@@ -1,6 +1,7 @@
 package com.souzip.api.global.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.souzip.api.global.aop.MdcTraceId;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,23 +11,27 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
 
+    private final String traceId;
     private final String message;
     private final List<FieldError> errors;
 
     @Builder(access = AccessLevel.PRIVATE)
     private ErrorResponse(String traceId, String message, List<FieldError> errors) {
+        this.traceId = traceId;
         this.message = message;
         this.errors = errors;
     }
 
     public static ErrorResponse of(String message) {
         return ErrorResponse.builder()
+            .traceId(MdcTraceId.get())
             .message(message)
             .build();
     }
 
     public static ErrorResponse of(String message, List<FieldError> errors) {
         return ErrorResponse.builder()
+            .traceId(MdcTraceId.get())
             .message(message)
             .errors(errors)
             .build();

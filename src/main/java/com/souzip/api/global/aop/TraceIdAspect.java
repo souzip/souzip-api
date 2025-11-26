@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Order(1)
 public class TraceIdAspect {
 
-    @Around("execution(* com.albafit.api..controller..*(..)) || execution(* com.albafit.api..service..*(..))")
+    @Around("execution(* com.souzip.api..controller..*(..)) || execution(* com.souzip.api..service..*(..))")
     public Object setTraceId(ProceedingJoinPoint joinPoint) throws Throwable {
         boolean isNewTrace = MdcTraceId.putIfAbsent();
         try {

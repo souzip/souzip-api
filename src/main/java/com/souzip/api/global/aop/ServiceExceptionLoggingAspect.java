@@ -1,6 +1,6 @@
 package com.souzip.api.global.aop;
 
-import com.albafit.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Order(2)
 public class ServiceExceptionLoggingAspect {
 
-    @Pointcut("execution(* com.albafit.api..service..*(..))")
+    @Pointcut("execution(* com.souzip.api..service..*(..))")
     public void serviceLayer() {}
 
     @AfterThrowing(pointcut = "serviceLayer()", throwing = "ex")

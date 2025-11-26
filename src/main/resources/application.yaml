@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: souzip-api
+
+logging:
+  pattern:
+    console: "[%d{yyyy-MM-dd HH:mm:ss}] [%X{traceId}] [%-5level] %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.souzip.api: DEBUG

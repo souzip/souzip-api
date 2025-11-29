@@ -18,8 +18,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Service
 public class CountryService {
 
     private final CountryRepository countryRepository;
@@ -28,48 +29,23 @@ public class CountryService {
     @Value("${external.api.countries-base-url}")
     private String baseUrl;
 
-    @Transactional
-    public void fetchAndSaveCountries() {
-        List<CountryExternalDto> externalCountries = fetchFromExternalApi();
-
-        Set<Object> existingCodes = getExistingCountryCodes();
-
-        List<Country> newCountries = externalCountries.stream()
-            .filter(dto -> isNewCountry(dto.cca2(), existingCodes))
-            .map(CountryExternalDto::toEntity)
-            .toList();
-
-        if (newCountries.isEmpty()) {
-            log.info("저장할 새로운 국가가 없습니다");
-            return;
-        }
-
-        countryRepository.saveAll(newCountries);
-
-    }
-
-    @Transactional(readOnly = true)
     public List<Country> getAllCountries() {
         return countryRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
     public Country getCountryByCode(String code) {
         return countryRepository.findByCode(code)
             .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
     }
 
-    @Transactional(readOnly = true)
     public List<Country> getCountriesByRegion(String region) {
         return countryRepository.findByRegion(region);
     }
 
-    @Transactional(readOnly = true)
     public List<Country> searchCountriesByName(String name) {
         return countryRepository.findByNameContaining(name);
     }
 
-    @Transactional(readOnly = true)
     public long getCountryCountByRegion(String region) {
         return countryRepository.countByRegion(region);
     }
@@ -84,6 +60,24 @@ public class CountryService {
         }
 
         return Arrays.asList(response);
+    }
+
+    @Transactional
+    public void fetchAndSaveCountries() {
+        List<CountryExternalDto> externalCountries = fetchFromExternalApi();
+        Set<Object> existingCodes = getExistingCountryCodes();
+
+        List<Country> newCountries = externalCountries.stream()
+            .filter(dto -> isNewCountry(dto.cca2(), existingCodes))
+            .map(CountryExternalDto::toEntity)
+            .toList();
+
+        if (newCountries.isEmpty()) {
+            log.info("저장할 새로운 국가가 없습니다");
+            return;
+        }
+
+        countryRepository.saveAll(newCountries);
     }
 
     private boolean isInvalidResponse(CountryExternalDto[] response) {

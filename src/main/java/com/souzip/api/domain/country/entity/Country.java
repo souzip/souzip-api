@@ -8,8 +8,10 @@ import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -35,10 +37,6 @@ public class Country extends BaseEntity {
     @Column(precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    public Object getCode() {
-        return code;
-    }
-
     public static Country of(
         String name,
         String code,
@@ -58,5 +56,4 @@ public class Country extends BaseEntity {
             .longitude(longitude)
             .build();
     }
-
 }

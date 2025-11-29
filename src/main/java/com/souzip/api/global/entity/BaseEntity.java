@@ -21,11 +21,10 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     @LastModifiedDate
     private LocalDateTime updatedAt;
 }

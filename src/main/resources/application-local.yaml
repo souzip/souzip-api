@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/souzipdb
+    username: developer
+    password: dev1129
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true

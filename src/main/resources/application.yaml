@@ -1,6 +1,11 @@
 spring:
   application:
     name: souzip-api
+  profiles:
+    default: local
+
+server:
+  port: 8080
 
 logging:
   pattern:
@@ -8,3 +13,7 @@ logging:
   level:
     root: INFO
     com.souzip.api: DEBUG
+
+external:
+  api:
+    countries-base-url: https://restcountries.com/v3.1

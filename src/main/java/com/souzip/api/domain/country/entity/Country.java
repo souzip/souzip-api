@@ -3,6 +3,8 @@ package com.souzip.api.domain.country.entity;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
@@ -28,7 +30,8 @@ public class Country extends BaseEntity {
     private String capital;
 
     @Column(nullable = false)
-    private String region;
+    @Enumerated(EnumType.STRING)
+    private Region region;
 
     private String flags;
     @Column(precision = 10, scale = 8)
@@ -41,7 +44,7 @@ public class Country extends BaseEntity {
         String name,
         String code,
         String capital,
-        String region,
+        Region region,
         String flags,
         BigDecimal latitude,
         BigDecimal longitude

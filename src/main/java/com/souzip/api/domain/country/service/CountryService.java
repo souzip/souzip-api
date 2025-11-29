@@ -2,9 +2,11 @@ package com.souzip.api.domain.country.service;
 
 import com.souzip.api.domain.country.dto.CountryExternalDto;
 import com.souzip.api.domain.country.entity.Country;
+import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.repository.CountryRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +31,8 @@ public class CountryService {
     @Value("${external.api.countries-base-url}")
     private String baseUrl;
 
+    private static final String COUNTRIES_API_PATH = "/all?fields=name,capital,region,flags,cca2,latlng";
+
     public List<Country> getAllCountries() {
         return countryRepository.findAll();
     }
@@ -38,38 +42,26 @@ public class CountryService {
             .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
     }
 
-    public List<Country> getCountriesByRegion(String region) {
-        return countryRepository.findByRegion(region);
+    public List<Country> getCountriesByRegion(String regionCode) {
+        return countryRepository.findByRegion(getRegionOrThrow(regionCode));
     }
 
     public List<Country> searchCountriesByName(String name) {
         return countryRepository.findByNameContaining(name);
     }
 
-    public long getCountryCountByRegion(String region) {
-        return countryRepository.countByRegion(region);
-    }
-
-    private List<CountryExternalDto> fetchFromExternalApi() {
-        String url = baseUrl + "/all?fields=name,capital,region,flags,cca2,latlng";
-        CountryExternalDto[] response = restTemplate.getForObject(url, CountryExternalDto[].class);
-
-        if (isInvalidResponse(response)) {
-            log.warn("외부 API로부터 국가 데이터를 받지 못했습니다");
-            return List.of();
-        }
-
-        return Arrays.asList(response);
+    public long getCountryCountByRegion(String regionCode) {
+        return countryRepository.countByRegion(getRegionOrThrow(regionCode));
     }
 
     @Transactional
     public void fetchAndSaveCountries() {
         List<CountryExternalDto> externalCountries = fetchFromExternalApi();
-        Set<Object> existingCodes = getExistingCountryCodes();
+        Set<String> existingCodes = getExistingCountryCodes();
 
         List<Country> newCountries = externalCountries.stream()
-            .filter(dto -> isNewCountry(dto.cca2(), existingCodes))
-            .map(CountryExternalDto::toEntity)
+            .filter(dto -> isNewCountry(dto, existingCodes))
+            .map(this::convertToEntity)
             .toList();
 
         if (newCountries.isEmpty()) {
@@ -80,18 +72,43 @@ public class CountryService {
         countryRepository.saveAll(newCountries);
     }
 
-    private boolean isInvalidResponse(CountryExternalDto[] response) {
-        return response == null || response.length == 0;
-    }
-
-    private Set<Object> getExistingCountryCodes() {
-        return countryRepository.findAll()
-            .stream()
+    private Set<String> getExistingCountryCodes() {
+        return countryRepository.findAll().stream()
             .map(Country::getCode)
             .collect(Collectors.toSet());
     }
 
-    private boolean isNewCountry(String countryCode, Set<Object> existingCodes) {
-        return !existingCodes.contains(countryCode);
+    private boolean isNewCountry(CountryExternalDto dto, Set<String> existingCodes) {
+        return !existingCodes.contains(dto.cca2());
+    }
+
+    private Country convertToEntity(CountryExternalDto dto) {
+        Region region = getRegionOrThrow(dto);
+        return dto.toEntity(region);
+    }
+
+    private Region getRegionOrThrow(CountryExternalDto dto) {
+        return dto.parseRegion()
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
+    }
+
+    private Region getRegionOrThrow(String regionCode) {
+        return Region.fromCode(regionCode)
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
+    }
+
+    private List<CountryExternalDto> fetchFromExternalApi() {
+        String url = baseUrl + COUNTRIES_API_PATH;
+        CountryExternalDto[] response = restTemplate.getForObject(url, CountryExternalDto[].class);
+
+        if (isEmptyResponse(response)) {
+            log.warn("외부 API로부터 국가 데이터를 받지 못했습니다.");
+            return List.of();
+        }
+        return Arrays.asList(response);
+    }
+
+    private boolean isEmptyResponse(CountryExternalDto[] response) {
+        return response == null || response.length == 0;
     }
 }

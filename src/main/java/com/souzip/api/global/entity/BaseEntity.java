@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -21,11 +21,11 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @CreatedDate
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", updatable = false)
+    private OffsetDateTime createdAt;
 
-    @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     @LastModifiedDate
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
 }

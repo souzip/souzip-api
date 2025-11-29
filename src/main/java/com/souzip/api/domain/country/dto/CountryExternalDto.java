@@ -3,6 +3,7 @@ package com.souzip.api.domain.country.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.souzip.api.domain.country.entity.Country;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,22 +30,23 @@ public record CountryExternalDto(
             getFirstOrNull(capital),
             region,
             flags.png(),
-            getCoordinateAt(0),
-            getCoordinateAt(1)
+            getCoordinateAtAsBigDecimal(0),
+            getCoordinateAtAsBigDecimal(1)
         );
     }
 
     private String getFirstOrNull(List<String> list) {
         return Optional.ofNullable(list)
             .filter(items -> !items.isEmpty())
-            .map(items -> items.get(0))
+            .map(List::getFirst)
             .orElse(null);
     }
 
-    private Double getCoordinateAt(int index) {
+    private BigDecimal getCoordinateAtAsBigDecimal(int index) {
         return Optional.ofNullable(latlng)
             .filter(coords -> coords.size() > index)
             .map(coords -> coords.get(index))
+            .map(BigDecimal::valueOf)
             .orElse(null);
     }
 }

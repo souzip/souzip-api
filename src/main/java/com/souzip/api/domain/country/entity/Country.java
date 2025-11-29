@@ -1,19 +1,20 @@
 package com.souzip.api.domain.country.entity;
 
 import com.souzip.api.global.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "countries")
-@Getter
+@Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder(access = AccessLevel.PRIVATE)
+@Table(name = "countries")
+@Entity
 public class Country extends BaseEntity {
 
     @Column(nullable = false)
@@ -28,8 +29,11 @@ public class Country extends BaseEntity {
     private String region;
 
     private String flags;
-    private Double latitude;
-    private Double longitude;
+    @Column(precision = 10, scale = 8)
+    private BigDecimal latitude;
+
+    @Column(precision = 11, scale = 8)
+    private BigDecimal longitude;
 
     public static Country of(
         String name,
@@ -37,8 +41,8 @@ public class Country extends BaseEntity {
         String capital,
         String region,
         String flags,
-        Double latitude,
-        Double longitude
+        BigDecimal latitude,
+        BigDecimal longitude
     ) {
         return Country.builder()
             .name(name)

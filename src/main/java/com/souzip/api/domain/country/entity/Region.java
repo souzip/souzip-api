@@ -23,10 +23,16 @@ public enum Region {
     }
 
     public static Optional<Region> fromCode(String code) {
-        if (code == null || code.isBlank()) return Optional.empty();
+        if (isNullOrBlank(code)) {
+            return Optional.empty();
+        }
 
         return Arrays.stream(values())
             .filter(region -> region.code.equalsIgnoreCase(code))
             .findFirst();
+    }
+
+    private static boolean isNullOrBlank(String str) {
+        return str == null || str.isBlank();
     }
 }

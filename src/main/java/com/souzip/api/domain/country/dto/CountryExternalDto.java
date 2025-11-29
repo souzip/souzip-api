@@ -2,6 +2,7 @@ package com.souzip.api.domain.country.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.souzip.api.domain.country.entity.Country;
+import com.souzip.api.domain.country.entity.Region;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,7 +24,11 @@ public record CountryExternalDto(
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Flags(String png, String svg) {}
 
-    public Country toEntity() {
+    public Optional<Region> parseRegion() {
+        return Region.fromCode(region);
+    }
+
+    public Country toEntity(Region region) {
         return Country.of(
             name.common(),
             cca2,

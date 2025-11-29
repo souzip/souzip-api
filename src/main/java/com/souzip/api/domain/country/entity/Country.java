@@ -35,6 +35,10 @@ public class Country extends BaseEntity {
     @Column(precision = 11, scale = 8)
     private BigDecimal longitude;
 
+    public Object getCode() {
+        return code;
+    }
+
     public static Country of(
         String name,
         String code,
@@ -54,4 +58,5 @@ public class Country extends BaseEntity {
             .longitude(longitude)
             .build();
     }
+
 }

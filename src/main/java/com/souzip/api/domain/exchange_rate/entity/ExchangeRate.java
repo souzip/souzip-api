@@ -1,12 +1,12 @@
 package com.souzip.api.domain.exchange_rate.entity;
 
-import com.souzip.api.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
@@ -14,7 +14,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "exchange_rates")
 @Entity
-public class ExchangeRate extends BaseEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class ExchangeRate {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private String baseCode;
@@ -26,14 +35,14 @@ public class ExchangeRate extends BaseEntity {
     private BigDecimal rate;
 
     public static ExchangeRate of(
-        String baseCode,
-        String currencyCode,
-        BigDecimal rate
+            String baseCode,
+            String currencyCode,
+            BigDecimal rate
     ) {
         return ExchangeRate.builder()
-            .baseCode(baseCode)
-            .currencyCode(currencyCode)
-            .rate(rate)
-            .build();
+                .baseCode(baseCode)
+                .currencyCode(currencyCode)
+                .rate(rate)
+                .build();
     }
 }

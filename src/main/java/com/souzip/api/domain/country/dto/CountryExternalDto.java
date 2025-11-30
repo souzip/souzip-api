@@ -24,10 +24,6 @@ public record CountryExternalDto(
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Flags(String png, String svg) {}
 
-    public Optional<Region> parseRegion() {
-        return Region.from(region);
-    }
-
     public Country toEntity(Region region) {
         return Country.of(
             name.common(),

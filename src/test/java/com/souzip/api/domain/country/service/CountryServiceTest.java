@@ -4,7 +4,7 @@ import com.souzip.api.domain.country.dto.CountryExternalDto;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Flags;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Name;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
-import com.souzip.api.domain.country.dto.CountryResponseDto.CountryListResponse;
+import com.souzip.api.domain.country.dto.CountryListResponse;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.repository.CountryRepository;
@@ -16,8 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,7 +32,7 @@ class CountryServiceTest {
     private CountryRepository countryRepository;
 
     @Mock
-    private RestTemplate restTemplate;
+    private CountryExternalApiClient externalApiClient;
 
     @InjectMocks
     private CountryService countryService;
@@ -51,7 +49,7 @@ class CountryServiceTest {
         );
     }
 
-    private CountryExternalDto[] createExternalDtos() {
+    private List<CountryExternalDto> createExternalDtoList() {
         CountryExternalDto.Name name = new CountryExternalDto.Name(
             "South Korea",
             "Republic of Korea"
@@ -70,7 +68,7 @@ class CountryServiceTest {
             List.of(37.0, 127.5)
         );
 
-        return new CountryExternalDto[]{korea};
+        return List.of(korea);
     }
 
     @Test
@@ -152,12 +150,10 @@ class CountryServiceTest {
     @DisplayName("외부 API에서 국가 데이터를 가져와 저장할 수 있다.")
     void fetchAndSaveCountries_success() {
         // given
-        ReflectionTestUtils.setField(countryService, "baseUrl", "https://restcountries.com/v3.1");
-
-        CountryExternalDto[] response = createExternalDtos();
+        List<CountryExternalDto> externalDtos = createExternalDtoList();
 
         given(countryRepository.findAll()).willReturn(List.of());
-        given(restTemplate.getForObject(anyString(), eq(CountryExternalDto[].class))).willReturn(response);
+        given(externalApiClient.fetchCountries()).willReturn(externalDtos);
 
         // when
         countryService.fetchAndSaveCountries();
@@ -172,13 +168,11 @@ class CountryServiceTest {
     @DisplayName("중복된 국가는 저장하지 않는다.")
     void fetchAndSaveCountries_skipDuplicates() {
         // given
-        ReflectionTestUtils.setField(countryService, "baseUrl", "https://restcountries.com/v3.1");
-
         Country existingKorea = createCountry("South Korea", "KR");
-        CountryExternalDto[] response = createExternalDtos();
+        List<CountryExternalDto> externalDtos = createExternalDtoList();
 
         given(countryRepository.findAll()).willReturn(List.of(existingKorea));
-        given(restTemplate.getForObject(anyString(), eq(CountryExternalDto[].class))).willReturn(response);
+        given(externalApiClient.fetchCountries()).willReturn(externalDtos);
 
         // when
         countryService.fetchAndSaveCountries();
@@ -188,25 +182,10 @@ class CountryServiceTest {
     }
 
     @Test
-    @DisplayName("외부 API가 null을 반환하면 저장하지 않는다.")
-    void fetchAndSaveCountries_nullResponse() {
-        // given
-        ReflectionTestUtils.setField(countryService, "baseUrl", "https://restcountries.com/v3.1");
-        given(restTemplate.getForObject(anyString(), eq(CountryExternalDto[].class))).willReturn(null);
-
-        // when
-        countryService.fetchAndSaveCountries();
-
-        // then
-        then(countryRepository).should(never()).saveAll(any());
-    }
-
-    @Test
-    @DisplayName("외부 API가 빈 배열을 반환하면 저장하지 않는다.")
+    @DisplayName("외부 API가 빈 리스트를 반환하면 저장하지 않는다.")
     void fetchAndSaveCountries_emptyResponse() {
         // given
-        ReflectionTestUtils.setField(countryService, "baseUrl", "https://restcountries.com/v3.1");
-        given(restTemplate.getForObject(anyString(), eq(CountryExternalDto[].class))).willReturn(new CountryExternalDto[0]);
+        given(externalApiClient.fetchCountries()).willReturn(List.of());
 
         // when
         countryService.fetchAndSaveCountries();
@@ -219,15 +198,19 @@ class CountryServiceTest {
     @DisplayName("잘못된 region 코드 DTO는 예외 발생")
     void fetchAndSaveCountries_invalidRegion() {
         // given
-        ReflectionTestUtils.setField(countryService, "baseUrl", "https://restcountries.com/v3.1");
-
         CountryExternalDto.Name name = new CountryExternalDto.Name("TestLand", "TestLand Official");
         CountryExternalDto.Flags flags = new CountryExternalDto.Flags("png", "svg");
-        CountryExternalDto invalidDto = new CountryExternalDto(name, List.of("Capital"), "InvalidRegion", flags, "TL", List.of(10.0, 20.0));
+        CountryExternalDto invalidDto = new CountryExternalDto(
+            name,
+            List.of("Capital"),
+            "InvalidRegion",
+            flags,
+            "TL",
+            List.of(10.0, 20.0)
+        );
 
         given(countryRepository.findAll()).willReturn(List.of());
-        given(restTemplate.getForObject(anyString(), eq(CountryExternalDto[].class)))
-            .willReturn(new CountryExternalDto[]{invalidDto});
+        given(externalApiClient.fetchCountries()).willReturn(List.of(invalidDto));
 
         // when & then
         assertThatThrownBy(() -> countryService.fetchAndSaveCountries())
@@ -239,16 +222,19 @@ class CountryServiceTest {
     @DisplayName("region 코드 대소문자 처리")
     void fetchAndSaveCountries_regionCaseInsensitive() {
         // given
-        ReflectionTestUtils.setField(countryService, "baseUrl", "https://restcountries.com/v3.1");
-
         Name name = new Name("South Korea", "Republic of Korea");
         Flags flags = new Flags("png", "svg");
-        CountryExternalDto dto = new CountryExternalDto(name, List.of("Seoul"), "asia", flags, "KR",
-            List.of(37.0, 127.0));
+        CountryExternalDto dto = new CountryExternalDto(
+            name,
+            List.of("Seoul"),
+            "asia",  // 소문자
+            flags,
+            "KR",
+            List.of(37.0, 127.0)
+        );
 
         given(countryRepository.findAll()).willReturn(List.of());
-        given(restTemplate.getForObject(anyString(), eq(CountryExternalDto[].class)))
-            .willReturn(new CountryExternalDto[]{dto});
+        given(externalApiClient.fetchCountries()).willReturn(List.of(dto));
 
         // when
         countryService.fetchAndSaveCountries();

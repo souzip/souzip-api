@@ -2,7 +2,7 @@ package com.souzip.api.domain.country.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
-import com.souzip.api.domain.country.dto.CountryResponseDto.CountryListResponse;
+import com.souzip.api.domain.country.dto.CountryListResponse;
 import com.souzip.api.domain.country.dto.RegionDto;
 import com.souzip.api.domain.country.service.CountryService;
 import org.junit.jupiter.api.DisplayName;

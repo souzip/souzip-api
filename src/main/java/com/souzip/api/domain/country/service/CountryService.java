@@ -1,6 +1,7 @@
 package com.souzip.api.domain.country.service;
 
 import com.souzip.api.domain.country.dto.CountryExternalDto;
+import com.souzip.api.domain.country.dto.CountryResponseDto;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.repository.CountryRepository;
@@ -33,25 +34,33 @@ public class CountryService {
 
     private static final String COUNTRIES_API_PATH = "/all?fields=name,capital,region,flags,cca2,latlng";
 
-    public List<Country> getAllCountries() {
-        return countryRepository.findAll();
+    // Entity → DTO 변환
+    public List<CountryResponseDto> getAllCountries() {
+        return countryRepository.findAll().stream()
+            .map(CountryResponseDto::from)
+            .toList();
     }
 
-    public Country getCountryByCode(String code) {
-        return countryRepository.findByCode(code)
+    public CountryResponseDto getCountryByCode(String code) {
+        Country country = countryRepository.findByCode(code)
             .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+        return CountryResponseDto.from(country);
     }
 
-    public List<Country> getCountriesByRegion(String regionCode) {
-        return countryRepository.findByRegion(getRegionOrThrow(regionCode));
+    public List<CountryResponseDto> getCountriesByRegion(String englishName) {
+        return countryRepository.findByRegion(getRegionOrThrow(englishName)).stream()
+            .map(CountryResponseDto::from)
+            .toList();
     }
 
-    public List<Country> searchCountriesByName(String name) {
-        return countryRepository.findByNameContaining(name);
+    public List<CountryResponseDto> searchCountriesByName(String name) {
+        return countryRepository.findByNameContaining(name).stream()
+            .map(CountryResponseDto::from)
+            .toList();
     }
 
-    public long getCountryCountByRegion(String regionCode) {
-        return countryRepository.countByRegion(getRegionOrThrow(regionCode));
+    public long getCountryCountByRegion(String englishName) {
+        return countryRepository.countByRegion(getRegionOrThrow(englishName));
     }
 
     @Transactional
@@ -92,8 +101,8 @@ public class CountryService {
             .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
     }
 
-    private Region getRegionOrThrow(String regionCode) {
-        return Region.fromCode(regionCode)
+    private Region getRegionOrThrow(String englishName) {
+        return Region.from(englishName)
             .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
     }
 

@@ -25,7 +25,7 @@ public record CountryExternalDto(
     public record Flags(String png, String svg) {}
 
     public Optional<Region> parseRegion() {
-        return Region.fromCode(region);
+        return Region.from(region);
     }
 
     public Country toEntity(Region region) {

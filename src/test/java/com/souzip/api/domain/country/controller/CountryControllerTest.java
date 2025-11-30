@@ -2,6 +2,7 @@ package com.souzip.api.domain.country.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
+import com.souzip.api.domain.country.dto.CountryResponseDto.CountryListResponse;
 import com.souzip.api.domain.country.dto.RegionDto;
 import com.souzip.api.domain.country.service.CountryService;
 import org.junit.jupiter.api.DisplayName;
@@ -60,29 +61,31 @@ class CountryControllerTest extends RestDocsSupport {
             new BigDecimal("2.0")
         );
 
-        given(countryService.getAllCountries()).willReturn(List.of(korea, france));
+        CountryListResponse listResponse = CountryListResponse.from(List.of(korea, france));
+        given(countryService.getAllCountries()).willReturn(listResponse);
 
         // when & then
         mockMvc.perform(get("/api/countries"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data[0].code").value("KR"))
-            .andExpect(jsonPath("$.data[1].code").value("FR"))
+            .andExpect(jsonPath("$.data.countries").isArray())
+            .andExpect(jsonPath("$.data.countries[0].code").value("KR"))
+            .andExpect(jsonPath("$.data.countries[1].code").value("FR"))
             .andDo(document("country/get-all",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("국가 목록"),
-                    fieldWithPath("data[].name").type(JsonFieldType.STRING).description("국가명"),
-                    fieldWithPath("data[].code").type(JsonFieldType.STRING).description("국가 코드"),
-                    fieldWithPath("data[].region").type(JsonFieldType.OBJECT).description("지역 정보"),
-                    fieldWithPath("data[].region.englishName").type(JsonFieldType.STRING).description("지역 영문명"),
-                    fieldWithPath("data[].region.koreanName").type(JsonFieldType.STRING).description("지역 한글명"),
-                    fieldWithPath("data[].capital").type(JsonFieldType.STRING).description("수도"),
-                    fieldWithPath("data[].flagUrl").type(JsonFieldType.STRING).description("국기 이미지 URL"),
-                    fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("위도"),
-                    fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                    fieldWithPath("data.countries[]").type(JsonFieldType.ARRAY).description("국가 목록"),
+                    fieldWithPath("data.countries[].name").type(JsonFieldType.STRING).description("국가명"),
+                    fieldWithPath("data.countries[].code").type(JsonFieldType.STRING).description("국가 코드"),
+                    fieldWithPath("data.countries[].region").type(JsonFieldType.OBJECT).description("지역 정보"),
+                    fieldWithPath("data.countries[].region.englishName").type(JsonFieldType.STRING).description("지역 영문명"),
+                    fieldWithPath("data.countries[].region.koreanName").type(JsonFieldType.STRING).description("지역 한글명"),
+                    fieldWithPath("data.countries[].capital").type(JsonFieldType.STRING).description("수도"),
+                    fieldWithPath("data.countries[].flagUrl").type(JsonFieldType.STRING).description("국기 이미지 URL"),
+                    fieldWithPath("data.countries[].latitude").type(JsonFieldType.NUMBER).description("위도"),
+                    fieldWithPath("data.countries[].longitude").type(JsonFieldType.NUMBER).description("경도"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
@@ -158,14 +161,15 @@ class CountryControllerTest extends RestDocsSupport {
             new BigDecimal("138.0")
         );
 
-        given(countryService.getCountriesByRegion("Asia")).willReturn(List.of(korea, japan));
+        CountryListResponse listResponse = CountryListResponse.from(List.of(korea, japan));
+        given(countryService.getCountriesByRegion("Asia")).willReturn(listResponse);
 
         // when & then
         mockMvc.perform(get("/api/countries/region/{englishName}", "Asia"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data[0].region.englishName").value("Asia"))
+            .andExpect(jsonPath("$.data.countries").isArray())
+            .andExpect(jsonPath("$.data.countries[0].region.englishName").value("Asia"))
             .andDo(document("country/get-by-region",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -173,16 +177,17 @@ class CountryControllerTest extends RestDocsSupport {
                     parameterWithName("englishName").description("지역 영문명")
                 ),
                 apiResponseFields(
-                    fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("국가 목록"),
-                    fieldWithPath("data[].name").type(JsonFieldType.STRING).description("국가명"),
-                    fieldWithPath("data[].code").type(JsonFieldType.STRING).description("국가 코드"),
-                    fieldWithPath("data[].region").type(JsonFieldType.OBJECT).description("지역 정보"),
-                    fieldWithPath("data[].region.englishName").type(JsonFieldType.STRING).description("지역 영문명"),
-                    fieldWithPath("data[].region.koreanName").type(JsonFieldType.STRING).description("지역 한글명"),
-                    fieldWithPath("data[].capital").type(JsonFieldType.STRING).description("수도"),
-                    fieldWithPath("data[].flagUrl").type(JsonFieldType.STRING).description("국기 이미지 URL"),
-                    fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("위도"),
-                    fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                    fieldWithPath("data.countries[]").type(JsonFieldType.ARRAY).description("국가 목록"),
+                    fieldWithPath("data.countries[].name").type(JsonFieldType.STRING).description("국가명"),
+                    fieldWithPath("data.countries[].code").type(JsonFieldType.STRING).description("국가 코드"),
+                    fieldWithPath("data.countries[].region").type(JsonFieldType.OBJECT).description("지역 정보"),
+                    fieldWithPath("data.countries[].region.englishName").type(JsonFieldType.STRING).description("지역 영문명"),
+                    fieldWithPath("data.countries[].region.koreanName").type(JsonFieldType.STRING).description("지역 한글명"),
+                    fieldWithPath("data.countries[].capital").type(JsonFieldType.STRING).description("수도"),
+                    fieldWithPath("data.countries[].flagUrl").type(JsonFieldType.STRING).description("국기 이미지 URL"),
+                    fieldWithPath("data.countries[].latitude").type(JsonFieldType.NUMBER).description("위도"),
+                    fieldWithPath("data.countries[].longitude").type(JsonFieldType.NUMBER).description("경도"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
@@ -203,15 +208,16 @@ class CountryControllerTest extends RestDocsSupport {
             new BigDecimal("127.0")
         );
 
-        given(countryService.searchCountriesByName("Korea")).willReturn(List.of(korea));
+        CountryListResponse listResponse = CountryListResponse.from(List.of(korea));
+        given(countryService.searchCountriesByName("Korea")).willReturn(listResponse);
 
         // when & then
         mockMvc.perform(get("/api/countries/search")
                 .param("name", "Korea"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data[0].name").value("South Korea"))
+            .andExpect(jsonPath("$.data.countries").isArray())
+            .andExpect(jsonPath("$.data.countries[0].name").value("South Korea"))
             .andDo(document("country/search",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -219,16 +225,17 @@ class CountryControllerTest extends RestDocsSupport {
                     parameterWithName("name").description("검색할 국가명 (부분 일치)")
                 ),
                 apiResponseFields(
-                    fieldWithPath("data[]").type(JsonFieldType.ARRAY).description("검색 결과"),
-                    fieldWithPath("data[].name").type(JsonFieldType.STRING).description("국가명"),
-                    fieldWithPath("data[].code").type(JsonFieldType.STRING).description("국가 코드"),
-                    fieldWithPath("data[].region").type(JsonFieldType.OBJECT).description("지역 정보"),
-                    fieldWithPath("data[].region.englishName").type(JsonFieldType.STRING).description("지역 영문명"),
-                    fieldWithPath("data[].region.koreanName").type(JsonFieldType.STRING).description("지역 한글명"),
-                    fieldWithPath("data[].capital").type(JsonFieldType.STRING).description("수도"),
-                    fieldWithPath("data[].flagUrl").type(JsonFieldType.STRING).description("국기 이미지 URL"),
-                    fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("위도"),
-                    fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                    fieldWithPath("data.countries[]").type(JsonFieldType.ARRAY).description("검색 결과"),
+                    fieldWithPath("data.countries[].name").type(JsonFieldType.STRING).description("국가명"),
+                    fieldWithPath("data.countries[].code").type(JsonFieldType.STRING).description("국가 코드"),
+                    fieldWithPath("data.countries[].region").type(JsonFieldType.OBJECT).description("지역 정보"),
+                    fieldWithPath("data.countries[].region.englishName").type(JsonFieldType.STRING).description("지역 영문명"),
+                    fieldWithPath("data.countries[].region.koreanName").type(JsonFieldType.STRING).description("지역 한글명"),
+                    fieldWithPath("data.countries[].capital").type(JsonFieldType.STRING).description("수도"),
+                    fieldWithPath("data.countries[].flagUrl").type(JsonFieldType.STRING).description("국기 이미지 URL"),
+                    fieldWithPath("data.countries[].latitude").type(JsonFieldType.NUMBER).description("위도"),
+                    fieldWithPath("data.countries[].longitude").type(JsonFieldType.NUMBER).description("경도"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));

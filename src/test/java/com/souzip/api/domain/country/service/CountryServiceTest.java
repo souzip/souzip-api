@@ -4,6 +4,7 @@ import com.souzip.api.domain.country.dto.CountryExternalDto;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Flags;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Name;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
+import com.souzip.api.domain.country.dto.CountryResponseDto.CountryListResponse;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.repository.CountryRepository;
@@ -81,11 +82,12 @@ class CountryServiceTest {
         given(countryRepository.findAll()).willReturn(List.of(korea, japan));
 
         // when
-        List<CountryResponseDto> countries = countryService.getAllCountries();
+        CountryListResponse response = countryService.getAllCountries();
 
         // then
-        assertThat(countries).hasSize(2);
-        assertThat(countries).extracting(CountryResponseDto::code)
+        assertThat(response.countries()).hasSize(2);
+        assertThat(response.countries())
+            .extracting(CountryResponseDto::code)
             .containsExactly("KR", "JP");
     }
 
@@ -114,6 +116,36 @@ class CountryServiceTest {
         assertThatThrownBy(() -> countryService.getCountryByCode("SOU"))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining(ErrorCode.COUNTRY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("지역별 국가를 조회할 수 있다.")
+    void getCountriesByRegion() {
+        // given
+        Country korea = createCountry("South Korea", "KR");
+        Country japan = createCountry("Japan", "JP");
+        given(countryRepository.findByRegion(Region.ASIA)).willReturn(List.of(korea, japan));
+
+        // when
+        CountryListResponse response = countryService.getCountriesByRegion("Asia");
+
+        // then
+        assertThat(response.countries()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("국가명으로 검색할 수 있다.")
+    void searchCountriesByName() {
+        // given
+        Country korea = createCountry("South Korea", "KR");
+        given(countryRepository.findByNameContaining("Korea")).willReturn(List.of(korea));
+
+        // when
+        CountryListResponse response = countryService.searchCountriesByName("Korea");
+
+        // then
+        assertThat(response.countries()).hasSize(1);
+        assertThat(response.countries().getFirst().name()).isEqualTo("South Korea");
     }
 
     @Test

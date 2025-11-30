@@ -2,6 +2,7 @@ package com.souzip.api.domain.country.dto;
 
 import com.souzip.api.domain.country.entity.Country;
 import java.math.BigDecimal;
+import java.util.List;
 
 public record CountryResponseDto(
     String name,
@@ -22,5 +23,13 @@ public record CountryResponseDto(
             country.getLatitude(),
             country.getLongitude()
         );
+    }
+
+    public record CountryListResponse(
+        List<CountryResponseDto> countries
+    ) {
+        public static CountryListResponse from(List<CountryResponseDto> countries) {
+            return new CountryListResponse(countries);
+        }
     }
 }

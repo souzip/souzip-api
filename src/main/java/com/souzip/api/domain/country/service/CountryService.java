@@ -2,6 +2,7 @@ package com.souzip.api.domain.country.service;
 
 import com.souzip.api.domain.country.dto.CountryExternalDto;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
+import com.souzip.api.domain.country.dto.CountryResponseDto.CountryListResponse;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.repository.CountryRepository;
@@ -34,11 +35,11 @@ public class CountryService {
 
     private static final String COUNTRIES_API_PATH = "/all?fields=name,capital,region,flags,cca2,latlng";
 
-    // Entity → DTO 변환
-    public List<CountryResponseDto> getAllCountries() {
-        return countryRepository.findAll().stream()
+    public CountryListResponse getAllCountries() {
+        List<CountryResponseDto> countries = countryRepository.findAll().stream()
             .map(CountryResponseDto::from)
             .toList();
+        return CountryListResponse.from(countries);
     }
 
     public CountryResponseDto getCountryByCode(String code) {
@@ -47,16 +48,18 @@ public class CountryService {
         return CountryResponseDto.from(country);
     }
 
-    public List<CountryResponseDto> getCountriesByRegion(String englishName) {
-        return countryRepository.findByRegion(getRegionOrThrow(englishName)).stream()
+    public CountryListResponse getCountriesByRegion(String englishName) {
+        List<CountryResponseDto> countries = countryRepository.findByRegion(getRegionOrThrow(englishName)).stream()
             .map(CountryResponseDto::from)
             .toList();
+        return CountryListResponse.from(countries);
     }
 
-    public List<CountryResponseDto> searchCountriesByName(String name) {
-        return countryRepository.findByNameContaining(name).stream()
+    public CountryListResponse searchCountriesByName(String name) {
+        List<CountryResponseDto> countries = countryRepository.findByNameContaining(name).stream()
             .map(CountryResponseDto::from)
             .toList();
+        return CountryListResponse.from(countries);
     }
 
     public long getCountryCountByRegion(String englishName) {

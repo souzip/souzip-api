@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
-@RestController
 @RequestMapping("/api/countries")
+@RestController
 public class CountryController {
 
     private final CountryService countryService;
@@ -25,9 +25,7 @@ public class CountryController {
     }
 
     @GetMapping("/region/{englishName}")
-    public SuccessResponse<CountryListResponse> getCountriesByRegion(
-        @PathVariable String englishName
-    ) {
+    public SuccessResponse<CountryListResponse> getCountriesByRegion(@PathVariable String englishName) {
         return SuccessResponse.of(countryService.getCountriesByRegion(englishName));
     }
 

@@ -14,21 +14,21 @@ public enum Region {
     OCEANIA("Oceania", "오세아니아"),
     ANTARCTIC("Antarctic", "남극");
 
-    private final String code;
-    private final String displayName;
+    private final String englishName;
+    private final String koreanName;
 
-    Region(String code, String displayName) {
-        this.code = code;
-        this.displayName = displayName;
+    Region(String englishName, String koreanName) {
+        this.englishName = englishName;
+        this.koreanName = koreanName;
     }
 
-    public static Optional<Region> fromCode(String code) {
-        if (isNullOrBlank(code)) {
+    public static Optional<Region> from(String name) {
+        if (isNullOrBlank(name)) {
             return Optional.empty();
         }
 
         return Arrays.stream(values())
-            .filter(region -> region.code.equalsIgnoreCase(code))
+            .filter(region -> region.englishName.equalsIgnoreCase(name))
             .findFirst();
     }
 

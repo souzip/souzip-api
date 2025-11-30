@@ -1,0 +1,122 @@
+[[overview]]
+== 개요
+
+[[overview-common-response]]
+=== 공통 응답 구조
+
+==== 성공 응답
+[source,json]
+----
+{
+  "data": { ... },
+  "message": "성공 메시지"
+}
+----
+
+==== 에러 응답
+[source,json]
+----
+{
+  "traceId": "a1b2c3d4",
+  "message": "에러 메시지",
+  "errors": [
+    {
+      "field": "필드명",
+      "value": "입력값",
+      "reason": "에러 사유"
+    }
+  ]
+}
+----
+
+[[overview-pagination]]
+=== 페이지네이션
+
+==== 요청 파라미터
+[cols="1,1,1,3"]
+|===
+|파라미터 |타입 |필수 |설명
+
+|pageNo
+|Integer
+|X
+|페이지 번호 (1부터 시작, 기본값: 1)
+
+|pageSize
+|Integer
+|X
+|페이지 크기 (기본값: 10, 최대: 30)
+|===
+
+==== 응답 구조
+[source,json]
+----
+{
+  "data": {
+    "content": [
+      {
+        "id": 1,
+        "name": "상품명",
+        ...
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 5,
+      "totalItems": 47,
+      "pageSize": 10,
+      "first": true,
+      "last": false,
+      "hasNext": true,
+      "hasPrevious": false
+    }
+  },
+  "message": null
+}
+----
+
+==== 응답 필드
+[cols="1,1,3"]
+|===
+|필드 |타입 |설명
+
+|content
+|Array
+|현재 페이지의 데이터 목록
+
+|pagination
+|Object
+|페이지 정보
+
+|pagination.currentPage
+|Integer
+|현재 페이지 번호 (1부터 시작)
+
+|pagination.totalPages
+|Integer
+|전체 페이지 수
+
+|pagination.totalItems
+|Long
+|전체 아이템 수
+
+|pagination.pageSize
+|Integer
+|페이지당 아이템 수
+
+|pagination.first
+|Boolean
+|첫 페이지 여부
+
+|pagination.last
+|Boolean
+|마지막 페이지 여부
+
+|pagination.hasNext
+|Boolean
+|다음 페이지 존재 여부
+
+|pagination.hasPrevious
+|Boolean
+|이전 페이지 존재 여부
+|===

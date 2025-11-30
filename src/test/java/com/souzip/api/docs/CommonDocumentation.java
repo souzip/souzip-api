@@ -2,22 +2,15 @@ package com.souzip.api.docs;
 
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.restdocs.snippet.Snippet;
 
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 
 public class CommonDocumentation {
 
-    public static FieldDescriptor[] apiResponseFields(FieldDescriptor... dataFields) {
-        FieldDescriptor[] commonFields = {
-            fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-            fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
-        };
-
-        FieldDescriptor[] allFields = new FieldDescriptor[commonFields.length + dataFields.length];
-        System.arraycopy(commonFields, 0, allFields, 0, commonFields.length);
-        System.arraycopy(dataFields, 0, allFields, commonFields.length, dataFields.length);
-
-        return allFields;
+    public static Snippet apiResponseFields(FieldDescriptor... allFields) {
+        return responseFields(allFields);
     }
 
     public static FieldDescriptor[] paginationResponseFields(FieldDescriptor... contentFields) {

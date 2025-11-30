@@ -1,0 +1,74 @@
+[[country-api]]
+== Country API
+
+[[country-get-all]]
+=== 전체 국가 목록 조회
+
+==== HTTP 요청
+include::{snippets}/country/get-all/http-request.adoc[]
+
+==== HTTP 응답
+include::{snippets}/country/get-all/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/country/get-all/response-fields.adoc[]
+
+[[country-get-by-code]]
+=== 국가 코드로 조회
+
+==== HTTP 요청
+include::{snippets}/country/get-by-code/http-request.adoc[]
+
+==== 경로 파라미터
+include::{snippets}/country/get-by-code/path-parameters.adoc[]
+
+==== HTTP 응답
+include::{snippets}/country/get-by-code/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/country/get-by-code/response-fields.adoc[]
+
+[[country-get-by-region]]
+=== 지역별 국가 목록 조회
+
+==== HTTP 요청
+include::{snippets}/country/get-by-region/http-request.adoc[]
+
+==== 경로 파라미터
+include::{snippets}/country/get-by-region/path-parameters.adoc[]
+
+==== HTTP 응답
+include::{snippets}/country/get-by-region/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/country/get-by-region/response-fields.adoc[]
+
+[[country-search]]
+=== 국가명 검색
+
+==== HTTP 요청
+include::{snippets}/country/search/http-request.adoc[]
+
+==== 쿼리 파라미터
+include::{snippets}/country/search/query-parameters.adoc[]
+
+==== HTTP 응답
+include::{snippets}/country/search/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/country/search/response-fields.adoc[]
+
+[[country-get-count-by-region]]
+=== 지역별 국가 수 조회
+
+==== HTTP 요청
+include::{snippets}/country/get-count-by-region/http-request.adoc[]
+
+==== 경로 파라미터
+include::{snippets}/country/get-count-by-region/path-parameters.adoc[]
+
+==== HTTP 응답
+include::{snippets}/country/get-count-by-region/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/country/get-count-by-region/response-fields.adoc[]

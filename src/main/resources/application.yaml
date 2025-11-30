@@ -17,3 +17,4 @@ logging:
 external:
   api:
     countries-base-url: https://restcountries.com/v3.1
+    exchange-rate-base-url: https://v6.exchangerate-api.com/v6/6bb64d753d5d604c571e963d/latest

@@ -3,11 +3,15 @@ package com.souzip.api.domain.country.service;
 import com.souzip.api.domain.country.dto.CountryExternalDto;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Flags;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Name;
+import com.souzip.api.domain.country.dto.CountryExternalDto.Translation;
+import com.souzip.api.domain.country.dto.CountryExternalDto.CurrencyInfo;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
 import com.souzip.api.domain.country.dto.CountryListResponse;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.repository.CountryRepository;
+import com.souzip.api.domain.currency.entity.Currency;
+import com.souzip.api.domain.currency.repository.CurrencyRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -32,51 +37,68 @@ class CountryServiceTest {
     private CountryRepository countryRepository;
 
     @Mock
+    private CurrencyRepository currencyRepository;
+
+    @Mock
     private CountryExternalApiClient externalApiClient;
 
     @InjectMocks
     private CountryService countryService;
 
-    private Country createCountry(String name, String code) {
+    private Country createCountry(String nameEn, String nameKr, String code, Currency currency) {
         return Country.of(
-            name,
+            nameEn,
+            nameKr,
             code,
             "Seoul",
             Region.ASIA,
             "https://flagcdn.com/w320/kr.png",
             new BigDecimal("37.0"),
-            new BigDecimal("127.0")
+            new BigDecimal("127.0"),
+            currency
         );
     }
 
-    private List<CountryExternalDto> createExternalDtoList() {
-        CountryExternalDto.Name name = new CountryExternalDto.Name(
-            "South Korea",
-            "Republic of Korea"
-        );
-        CountryExternalDto.Flags flags = new CountryExternalDto.Flags(
-            "https://flagcdn.com/w320/kr.png",
-            "https://flagcdn.com/kr.svg"
-        );
+    private Currency createCurrency(String code, String symbol) {
+        return Currency.of(code, symbol);
+    }
 
-        CountryExternalDto korea = new CountryExternalDto(
+    private CountryExternalDto createCountryExternalDto(
+        String nameEn,
+        String nameKr,
+        String code,
+        String region,
+        String currencyCode,
+        String currencySymbol
+    ) {
+        Name name = new Name(nameEn, "Republic of " + nameEn);
+        Flags flags = new Flags("https://flagcdn.com/w320/kr.png", "https://flagcdn.com/kr.svg");
+        Translation translation = new Translation(nameKr, nameKr);
+        CurrencyInfo currencyInfo = new CurrencyInfo(currencyCode, currencySymbol);
+
+        return new CountryExternalDto(
             name,
             List.of("Seoul"),
-            "Asia",
+            region,
             flags,
-            "KR",
-            List.of(37.0, 127.5)
+            code,
+            List.of(37.0, 127.5),
+            Map.of("kor", translation),
+            Map.of(currencyCode, currencyInfo)
         );
-
-        return List.of(korea);
     }
+
+    // ===== 조회 테스트 =====
 
     @Test
     @DisplayName("전체 국가를 조회할 수 있다.")
     void getAllCountries() {
         // given
-        Country korea = createCountry("South Korea", "KR");
-        Country japan = createCountry("Japan", "JP");
+        Currency krw = createCurrency("KRW", "₩");
+        Currency jpy = createCurrency("JPY", "¥");
+        Country korea = createCountry("South Korea", "대한민국", "KR", krw);
+        Country japan = createCountry("Japan", "일본", "JP", jpy);
+
         given(countryRepository.findAll()).willReturn(List.of(korea, japan));
 
         // when
@@ -90,38 +112,44 @@ class CountryServiceTest {
     }
 
     @Test
-    @DisplayName("국가 코드로 조회할 수 있다.")
+    @DisplayName("국가 코드로 국가를 조회할 수 있다.")
     void getCountryByCode_success() {
         // given
-        Country korea = createCountry("South Korea", "KR");
+        Currency krw = createCurrency("KRW", "₩");
+        Country korea = createCountry("South Korea", "대한민국", "KR", krw);
+
         given(countryRepository.findByCode("KR")).willReturn(Optional.of(korea));
 
         // when
         CountryResponseDto found = countryService.getCountryByCode("KR");
 
         // then
-        assertThat(found.name()).isEqualTo("South Korea");
+        assertThat(found.nameEn()).isEqualTo("South Korea");
+        assertThat(found.nameKr()).isEqualTo("대한민국");
         assertThat(found.code()).isEqualTo("KR");
     }
 
     @Test
-    @DisplayName("존재하지 않는 국가 코드 조회 시 예외 발생")
-    void getCountryByCode_notFound() {
+    @DisplayName("존재하지 않는 국가 코드 조회 시 예외가 발생한다.")
+    void getCountryByCode_throwsException_whenCountryNotFound() {
         // given
-        given(countryRepository.findByCode("SOU")).willReturn(Optional.empty());
+        given(countryRepository.findByCode("INVALID")).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> countryService.getCountryByCode("SOU"))
+        assertThatThrownBy(() -> countryService.getCountryByCode("INVALID"))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining(ErrorCode.COUNTRY_NOT_FOUND.getMessage());
     }
 
     @Test
-    @DisplayName("지역별 국가를 조회할 수 있다.")
+    @DisplayName("지역별로 국가를 조회할 수 있다.")
     void getCountriesByRegion() {
         // given
-        Country korea = createCountry("South Korea", "KR");
-        Country japan = createCountry("Japan", "JP");
+        Currency krw = createCurrency("KRW", "₩");
+        Currency jpy = createCurrency("JPY", "¥");
+        Country korea = createCountry("South Korea", "대한민국", "KR", krw);
+        Country japan = createCountry("Japan", "일본", "JP", jpy);
+
         given(countryRepository.findByRegion(Region.ASIA)).willReturn(List.of(korea, japan));
 
         // when
@@ -135,7 +163,9 @@ class CountryServiceTest {
     @DisplayName("국가명으로 검색할 수 있다.")
     void searchCountriesByName() {
         // given
-        Country korea = createCountry("South Korea", "KR");
+        Currency krw = createCurrency("KRW", "₩");
+        Country korea = createCountry("South Korea", "대한민국", "KR", krw);
+
         given(countryRepository.findByNameContaining("Korea")).willReturn(List.of(korea));
 
         // when
@@ -143,47 +173,91 @@ class CountryServiceTest {
 
         // then
         assertThat(response.countries()).hasSize(1);
-        assertThat(response.countries().getFirst().name()).isEqualTo("South Korea");
+        assertThat(response.countries().getFirst().nameEn()).isEqualTo("South Korea");
+    }
+
+    @Test
+    @DisplayName("지역별 국가 수를 조회할 수 있다.")
+    void getCountryCountByRegion() {
+        // given
+        given(countryRepository.countByRegion(Region.ASIA)).willReturn(48L);
+
+        // when
+        long count = countryService.getCountryCountByRegion("Asia");
+
+        // then
+        assertThat(count).isEqualTo(48L);
     }
 
     @Test
     @DisplayName("외부 API에서 국가 데이터를 가져와 저장할 수 있다.")
-    void fetchAndSaveCountries_success() {
+    void fetchAndSaveCountries_savesNewCountries() {
         // given
-        List<CountryExternalDto> externalDtos = createExternalDtoList();
+        CountryExternalDto dto = createCountryExternalDto(
+            "South Korea", "대한민국", "KR", "Asia", "KRW", "₩"
+        );
+        Currency krw = createCurrency("KRW", "₩");
 
         given(countryRepository.findAll()).willReturn(List.of());
-        given(externalApiClient.fetchCountries()).willReturn(externalDtos);
+        given(externalApiClient.fetchCountries()).willReturn(List.of(dto));
+        given(currencyRepository.findByCode("KRW")).willReturn(Optional.of(krw));
 
         // when
         countryService.fetchAndSaveCountries();
 
         // then
-        then(countryRepository).should().saveAll(argThat((List<Country> countries) ->
-            !countries.isEmpty() && countries.getFirst().getCode().equals("KR")
-        ));
+        then(countryRepository).should().saveAll(
+            argThat((List<Country> countries) ->
+                countries.size() == 1 && countries.getFirst().getCode().equals("KR")
+            )
+        );
+    }
+
+    @Test
+    @DisplayName("통화 정보가 없으면 새로운 통화를 생성하여 저장한다.")
+    void fetchAndSaveCountries_createsNewCurrency_whenCurrencyNotExists() {
+        // given
+        CountryExternalDto dto = createCountryExternalDto(
+            "South Korea", "대한민국", "KR", "Asia", "KRW", "₩"
+        );
+        Currency krw = createCurrency("KRW", "₩");
+
+        given(countryRepository.findAll()).willReturn(List.of());
+        given(externalApiClient.fetchCountries()).willReturn(List.of(dto));
+        given(currencyRepository.findByCode("KRW")).willReturn(Optional.empty());
+        given(currencyRepository.save(any(Currency.class))).willReturn(krw);
+
+        // when
+        countryService.fetchAndSaveCountries();
+
+        // then
+        then(currencyRepository).should().save(any(Currency.class));
+        then(countryRepository).should().saveAll(anyList());
     }
 
     @Test
     @DisplayName("중복된 국가는 저장하지 않는다.")
-    void fetchAndSaveCountries_skipDuplicates() {
+    void fetchAndSaveCountries_skipsExistingCountries() {
         // given
-        Country existingKorea = createCountry("South Korea", "KR");
-        List<CountryExternalDto> externalDtos = createExternalDtoList();
+        Currency krw = createCurrency("KRW", "₩");
+        Country existingKorea = createCountry("South Korea", "대한민국", "KR", krw);
+        CountryExternalDto dto = createCountryExternalDto(
+            "South Korea", "대한민국", "KR", "Asia", "KRW", "₩"
+        );
 
         given(countryRepository.findAll()).willReturn(List.of(existingKorea));
-        given(externalApiClient.fetchCountries()).willReturn(externalDtos);
+        given(externalApiClient.fetchCountries()).willReturn(List.of(dto));
 
         // when
         countryService.fetchAndSaveCountries();
 
         // then
-        then(countryRepository).should(never()).saveAll(any());
+        then(countryRepository).should(never()).saveAll(anyList());
     }
 
     @Test
     @DisplayName("외부 API가 빈 리스트를 반환하면 저장하지 않는다.")
-    void fetchAndSaveCountries_emptyResponse() {
+    void fetchAndSaveCountries_doesNotSave_whenExternalApiReturnsEmptyList() {
         // given
         given(externalApiClient.fetchCountries()).willReturn(List.of());
 
@@ -191,22 +265,15 @@ class CountryServiceTest {
         countryService.fetchAndSaveCountries();
 
         // then
-        then(countryRepository).should(never()).saveAll(any());
+        then(countryRepository).should(never()).saveAll(anyList());
     }
 
     @Test
-    @DisplayName("잘못된 region 코드 DTO는 예외 발생")
-    void fetchAndSaveCountries_invalidRegion() {
+    @DisplayName("잘못된 지역 코드가 포함된 DTO는 예외를 발생시킨다.")
+    void fetchAndSaveCountries_throwsException_whenRegionIsInvalid() {
         // given
-        CountryExternalDto.Name name = new CountryExternalDto.Name("TestLand", "TestLand Official");
-        CountryExternalDto.Flags flags = new CountryExternalDto.Flags("png", "svg");
-        CountryExternalDto invalidDto = new CountryExternalDto(
-            name,
-            List.of("Capital"),
-            "InvalidRegion",
-            flags,
-            "TL",
-            List.of(10.0, 20.0)
+        CountryExternalDto invalidDto = createCountryExternalDto(
+            "TestLand", "테스트랜드", "TL", "InvalidRegion", "TEST", "$"
         );
 
         given(countryRepository.findAll()).willReturn(List.of());
@@ -219,29 +286,26 @@ class CountryServiceTest {
     }
 
     @Test
-    @DisplayName("region 코드 대소문자 처리")
-    void fetchAndSaveCountries_regionCaseInsensitive() {
+    @DisplayName("지역 코드는 대소문자를 구분하지 않는다.")
+    void fetchAndSaveCountries_handlesCaseInsensitiveRegion() {
         // given
-        Name name = new Name("South Korea", "Republic of Korea");
-        Flags flags = new Flags("png", "svg");
-        CountryExternalDto dto = new CountryExternalDto(
-            name,
-            List.of("Seoul"),
-            "asia",  // 소문자
-            flags,
-            "KR",
-            List.of(37.0, 127.0)
+        CountryExternalDto dto = createCountryExternalDto(
+            "South Korea", "대한민국", "KR", "asia", "KRW", "₩"
         );
+        Currency krw = createCurrency("KRW", "₩");
 
         given(countryRepository.findAll()).willReturn(List.of());
         given(externalApiClient.fetchCountries()).willReturn(List.of(dto));
+        given(currencyRepository.findByCode("KRW")).willReturn(Optional.of(krw));
 
         // when
         countryService.fetchAndSaveCountries();
 
         // then
         then(countryRepository).should().saveAll(
-            argThat((List<Country> countries) -> countries.getFirst().getRegion() == Region.ASIA)
+            argThat((List<Country> countries) ->
+                countries.getFirst().getRegion() == Region.ASIA
+            )
         );
     }
 }

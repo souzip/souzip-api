@@ -6,6 +6,8 @@ import com.souzip.api.domain.country.dto.CountryResponseDto;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.repository.CountryRepository;
+import com.souzip.api.domain.currency.entity.Currency;
+import com.souzip.api.domain.currency.repository.CurrencyRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 
@@ -19,12 +21,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class CountryService {
 
     private final CountryRepository countryRepository;
+    private final CurrencyRepository currencyRepository;
     private final CountryExternalApiClient externalApiClient;
 
     public CountryListResponse getAllCountries() {
@@ -33,8 +36,7 @@ public class CountryService {
     }
 
     public CountryResponseDto getCountryByCode(String code) {
-        Country country = countryRepository.findByCode(code)
-            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+        Country country = findCountryByCodeOrThrow(code);
         return CountryResponseDto.from(country);
     }
 
@@ -59,25 +61,24 @@ public class CountryService {
         List<CountryExternalDto> externalCountries = externalApiClient.fetchCountries();
         Set<String> existingCodes = getExistingCountryCodes();
 
-        List<Country> newCountries = externalCountries.stream()
-            .filter(dto -> !existingCodes.contains(dto.cca2()))
-            .map(this::convertToEntity)
-            .toList();
+        List<Country> newCountries = extractNewCountries(externalCountries, existingCodes);
 
-        if (newCountries.isEmpty()) {
+        if (hasNoNewCountries(newCountries)) {
             log.info("저장할 새로운 국가가 없습니다");
             return;
         }
 
         countryRepository.saveAll(newCountries);
-        log.info("{}개의 새로운 국가를 저장했습니다", newCountries.size());
     }
 
-    private CountryListResponse convertToListResponse(List<Country> countries) {
-        List<CountryResponseDto> dtos = countries.stream()
-            .map(CountryResponseDto::from)
-            .toList();
-        return CountryListResponse.from(dtos);
+    private Country findCountryByCodeOrThrow(String code) {
+        return countryRepository.findByCode(code)
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+    }
+
+    private Region getRegionOrThrow(String englishName) {
+        return Region.from(englishName)
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
     }
 
     private Set<String> getExistingCountryCodes() {
@@ -86,13 +87,56 @@ public class CountryService {
             .collect(Collectors.toSet());
     }
 
-    private Country convertToEntity(CountryExternalDto dto) {
-        Region region = getRegionOrThrow(dto.region());
-        return dto.toEntity(region);
+    private List<Country> extractNewCountries(
+        List<CountryExternalDto> externalCountries,
+        Set<String> existingCodes
+    ) {
+        return externalCountries.stream()
+            .filter(dto -> isNewCountry(dto, existingCodes))
+            .map(this::convertToEntity)
+            .toList();
     }
 
-    private Region getRegionOrThrow(String englishName) {
-        return Region.from(englishName)
-            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
+    private Country convertToEntity(CountryExternalDto dto) {
+        Region region = getRegionOrThrow(dto.region());
+        Currency currency = getOrCreateCurrency(dto);
+        return dto.toEntity(region, currency);
+    }
+
+    private CountryListResponse convertToListResponse(List<Country> countries) {
+        return CountryListResponse.from(
+            countries.stream()
+                .map(CountryResponseDto::from)
+                .toList()
+        );
+    }
+
+    private Currency getOrCreateCurrency(CountryExternalDto dto) {
+        String currencyCode = dto.getPrimaryCurrencyCode();
+
+        if (isInvalidCurrencyCode(currencyCode)) {
+            log.debug("통화 정보 없음 - 국가: {}", dto.cca2());
+            return null;
+        }
+
+        return currencyRepository.findByCode(currencyCode)
+            .orElseGet(() -> createAndSaveCurrency(currencyCode, dto.getPrimaryCurrencySymbol()));
+    }
+
+    private Currency createAndSaveCurrency(String currencyCode, String currencySymbol) {
+        Currency newCurrency = Currency.of(currencyCode, currencySymbol);
+        return currencyRepository.save(newCurrency);
+    }
+
+    private boolean isNewCountry(CountryExternalDto dto, Set<String> existingCodes) {
+        return !existingCodes.contains(dto.cca2());
+    }
+
+    private boolean hasNoNewCountries(List<Country> newCountries) {
+        return newCountries.isEmpty();
+    }
+
+    private boolean isInvalidCurrencyCode(String currencyCode) {
+        return currencyCode == null || currencyCode.isBlank();
     }
 }

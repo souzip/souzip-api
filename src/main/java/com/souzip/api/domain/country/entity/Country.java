@@ -1,11 +1,15 @@
 package com.souzip.api.domain.country.entity;
 
+import com.souzip.api.domain.currency.entity.Currency;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,46 +21,59 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name = "countries")
 @Entity
 public class Country extends BaseEntity {
 
     @Column(nullable = false)
-    private String name;
+    private String nameEn;
+
+    @Column(nullable = false)
+    private String nameKr;
 
     @Column(nullable = false)
     private String code;
 
+    @Column
     private String capital;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Region region;
 
-    private String flags;
-    @Column(precision = 10, scale = 8)
+    @Column(nullable = false)
+    private String imageUrl;
+
+    @Column(nullable = false, precision = 10, scale = 8)
     private BigDecimal latitude;
 
-    @Column(precision = 11, scale = 8)
+    @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
+    @ManyToOne
+    @JoinColumn(name = "currency_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Currency currency;
+
     public static Country of(
-        String name,
+        String nameEn,
+        String nameKr,
         String code,
         String capital,
         Region region,
-        String flags,
+        String imageUrl,
         BigDecimal latitude,
-        BigDecimal longitude
+        BigDecimal longitude,
+        Currency currency
     ) {
         return Country.builder()
-            .name(name)
+            .nameEn(nameEn)
+            .nameKr(nameKr)
             .code(code)
             .capital(capital)
             .region(region)
-            .flags(flags)
+            .imageUrl(imageUrl)
             .latitude(latitude)
             .longitude(longitude)
+            .currency(currency)
             .build();
     }
 }

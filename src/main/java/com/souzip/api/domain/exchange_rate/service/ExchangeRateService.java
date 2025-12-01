@@ -32,45 +32,11 @@ public class ExchangeRateService {
     @Transactional
     public void fetchAndSaveExchangeRates() {
         ExchangeRateExternalDto externalDto = fetchFromExternalApi("KRW");
+
         Set<String> existingPairs = getExistingCurrencyPairs();
+        List<ExchangeRate> newRates = extractNewRates(externalDto, existingPairs);
 
-        List<ExchangeRate> newRates = externalDto.toEntities().stream()
-                .filter(rate -> isNewRate(rate, existingPairs))
-                .toList();
-
-        if (newRates.isEmpty()) {
-            log.info("저장할 새로운 환율 데이터가 없습니다.");
-            return;
-        }
-
-        exchangeRateRepository.saveAll(newRates);
-        log.info("환율 데이터 저장 완료: {}건", newRates.size());
-    }
-
-    @Transactional
-    public void fetchAndSaveSingleRate(String foreignCurrencyCode) {
-        ExchangeRateExternalDto externalDto = fetchFromExternalApi("KRW");
-
-        ExchangeRate rate = externalDto.toEntity(foreignCurrencyCode)
-                .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
-
-        if (exchangeRateRepository.existsByBaseCodeAndCurrencyCode(rate.getBaseCode(), rate.getCurrencyCode())) {
-            log.info("환율 데이터 이미 존재: {} -> {}", rate.getCurrencyCode(), rate.getBaseCode());
-            return;
-        }
-
-        exchangeRateRepository.save(rate);
-        log.info("환율 데이터 저장 완료: {} -> {}", rate.getCurrencyCode(), rate.getBaseCode());
-    }
-
-    private Set<String> getExistingCurrencyPairs() {
-        return exchangeRateRepository.findAll().stream()
-                .map(rate -> rate.getCurrencyCode() + "->" + rate.getBaseCode())
-                .collect(Collectors.toSet());
-    }
-
-    private boolean isNewRate(ExchangeRate rate, Set<String> existingPairs) {
-        return !existingPairs.contains(rate.getCurrencyCode() + "->" + rate.getBaseCode());
+        saveIfNotEmpty(newRates);
     }
 
     private ExchangeRateExternalDto fetchFromExternalApi(String baseCurrency) {
@@ -81,7 +47,38 @@ public class ExchangeRateService {
             log.warn("외부 API로부터 환율 데이터를 받지 못했습니다.");
             return ExchangeRateExternalDto.ofMultiple(Map.of(), baseCurrency);
         }
-
         return response;
+    }
+
+    private Set<String> getExistingCurrencyPairs() {
+        return exchangeRateRepository.findAll()
+                .stream()
+                .map(this::toPairKey)
+                .collect(Collectors.toSet());
+    }
+
+    private List<ExchangeRate> extractNewRates(ExchangeRateExternalDto externalDto, Set<String> existingPairs) {
+        return externalDto.toEntities().stream()
+                .filter(rate -> isNewRate(rate, existingPairs))
+                .toList();
+    }
+
+    private boolean isNewRate(ExchangeRate rate, Set<String> existingPairs) {
+        return !existingPairs.contains(toPairKey(rate));
+    }
+
+    @Transactional
+    public void saveIfNotEmpty(List<ExchangeRate> rates) {
+        if (rates.isEmpty()) {
+            log.info("저장할 새로운 환율 데이터가 없습니다.");
+            return;
+        }
+
+        exchangeRateRepository.saveAll(rates);
+        log.info("환율 데이터 저장 완료: {}건", rates.size());
+    }
+
+    private String toPairKey(ExchangeRate rate) {
+        return rate.getCurrencyCode() + "->" + rate.getBaseCode();
     }
 }

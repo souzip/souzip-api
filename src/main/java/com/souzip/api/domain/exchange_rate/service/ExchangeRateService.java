@@ -4,8 +4,6 @@ import com.souzip.api.domain.exchange_rate.dto.ExchangeRateExternalDto;
 import com.souzip.api.domain.exchange_rate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
 import com.souzip.api.domain.exchange_rate.repository.ExchangeRateRepository;
-import com.souzip.api.global.exception.BusinessException;
-import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 

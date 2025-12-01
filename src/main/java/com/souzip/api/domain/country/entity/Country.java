@@ -45,8 +45,7 @@ public class Country extends BaseEntity {
     @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    private String currencyCode;
-    private String currencySymbol;
+    private Long currencyId;
 
     public static Country of(
         String nameEn,
@@ -57,8 +56,7 @@ public class Country extends BaseEntity {
         String imageUrl,
         BigDecimal latitude,
         BigDecimal longitude,
-        String currencyCode,
-        String currencySymbol
+        Long currencyId
     ) {
         return Country.builder()
             .nameEn(nameEn)
@@ -69,8 +67,7 @@ public class Country extends BaseEntity {
             .imageUrl(imageUrl)
             .latitude(latitude)
             .longitude(longitude)
-            .currencyCode(currencyCode)
-            .currencySymbol(currencySymbol)
+            .currencyId(currencyId)
             .build();
     }
 }

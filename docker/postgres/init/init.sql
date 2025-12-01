@@ -12,14 +12,16 @@ CREATE TABLE IF NOT EXISTS user (
     UNIQUE (provider, provider_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_user_id ON users(user_id);
-CREATE INDEX IF NOT EXISTS idx_provider ON users(provider, provider_id);
-CREATE INDEX IF NOT EXISTS idx_deleted ON users(deleted);
+CREATE INDEX IF NOT EXISTS idx_user_id ON user(user_id);
+CREATE INDEX IF NOT EXISTS idx_provider ON user(provider, provider_id);
+CREATE INDEX IF NOT EXISTS idx_deleted ON user(deleted);
 
 CREATE TABLE IF NOT EXISTS currency (
     id BIGSERIAL PRIMARY KEY,
     code VARCHAR(10) UNIQUE NOT NULL,
-    symbol VARCHAR(10)
+    symbol VARCHAR(10),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_currency_code ON currency(code);
@@ -28,7 +30,8 @@ CREATE TABLE IF NOT EXISTS country (
     id BIGSERIAL PRIMARY KEY,
     name_en VARCHAR(255) NOT NULL,
     name_kr VARCHAR(255) NOT NULL,
-    capital VARCHAR(255) NOT NULL,
+    code VARCHAR(10) NOT NULL,
+    capital VARCHAR(255),
     region VARCHAR(50) NOT NULL,
     image_url VARCHAR(500) NOT NULL,
     latitude DECIMAL(10,8) NOT NULL,
@@ -38,6 +41,7 @@ CREATE TABLE IF NOT EXISTS country (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_code ON country(code);
 CREATE INDEX IF NOT EXISTS idx_region ON country(region);
 CREATE INDEX IF NOT EXISTS idx_currency_id ON country(currency_id);
 

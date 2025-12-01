@@ -17,46 +17,60 @@ import lombok.NoArgsConstructor;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name = "countries")
 @Entity
 public class Country extends BaseEntity {
 
     @Column(nullable = false)
-    private String name;
+    private String nameEn;
+
+    @Column(nullable = false)
+    private String nameKr;
 
     @Column(nullable = false)
     private String code;
 
+    @Column(nullable = false)
     private String capital;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Region region;
 
-    private String flags;
-    @Column(precision = 10, scale = 8)
+    @Column(nullable = false)
+    private String imageUrl;
+
+    @Column(nullable = false, precision = 10, scale = 8)
     private BigDecimal latitude;
 
-    @Column(precision = 11, scale = 8)
+    @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
+    private String currencyCode;
+    private String currencySymbol;
+
     public static Country of(
-        String name,
+        String nameEn,
+        String nameKr,
         String code,
         String capital,
         Region region,
-        String flags,
+        String imageUrl,
         BigDecimal latitude,
-        BigDecimal longitude
+        BigDecimal longitude,
+        String currencyCode,
+        String currencySymbol
     ) {
         return Country.builder()
-            .name(name)
+            .nameEn(nameEn)
+            .nameKr(nameKr)
             .code(code)
             .capital(capital)
             .region(region)
-            .flags(flags)
+            .imageUrl(imageUrl)
             .latitude(latitude)
             .longitude(longitude)
+            .currencyCode(currencyCode)
+            .currencySymbol(currencySymbol)
             .build();
     }
 }

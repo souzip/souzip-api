@@ -1,6 +1,7 @@
 package com.souzip.api.domain.exchange_rate.service;
 
 import com.souzip.api.domain.exchange_rate.dto.ExchangeRateExternalDto;
+import com.souzip.api.domain.exchange_rate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
 import com.souzip.api.domain.exchange_rate.repository.ExchangeRateRepository;
 import com.souzip.api.global.exception.BusinessException;
@@ -23,16 +24,38 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ExchangeRateService {
 
+    private static final String DEFAULT_BASE_CURRENCY = "KRW";
     private final ExchangeRateRepository exchangeRateRepository;
     private final RestTemplate restTemplate;
 
     @Value("${external.api.exchange-rate-base-url}")
     private String baseUrl;
 
-    @Transactional
-    public void fetchAndSaveExchangeRates() {
-        ExchangeRateExternalDto externalDto = fetchFromExternalApi("KRW");
+    public ExchangeRateResponseDto getRate(String baseCode, String currencyCode) {
+        return getRatesInternal(resolveBaseCurrency(baseCode), Set.of(currencyCode)).get(0);
+    }
 
+    public List<ExchangeRateResponseDto> getRates(String baseCode, Set<String> currencyCodes) {
+        return getRatesInternal(resolveBaseCurrency(baseCode), currencyCodes);
+    }
+
+    private List<ExchangeRateResponseDto> getRatesInternal(String baseCode, Set<String> currencyCodes) {
+        return exchangeRateRepository.findAll().stream()
+                .filter(rate -> rate.getBaseCode().equals(baseCode)
+                        && (currencyCodes == null || currencyCodes.contains(rate.getCurrencyCode())))
+                .map(ExchangeRateResponseDto::from)
+                .toList();
+    }
+
+    private String resolveBaseCurrency(String baseCode) {
+        return (baseCode == null || baseCode.isBlank()) ? DEFAULT_BASE_CURRENCY : baseCode;
+    }
+
+    @Transactional
+    public void fetchAndSaveExchangeRates(String baseCurrency) {
+        String resolvedBase = resolveBaseCurrency(baseCurrency);
+
+        ExchangeRateExternalDto externalDto = fetchFromExternalApi(resolvedBase);
         Set<String> existingPairs = getExistingCurrencyPairs();
         List<ExchangeRate> newRates = extractNewRates(externalDto, existingPairs);
 

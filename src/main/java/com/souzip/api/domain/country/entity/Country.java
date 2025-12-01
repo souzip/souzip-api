@@ -1,11 +1,15 @@
 package com.souzip.api.domain.country.entity;
 
+import com.souzip.api.domain.currency.entity.Currency;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -29,7 +33,7 @@ public class Country extends BaseEntity {
     @Column(nullable = false)
     private String code;
 
-    @Column(nullable = false)
+    @Column
     private String capital;
 
     @Column(nullable = false)
@@ -45,7 +49,9 @@ public class Country extends BaseEntity {
     @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    private Long currencyId;
+    @ManyToOne
+    @JoinColumn(name = "currency_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Currency currency;
 
     public static Country of(
         String nameEn,
@@ -56,7 +62,7 @@ public class Country extends BaseEntity {
         String imageUrl,
         BigDecimal latitude,
         BigDecimal longitude,
-        Long currencyId
+        Currency currency
     ) {
         return Country.builder()
             .nameEn(nameEn)
@@ -67,7 +73,7 @@ public class Country extends BaseEntity {
             .imageUrl(imageUrl)
             .latitude(latitude)
             .longitude(longitude)
-            .currencyId(currencyId)
+            .currency(currency)
             .build();
     }
 }

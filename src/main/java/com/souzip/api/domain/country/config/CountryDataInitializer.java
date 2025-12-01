@@ -1,4 +1,4 @@
-package com.souzip.api.global.config;
+package com.souzip.api.domain.country.config;
 
 import com.souzip.api.domain.country.service.CountryService;
 import lombok.RequiredArgsConstructor;

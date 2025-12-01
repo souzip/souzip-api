@@ -1,26 +1,31 @@
 package com.souzip.api.domain.country.dto;
 
 import com.souzip.api.domain.country.entity.Country;
+import com.souzip.api.domain.currency.CurrencyDto;
 import java.math.BigDecimal;
 
 public record CountryResponseDto(
-    String name,
+    String nameEn,
+    String nameKr,
     String code,
     RegionDto region,
     String capital,
-    String flagUrl,
+    String imageUrl,
     BigDecimal latitude,
-    BigDecimal longitude
+    BigDecimal longitude,
+    CurrencyDto currency
 ) {
     public static CountryResponseDto from(Country country) {
         return new CountryResponseDto(
-            country.getName(),
+            country.getNameEn(),
+            country.getNameKr(),
             country.getCode(),
             RegionDto.from(country.getRegion()),
             country.getCapital(),
-            country.getFlags(),
+            country.getImageUrl(),
             country.getLatitude(),
-            country.getLongitude()
+            country.getLongitude(),
+            CurrencyDto.from(country.getCurrency())
         );
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,13 +64,13 @@ public class ExchangeRateService {
     }
 
     private ExchangeRateExternalDto fetchFromExternalApi(String baseCurrency) {
-        String url = String.format("%s/%s", baseUrl, baseCurrency);
-        ExchangeRateExternalDto response = restTemplate.getForObject(url, ExchangeRateExternalDto.class);
+        ExchangeRateExternalDto response = restTemplate.getForObject(baseUrl + "/" + baseCurrency, ExchangeRateExternalDto.class);
 
         if (response == null || response.toEntities().isEmpty()) {
-            log.warn("외부 API로부터 환율 데이터를 받지 못했습니다.");
+            log.warn("외부 API로부터 환율 데이터를 받지 못했습니다. (baseCurrency: {})", baseCurrency);
             return ExchangeRateExternalDto.ofMultiple(Map.of(), baseCurrency);
         }
+
         return response;
     }
 

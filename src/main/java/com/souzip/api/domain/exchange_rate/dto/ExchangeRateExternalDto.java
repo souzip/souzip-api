@@ -7,7 +7,6 @@ import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ExchangeRateExternalDto(

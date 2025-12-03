@@ -14,6 +14,7 @@ logging:
     root: INFO
     com.souzip.api: DEBUG
 
+
 external:
   api:
     countries-base-url: https://restcountries.com/v3.1

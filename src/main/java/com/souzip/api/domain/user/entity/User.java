@@ -16,7 +16,8 @@ import java.util.UUID;
 @Table(name = "\"user\"",
     uniqueConstraints = {
         @UniqueConstraint(columnNames = {"provider", "provider_id"})
-    })
+    }
+)
 @SQLDelete(sql = "UPDATE \"user\" SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @SQLRestriction("deleted = false")
 @Entity

@@ -21,8 +21,8 @@ public record ExchangeRateExternalDto(
 
         return conversionRates.entrySet().stream()
                 .map(entry -> ExchangeRate.of(
-                        entry.getKey(),
-                        baseCode,
+                        baseCode,          // 기준 통화 (KRW)
+                        entry.getKey(),    // 외국 통화 (JPY)
                         BigDecimal.valueOf(1.0 / entry.getValue())
                 ))
                 .toList();

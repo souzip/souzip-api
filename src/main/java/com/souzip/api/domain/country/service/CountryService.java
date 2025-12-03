@@ -137,6 +137,6 @@ public class CountryService {
     }
 
     private boolean isInvalidCurrencyCode(String currencyCode) {
-        return currencyCode == null || currencyCode.isBlank();
+        return currencyCode.isBlank();
     }
 }

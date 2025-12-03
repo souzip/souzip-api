@@ -1,5 +1,6 @@
 package com.souzip.api.domain.country.service;
 
+import com.souzip.api.domain.country.client.CountryExternalApiClient;
 import com.souzip.api.domain.country.dto.CountryExternalDto;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Flags;
 import com.souzip.api.domain.country.dto.CountryExternalDto.Name;

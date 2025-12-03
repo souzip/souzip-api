@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class KakaoUserInfo {
+public class KakaoUserInfo implements OAuthUserInfo {
 
     private Long id;
 
@@ -26,11 +26,13 @@ public class KakaoUserInfo {
         }
     }
 
+    @Override
     public String getProviderId() {
         return String.valueOf(id);
     }
 
-    public String getNickname() {
+    @Override
+    public String getName() {
         return kakaoAccount.profile.nickname;
     }
 }

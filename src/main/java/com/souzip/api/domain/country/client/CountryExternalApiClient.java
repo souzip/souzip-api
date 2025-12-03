@@ -1,4 +1,4 @@
-package com.souzip.api.domain.country.service;
+package com.souzip.api.domain.country.client;
 
 import com.souzip.api.domain.country.dto.CountryExternalDto;
 import lombok.RequiredArgsConstructor;

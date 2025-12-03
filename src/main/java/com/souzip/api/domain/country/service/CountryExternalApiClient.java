@@ -14,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class CountryExternalApiClient {
+
     private final RestTemplate restTemplate;
 
     @Value("${external.api.countries-base-url}")

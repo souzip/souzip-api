@@ -14,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class CountryExternalApiClient {
-
     private final RestTemplate restTemplate;
 
     @Value("${external.api.countries-base-url}")
@@ -24,20 +23,25 @@ public class CountryExternalApiClient {
 
     public List<CountryExternalDto> fetchCountries() {
         try {
-            String url = baseUrl + COUNTRIES_API_PATH;
-            CountryExternalDto[] response = restTemplate.getForObject(url, CountryExternalDto[].class);
-
-            if (isEmptyResponse(response)) {
-                log.warn("외부 API로부터 국가 데이터를 받지 못했습니다.");
-                return List.of();
-            }
-
-            return Arrays.asList(response);
-
+            CountryExternalDto[] response = callCountriesApi();
+            return convertToList(response);
         } catch (Exception e) {
             log.error("외부 API 호출 중 오류 발생", e);
             return List.of();
         }
+    }
+
+    private CountryExternalDto[] callCountriesApi() {
+        String url = baseUrl + COUNTRIES_API_PATH;
+        return restTemplate.getForObject(url, CountryExternalDto[].class);
+    }
+
+    private List<CountryExternalDto> convertToList(CountryExternalDto[] response) {
+        if (isEmptyResponse(response)) {
+            log.warn("외부 API로부터 국가 데이터를 받지 못했습니다.");
+            return List.of();
+        }
+        return Arrays.asList(response);
     }
 
     private boolean isEmptyResponse(CountryExternalDto[] response) {

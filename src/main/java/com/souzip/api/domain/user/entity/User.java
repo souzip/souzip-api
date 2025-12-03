@@ -1,5 +1,6 @@
 package com.souzip.api.domain.user.entity;
 
+import com.souzip.api.domain.auth.dto.OAuthUserInfo;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,6 +59,19 @@ public class User extends BaseEntity {
             .nickname(nickname)
             .deleted(false)
             .build();
+    }
+
+    public static User of(Provider provider, OAuthUserInfo oauthUserInfo) {
+        String name = oauthUserInfo.getName();
+        String originalName = name;
+        String defaultNickname = name;
+
+        return User.of(
+            provider,
+            oauthUserInfo.getProviderId(),
+            originalName,
+            defaultNickname
+        );
     }
 
     private void ensureUserId() {

@@ -45,28 +45,26 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    private OAuthUserInfo createOAuthUserInfo(String providerId, String name) {
+    private OAuthUserInfo createOAuthUserInfo() {
         return new OAuthUserInfo() {
             @Override
             public String getProviderId() {
-                return providerId;
+                return "20251204";
             }
 
             @Override
             public String getName() {
-                return name;
+                return "수집";
             }
         };
     }
-
-    // ===== login() 테스트만! =====
 
     @Test
     @DisplayName("카카오 로그인 시 신규 사용자를 생성하고 토큰을 발급한다.")
     void login_createsNewUser_whenUserNotExists() {
         // given
         String kakaoAccessToken = "kakao_token";
-        OAuthUserInfo oauthUserInfo = createOAuthUserInfo("20251204", "수집");
+        OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User newUser = User.of(Provider.KAKAO, oauthUserInfo);
         newUser = spy(newUser);
 
@@ -98,7 +96,7 @@ class AuthServiceTest {
     void login_findsExistingUser_whenUserExists() {
         // given
         String kakaoAccessToken = "kakao_token";
-        OAuthUserInfo oauthUserInfo = createOAuthUserInfo("20251204", "수집");
+        OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User existingUser = User.of(Provider.KAKAO, oauthUserInfo);
 
         existingUser = spy(existingUser);
@@ -134,7 +132,7 @@ class AuthServiceTest {
     void login_createsRefreshToken_whenNotExists() {
         // given
         String kakaoAccessToken = "kakao_token";
-        OAuthUserInfo oauthUserInfo = createOAuthUserInfo("20251204", "수집");
+        OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User newUser = User.of(Provider.KAKAO, oauthUserInfo);
         newUser = spy(newUser);
 
@@ -160,7 +158,7 @@ class AuthServiceTest {
     void login_updatesRefreshToken_whenExists() {
         // given
         String kakaoAccessToken = "kakao_token";
-        OAuthUserInfo oauthUserInfo = createOAuthUserInfo("20251204", "수집");
+        OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User existingUser = User.of(Provider.KAKAO, oauthUserInfo);
         existingUser = spy(existingUser);
         given(existingUser.getCreatedAt()).willReturn(LocalDateTime.now().minusMinutes(10));

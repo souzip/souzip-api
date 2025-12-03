@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
-
-    boolean existsByBaseCodeAndCurrencyCode(String baseCode, String currencyCode);
 }

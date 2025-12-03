@@ -1,4 +1,5 @@
 package com.souzip.api.domain.auth.dto;
 
-public class LoginRequest {
-}
+public record LoginRequest(
+    String accessToken
+) {}

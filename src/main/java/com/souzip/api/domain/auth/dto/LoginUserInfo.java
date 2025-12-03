@@ -1,4 +1,15 @@
 package com.souzip.api.domain.auth.dto;
 
-public class LoginUserInfo {
+import com.souzip.api.domain.user.entity.User;
+
+public record LoginUserInfo(
+    String userId,
+    String nickname
+) {
+    public static LoginUserInfo from(User user) {
+        return new LoginUserInfo(
+            user.getUserId().substring(0, 8),
+            user.getNickname()
+        );
+    }
 }

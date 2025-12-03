@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name = "exchange_rates")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class ExchangeRate {

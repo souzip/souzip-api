@@ -33,39 +33,73 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            String token = extractTokenFromRequest(request);
-
-            if (token != null && jwtTokenProvider.validateToken(token)) {
-                String userId = jwtTokenProvider.getUserIdFromToken(token);
-
-                User user = userRepository.findByUserId(userId)
-                    .orElse(null);
-
-                if (user != null) {
-                    UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            Collections.emptyList()
-                        );
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
+            authenticateRequest(request);
         } catch (Exception e) {
-            log.error("Could not set user authentication in security context", e);
+            log.error("사용자 인증 정보를 SecurityContext에 설정할 수 없습니다.", e);
         }
 
         filterChain.doFilter(request, response);
     }
 
+    private void authenticateRequest(HttpServletRequest request) {
+        String token = extractTokenFromRequest(request);
+
+        if (isTokenAbsent(token)) {
+            return;
+        }
+
+        User user = getUserFromToken(token);
+
+        if (isUserAbsent(user)) {
+            return;
+        }
+
+        setAuthentication(user);
+    }
+
     private String extractTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
 
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(BEARER_PREFIX.length());
+        if (hasBearerToken(bearerToken)) {
+            return extractToken(bearerToken);
         }
 
         return null;
+    }
+
+    private boolean hasBearerToken(String bearerToken) {
+        return StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX);
+    }
+
+    private String extractToken(String bearerToken) {
+        return bearerToken.substring(BEARER_PREFIX.length());
+    }
+
+    private boolean isTokenAbsent(String token) {
+        return isTokenNull(token) || isTokenInvalid(token);
+    }
+
+    private boolean isTokenNull(String token) {
+        return token == null;
+    }
+
+    private boolean isTokenInvalid(String token) {
+        return !jwtTokenProvider.validateToken(token);
+    }
+
+    private User getUserFromToken(String token) {
+        String userId = jwtTokenProvider.getUserIdFromToken(token);
+        return userRepository.findByUserId(userId).orElse(null);
+    }
+
+    private boolean isUserAbsent(User user) {
+        return user == null;
+    }
+
+    private void setAuthentication(User user) {
+        UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

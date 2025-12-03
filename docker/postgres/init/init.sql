@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS "user" (
     id BIGSERIAL PRIMARY KEY,
     user_id VARCHAR(36) UNIQUE NOT NULL,
     provider VARCHAR(10) NOT NULL,
@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS user (
     UNIQUE (provider, provider_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_user_id ON user(user_id);
-CREATE INDEX IF NOT EXISTS idx_provider ON user(provider, provider_id);
-CREATE INDEX IF NOT EXISTS idx_deleted ON user(deleted);
+CREATE INDEX IF NOT EXISTS idx_user_id ON "user"(user_id);
+CREATE INDEX IF NOT EXISTS idx_provider ON "user"(provider, provider_id);
+CREATE INDEX IF NOT EXISTS idx_deleted ON "user"(deleted);
 
 CREATE TABLE IF NOT EXISTS currency (
     id BIGSERIAL PRIMARY KEY,

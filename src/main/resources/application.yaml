@@ -14,7 +14,15 @@ logging:
     root: INFO
     com.souzip.api: DEBUG
 
+jwt:
+  expiration: 86400000
+  refresh-expiration: 604800000
+
 external:
   api:
     countries-base-url: https://restcountries.com/v3.1
     exchange-rate-base-url: https://v6.exchangerate-api.com/v6/6bb64d753d5d604c571e963d/latest
+
+oauth:
+  kakao:
+    user-info-url: https://kapi.kakao.com/v2/user/me

@@ -1,5 +1,6 @@
 package com.souzip.api.domain.country.service;
 
+import com.souzip.api.domain.country.client.CountryExternalApiClient;
 import com.souzip.api.domain.country.dto.CountryExternalDto;
 import com.souzip.api.domain.country.dto.CountryListResponse;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
@@ -137,6 +138,6 @@ public class CountryService {
     }
 
     private boolean isInvalidCurrencyCode(String currencyCode) {
-        return currencyCode == null || currencyCode.isBlank();
+        return currencyCode.isBlank();
     }
 }

@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.Collections;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";

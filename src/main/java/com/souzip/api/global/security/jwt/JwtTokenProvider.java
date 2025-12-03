@@ -12,8 +12,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
+@Component
 public class JwtTokenProvider {
 
     private final JwtProperties jwtProperties;

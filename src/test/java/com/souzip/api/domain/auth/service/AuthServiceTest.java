@@ -4,15 +4,19 @@ import com.souzip.api.domain.auth.client.OAuthClient;
 import com.souzip.api.domain.auth.client.OAuthClientFactory;
 import com.souzip.api.domain.auth.dto.LoginResponse;
 import com.souzip.api.domain.auth.dto.OAuthUserInfo;
+import com.souzip.api.domain.auth.dto.RefreshResponse;
 import com.souzip.api.domain.auth.entity.RefreshToken;
 import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
+import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -183,5 +187,156 @@ class AuthServiceTest {
         // then
         then(existingToken).should().updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
         then(refreshTokenRepository).should(never()).save(any(RefreshToken.class));
+    }
+
+    @Test
+    @DisplayName("Refresh Token이 유효하고 여유가 있으면 Access Token만 재발급한다.")
+    void refresh_withValidToken_returnsNewAccessTokenOnly() {
+        // given
+        User user = User.of(Provider.KAKAO, createOAuthUserInfo());
+        User savedUser = spy(user);
+        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+
+        RefreshToken refreshToken = RefreshToken.of(
+            savedUser,
+            "valid_refresh_token",
+            LocalDateTime.now().plusDays(20)
+        );
+        RefreshToken spyRefreshToken = spy(refreshToken);
+        given(spyRefreshToken.isExpired()).willReturn(false);
+        given(spyRefreshToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(20));
+
+        given(refreshTokenRepository.findByToken("valid_refresh_token"))
+            .willReturn(Optional.of(spyRefreshToken));
+        given(jwtTokenProvider.generateToken(anyString()))
+            .willReturn("new_access_token");
+
+        // when
+        RefreshResponse response = authService.refresh("valid_refresh_token");
+
+        // then
+        assertThat(response.accessToken()).isEqualTo("new_access_token");
+        assertThat(response.refreshToken()).isEqualTo("valid_refresh_token");
+        verify(jwtTokenProvider, never()).generateRefreshToken(anyString());
+    }
+
+    @Test
+    @DisplayName("Refresh Token이 10일 이하로 남으면 둘 다 재발급한다.")
+    void refresh_withExpiringSoon_returnsBothNewTokens() {
+        // given
+        User user = User.of(Provider.KAKAO, createOAuthUserInfo());
+        User savedUser = spy(user);
+        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+
+        RefreshToken refreshToken = RefreshToken.of(
+            savedUser,
+            "expiring_soon_token",
+            LocalDateTime.now().plusDays(5)
+        );
+        RefreshToken spyRefreshToken = spy(refreshToken);
+        given(spyRefreshToken.isExpired()).willReturn(false);
+        given(spyRefreshToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(5));
+
+        given(refreshTokenRepository.findByToken("expiring_soon_token"))
+            .willReturn(Optional.of(spyRefreshToken));
+        given(jwtTokenProvider.generateToken(anyString()))
+            .willReturn("new_access_token");
+        given(jwtTokenProvider.generateRefreshToken(anyString()))
+            .willReturn("new_refresh_token");
+
+        // when
+        RefreshResponse response = authService.refresh("expiring_soon_token");
+
+        // then
+        assertThat(response.accessToken()).isEqualTo("new_access_token");
+        assertThat(response.refreshToken()).isEqualTo("new_refresh_token");
+        verify(spyRefreshToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
+    }
+
+    @Test
+    @DisplayName("만료된 Refresh Token으로 재발급 시 에러가 발생한다.")
+    void refresh_withExpiredToken_throwsException() {
+        // given
+        User user = User.of(Provider.KAKAO, createOAuthUserInfo());
+
+        RefreshToken expiredToken = RefreshToken.of(
+            user,
+            "expired_refresh_token",
+            LocalDateTime.now().minusDays(1)
+        );
+        RefreshToken spyExpiredToken = spy(expiredToken);
+        given(spyExpiredToken.isExpired()).willReturn(true);
+
+        given(refreshTokenRepository.findByToken("expired_refresh_token"))
+            .willReturn(Optional.of(spyExpiredToken));
+
+        // when & then
+        assertThatThrownBy(() -> authService.refresh("expired_refresh_token"))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("만료된 Refresh Token입니다.");
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 Refresh Token으로 재발급 시 에러가 발생한다.")
+    void refresh_withInvalidToken_throwsException() {
+        // given
+        given(refreshTokenRepository.findByToken("invalid_token"))
+            .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> authService.refresh("invalid_token"))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("유효하지 않은 Refresh Token입니다.");
+    }
+
+    @ParameterizedTest
+    @DisplayName("Refresh Token 만료 임계값 경계 조건 테스트")
+    @CsvSource({
+        "11, false, 11일 남음 - 갱신 안 함",
+        "10, true, 정확히 10일 남음 - 갱신",
+        "9, true, 9일 남음 - 갱신"
+    })
+    void refresh_boundaryCondition_test(int daysRemaining, boolean shouldRenew, String description) {
+        // given
+        User user = User.of(Provider.KAKAO, createOAuthUserInfo());
+        User savedUser = spy(user);
+        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+
+        String tokenValue = "token_" + daysRemaining + "_days";
+        RefreshToken refreshToken = RefreshToken.of(
+            savedUser,
+            tokenValue,
+            LocalDateTime.now().plusDays(daysRemaining)
+        );
+        RefreshToken spyRefreshToken = spy(refreshToken);
+        given(spyRefreshToken.isExpired()).willReturn(false);
+        given(spyRefreshToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(daysRemaining));
+
+        given(refreshTokenRepository.findByToken(tokenValue))
+            .willReturn(Optional.of(spyRefreshToken));
+        given(jwtTokenProvider.generateToken(anyString()))
+            .willReturn("new_access_token");
+
+        if (shouldRenew) {
+            given(jwtTokenProvider.generateRefreshToken(anyString()))
+                .willReturn("new_refresh_token");
+        }
+
+        // when
+        RefreshResponse response = authService.refresh(tokenValue);
+
+        // then
+        assertThat(response.accessToken()).isEqualTo("new_access_token");
+
+        if (shouldRenew) {
+            // 갱신됨
+            assertThat(response.refreshToken()).isEqualTo("new_refresh_token");
+            verify(spyRefreshToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
+            return;
+        }
+
+        assertThat(response.refreshToken()).isEqualTo(tokenValue);
+        verify(jwtTokenProvider, never()).generateRefreshToken(anyString());
+        verify(spyRefreshToken, never()).updateToken(anyString(), any(LocalDateTime.class));
     }
 }

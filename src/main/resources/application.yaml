@@ -15,8 +15,8 @@ logging:
     com.souzip.api: DEBUG
 
 jwt:
-  expiration: 86400000
-  refresh-expiration: 604800000
+  expiration: 3600000
+  refresh-expiration: 2592000000
 
 external:
   api:

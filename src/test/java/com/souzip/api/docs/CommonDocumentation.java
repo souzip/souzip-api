@@ -40,7 +40,9 @@ public class CommonDocumentation {
 
     public static FieldDescriptor[] errorResponseFields() {
         return new FieldDescriptor[]{
-            fieldWithPath("traceId").type(JsonFieldType.STRING).description("에러 추적 ID"),
+            fieldWithPath("traceId").type(JsonFieldType.STRING)
+                .description("에러 추적 ID (테스트 환경에서는 생성X)")
+                .optional(),
             fieldWithPath("message").type(JsonFieldType.STRING).description("에러 메시지"),
             fieldWithPath("errors").type(JsonFieldType.ARRAY).description("필드 에러 목록").optional(),
             fieldWithPath("errors[].field").type(JsonFieldType.STRING).description("에러 필드명").optional(),

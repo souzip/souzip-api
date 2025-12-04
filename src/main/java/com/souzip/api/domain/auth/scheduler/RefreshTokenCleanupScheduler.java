@@ -16,7 +16,7 @@ public class RefreshTokenCleanupScheduler {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     public void cleanUpExpiredRefreshTokens() {
         LocalDateTime now = LocalDateTime.now();
         int deletedCount = refreshTokenRepository.deleteAllByExpiresAtBefore(now);

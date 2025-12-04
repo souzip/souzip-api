@@ -1,0 +1,44 @@
+[[exchange-rate-api]]
+== Exchange Rate API
+
+[[exchange-rate-get-by-country]]
+=== 단일 국가 환율 조회
+
+==== HTTP 요청
+include::{snippets}/exchange-rate/get-by-country/http-request.adoc[]
+
+==== 경로 파라미터
+include::{snippets}/exchange-rate/get-by-country/path-parameters.adoc[]
+
+==== HTTP 응답
+include::{snippets}/exchange-rate/get-by-country/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/exchange-rate/get-by-country/response-fields.adoc[]
+
+[[exchange-rate-get-by-countries]]
+=== 여러 국가 환율 조회
+
+==== HTTP 요청
+include::{snippets}/exchange-rate/get-by-countries/http-request.adoc[]
+
+==== 쿼리 파라미터
+include::{snippets}/exchange-rate/get-by-countries/query-parameters.adoc[]
+
+==== HTTP 응답
+include::{snippets}/exchange-rate/get-by-countries/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/exchange-rate/get-by-countries/response-fields.adoc[]
+
+[[exchange-rate-get-all]]
+=== 전체 환율 조회
+
+==== HTTP 요청
+include::{snippets}/exchange-rate/get-all/http-request.adoc[]
+
+==== HTTP 응답
+include::{snippets}/exchange-rate/get-all/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/exchange-rate/get-all/response-fields.adoc[]

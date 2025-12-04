@@ -33,3 +33,39 @@ include::{snippets}/auth/login-kakao-existing-user/http-response.adoc[]
 
 ===== 응답 필드
 include::{snippets}/auth/login-kakao-existing-user/response-fields.adoc[]
+
+[[auth-refresh]]
+=== 토큰 재발급
+
+Access Token이 만료되었을 때 Refresh Token을 사용하여 새로운 토큰을 발급받는 API입니다.
+
+* Refresh Token 유효기간이 10일 초과 남았을 경우: Access Token만 재발급
+* Refresh Token 유효기간이 10일 이하 남았을 경우: Access Token과 Refresh Token 모두 재발급
+
+==== 정상 케이스 (Access Token만 재발급)
+
+===== HTTP 요청
+include::{snippets}/auth/refresh-valid-token/http-request.adoc[]
+
+===== 요청 필드
+include::{snippets}/auth/refresh-valid-token/request-fields.adoc[]
+
+===== HTTP 응답
+include::{snippets}/auth/refresh-valid-token/http-response.adoc[]
+
+===== 응답 필드
+include::{snippets}/auth/refresh-valid-token/response-fields.adoc[]
+
+==== 만료 임박 케이스 (둘 다 재발급)
+
+===== HTTP 요청
+include::{snippets}/auth/refresh-expiring-soon/http-request.adoc[]
+
+===== 요청 필드
+include::{snippets}/auth/refresh-expiring-soon/request-fields.adoc[]
+
+===== HTTP 응답
+include::{snippets}/auth/refresh-expiring-soon/http-response.adoc[]
+
+===== 응답 필드
+include::{snippets}/auth/refresh-expiring-soon/response-fields.adoc[]

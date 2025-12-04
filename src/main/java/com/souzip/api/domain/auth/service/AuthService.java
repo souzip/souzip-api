@@ -89,7 +89,7 @@ public class AuthService {
     }
 
     private void saveRefreshToken(User user, String tokenValue) {
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(jwtProperties.getRefreshExpiration());
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS );
 
         refreshTokenRepository.findByUser(user)
             .ifPresentOrElse(

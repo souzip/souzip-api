@@ -1,9 +1,11 @@
-package com.souzip.api.domain.exchange_rate.service;
+package com.souzip.api.domain.exchangerate.service;
 
-import com.souzip.api.domain.exchange_rate.dto.ExchangeRateExternalDto;
-import com.souzip.api.domain.exchange_rate.dto.ExchangeRateResponseDto;
-import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
-import com.souzip.api.domain.exchange_rate.repository.ExchangeRateRepository;
+import com.souzip.api.domain.country.dto.CountryResponseDto;
+import com.souzip.api.domain.country.service.CountryService;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
+import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
+import com.souzip.api.domain.exchangerate.repository.ExchangeRateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +25,26 @@ import java.util.stream.Collectors;
 public class ExchangeRateService {
 
     private static final String DEFAULT_BASE_CURRENCY = "KRW";
-    private final ExchangeRateRepository exchangeRateRepository;
     private final RestTemplate restTemplate;
+    private final ExchangeRateRepository exchangeRateRepository;
+    private final CountryService countryService;
+
 
     @Value("${external.api.exchange-rate-base-url}")
     private String baseUrl;
+
+    public ExchangeRateResponseDto getRateByCountry(String countryCode) {
+        CountryResponseDto country = countryService.getCountryByCode(countryCode);
+        String currencyCode = country.currency().code();
+        return getRate(DEFAULT_BASE_CURRENCY, currencyCode);
+    }
+
+    public List<ExchangeRateResponseDto> getRatesByCountries(Set<String> countryCodes) {
+        if (countryCodes == null || countryCodes.isEmpty()) {
+            return getRatesInternal(DEFAULT_BASE_CURRENCY, null);
+        }
+        return getRates(DEFAULT_BASE_CURRENCY, mapCountriesToCurrencyCodes(countryCodes));
+    }
 
     public ExchangeRateResponseDto getRate(String baseCode, String currencyCode) {
         return getRatesInternal(resolveBaseCurrency(baseCode), Set.of(currencyCode)).get(0);
@@ -43,6 +60,12 @@ public class ExchangeRateService {
                         && (currencyCodes == null || currencyCodes.contains(rate.getCurrencyCode())))
                 .map(ExchangeRateResponseDto::from)
                 .toList();
+    }
+
+    private Set<String> mapCountriesToCurrencyCodes(Set<String> countryCodes) {
+        return countryCodes.stream()
+                .map(code -> countryService.getCountryByCode(code).currency().code())
+                .collect(Collectors.toSet());
     }
 
     private String resolveBaseCurrency(String baseCode) {

@@ -1,8 +1,8 @@
-package com.souzip.api.domain.exchange_rate.dto;
+package com.souzip.api.domain.exchangerate.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
+import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,8 +21,8 @@ public record ExchangeRateExternalDto(
 
         return conversionRates.entrySet().stream()
                 .map(entry -> ExchangeRate.of(
-                        entry.getKey(),
-                        baseCode,
+                        baseCode,          // 기준 통화 (KRW)
+                        entry.getKey(),    // 외국 통화 (JPY)
                         BigDecimal.valueOf(1.0 / entry.getValue())
                 ))
                 .toList();

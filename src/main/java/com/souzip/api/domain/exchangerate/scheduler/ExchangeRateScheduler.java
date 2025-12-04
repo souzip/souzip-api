@@ -1,6 +1,6 @@
-package com.souzip.api.domain.exchange_rate.scheduler;
+package com.souzip.api.domain.exchangerate.scheduler;
 
-import com.souzip.api.domain.exchange_rate.service.ExchangeRateService;
+import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;

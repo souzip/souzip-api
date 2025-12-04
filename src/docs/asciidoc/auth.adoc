@@ -69,3 +69,33 @@ include::{snippets}/auth/refresh-expiring-soon/http-response.adoc[]
 
 ===== 응답 필드
 include::{snippets}/auth/refresh-expiring-soon/response-fields.adoc[]
+
+==== 에러 케이스
+
+===== 만료된 Refresh Token
+
+====== HTTP 요청
+include::{snippets}/auth/refresh-expired-token/http-request.adoc[]
+
+====== 요청 필드
+include::{snippets}/auth/refresh-expired-token/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/auth/refresh-expired-token/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/auth/refresh-expired-token/response-fields.adoc[]
+
+===== 유효하지 않은 Refresh Token
+
+====== HTTP 요청
+include::{snippets}/auth/refresh-invalid-token/http-request.adoc[]
+
+====== 요청 필드
+include::{snippets}/auth/refresh-invalid-token/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/auth/refresh-invalid-token/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/auth/refresh-invalid-token/response-fields.adoc[]

@@ -1,5 +1,6 @@
 package com.souzip.api.domain.auth.controller;
 
+import com.souzip.api.docs.CommonDocumentation;
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.auth.dto.LoginRequest;
 import com.souzip.api.domain.auth.dto.LoginResponse;
@@ -8,6 +9,8 @@ import com.souzip.api.domain.auth.dto.RefreshRequest;
 import com.souzip.api.domain.auth.dto.RefreshResponse;
 import com.souzip.api.domain.auth.service.AuthService;
 import com.souzip.api.domain.user.entity.Provider;
+import com.souzip.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -24,6 +27,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -224,6 +228,58 @@ class AuthControllerTest extends RestDocsSupport {
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지").optional()
                 )
+            ));
+    }
+
+    @Test
+    @DisplayName("만료된 Refresh Token으로 재발급 시 401 에러를 반환한다.")
+    void refresh_withExpiredToken_returns401() throws Exception {
+        // given
+        RefreshRequest request = new RefreshRequest("expired_refresh_token");
+        given(authService.refresh(anyString()))
+            .willThrow(new BusinessException(ErrorCode.EXPIRED_REFRESH_TOKEN));
+
+        // when & then
+        mockMvc.perform(post("/api/auth/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.message").value("만료된 Refresh Token입니다."))
+            .andDo(document("auth/refresh-expired-token",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("refreshToken").type(JsonFieldType.STRING)
+                        .description("만료된 Refresh Token")
+                ),
+                responseFields(CommonDocumentation.errorResponseFields())
+            ));
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 Refresh Token으로 재발급 시 401 에러를 반환한다.")
+    void refresh_withInvalidToken_returns401() throws Exception {
+        // given
+        RefreshRequest request = new RefreshRequest("invalid_refresh_token");
+        given(authService.refresh(anyString()))
+            .willThrow(new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
+
+        // when & then
+        mockMvc.perform(post("/api/auth/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.message").value("유효하지 않은 Refresh Token입니다."))
+            .andDo(document("auth/refresh-invalid-token",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("refreshToken").type(JsonFieldType.STRING)
+                        .description("유효하지 않은 Refresh Token")
+                ),
+                responseFields(CommonDocumentation.errorResponseFields())
             ));
     }
 }

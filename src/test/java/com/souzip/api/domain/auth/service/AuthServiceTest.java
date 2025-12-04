@@ -15,6 +15,8 @@ import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -285,5 +287,56 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.refresh("invalid_token"))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("유효하지 않은 Refresh Token입니다.");
+    }
+
+    @ParameterizedTest
+    @DisplayName("Refresh Token 만료 임계값 경계 조건 테스트")
+    @CsvSource({
+        "11, false, 11일 남음 - 갱신 안 함",
+        "10, true, 정확히 10일 남음 - 갱신",
+        "9, true, 9일 남음 - 갱신"
+    })
+    void refresh_boundaryCondition_test(int daysRemaining, boolean shouldRenew, String description) {
+        // given
+        User user = User.of(Provider.KAKAO, createOAuthUserInfo());
+        User savedUser = spy(user);
+        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+
+        String tokenValue = "token_" + daysRemaining + "_days";
+        RefreshToken refreshToken = RefreshToken.of(
+            savedUser,
+            tokenValue,
+            LocalDateTime.now().plusDays(daysRemaining)
+        );
+        RefreshToken spyRefreshToken = spy(refreshToken);
+        given(spyRefreshToken.isExpired()).willReturn(false);
+        given(spyRefreshToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(daysRemaining));
+
+        given(refreshTokenRepository.findByToken(tokenValue))
+            .willReturn(Optional.of(spyRefreshToken));
+        given(jwtTokenProvider.generateToken(anyString()))
+            .willReturn("new_access_token");
+
+        if (shouldRenew) {
+            given(jwtTokenProvider.generateRefreshToken(anyString()))
+                .willReturn("new_refresh_token");
+        }
+
+        // when
+        RefreshResponse response = authService.refresh(tokenValue);
+
+        // then
+        assertThat(response.accessToken()).isEqualTo("new_access_token");
+
+        if (shouldRenew) {
+            // 갱신됨
+            assertThat(response.refreshToken()).isEqualTo("new_refresh_token");
+            verify(spyRefreshToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
+            return;
+        }
+
+        assertThat(response.refreshToken()).isEqualTo(tokenValue);
+        verify(jwtTokenProvider, never()).generateRefreshToken(anyString());
+        verify(spyRefreshToken, never()).updateToken(anyString(), any(LocalDateTime.class));
     }
 }

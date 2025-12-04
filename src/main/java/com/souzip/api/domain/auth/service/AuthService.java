@@ -34,7 +34,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final JwtProperties jwtProperties;
 
     @Transactional
     public LoginResponse login(Provider provider, String oauthAccessToken) {
@@ -64,9 +63,11 @@ public class AuthService {
 
         if (isRefreshTokenExpiringSoon(refreshToken)) {
             String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
+
             updateRefreshToken(refreshToken, newRefreshToken);
             log.info("Refresh Token 갱신: userId={}, remainingDays={}",
                 user.getUserId(), getRemainingDays(refreshToken));
+
             return RefreshResponse.of(newAccessToken, newRefreshToken);
         }
 
@@ -89,7 +90,7 @@ public class AuthService {
     }
 
     private void saveRefreshToken(User user, String tokenValue) {
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS );
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS);
 
         refreshTokenRepository.findByUser(user)
             .ifPresentOrElse(

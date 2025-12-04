@@ -1,4 +1,4 @@
-package com.souzip.api.domain.exchange_rate.service;
+package com.souzip.api.domain.exchangerate.service;
 
 import com.souzip.api.domain.country.dto.CountryResponseDto;
 import com.souzip.api.domain.country.dto.RegionDto;
@@ -6,10 +6,10 @@ import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.service.CountryService;
 import com.souzip.api.domain.currency.CurrencyDto;
 import com.souzip.api.domain.currency.entity.Currency;
-import com.souzip.api.domain.exchange_rate.dto.ExchangeRateExternalDto;
-import com.souzip.api.domain.exchange_rate.dto.ExchangeRateResponseDto;
-import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
-import com.souzip.api.domain.exchange_rate.repository.ExchangeRateRepository;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
+import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
+import com.souzip.api.domain.exchangerate.repository.ExchangeRateRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;

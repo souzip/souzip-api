@@ -1,8 +1,8 @@
-package com.souzip.api.domain.exchange_rate.dto;
+package com.souzip.api.domain.exchangerate.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
+import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
 
 import java.math.BigDecimal;
 import java.util.List;

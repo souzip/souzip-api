@@ -1,8 +1,8 @@
-package com.souzip.api.domain.exchange_rate.controller;
+package com.souzip.api.domain.exchangerate.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
-import com.souzip.api.domain.exchange_rate.dto.ExchangeRateResponseDto;
-import com.souzip.api.domain.exchange_rate.service.ExchangeRateService;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
+import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -19,8 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
@@ -57,6 +56,9 @@ class ExchangeControllerTest extends RestDocsSupport {
                 .andDo(document("exchange-rate/get-by-country",
                         getDocumentRequest(),
                         getDocumentResponse(),
+                        pathParameters(
+                                parameterWithName("countryCode").description("나라 코드")
+                        ),
                         apiResponseFields(
                                 fieldWithPath("baseCode").type(JsonFieldType.STRING).description("기준 통화 코드"),
                                 fieldWithPath("currencyCode").type(JsonFieldType.STRING).description("대상 통화 코드"),

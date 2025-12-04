@@ -1,6 +1,6 @@
-package com.souzip.api.domain.exchange_rate.dto;
+package com.souzip.api.domain.exchangerate.dto;
 
-import com.souzip.api.domain.exchange_rate.entity.ExchangeRate;
+import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
 
 import java.math.BigDecimal;
 

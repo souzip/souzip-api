@@ -1,4 +1,4 @@
-package com.souzip.api.domain.exchange_rate.entity;
+package com.souzip.api.domain.exchangerate.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

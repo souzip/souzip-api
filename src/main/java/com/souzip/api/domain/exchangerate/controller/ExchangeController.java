@@ -1,7 +1,7 @@
-package com.souzip.api.domain.exchange_rate.controller;
+package com.souzip.api.domain.exchangerate.controller;
 
-import com.souzip.api.domain.exchange_rate.dto.ExchangeRateResponseDto;
-import com.souzip.api.domain.exchange_rate.service.ExchangeRateService;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
+import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

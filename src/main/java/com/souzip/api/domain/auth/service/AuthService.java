@@ -10,6 +10,7 @@ import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
+import com.souzip.api.global.security.jwt.JwtProperties;
 import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtProperties jwtProperties;
 
     @Transactional
     public LoginResponse login(Provider provider, String oauthAccessToken) {
@@ -61,7 +63,7 @@ public class AuthService {
     }
 
     private void saveRefreshToken(User user, String tokenValue) {
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(7);
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(jwtProperties.getRefreshExpiration());
 
         refreshTokenRepository.findByUser(user)
             .ifPresentOrElse(

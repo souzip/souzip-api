@@ -2517,12 +2517,15 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 67
+Content-Length: 108
 
 {
-  "baseCode" : "KRW",
-  "currencyCode" : "USD",
-  "rate" : 1300
+  "data" : {
+    "baseCode" : "KRW",
+    "currencyCode" : "USD",
+    "rate" : 1300
+  },
+  "message" : ""
 }</code></pre>
 </div>
 </div>
@@ -2548,17 +2551,22 @@ Content-Length: 67
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">baseCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">응답 데이터</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.baseCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">기준 통화 코드</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">currencyCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.currencyCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">대상 통화 코드</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">rate</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.rate</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">환율</p></td>
 </tr>
@@ -2609,17 +2617,20 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 137
+Content-Length: 186
 
-[ {
-  "baseCode" : "KRW",
-  "currencyCode" : "USD",
-  "rate" : 1300
-}, {
-  "baseCode" : "KRW",
-  "currencyCode" : "JPY",
-  "rate" : 9
-} ]</code></pre>
+{
+  "data" : [ {
+    "baseCode" : "KRW",
+    "currencyCode" : "USD",
+    "rate" : 1300
+  }, {
+    "baseCode" : "KRW",
+    "currencyCode" : "JPY",
+    "rate" : 9
+  } ],
+  "message" : ""
+}</code></pre>
 </div>
 </div>
 </div>
@@ -2644,17 +2655,22 @@ Content-Length: 137
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[].baseCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">응답 데이터</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].baseCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">기준 통화 코드</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[].currencyCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].currencyCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">대상 통화 코드</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[].rate</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].rate</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">환율</p></td>
 </tr>
@@ -2684,21 +2700,24 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 206
+Content-Length: 263
 
-[ {
-  "baseCode" : "KRW",
-  "currencyCode" : "USD",
-  "rate" : 1300
-}, {
-  "baseCode" : "KRW",
-  "currencyCode" : "JPY",
-  "rate" : 9
-}, {
-  "baseCode" : "KRW",
-  "currencyCode" : "EUR",
-  "rate" : 1500
-} ]</code></pre>
+{
+  "data" : [ {
+    "baseCode" : "KRW",
+    "currencyCode" : "USD",
+    "rate" : 1300
+  }, {
+    "baseCode" : "KRW",
+    "currencyCode" : "JPY",
+    "rate" : 9
+  }, {
+    "baseCode" : "KRW",
+    "currencyCode" : "EUR",
+    "rate" : 1500
+  } ],
+  "message" : ""
+}</code></pre>
 </div>
 </div>
 </div>
@@ -2723,17 +2742,22 @@ Content-Length: 206
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[].baseCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">응답 데이터</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].baseCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">기준 통화 코드</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[].currencyCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].currencyCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">대상 통화 코드</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[].rate</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].rate</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">환율</p></td>
 </tr>

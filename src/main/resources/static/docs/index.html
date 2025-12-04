@@ -489,6 +489,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_response_fields_5">Response Fields</a></li>
 <li><a href="#_request_fields_6">Request Fields</a></li>
 <li><a href="#_response_fields_6">Response Fields</a></li>
+</ul>
+</li>
+<li><a href="#auth-logout">로그아웃</a>
+<ul class="sectlevel3">
+<li><a href="#_http_요청_7">HTTP 요청</a></li>
+<li><a href="#_요청_헤더">요청 헤더</a></li>
+<li><a href="#_http_응답_7">HTTP 응답</a></li>
+<li><a href="#_응답_필드_8">응답 필드</a></li>
 <li><a href="#_response_fields_7">Response Fields</a></li>
 </ul>
 </li>
@@ -1372,32 +1380,12 @@ Content-Length: 53
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">traceId</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에러 추적 ID (테스트 환경에서는 생성X)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">에러 추적 ID (운영 환경에서만 포함)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">에러 메시지</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">필드 에러 목록</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors[].field</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에러 필드명</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors[].value</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">입력된 값</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors[].reason</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에러 사유</p></td>
 </tr>
 </tbody>
 </table>
@@ -1488,39 +1476,24 @@ Content-Length: 63
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">traceId</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에러 추적 ID (테스트 환경에서는 생성X)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">에러 추적 ID (운영 환경에서만 포함)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">에러 메시지</p></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">필드 에러 목록</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors[].field</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에러 필드명</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors[].value</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">입력된 값</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">errors[].reason</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에러 사유</p></td>
-</tr>
 </tbody>
 </table>
-<div class="sect4">
-<h5 id="_로그아웃"><a class="link" href="#_로그아웃">로그아웃</a></h5>
-<div class="sect5">
-<h6 id="_http_요청_7"><a class="link" href="#_http_요청_7">HTTP 요청</a></h6>
+</div>
+</div>
+<div class="sect2">
+<h3 id="auth-logout"><a class="link" href="#auth-logout">로그아웃</a></h3>
+<div class="paragraph">
+<p>사용자의 Refresh Token을 삭제하여 로그아웃합니다.</p>
+</div>
+<div class="sect3">
+<h4 id="_http_요청_7"><a class="link" href="#_http_요청_7">HTTP 요청</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/auth/logout HTTP/1.1
@@ -1530,8 +1503,35 @@ Content-Type: application/x-www-form-urlencoded</code></pre>
 </div>
 </div>
 </div>
-<div class="sect5">
-<h6 id="_http_응답_7"><a class="link" href="#_http_응답_7">HTTP 응답</a></h6>
+<div class="sect3">
+<h4 id="_요청_헤더"><a class="link" href="#_요청_헤더">요청 헤더</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">헤더</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authorization</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bearer {accessToken}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_http_응답_7"><a class="link" href="#_http_응답_7">HTTP 응답</a></h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -1545,11 +1545,9 @@ Content-Length: 66
 </div>
 </div>
 </div>
-<div class="sect5">
-<h6 id="_응답_필드_8"><a class="link" href="#_응답_필드_8">응답 필드</a></h6>
+<div class="sect3">
+<h4 id="_응답_필드_8"><a class="link" href="#_응답_필드_8">응답 필드</a></h4>
 
-</div>
-</div>
 </div>
 <div class="sect3">
 <h4 id="_response_fields_7"><a class="link" href="#_response_fields_7">Response Fields</a></h4>
@@ -1579,6 +1577,18 @@ Content-Length: 66
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+로그아웃 후에는 클라이언트에서 저장된 Access Token과 Refresh Token을 모두 삭제해야 합니다.
+</td>
+</tr>
+</table>
+</div>
 </div>
 </div>
 </div>

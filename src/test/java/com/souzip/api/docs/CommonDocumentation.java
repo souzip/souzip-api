@@ -41,13 +41,28 @@ public class CommonDocumentation {
     public static FieldDescriptor[] errorResponseFields() {
         return new FieldDescriptor[]{
             fieldWithPath("traceId").type(JsonFieldType.STRING)
-                .description("에러 추적 ID (테스트 환경에서는 생성X)")
+                .description("에러 추적 ID (운영 환경에서만 포함)")
                 .optional(),
-            fieldWithPath("message").type(JsonFieldType.STRING).description("에러 메시지"),
-            fieldWithPath("errors").type(JsonFieldType.ARRAY).description("필드 에러 목록").optional(),
-            fieldWithPath("errors[].field").type(JsonFieldType.STRING).description("에러 필드명").optional(),
-            fieldWithPath("errors[].value").type(JsonFieldType.STRING).description("입력된 값").optional(),
-            fieldWithPath("errors[].reason").type(JsonFieldType.STRING).description("에러 사유").optional()
+            fieldWithPath("message").type(JsonFieldType.STRING)
+                .description("에러 메시지")
+        };
+    }
+
+    public static FieldDescriptor[] validationErrorResponseFields() {
+        return new FieldDescriptor[]{
+            fieldWithPath("traceId").type(JsonFieldType.STRING)
+                .description("에러 추적 ID (운영 환경에서만 포함)")
+                .optional(),
+            fieldWithPath("message").type(JsonFieldType.STRING)
+                .description("에러 메시지"),
+            fieldWithPath("errors").type(JsonFieldType.ARRAY)
+                .description("필드별 에러 상세 정보"),
+            fieldWithPath("errors[].field").type(JsonFieldType.STRING)
+                .description("에러 필드명"),
+            fieldWithPath("errors[].value").type(JsonFieldType.STRING)
+                .description("입력된 값"),
+            fieldWithPath("errors[].reason").type(JsonFieldType.STRING)
+                .description("에러 사유")
         };
     }
 }

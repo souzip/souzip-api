@@ -83,6 +83,9 @@ include::{snippets}/auth/refresh-expired-token/request-fields.adoc[]
 ====== HTTP 응답
 include::{snippets}/auth/refresh-expired-token/http-response.adoc[]
 
+====== 응답 필드
+include::{snippets}/auth/refresh-expired-token/response-fields.adoc[]
+
 ===== 유효하지 않은 Refresh Token
 
 ====== HTTP 요청
@@ -94,14 +97,32 @@ include::{snippets}/auth/refresh-invalid-token/request-fields.adoc[]
 ====== HTTP 응답
 include::{snippets}/auth/refresh-invalid-token/http-response.adoc[]
 
+====== 응답 필드
+include::{snippets}/auth/refresh-invalid-token/response-fields.adoc[]
 
 [[auth-logout]]
 === 로그아웃
 
-====== HTTP 요청
+사용자의 Refresh Token을 삭제하여 로그아웃합니다.
+
+==== HTTP 요청
 include::{snippets}/auth/logout/http-request.adoc[]
 
+==== 요청 헤더
+[cols="1,1,1,3"]
+|===
+|헤더 |타입 |필수 |설명
 
-====== HTTP 응답
+|Authorization
+|String
+|O
+|Bearer {accessToken}
+|===
+
+==== HTTP 응답
 include::{snippets}/auth/logout/http-response.adoc[]
 
+==== 응답 필드
+include::{snippets}/auth/logout/response-fields.adoc[]
+
+NOTE: 로그아웃 후에는 클라이언트에서 저장된 Access Token과 Refresh Token을 모두 삭제해야 합니다.

@@ -74,6 +74,17 @@ public class AuthService {
         return RefreshResponse.of(newAccessToken, refreshToken.getToken());
     }
 
+    @Transactional
+    public void logout(Long currentUserId) {
+        User user = userRepository.findById(currentUserId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        refreshTokenRepository.findByUser(user)
+            .ifPresent(refreshTokenRepository::delete);
+
+        log.info("로그아웃 완료: userId={}", user.getUserId());
+    }
+
     private User findOrCreateUser(Provider provider, OAuthUserInfo oauthUserInfo) {
         return userRepository
             .findByProviderAndProviderId(provider, oauthUserInfo.getProviderId())

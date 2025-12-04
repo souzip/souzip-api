@@ -7,6 +7,8 @@ import com.souzip.api.domain.auth.dto.RefreshResponse;
 import com.souzip.api.domain.auth.service.AuthService;
 import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.global.common.dto.SuccessResponse;
+import com.souzip.api.global.security.annotation.CurrentUserId;
+import com.souzip.api.global.security.annotation.RequireAuth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,5 +32,12 @@ public class AuthController {
     public SuccessResponse<RefreshResponse> refresh(@RequestBody RefreshRequest request) {
         RefreshResponse response = authService.refresh(request.refreshToken());
         return SuccessResponse.of(response);
+    }
+
+    @PostMapping("/logout")
+    @RequireAuth
+    public SuccessResponse<Void> logout(@CurrentUserId Long currentUserId) {
+        authService.logout(currentUserId);
+        return SuccessResponse.of(null, "로그아웃 되었습니다.");
     }
 }

@@ -254,8 +254,8 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("만료된 Refresh Token으로 재발급 시 에러가 발생한다.")
-    void refresh_withExpiredToken_throwsException() {
+    @DisplayName("만료된 Refresh Token으로 재발급 시 토큰을 삭제하고 에러가 발생한다.")
+    void refresh_withExpiredToken_deletesTokenAndThrowsException() {
         // given
         User user = User.of(Provider.KAKAO, createOAuthUserInfo());
 
@@ -274,6 +274,8 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.refresh("expired_refresh_token"))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("만료된 Refresh Token입니다.");
+
+        verify(refreshTokenRepository).delete(spyExpiredToken);
     }
 
     @Test

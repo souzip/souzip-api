@@ -20,8 +20,10 @@ import static com.souzip.api.docs.ApiDocumentUtils.getDocumentRequest;
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
 import static com.souzip.api.docs.CommonDocumentation.apiResponseFields;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -280,6 +282,29 @@ class AuthControllerTest extends RestDocsSupport {
                         .description("유효하지 않은 Refresh Token")
                 ),
                 responseFields(CommonDocumentation.errorResponseFields())
+            ));
+    }
+
+    @Test
+    @DisplayName("로그아웃을 한다")
+    void logout_success() throws Exception {
+        // given
+        doNothing().when(authService).logout(anyLong());
+
+        // when & then
+        mockMvc.perform(post("/api/auth/logout")
+                .header("Authorization", "Bearer valid_access_token"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(document("auth/logout",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.NULL)
+                        .description("응답 데이터 (null)"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지").optional()
+                )
             ));
     }
 }

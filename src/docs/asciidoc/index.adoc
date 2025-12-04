@@ -11,9 +11,6 @@ endif::[]
 :sectlinks:
 
 include::overview.adoc[]
-
 include::auth.adoc[]
-
 include::country.adoc[]
-
 include::exchange-rate.adoc[]

@@ -341,4 +341,43 @@ class AuthServiceTest {
         verify(jwtTokenProvider, never()).generateRefreshToken(anyString());
         verify(spyRefreshToken, never()).updateToken(anyString(), any(LocalDateTime.class));
     }
+
+    @Test
+    @DisplayName("로그아웃 시 Refresh Token을 삭제한다.")
+    void logout_success() {
+        // given
+        User user = User.of(Provider.KAKAO, createOAuthUserInfo());
+        User savedUser = spy(user);
+        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+
+        RefreshToken refreshToken = RefreshToken.of(
+            savedUser,
+            "refresh_token",
+            LocalDateTime.now().plusDays(30)
+        );
+
+        given(userRepository.findById(1L))
+            .willReturn(Optional.of(savedUser));
+        given(refreshTokenRepository.findByUser(savedUser))
+            .willReturn(Optional.of(refreshToken));
+
+        // when
+        authService.logout(1L);
+
+        // then
+        verify(refreshTokenRepository).delete(refreshToken);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자로 로그아웃 시 에러가 발생한다.")
+    void logout_withNotExistUser_throwsException() {
+        // given
+        given(userRepository.findById(999L))
+            .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> authService.logout(999L))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("사용자를 찾을 수 없습니다.");
+    }
 }

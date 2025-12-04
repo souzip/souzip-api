@@ -12,7 +12,8 @@ endif::[]
 
 include::overview.adoc[]
 
-include::country.adoc[]
-
 include::auth.adoc[]
 
+include::country.adoc[]
+
+include::exchange-rate.adoc[]

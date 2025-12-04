@@ -297,7 +297,6 @@ class AuthControllerTest extends RestDocsSupport {
             .andDo(print())
             .andExpect(status().isOk())
             .andDo(document("auth/logout",
-                getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.NULL)

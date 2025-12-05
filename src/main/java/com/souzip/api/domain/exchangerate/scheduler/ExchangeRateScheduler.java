@@ -1,5 +1,6 @@
 package com.souzip.api.domain.exchangerate.scheduler;
 
+import com.souzip.api.domain.exchangerate.client.ExchangeRateExternalApiClient;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +14,13 @@ import org.springframework.stereotype.Component;
 @Profile("local")
 public class ExchangeRateScheduler {
 
-    private final ExchangeRateService exchangeRateService;
+    private final ExchangeRateExternalApiClient exchangeRateExternalApiClient;
 
     // 매주 월 ~ 금 오전 9시
     @Scheduled(cron = "0 0 9 * * 1-5", zone = "Asia/Seoul")
     public void fetchExchangeRates() {
         log.info("환율 스케줄러 실행 시작");
-        exchangeRateService.fetchAndSaveExchangeRates("KRW");
+        exchangeRateExternalApiClient.fetchRates();
         log.info("환율 스케줄러 실행 완료");
     }
 }

@@ -6,6 +6,7 @@ import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.country.service.CountryService;
 import com.souzip.api.domain.currency.CurrencyDto;
 import com.souzip.api.domain.currency.entity.Currency;
+import com.souzip.api.domain.exchangerate.client.ExchangeRateExternalApiClient;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
@@ -43,7 +44,7 @@ class ExchangeRateServiceTest {
     private CountryService countryService;
 
     @Mock
-    private RestTemplate restTemplate;
+    private ExchangeRateExternalApiClient apiClient;
 
     @InjectMocks
     private ExchangeRateService exchangeRateService;
@@ -77,7 +78,6 @@ class ExchangeRateServiceTest {
             when(countryService.getCountryByCode(countryCode))
                     .thenReturn(countryDto);
 
-            // 미국 달러(USD)가 한국 원(KRW) 기준으로 얼마인지 확인
             ExchangeRate rate = createRate("KRW", "USD", BigDecimal.valueOf(1300));
             when(exchangeRateRepository.findAll())
                     .thenReturn(List.of(rate));
@@ -146,7 +146,6 @@ class ExchangeRateServiceTest {
                             CurrencyDto.from(Currency.of("JPY", "¥"))
                     ));
 
-            // baseCode = KRW (기준통화), currencyCode = 대상통화
             ExchangeRate usd = createRate("KRW", "USD", BigDecimal.valueOf(1300));
             ExchangeRate jpy = createRate("KRW", "JPY", BigDecimal.valueOf(9));
 
@@ -198,32 +197,32 @@ class ExchangeRateServiceTest {
 
         @BeforeEach
         void setup() {
-            // given
-            when(restTemplate.getForObject(anyString(), eq(ExchangeRateExternalDto.class)))
-                    .thenReturn(externalDto);
+            when(apiClient.fetchRates()).thenReturn(externalDto);
         }
 
         @Test
-        @DisplayName("외부 API가 정상적으로 호출된다")
+        @DisplayName("외부 API가 정상적으로 호출된다.")
         void apiCalled() {
+            // given
+            when(apiClient.fetchRates()).thenReturn(externalDto);
+
             // when
-            exchangeRateService.fetchAndSaveExchangeRates("KRW");
+            exchangeRateService.fetchAndSaveExchangeRates();
 
             // then
-            verify(restTemplate).getForObject(contains("KRW"), eq(ExchangeRateExternalDto.class));
+            verify(apiClient).fetchRates();
         }
 
         @Test
-        @DisplayName("신규 환율만 DB에 저장된다")
+        @DisplayName("신규 환율만 DB에 저장된다.")
         void saveOnlyNewRates() {
             // given
             ExchangeRate existingUsd = createRate("KRW", "USD", BigDecimal.valueOf(1300));
             when(exchangeRateRepository.findAll()).thenReturn(List.of(existingUsd));
-            when(exchangeRateRepository.saveAll(anyList()))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+            when(exchangeRateRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
             // when
-            exchangeRateService.fetchAndSaveExchangeRates("KRW");
+            exchangeRateService.fetchAndSaveExchangeRates();
 
             // then
             verify(exchangeRateRepository).saveAll(argThat((List<ExchangeRate> list) ->
@@ -231,6 +230,7 @@ class ExchangeRateServiceTest {
                             list.get(0).getBaseCode().equals("KRW") &&
                             list.get(0).getCurrencyCode().equals("JPY")
             ));
+            verify(apiClient).fetchRates();
         }
     }
 

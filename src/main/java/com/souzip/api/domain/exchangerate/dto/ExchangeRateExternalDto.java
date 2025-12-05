@@ -17,14 +17,23 @@ public record ExchangeRateExternalDto(
 ) {
 
     public List<ExchangeRate> toEntities() {
-        if (conversionRates == null || conversionRates.isEmpty()) return List.of();
+        if (conversionRates == null || conversionRates.isEmpty()) {
+            return List.of();
+        }
 
         return conversionRates.entrySet().stream()
-                .map(entry -> ExchangeRate.of(
-                        baseCode,          // 기준 통화 (KRW)
-                        entry.getKey(),    // 외국 통화 (JPY)
-                        BigDecimal.valueOf(1.0 / entry.getValue())
-                ))
+                .map(entry -> {
+                    String currencyCode = entry.getKey();
+                    Double rateFromBase = entry.getValue();
+
+                    BigDecimal invertedRate = BigDecimal.valueOf(1.0 / rateFromBase);
+
+                    return ExchangeRate.of(
+                            baseCode,
+                            currencyCode,
+                            invertedRate
+                    );
+                })
                 .toList();
     }
 

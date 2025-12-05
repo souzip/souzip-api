@@ -77,7 +77,6 @@ class ExchangeRateServiceTest {
             when(countryService.getCountryByCode(countryCode))
                     .thenReturn(countryDto);
 
-            // 미국 달러(USD)가 한국 원(KRW) 기준으로 얼마인지 확인
             ExchangeRate rate = createRate("KRW", "USD", BigDecimal.valueOf(1300));
             when(exchangeRateRepository.findAll())
                     .thenReturn(List.of(rate));
@@ -146,7 +145,6 @@ class ExchangeRateServiceTest {
                             CurrencyDto.from(Currency.of("JPY", "¥"))
                     ));
 
-            // baseCode = KRW (기준통화), currencyCode = 대상통화
             ExchangeRate usd = createRate("KRW", "USD", BigDecimal.valueOf(1300));
             ExchangeRate jpy = createRate("KRW", "JPY", BigDecimal.valueOf(9));
 
@@ -207,7 +205,7 @@ class ExchangeRateServiceTest {
         @DisplayName("외부 API가 정상적으로 호출된다")
         void apiCalled() {
             // when
-            exchangeRateService.fetchAndSaveExchangeRates("KRW");
+            exchangeRateService.fetchAndSaveExchangeRates();
 
             // then
             verify(restTemplate).getForObject(contains("KRW"), eq(ExchangeRateExternalDto.class));
@@ -223,7 +221,7 @@ class ExchangeRateServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // when
-            exchangeRateService.fetchAndSaveExchangeRates("KRW");
+            exchangeRateService.fetchAndSaveExchangeRates();
 
             // then
             verify(exchangeRateRepository).saveAll(argThat((List<ExchangeRate> list) ->

@@ -1,5 +1,6 @@
 package com.souzip.api.domain.exchangerate.controller;
 
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateListResponse;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import com.souzip.api.global.common.dto.SuccessResponse;
@@ -22,7 +23,7 @@ public class ExchangeController {
     }
 
     @GetMapping
-    public SuccessResponse<List<ExchangeRateResponseDto>> getRatesByCountries(@RequestParam(required = false) Set<String> countries) {
+    public SuccessResponse<ExchangeRateListResponse> getRatesByCountries(@RequestParam(required = false) Set<String> countries) {
         return SuccessResponse.of(exchangeRateService.getRatesByCountries(countries));
     }
 }

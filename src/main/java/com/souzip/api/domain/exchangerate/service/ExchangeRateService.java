@@ -6,6 +6,8 @@ import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
 import com.souzip.api.domain.exchangerate.repository.ExchangeRateRepository;
+import com.souzip.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,38 +27,35 @@ import java.util.stream.Collectors;
 public class ExchangeRateService {
 
     private static final String DEFAULT_BASE_CURRENCY = "KRW";
+
     private final RestTemplate restTemplate;
     private final ExchangeRateRepository exchangeRateRepository;
     private final CountryService countryService;
-
 
     @Value("${external.api.exchange-rate-base-url}")
     private String baseUrl;
 
     public ExchangeRateResponseDto getRateByCountry(String countryCode) {
         CountryResponseDto country = countryService.getCountryByCode(countryCode);
-        String currencyCode = country.currency().code();
-        return getRate(DEFAULT_BASE_CURRENCY, currencyCode);
+        return getRate(country.currency().code());
     }
 
     public List<ExchangeRateResponseDto> getRatesByCountries(Set<String> countryCodes) {
-        if (countryCodes == null || countryCodes.isEmpty()) {
-            return getRatesInternal(DEFAULT_BASE_CURRENCY, null);
+        if (isEmpty(countryCodes)) {
+            return getRatesInternal(null);
         }
-        return getRates(DEFAULT_BASE_CURRENCY, mapCountriesToCurrencyCodes(countryCodes));
+        return getRatesInternal(mapCountriesToCurrencyCodes(countryCodes));
     }
 
-    public ExchangeRateResponseDto getRate(String baseCode, String currencyCode) {
-        return getRatesInternal(resolveBaseCurrency(baseCode), Set.of(currencyCode)).get(0);
+    public ExchangeRateResponseDto getRate(String currencyCode) {
+        return getRatesInternal(Set.of(currencyCode)).stream()
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
     }
 
-    public List<ExchangeRateResponseDto> getRates(String baseCode, Set<String> currencyCodes) {
-        return getRatesInternal(resolveBaseCurrency(baseCode), currencyCodes);
-    }
-
-    private List<ExchangeRateResponseDto> getRatesInternal(String baseCode, Set<String> currencyCodes) {
+    private List<ExchangeRateResponseDto> getRatesInternal(Set<String> currencyCodes) {
         return exchangeRateRepository.findAll().stream()
-                .filter(rate -> rate.getBaseCode().equals(baseCode)
+                .filter(rate -> rate.getBaseCode().equals(DEFAULT_BASE_CURRENCY)
                         && (currencyCodes == null || currencyCodes.contains(rate.getCurrencyCode())))
                 .map(ExchangeRateResponseDto::from)
                 .toList();
@@ -68,35 +67,34 @@ public class ExchangeRateService {
                 .collect(Collectors.toSet());
     }
 
-    private String resolveBaseCurrency(String baseCode) {
-        return (baseCode == null || baseCode.isBlank()) ? DEFAULT_BASE_CURRENCY : baseCode;
+    private boolean isEmpty(Set<?> set) {
+        return set == null || set.isEmpty();
     }
 
     @Transactional
-    public void fetchAndSaveExchangeRates(String baseCurrency) {
-        String resolvedBase = resolveBaseCurrency(baseCurrency);
-
-        ExchangeRateExternalDto externalDto = fetchFromExternalApi(resolvedBase);
+    public void fetchAndSaveExchangeRates() {
+        ExchangeRateExternalDto externalDto = fetchFromExternalApi();
         Set<String> existingPairs = getExistingCurrencyPairs();
         List<ExchangeRate> newRates = extractNewRates(externalDto, existingPairs);
 
         saveIfNotEmpty(newRates);
     }
 
-    private ExchangeRateExternalDto fetchFromExternalApi(String baseCurrency) {
-        ExchangeRateExternalDto response = restTemplate.getForObject(baseUrl + "/" + baseCurrency, ExchangeRateExternalDto.class);
+    private ExchangeRateExternalDto fetchFromExternalApi() {
+        String url = baseUrl + "/" + DEFAULT_BASE_CURRENCY;
+
+        ExchangeRateExternalDto response = restTemplate.getForObject(url, ExchangeRateExternalDto.class);
 
         if (response == null || response.toEntities().isEmpty()) {
-            log.warn("외부 API로부터 환율 데이터를 받지 못했습니다. (baseCurrency: {})", baseCurrency);
-            return ExchangeRateExternalDto.ofMultiple(Map.of(), baseCurrency);
+            log.warn("외부 API로부터 환율 데이터를 받지 못했습니다. (baseCurrency: {})", DEFAULT_BASE_CURRENCY);
+            return ExchangeRateExternalDto.ofMultiple(Map.of(), DEFAULT_BASE_CURRENCY);
         }
 
         return response;
     }
 
     private Set<String> getExistingCurrencyPairs() {
-        return exchangeRateRepository.findAll()
-                .stream()
+        return exchangeRateRepository.findAll().stream()
                 .map(this::toPairKey)
                 .collect(Collectors.toSet());
     }

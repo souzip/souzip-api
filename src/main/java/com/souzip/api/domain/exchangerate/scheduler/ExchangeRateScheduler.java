@@ -19,7 +19,7 @@ public class ExchangeRateScheduler {
     @Scheduled(cron = "0 0 9 * * 1-5", zone = "Asia/Seoul")
     public void fetchExchangeRates() {
         log.info("환율 스케줄러 실행 시작");
-        exchangeRateService.fetchAndSaveExchangeRates("KRW");
+        exchangeRateService.fetchAndSaveExchangeRates();
         log.info("환율 스케줄러 실행 완료");
     }
 }

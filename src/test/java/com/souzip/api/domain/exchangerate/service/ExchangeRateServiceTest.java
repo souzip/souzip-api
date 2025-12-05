@@ -8,6 +8,7 @@ import com.souzip.api.domain.currency.CurrencyDto;
 import com.souzip.api.domain.currency.entity.Currency;
 import com.souzip.api.domain.exchangerate.client.ExchangeRateExternalApiClient;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateListResponse;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
 import com.souzip.api.domain.exchangerate.repository.ExchangeRateRepository;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -153,8 +153,10 @@ class ExchangeRateServiceTest {
                     .thenReturn(List.of(usd, jpy));
 
             // when
-            List<ExchangeRateResponseDto> results =
+            ExchangeRateListResponse response =
                     exchangeRateService.getRatesByCountries(codes);
+
+            List<ExchangeRateResponseDto> results = response.exchangeRates();
 
             // then
             assertThat(results).hasSize(2);
@@ -163,7 +165,7 @@ class ExchangeRateServiceTest {
         }
 
         @Test
-        @DisplayName("국가 코드를 따로 전달하지 않으면 기본적으로는 전체 환율을 조회한다.")
+        @DisplayName("국가 코드를 따로 전달하지 않으면 전체 환율을 조회한다.")
         void success_getAllRates_whenNoCountryCode() {
             // given
             ExchangeRate usd = createRate("KRW", "USD", BigDecimal.valueOf(1300));
@@ -174,12 +176,13 @@ class ExchangeRateServiceTest {
                     .thenReturn(List.of(usd, jpy, eur));
 
             // when
-            List<ExchangeRateResponseDto> results =
-                    exchangeRateService.getRatesByCountries(null); // null 전달 -> 전체 조회
+            ExchangeRateListResponse response =
+                    exchangeRateService.getRatesByCountries(null);
 
             // then
-            assertThat(results).hasSize(3);
-            assertThat(results).extracting(ExchangeRateResponseDto::currencyCode)
+            assertThat(response.exchangeRates()).hasSize(3);
+            assertThat(response.exchangeRates())
+                    .extracting(ExchangeRateResponseDto::currencyCode)
                     .containsExactlyInAnyOrder("USD", "JPY", "EUR");
         }
     }

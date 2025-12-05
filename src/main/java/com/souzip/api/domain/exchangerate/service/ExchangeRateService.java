@@ -4,6 +4,7 @@ import com.souzip.api.domain.country.dto.CountryResponseDto;
 import com.souzip.api.domain.country.service.CountryService;
 import com.souzip.api.domain.exchangerate.client.ExchangeRateExternalApiClient;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateListResponse;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
 import com.souzip.api.domain.exchangerate.repository.ExchangeRateRepository;
@@ -35,7 +36,12 @@ public class ExchangeRateService {
         return getRate(country.currency().code());
     }
 
-    public List<ExchangeRateResponseDto> getRatesByCountries(Set<String> countryCodes) {
+    public ExchangeRateListResponse getRatesByCountries(Set<String> countryCodes) {
+        List<ExchangeRateResponseDto> list = resolveRates(countryCodes);
+        return ExchangeRateListResponse.from(list);
+    }
+
+    private List<ExchangeRateResponseDto> resolveRates(Set<String> countryCodes) {
         if (isEmpty(countryCodes)) {
             return getRatesInternal(null);
         }

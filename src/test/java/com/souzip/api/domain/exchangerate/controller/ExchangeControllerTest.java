@@ -1,6 +1,7 @@
 package com.souzip.api.domain.exchangerate.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
+import com.souzip.api.domain.exchangerate.dto.ExchangeRateListResponse;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import org.junit.jupiter.api.DisplayName;
@@ -78,29 +79,29 @@ class ExchangeControllerTest extends RestDocsSupport {
         Set<String> codes = Set.of("US", "JP");
 
         given(exchangeRateService.getRatesByCountries(codes))
-            .willReturn(List.of(usd, jpy));
+                .willReturn(ExchangeRateListResponse.from(List.of(usd, jpy)));
 
         // when & then
         mockMvc.perform(get("/api/exchange-rate")
-                .param("countries", "US", "JP"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data[0].currencyCode").value("USD"))
-            .andExpect(jsonPath("$.data[1].currencyCode").value("JPY"))
-            .andDo(document("exchange-rate/get-by-countries",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                queryParameters(
-                    parameterWithName("countries").description("조회할 국가 코드 목록 (여러 개 전달 가능)")
-                ),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("응답 데이터"),
-                    fieldWithPath("data[].baseCode").type(JsonFieldType.STRING).description("기준 통화 코드"),
-                    fieldWithPath("data[].currencyCode").type(JsonFieldType.STRING).description("대상 통화 코드"),
-                    fieldWithPath("data[].rate").type(JsonFieldType.NUMBER).description("환율"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
-                )
-            ));
+                        .param("countries", "US", "JP"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.exchangeRates[0].currencyCode").value("USD"))
+                .andExpect(jsonPath("$.data.exchangeRates[1].currencyCode").value("JPY"))
+                .andDo(document("exchange-rate/get-by-countries",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        queryParameters(
+                                parameterWithName("countries").description("조회할 국가 코드 목록 (여러 개 전달 가능)")
+                        ),
+                        apiResponseFields(
+                                fieldWithPath("data.exchangeRates").type(JsonFieldType.ARRAY).description("환율 목록"),
+                                fieldWithPath("data.exchangeRates[].baseCode").type(JsonFieldType.STRING).description("기준 통화 코드"),
+                                fieldWithPath("data.exchangeRates[].currencyCode").type(JsonFieldType.STRING).description("대상 통화 코드"),
+                                fieldWithPath("data.exchangeRates[].rate").type(JsonFieldType.NUMBER).description("환율"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
+                        )
+                ));
     }
 
     @Test
@@ -112,23 +113,23 @@ class ExchangeControllerTest extends RestDocsSupport {
         ExchangeRateResponseDto eur = createResponse("EUR", BigDecimal.valueOf(1500));
 
         given(exchangeRateService.getRatesByCountries(null))
-            .willReturn(List.of(usd, jpy, eur));
+                .willReturn(ExchangeRateListResponse.from(List.of(usd, jpy, eur)));
 
         // when & then
         mockMvc.perform(get("/api/exchange-rate"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data[2].currencyCode").value("EUR"))
-            .andDo(document("exchange-rate/get-all",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("응답 데이터"),
-                    fieldWithPath("data[].baseCode").type(JsonFieldType.STRING).description("기준 통화 코드"),
-                    fieldWithPath("data[].currencyCode").type(JsonFieldType.STRING).description("대상 통화 코드"),
-                    fieldWithPath("data[].rate").type(JsonFieldType.NUMBER).description("환율"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
-                )
-            ));
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.exchangeRates[2].currencyCode").value("EUR"))
+                .andDo(document("exchange-rate/get-all",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        apiResponseFields(
+                                fieldWithPath("data.exchangeRates").type(JsonFieldType.ARRAY).description("전체 환율 목록"),
+                                fieldWithPath("data.exchangeRates[].baseCode").type(JsonFieldType.STRING).description("기준 통화 코드"),
+                                fieldWithPath("data.exchangeRates[].currencyCode").type(JsonFieldType.STRING).description("대상 통화 코드"),
+                                fieldWithPath("data.exchangeRates[].rate").type(JsonFieldType.NUMBER).description("환율"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
+                        )
+                ));
     }
 }

@@ -1,7 +1,7 @@
 name: souzip CI/CD
 
 on:
-  push:
+  pull_request:
     branches:
       - develop
 
@@ -34,25 +34,30 @@ jobs:
 
       - name: NCP Container Registry Login
         run: |
-          echo ${{ secrets.NCP_SECRET_KEY }} | docker login registry.<region>.ndocker.io -u ${{ secrets.NCP_ACCESS_KEY }} --password-stdin
+          echo ${{ secrets.NCP_SECRET_KEY }} | docker login souzip.kr.ncr.ntruss.com -u ${{ secrets.NCP_ACCESS_KEY }} --password-stdin
 
       - name: Build Docker Image
         run: |
-          docker build -t registry.<region>.ndocker.io/<namespace>/<repository>:${GITHUB_SHA} .
+          docker build -t souzip.kr.ncr.ntruss.com/souzip/souzip-api:${GITHUB_SHA} .
 
       - name: Push Docker Image
         run: |
-          docker push registry.<region>.ndocker.io/<namespace>/<repository>:${GITHUB_SHA}
+          docker push souzip.kr.ncr.ntruss.com/souzip/souzip-api:${GITHUB_SHA}
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          host: ${{ secrets.NCP_SERVER_HOST}}
+          username: ${{ secrets.NCP_SERVER_USER }}
+          key: ${{ secrets.NCP_SERVER_SSH_KEY }}
           script: |
-            docker login registry.<region>.ndocker.io -u ${{ secrets.NCP_ACCESS_KEY }} -p ${{ secrets.NCP_SECRET_KEY }}
-            docker pull registry.<region>.ndocker.io/<namespace>/<repository>:${GITHUB_SHA}
-            docker stop souzip || true
-            docker rm souzip || true
-            docker run -d --name souzip -p 8080:8080 registry.<region>.ndocker.io/<namespace>/<repository>:${GITHUB_SHA}
+            docker login souzip.kr.ncr.ntruss.com -u ${{ secrets.NCP_ACCESS_KEY }} -p ${{ secrets.NCP_SECRET_KEY }}
+            
+            export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+            export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+      
+            cd souzip-api/docker
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d

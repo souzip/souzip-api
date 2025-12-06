@@ -38,11 +38,11 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t souzip.kr.ncr.ntruss.com/souzip/souzip-api:${GITHUB_SHA} .
+          docker build -t souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest .
 
       - name: Push Docker Image
         run: |
-          docker push souzip.kr.ncr.ntruss.com/souzip/souzip-api:${GITHUB_SHA}
+          docker push souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest .
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6

@@ -42,7 +42,7 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker push souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest .
+          docker push souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6

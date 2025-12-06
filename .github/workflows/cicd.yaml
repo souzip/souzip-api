@@ -30,7 +30,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v3
         with:
-          arguments: build -x test
+          arguments: build -x test -x asciidoctor
 
       - name: NCP Container Registry Login
         run: |

@@ -7,4 +7,4 @@ COPY ${JAR_FILE} /souzip-api.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/souzip-api.jar"]
+ENTRYPOINT ["java", "-jar", "/souzip-api.jar", "--spring.profiles.active=dev"]

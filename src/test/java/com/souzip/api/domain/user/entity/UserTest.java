@@ -11,7 +11,7 @@ class UserTest {
     @DisplayName("anonymize 호출 시 개인정보가 익명화된다.")
     void anonymize_success() {
         // given
-        User user = User.of(Provider.KAKAO, "kakao123", "홍길동", "길동이");
+        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트");
 
         // when
         user.anonymize();
@@ -28,11 +28,11 @@ class UserTest {
         User user = User.of(Provider.KAKAO, "kakao123", "탈퇴한사용자", "탈퇴한사용자");
 
         // when
-        user.restore("홍길동", "길동이");
+        user.restore("테스트유저", "테스트");
 
         // then
-        assertThat(user.getName()).isEqualTo("홍길동");
-        assertThat(user.getNickname()).isEqualTo("길동이");
+        assertThat(user.getName()).isEqualTo("테스트유저");
+        assertThat(user.getNickname()).isEqualTo("테스트");
         assertThat(user.getDeleted()).isFalse();
         assertThat(user.getRestoredAt()).isNotNull();
         assertThat(user.getDeletedAt()).isNull();

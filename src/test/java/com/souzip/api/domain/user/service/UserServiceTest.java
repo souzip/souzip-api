@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -33,28 +34,31 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
-    @DisplayName("회원탈퇴 시 User는 soft delete되고 Refresh Token은 삭제된다.")
+    @DisplayName("회원탈퇴 시 User는 익명화되고 soft delete된다")
     void withdraw_success() {
+        // given
         User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트");
-        User spyUser = spy(user);
 
         RefreshToken refreshToken = RefreshToken.of(
-            spyUser,
+            user,
             "refresh_token",
             LocalDateTime.now().plusDays(30)
         );
 
         given(userRepository.findById(1L))
-            .willReturn(Optional.of(spyUser));
-        given(refreshTokenRepository.findByUser(spyUser))
+            .willReturn(Optional.of(user));
+        given(refreshTokenRepository.findByUser(user))
             .willReturn(Optional.of(refreshToken));
 
         // when
         userService.withdraw(1L);
 
         // then
+        assertThat(user.getName()).isEqualTo("탈퇴한사용자");
+        assertThat(user.getNickname()).isEqualTo("탈퇴한사용자");
+
         verify(refreshTokenRepository).delete(refreshToken);
-        verify(userRepository).delete(spyUser);
+        verify(userRepository).delete(user);
     }
 
     @Test
@@ -68,5 +72,26 @@ class UserServiceTest {
         assertThatThrownBy(() -> userService.withdraw(999L))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("사용자를 찾을 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("Refresh Token이 없어도 회원탈퇴는 성공한다.")
+    void withdraw_withoutRefreshToken_success() {
+        // given
+        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트");
+        User spyUser = spy(user);
+
+        given(userRepository.findById(1L))
+            .willReturn(Optional.of(spyUser));
+
+        given(refreshTokenRepository.findByUser(spyUser))
+            .willReturn(Optional.empty());
+        // when
+        userService.withdraw(1L);
+
+        // then
+        verify(spyUser).anonymize();
+        verify(userRepository).delete(spyUser);
+        verify(refreshTokenRepository, never()).delete(any());
     }
 }

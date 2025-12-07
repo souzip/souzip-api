@@ -286,7 +286,7 @@ class AuthControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("로그아웃을 한다")
+    @DisplayName("로그아웃을 한다.")
     void logout_success() throws Exception {
         // given
         doNothing().when(authService).logout(anyLong());

@@ -5,7 +5,6 @@ import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,15 +19,16 @@ import java.util.UUID;
     }
 )
 @SQLDelete(sql = "UPDATE \"user\" SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@SQLRestriction("deleted = false")
 @Entity
 public class User extends BaseEntity {
+
+    private static final String ANONYMIZED_VALUE = "탈퇴한사용자";
 
     @Column(unique = true, nullable = false, length = 36)
     private String userId;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Provider provider;
 
     @Column(nullable = false)
@@ -44,6 +44,8 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean deleted;
+
+    private LocalDateTime restoredAt;
 
     @PrePersist
     protected void onCreate() {
@@ -63,24 +65,42 @@ public class User extends BaseEntity {
 
     public static User of(Provider provider, OAuthUserInfo oauthUserInfo) {
         String name = oauthUserInfo.getName();
-        String originalName = name;
-        String defaultNickname = name;
-
         return User.of(
             provider,
             oauthUserInfo.getProviderId(),
-            originalName,
-            defaultNickname
+            name,
+            name
         );
     }
 
     private void ensureUserId() {
-        if (isUserIdAbsent()) {
+        if (this.userId == null) {
             this.userId = UUID.randomUUID().toString();
         }
     }
 
-    private boolean isUserIdAbsent() {
-        return this.userId == null;
+    public void anonymize() {
+        this.name = ANONYMIZED_VALUE;
+        this.nickname = ANONYMIZED_VALUE;
+    }
+
+    public void restore(String originalName, String originalNickname) {
+        this.name = originalName;
+        this.nickname = originalNickname;
+        this.deleted = false;
+        this.deletedAt = null;
+        this.restoredAt = LocalDateTime.now();
+    }
+
+    public boolean isRecentlyCreated(LocalDateTime threshold) {
+        return this.getCreatedAt().isAfter(threshold);
+    }
+
+    public boolean isRecentlyRestored(LocalDateTime threshold) {
+        return this.restoredAt != null && this.restoredAt.isAfter(threshold);
+    }
+
+    public boolean isDeleted() {
+        return Boolean.TRUE.equals(this.deleted);
     }
 }

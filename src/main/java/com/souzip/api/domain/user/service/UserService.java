@@ -24,6 +24,8 @@ public class UserService {
         User user = userRepository.findById(currentUserId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        user.anonymize();
+
         refreshTokenRepository.findByUser(user)
             .ifPresent(refreshTokenRepository::delete);
 

@@ -37,6 +37,9 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private String country;
 
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
     public static Product of(
         String name,
         Integer price,
@@ -55,5 +58,13 @@ public class Product extends BaseEntity {
             .purpose(purpose)
             .country(country)
             .build();
+    }
+
+    public void delete() {
+        this.deleted = true;
+    }
+
+    public boolean isDeleted() {
+        return Boolean.TRUE.equals(this.deleted);
     }
 }

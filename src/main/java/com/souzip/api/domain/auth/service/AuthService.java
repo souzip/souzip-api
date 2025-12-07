@@ -13,8 +13,8 @@ import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
-import com.souzip.api.global.security.jwt.JwtProperties;
 import com.souzip.api.global.security.jwt.JwtTokenProvider;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,7 +41,7 @@ public class AuthService {
         OAuthUserInfo oauthUserInfo = oauthClient.getUserInfo(oauthAccessToken);
 
         User user = findOrCreateUser(provider, oauthUserInfo);
-        boolean isNewUser = isNewUser(user);
+        boolean isNewUser = isRecentlyJoined(user);
 
         String accessToken = jwtTokenProvider.generateToken(user.getUserId());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
@@ -81,14 +81,24 @@ public class AuthService {
 
         refreshTokenRepository.findByUser(user)
             .ifPresent(refreshTokenRepository::delete);
-
-        log.info("로그아웃 완료: userId={}", user.getUserId());
     }
 
     private User findOrCreateUser(Provider provider, OAuthUserInfo oauthUserInfo) {
-        return userRepository
-            .findByProviderAndProviderId(provider, oauthUserInfo.getProviderId())
-            .orElseGet(() -> createUser(provider, oauthUserInfo));
+        Optional<User> existingUser = userRepository
+            .findByProviderAndProviderId(provider, oauthUserInfo.getProviderId());
+
+        if (existingUser.isEmpty()) {
+            return createUser(provider, oauthUserInfo);
+        }
+
+        User user = existingUser.get();
+
+        if (user.isDeleted()) {
+            String name = oauthUserInfo.getName();
+            user.restore(name, name);
+        }
+
+        return user;
     }
 
     private User createUser(Provider provider, OAuthUserInfo oauthUserInfo) {
@@ -96,8 +106,9 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    private boolean isNewUser(User user) {
-        return user.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(5));
+    private boolean isRecentlyJoined(User user) {
+        LocalDateTime threshold = LocalDateTime.now().minusSeconds(5);
+        return user.isRecentlyCreated(threshold) || user.isRecentlyRestored(threshold);
     }
 
     private void saveRefreshToken(User user, String tokenValue) {

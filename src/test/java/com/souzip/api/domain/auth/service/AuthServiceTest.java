@@ -53,7 +53,7 @@ class AuthServiceTest {
         return new OAuthUserInfo() {
             @Override
             public String getProviderId() {
-                return "20251204";
+                return "kakao123";
             }
 
             @Override
@@ -64,26 +64,26 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("카카오 로그인 시 신규 사용자를 생성하고 토큰을 발급한다.")
-    void login_createsNewUser_whenUserNotExists() {
+    @DisplayName("신규 사용자 로그인 시 User를 생성하고 토큰을 발급한다.")
+    void login_newUser_createsUserAndIssuesTokens() {
         // given
-        String kakaoAccessToken = "kakao_token";
         OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User newUser = User.of(Provider.KAKAO, oauthUserInfo);
-        newUser = spy(newUser);
+        User spyUser = spy(newUser);
+        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now());
+        given(spyUser.getUserId()).willReturn("550e8400");
 
-        given(newUser.getCreatedAt()).willReturn(LocalDateTime.now());
         given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
-        given(oauthClient.getUserInfo(kakaoAccessToken)).willReturn(oauthUserInfo);
-        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "20251204"))
+        given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
+        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "kakao123"))
             .willReturn(Optional.empty());
-        given(userRepository.save(any(User.class))).willReturn(newUser);
-        given(jwtTokenProvider.generateToken(anyString())).willReturn("access_token");
-        given(jwtTokenProvider.generateRefreshToken(anyString())).willReturn("refresh_token");
-        given(refreshTokenRepository.findByUser(any(User.class))).willReturn(Optional.empty());
+        given(userRepository.save(any(User.class))).willReturn(spyUser);
+        given(jwtTokenProvider.generateToken("550e8400")).willReturn("access_token");
+        given(jwtTokenProvider.generateRefreshToken("550e8400")).willReturn("refresh_token");
+        given(refreshTokenRepository.findByUser(any())).willReturn(Optional.empty());
 
         // when
-        LoginResponse response = authService.login(Provider.KAKAO, kakaoAccessToken);
+        LoginResponse response = authService.login(Provider.KAKAO, "kakao_token");
 
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
@@ -91,124 +91,158 @@ class AuthServiceTest {
         assertThat(response.getUser().nickname()).isEqualTo("수집");
         assertThat(response.isNewUser()).isTrue();
 
-        then(userRepository).should().save(any(User.class));
-        then(refreshTokenRepository).should().save(any(RefreshToken.class));
+        verify(userRepository).save(any(User.class));
+        verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
     @Test
-    @DisplayName("카카오 로그인 시 기존 사용자를 조회하고 토큰을 발급한다.")
-    void login_findsExistingUser_whenUserExists() {
+    @DisplayName("기존 사용자 로그인 시 User를 조회하고 토큰을 발급한다.")
+    void login_existingUser_findsUserAndIssuesTokens() {
         // given
-        String kakaoAccessToken = "kakao_token";
         OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User existingUser = User.of(Provider.KAKAO, oauthUserInfo);
+        User spyUser = spy(existingUser);
 
-        existingUser = spy(existingUser);
-        given(existingUser.getCreatedAt()).willReturn(LocalDateTime.now().minusMinutes(10));
+        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now().minusDays(10));
+        given(spyUser.getUserId()).willReturn("550e8400");
 
         RefreshToken existingToken = RefreshToken.of(
-            existingUser,
+            spyUser,
             "old_refresh_token",
-            LocalDateTime.now().plusDays(7)
+            LocalDateTime.now().plusDays(20)
         );
 
         given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
-        given(oauthClient.getUserInfo(kakaoAccessToken)).willReturn(oauthUserInfo);
-        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "20251204"))
-            .willReturn(Optional.of(existingUser));
-        given(jwtTokenProvider.generateToken(anyString())).willReturn("access_token");
-        given(jwtTokenProvider.generateRefreshToken(anyString())).willReturn("refresh_token");
-        given(refreshTokenRepository.findByUser(existingUser)).willReturn(Optional.of(existingToken));
+        given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
+        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "kakao123"))
+            .willReturn(Optional.of(spyUser));
+        given(jwtTokenProvider.generateToken("550e8400")).willReturn("access_token");
+        given(jwtTokenProvider.generateRefreshToken("550e8400")).willReturn("refresh_token");
+        given(refreshTokenRepository.findByUser(spyUser)).willReturn(Optional.of(existingToken));
 
         // when
-        LoginResponse response = authService.login(Provider.KAKAO, kakaoAccessToken);
+        LoginResponse response = authService.login(Provider.KAKAO, "kakao_token");
 
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
         assertThat(response.isNewUser()).isFalse();
 
-        then(userRepository).should(never()).save(any(User.class));
+        verify(userRepository, never()).save(any(User.class));
+        verify(spyUser, never()).restore(anyString(), anyString());
     }
 
     @Test
-    @DisplayName("RefreshToken이 없으면 새로 생성한다.")
-    void login_createsRefreshToken_whenNotExists() {
+    @DisplayName("탈퇴 회원 재로그인 시 User를 복구하고 isNewUser는 true다.")
+    void login_withdrawnUser_restoresUserAndIsNewUserTrue() {
         // given
-        String kakaoAccessToken = "kakao_token";
         OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
-        User newUser = User.of(Provider.KAKAO, oauthUserInfo);
-        newUser = spy(newUser);
+        User withdrawnUser = User.of(Provider.KAKAO, oauthUserInfo);
+        User spyUser = spy(withdrawnUser);
 
-        given(newUser.getCreatedAt()).willReturn(LocalDateTime.now());
+        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now().minusDays(10));
+        given(spyUser.isDeleted()).willReturn(true);
+        given(spyUser.getUserId()).willReturn("550e8400");
+
+        doCallRealMethod().when(spyUser).restore(anyString(), anyString());
+
         given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
-        given(oauthClient.getUserInfo(kakaoAccessToken)).willReturn(oauthUserInfo);
-        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "20251204"))
-            .willReturn(Optional.empty());
-        given(userRepository.save(any(User.class))).willReturn(newUser);
-        given(jwtTokenProvider.generateToken(anyString())).willReturn("access_token");
-        given(jwtTokenProvider.generateRefreshToken(anyString())).willReturn("refresh_token");
-        given(refreshTokenRepository.findByUser(any(User.class))).willReturn(Optional.empty());
+        given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
+        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "kakao123"))
+            .willReturn(Optional.of(spyUser));
+        given(jwtTokenProvider.generateToken("550e8400")).willReturn("access_token");
+        given(jwtTokenProvider.generateRefreshToken("550e8400")).willReturn("refresh_token");
+        given(refreshTokenRepository.findByUser(any())).willReturn(Optional.empty());
 
         // when
-        authService.login(Provider.KAKAO, kakaoAccessToken);
+        LoginResponse response = authService.login(Provider.KAKAO, "kakao_token");
 
         // then
-        then(refreshTokenRepository).should().save(any(RefreshToken.class));
+        verify(spyUser).restore("수집", "수집");
+        assertThat(response.isNewUser()).isTrue();
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    @DisplayName("RefreshToken이 있으면 업데이트한다.")
-    void login_updatesRefreshToken_whenExists() {
+    @DisplayName("Refresh Token이 없으면 새로 생성한다.")
+    void login_withoutRefreshToken_createsNewToken() {
         // given
-        String kakaoAccessToken = "kakao_token";
+        OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
+        User newUser = User.of(Provider.KAKAO, oauthUserInfo);
+        User spyUser = spy(newUser);
+
+        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now());
+        given(spyUser.getUserId()).willReturn("550e8400");
+
+        given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
+        given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
+        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "kakao123"))
+            .willReturn(Optional.empty());
+        given(userRepository.save(any(User.class))).willReturn(spyUser);
+        given(jwtTokenProvider.generateToken(anyString())).willReturn("access_token");
+        given(jwtTokenProvider.generateRefreshToken(anyString())).willReturn("refresh_token");
+        given(refreshTokenRepository.findByUser(any())).willReturn(Optional.empty());
+
+        // when
+        authService.login(Provider.KAKAO, "kakao_token");
+
+        // then
+        verify(refreshTokenRepository).save(any(RefreshToken.class));
+    }
+
+    @Test
+    @DisplayName("Refresh Token이 있으면 업데이트한다.")
+    void login_withExistingRefreshToken_updatesToken() {
+        // given
         OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User existingUser = User.of(Provider.KAKAO, oauthUserInfo);
-        existingUser = spy(existingUser);
-        given(existingUser.getCreatedAt()).willReturn(LocalDateTime.now().minusMinutes(10));
+        User spyUser = spy(existingUser);
+
+        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now().minusDays(10));
+        given(spyUser.getUserId()).willReturn("550e8400");
 
         RefreshToken existingToken = spy(RefreshToken.of(
-            existingUser,
+            spyUser,
             "old_refresh_token",
-            LocalDateTime.now().plusDays(7)
+            LocalDateTime.now().plusDays(20)
         ));
 
         given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
-        given(oauthClient.getUserInfo(kakaoAccessToken)).willReturn(oauthUserInfo);
-        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "20251204"))
-            .willReturn(Optional.of(existingUser));
+        given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
+        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "kakao123"))
+            .willReturn(Optional.of(spyUser));
         given(jwtTokenProvider.generateToken(anyString())).willReturn("access_token");
         given(jwtTokenProvider.generateRefreshToken(anyString())).willReturn("new_refresh_token");
-        given(refreshTokenRepository.findByUser(existingUser)).willReturn(Optional.of(existingToken));
+        given(refreshTokenRepository.findByUser(spyUser)).willReturn(Optional.of(existingToken));
 
         // when
-        authService.login(Provider.KAKAO, kakaoAccessToken);
+        authService.login(Provider.KAKAO, "kakao_token");
 
         // then
-        then(existingToken).should().updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
-        then(refreshTokenRepository).should(never()).save(any(RefreshToken.class));
+        verify(existingToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
+        verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
     }
 
     @Test
-    @DisplayName("Refresh Token이 유효하고 여유가 있으면 Access Token만 재발급한다.")
+    @DisplayName("Refresh Token이 유효하고 만료 임박하지 않으면 Access Token만 재발급한다.")
     void refresh_withValidToken_returnsNewAccessTokenOnly() {
         // given
         User user = User.of(Provider.KAKAO, createOAuthUserInfo());
-        User savedUser = spy(user);
-        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+        User spyUser = spy(user);
+        given(spyUser.getUserId()).willReturn("550e8400");
 
         RefreshToken refreshToken = RefreshToken.of(
-            savedUser,
+            spyUser,
             "valid_refresh_token",
             LocalDateTime.now().plusDays(20)
         );
-        RefreshToken spyRefreshToken = spy(refreshToken);
-        given(spyRefreshToken.isExpired()).willReturn(false);
-        given(spyRefreshToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(20));
+        RefreshToken spyToken = spy(refreshToken);
+        given(spyToken.isExpired()).willReturn(false);
+        given(spyToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(20));
 
         given(refreshTokenRepository.findByToken("valid_refresh_token"))
-            .willReturn(Optional.of(spyRefreshToken));
-        given(jwtTokenProvider.generateToken(anyString()))
+            .willReturn(Optional.of(spyToken));
+        given(jwtTokenProvider.generateToken("550e8400"))
             .willReturn("new_access_token");
 
         // when
@@ -225,32 +259,32 @@ class AuthServiceTest {
     void refresh_withExpiringSoon_returnsBothNewTokens() {
         // given
         User user = User.of(Provider.KAKAO, createOAuthUserInfo());
-        User savedUser = spy(user);
-        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+        User spyUser = spy(user);
+        given(spyUser.getUserId()).willReturn("550e8400");
 
         RefreshToken refreshToken = RefreshToken.of(
-            savedUser,
-            "expiring_soon_token",
+            spyUser,
+            "expiring_token",
             LocalDateTime.now().plusDays(5)
         );
-        RefreshToken spyRefreshToken = spy(refreshToken);
-        given(spyRefreshToken.isExpired()).willReturn(false);
-        given(spyRefreshToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(5));
+        RefreshToken spyToken = spy(refreshToken);
+        given(spyToken.isExpired()).willReturn(false);
+        given(spyToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(5));
 
-        given(refreshTokenRepository.findByToken("expiring_soon_token"))
-            .willReturn(Optional.of(spyRefreshToken));
-        given(jwtTokenProvider.generateToken(anyString()))
+        given(refreshTokenRepository.findByToken("expiring_token"))
+            .willReturn(Optional.of(spyToken));
+        given(jwtTokenProvider.generateToken("550e8400"))
             .willReturn("new_access_token");
-        given(jwtTokenProvider.generateRefreshToken(anyString()))
+        given(jwtTokenProvider.generateRefreshToken("550e8400"))
             .willReturn("new_refresh_token");
 
         // when
-        RefreshResponse response = authService.refresh("expiring_soon_token");
+        RefreshResponse response = authService.refresh("expiring_token");
 
         // then
         assertThat(response.accessToken()).isEqualTo("new_access_token");
         assertThat(response.refreshToken()).isEqualTo("new_refresh_token");
-        verify(spyRefreshToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
+        verify(spyToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
     }
 
     @Test
@@ -261,21 +295,21 @@ class AuthServiceTest {
 
         RefreshToken expiredToken = RefreshToken.of(
             user,
-            "expired_refresh_token",
+            "expired_token",
             LocalDateTime.now().minusDays(1)
         );
-        RefreshToken spyExpiredToken = spy(expiredToken);
-        given(spyExpiredToken.isExpired()).willReturn(true);
+        RefreshToken spyToken = spy(expiredToken);
+        given(spyToken.isExpired()).willReturn(true);
 
-        given(refreshTokenRepository.findByToken("expired_refresh_token"))
-            .willReturn(Optional.of(spyExpiredToken));
+        given(refreshTokenRepository.findByToken("expired_token"))
+            .willReturn(Optional.of(spyToken));
 
         // when & then
-        assertThatThrownBy(() -> authService.refresh("expired_refresh_token"))
+        assertThatThrownBy(() -> authService.refresh("expired_token"))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("만료된 Refresh Token입니다.");
 
-        verify(refreshTokenRepository).delete(spyExpiredToken);
+        verify(refreshTokenRepository).delete(spyToken);
     }
 
     @Test
@@ -301,26 +335,26 @@ class AuthServiceTest {
     void refresh_boundaryCondition_test(int daysRemaining, boolean shouldRenew, String description) {
         // given
         User user = User.of(Provider.KAKAO, createOAuthUserInfo());
-        User savedUser = spy(user);
-        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+        User spyUser = spy(user);
+        given(spyUser.getUserId()).willReturn("550e8400");
 
         String tokenValue = "token_" + daysRemaining + "_days";
         RefreshToken refreshToken = RefreshToken.of(
-            savedUser,
+            spyUser,
             tokenValue,
             LocalDateTime.now().plusDays(daysRemaining)
         );
-        RefreshToken spyRefreshToken = spy(refreshToken);
-        given(spyRefreshToken.isExpired()).willReturn(false);
-        given(spyRefreshToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(daysRemaining));
+        RefreshToken spyToken = spy(refreshToken);
+        given(spyToken.isExpired()).willReturn(false);
+        given(spyToken.getExpiresAt()).willReturn(LocalDateTime.now().plusDays(daysRemaining));
 
         given(refreshTokenRepository.findByToken(tokenValue))
-            .willReturn(Optional.of(spyRefreshToken));
-        given(jwtTokenProvider.generateToken(anyString()))
+            .willReturn(Optional.of(spyToken));
+        given(jwtTokenProvider.generateToken("550e8400"))
             .willReturn("new_access_token");
 
         if (shouldRenew) {
-            given(jwtTokenProvider.generateRefreshToken(anyString()))
+            given(jwtTokenProvider.generateRefreshToken("550e8400"))
                 .willReturn("new_refresh_token");
         }
 
@@ -331,15 +365,13 @@ class AuthServiceTest {
         assertThat(response.accessToken()).isEqualTo("new_access_token");
 
         if (shouldRenew) {
-            // 갱신됨
             assertThat(response.refreshToken()).isEqualTo("new_refresh_token");
-            verify(spyRefreshToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
-            return;
+            verify(spyToken).updateToken(eq("new_refresh_token"), any(LocalDateTime.class));
+        } else {
+            assertThat(response.refreshToken()).isEqualTo(tokenValue);
+            verify(jwtTokenProvider, never()).generateRefreshToken(anyString());
+            verify(spyToken, never()).updateToken(anyString(), any(LocalDateTime.class));
         }
-
-        assertThat(response.refreshToken()).isEqualTo(tokenValue);
-        verify(jwtTokenProvider, never()).generateRefreshToken(anyString());
-        verify(spyRefreshToken, never()).updateToken(anyString(), any(LocalDateTime.class));
     }
 
     @Test
@@ -347,18 +379,17 @@ class AuthServiceTest {
     void logout_success() {
         // given
         User user = User.of(Provider.KAKAO, createOAuthUserInfo());
-        User savedUser = spy(user);
-        given(savedUser.getUserId()).willReturn("550e8400-e29b-41d4-a716-446655440000");
+        User spyUser = spy(user);
 
         RefreshToken refreshToken = RefreshToken.of(
-            savedUser,
+            spyUser,
             "refresh_token",
             LocalDateTime.now().plusDays(30)
         );
 
         given(userRepository.findById(1L))
-            .willReturn(Optional.of(savedUser));
-        given(refreshTokenRepository.findByUser(savedUser))
+            .willReturn(Optional.of(spyUser));
+        given(refreshTokenRepository.findByUser(spyUser))
             .willReturn(Optional.of(refreshToken));
 
         // when

@@ -12,5 +12,6 @@ endif::[]
 
 include::overview.adoc[]
 include::auth.adoc[]
+include::user.adoc[]
 include::country.adoc[]
 include::exchange-rate.adoc[]

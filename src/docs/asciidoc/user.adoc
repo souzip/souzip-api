@@ -1,0 +1,27 @@
+[[user-api]]
+== User API
+
+[[user-withdraw]]
+=== 회원탈퇴
+
+사용자의 계정을 탈퇴합니다. Soft delete 방식으로 처리되며, Refresh Token도 함께 삭제됩니다.
+
+==== HTTP 요청
+include::{snippets}/user/withdraw/http-request.adoc[]
+
+==== 요청 헤더
+[cols="1,1,1,3"]
+|===
+|헤더 |타입 |필수 |설명
+
+|Authorization
+|String
+|O
+|Bearer {accessToken}
+|===
+
+==== HTTP 응답
+include::{snippets}/user/withdraw/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/user/withdraw/response-fields.adoc[]

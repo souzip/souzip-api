@@ -1,13 +1,28 @@
 name: souzip CI/CD
 
 on:
-  pull_request:
+  push:
     branches:
       - develop
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+        options: >-
+          --health-cmd="pg_isready -U testuser -d testdb"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout
@@ -30,7 +45,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v3
         with:
-          arguments: build -x test -x asciidoctor
+          arguments: clean build -Dspring.profiles.active=test
 
       - name: NCP Container Registry Login
         run: |
@@ -47,17 +62,20 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.NCP_SERVER_HOST}}
+          host: ${{ secrets.NCP_SERVER_HOST }}
           username: ${{ secrets.NCP_SERVER_USER }}
           key: ${{ secrets.NCP_SERVER_SSH_KEY }}
           script: |
             docker login souzip.kr.ncr.ntruss.com -u ${{ secrets.NCP_ACCESS_KEY }} -p ${{ secrets.NCP_SECRET_KEY }}
-            
-            export POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-            export POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-      
-            cd souzip-api/docker
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+
+            docker rm -f souzip-api || true
+
+            docker run -d \
+              --name souzip-api \
+              -p 8080:8080 \
+              -e SPRING_PROFILES_ACTIVE=dev \
+              -e DB_URL=${{ secrets.DEV_DB_URL }} \
+              -e POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }} \
+              -e POSTGRES_PASSWORD=${{ secrets.DEV_DB_PASSWORD }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest

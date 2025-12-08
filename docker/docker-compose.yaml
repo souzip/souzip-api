@@ -1,15 +1,4 @@
-version: "3.9"
-
 services:
-  app:
-    image: souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
-    container_name: souzip-api
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-
   postgres:
     image: postgres:16
     container_name: souzip-db

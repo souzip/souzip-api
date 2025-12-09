@@ -94,6 +94,7 @@ public class CountryService {
     ) {
         return externalCountries.stream()
             .filter(dto -> isNewCountry(dto, existingCodes))
+            .filter(this::hasValidCurrency)
             .map(this::convertToEntity)
             .toList();
     }
@@ -133,11 +134,16 @@ public class CountryService {
         return !existingCodes.contains(dto.cca2());
     }
 
+    private boolean hasValidCurrency(CountryExternalDto dto) {
+        String currencyCode = dto.getPrimaryCurrencyCode();
+        return currencyCode != null && !currencyCode.isBlank();
+    }
+
     private boolean hasNoNewCountries(List<Country> newCountries) {
         return newCountries.isEmpty();
     }
 
     private boolean isInvalidCurrencyCode(String currencyCode) {
-        return currencyCode.isBlank();
+        return currencyCode == null || currencyCode.isBlank();
     }
 }

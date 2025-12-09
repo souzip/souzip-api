@@ -45,6 +45,7 @@ public class File extends BaseEntity {
     private String type;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer displayOrder = 1;
 
     public static File of(

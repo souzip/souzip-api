@@ -35,7 +35,10 @@ public class Product extends BaseEntity {
     private Purpose purpose;
 
     @Column(nullable = false)
-    private String country;
+    private String location;
+
+    @Column
+    private String address;
 
     @Column(nullable = false)
     private Boolean deleted = false;
@@ -47,7 +50,7 @@ public class Product extends BaseEntity {
         String description,
         Category category,
         Purpose purpose,
-        String country
+        String location
     ) {
         return Product.builder()
             .name(name)
@@ -56,7 +59,7 @@ public class Product extends BaseEntity {
             .description(description)
             .category(category)
             .purpose(purpose)
-            .country(country)
+            .location(location)
             .build();
     }
 

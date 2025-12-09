@@ -5,7 +5,7 @@ import com.souzip.api.domain.country.dto.CountryResponseDto;
 import com.souzip.api.domain.country.dto.CountryListResponse;
 import com.souzip.api.domain.country.dto.RegionDto;
 import com.souzip.api.domain.country.service.CountryService;
-import com.souzip.api.domain.currency.CurrencyDto;
+import com.souzip.api.domain.currency.dto.CurrencyDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;

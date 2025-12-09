@@ -3,7 +3,7 @@ package com.souzip.api.domain.product.dto;
 import com.souzip.api.domain.product.entity.Category;
 import com.souzip.api.domain.product.entity.Purpose;
 
-public record ProductCreateRequest(
+public record ProductCreateRequestDto(
         String name,
         Integer price,
         String imageUrl,

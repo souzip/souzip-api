@@ -44,23 +44,26 @@ public class Product extends BaseEntity {
     private Boolean deleted = false;
 
     public static Product of(
-        String name,
-        Integer price,
-        String imageUrl,
-        String description,
-        Category category,
-        Purpose purpose,
-        String location
+            String name,
+            Integer price,
+            String imageUrl,
+            String description,
+            Category category,
+            Purpose purpose,
+            String location,
+            String address
     ) {
         return Product.builder()
-            .name(name)
-            .price(price)
-            .imageUrl(imageUrl)
-            .description(description)
-            .category(category)
-            .purpose(purpose)
-            .location(location)
-            .build();
+                .name(name)
+                .price(price)
+                .imageUrl(imageUrl)
+                .description(description)
+                .category(category)
+                .purpose(purpose)
+                .location(location)
+                .address(address)
+                .deleted(false)
+                .build();
     }
 
     public void delete() {

@@ -3,6 +3,10 @@ spring:
     name: souzip-api
   profiles:
     default: local
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
 
 server:
   port: 8080
@@ -26,3 +30,11 @@ external:
 oauth:
   kakao:
     user-info-url: https://kapi.kakao.com/v2/user/me
+
+ncp:
+  object-storage:
+    access-key: ${NCP_ACCESS_KEY}
+    secret-key: ${NCP_SECRET_KEY}
+    endpoint: ${NCP_ENDPOINT}
+    bucket: ${NCP_BUCKET}
+    region: ${NCP_REGION}

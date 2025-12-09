@@ -8,7 +8,7 @@ public record LoginUserInfo(
 ) {
     public static LoginUserInfo from(User user) {
         return new LoginUserInfo(
-            user.getUserId().substring(0, 8),
+            user.getUserId(),
             user.getNickname()
         );
     }

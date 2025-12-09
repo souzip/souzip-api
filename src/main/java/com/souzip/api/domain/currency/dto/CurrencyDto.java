@@ -1,4 +1,4 @@
-package com.souzip.api.domain.currency;
+package com.souzip.api.domain.currency.dto;
 
 import com.souzip.api.domain.currency.entity.Currency;
 

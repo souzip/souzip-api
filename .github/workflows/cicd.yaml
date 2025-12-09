@@ -45,7 +45,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v3
         with:
-          arguments: clean build -Dspring.profiles.active=test
+          arguments: clean build -Dspring.profiles.active=test --no-build-cache
 
       - name: NCP Container Registry Login
         run: |

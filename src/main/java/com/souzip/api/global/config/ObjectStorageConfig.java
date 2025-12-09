@@ -12,21 +12,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Slf4j
-@RequiredArgsConstructor
+@Slf4j  // ⬅️ 추가
 @Configuration
+@RequiredArgsConstructor
 public class ObjectStorageConfig {
 
     private final ObjectStorageProperties properties;
 
     @Bean
     public AmazonS3 s3Client() {
-        AWSCredentials credentials = new BasicAWSCredentials(
+        // ⭐ 로그 추가
+        log.info("=== ObjectStorage Config ===");
+        log.info("Endpoint: {}", properties.getEndpoint());
+        log.info("Region: {}", properties.getRegion());
+        log.info("Bucket: {}", properties.getBucket());
+        log.info("Access Key: {}", properties.getAccessKey() != null ? "설정됨 ✅" : "NULL ❌");
+        log.info("Secret Key: {}", properties.getSecretKey() != null ? "설정됨 ✅" : "NULL ❌");
+
+        BasicAWSCredentials credentials = new BasicAWSCredentials(
             properties.getAccessKey(),
             properties.getSecretKey()
         );
 
-        AmazonS3 client = AmazonS3ClientBuilder.standard()
+        return AmazonS3ClientBuilder.standard()
             .withEndpointConfiguration(
                 new AwsClientBuilder.EndpointConfiguration(
                     properties.getEndpoint(),
@@ -35,7 +43,5 @@ public class ObjectStorageConfig {
             )
             .withCredentials(new AWSStaticCredentialsProvider(credentials))
             .build();
-
-        return client;
     }
 }

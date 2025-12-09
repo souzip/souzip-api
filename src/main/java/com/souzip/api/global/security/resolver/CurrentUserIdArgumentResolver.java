@@ -1,5 +1,6 @@
 package com.souzip.api.global.security.resolver;
 
+import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import com.souzip.api.global.security.annotation.CurrentUserId;
@@ -30,10 +31,10 @@ public class CurrentUserIdArgumentResolver implements HandlerMethodArgumentResol
                                   WebDataBinderFactory binderFactory) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !(authentication.getPrincipal() instanceof Long)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
-
-        return authentication.getPrincipal();
+        User user = (User) authentication.getPrincipal();
+        return user.getId();
     }
 }

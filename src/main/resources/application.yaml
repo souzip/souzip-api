@@ -3,6 +3,10 @@ spring:
     name: souzip-api
   profiles:
     default: local
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
 
 server:
   port: 8080

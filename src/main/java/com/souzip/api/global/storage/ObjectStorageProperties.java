@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @RequiredArgsConstructor
-@ConfigurationProperties(prefix = "ncp-object-storage")
+@ConfigurationProperties(prefix = "ncp.object-storage")
 public class ObjectStorageProperties {
 
     private final String endpoint;
@@ -14,5 +14,6 @@ public class ObjectStorageProperties {
     private final String bucket;
     private final String accessKey;
     private final String secretKey;
+
 }
 

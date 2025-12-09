@@ -1,7 +1,7 @@
 package com.souzip.api.domain.country.dto;
 
 import com.souzip.api.domain.country.entity.Country;
-import com.souzip.api.domain.currency.CurrencyDto;
+import com.souzip.api.domain.currency.dto.CurrencyDto;
 import java.math.BigDecimal;
 
 public record CountryResponseDto(

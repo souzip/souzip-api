@@ -62,4 +62,9 @@ jobs:
               -e POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }} \
               -e POSTGRES_PASSWORD=${{ secrets.DEV_DB_PASSWORD }} \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e NCP_ENDPOINT=${{ secrets.NCP_ENDPOINT }} \
+              -e NCP_REGION=${{ secrets.NCP_REGION }} \
+              -e NCP_BUCKET=${{ secrets.NCP_BUCKET }} \
+              -e NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }} \
+              -e NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }} \
               souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest

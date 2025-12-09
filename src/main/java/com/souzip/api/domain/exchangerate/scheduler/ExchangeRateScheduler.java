@@ -14,13 +14,13 @@ import org.springframework.stereotype.Component;
 @Profile("local")
 public class ExchangeRateScheduler {
 
-    private final ExchangeRateExternalApiClient exchangeRateExternalApiClient;
+    private final ExchangeRateService exchangeRateService;
 
     // 매주 월 ~ 금 오전 9시
     @Scheduled(cron = "0 0 9 * * 1-5", zone = "Asia/Seoul")
     public void fetchExchangeRates() {
         log.info("환율 스케줄러 실행 시작");
-        exchangeRateExternalApiClient.fetchRates();
+        exchangeRateService.fetchAndSaveExchangeRates();
         log.info("환율 스케줄러 실행 완료");
     }
 }

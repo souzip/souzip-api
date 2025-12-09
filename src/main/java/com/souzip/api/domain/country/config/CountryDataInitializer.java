@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
-@Profile("local")
 @Component
 public class CountryDataInitializer implements ApplicationRunner {
 

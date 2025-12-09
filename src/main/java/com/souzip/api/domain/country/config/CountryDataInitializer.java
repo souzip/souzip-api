@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Profile("dev")
 public class CountryDataInitializer implements ApplicationRunner {
 
     private final CountryService countryService;

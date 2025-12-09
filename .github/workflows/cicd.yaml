@@ -52,6 +52,7 @@ jobs:
           key: ${{ secrets.NCP_SERVER_SSH_KEY }}
           script: |
             docker login souzip.kr.ncr.ntruss.com -u ${{ secrets.NCP_ACCESS_KEY }} -p ${{ secrets.NCP_SECRET_KEY }}
+            docker pull souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
             docker rm -f souzip-api || true
             docker run -d \
               --name souzip-api \

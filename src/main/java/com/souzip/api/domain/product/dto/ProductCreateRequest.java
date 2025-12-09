@@ -10,5 +10,6 @@ public record ProductCreateRequest(
         String description,
         Category category,
         Purpose purpose,
-        String country
+        String location,
+        String address
 ) {}

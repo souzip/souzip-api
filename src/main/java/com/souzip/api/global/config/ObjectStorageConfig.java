@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Profile;
 @Slf4j  // ⬅️ 추가
 @Configuration
 @RequiredArgsConstructor
-@Profile("dev")
 public class ObjectStorageConfig {
 
     private final ObjectStorageProperties properties;

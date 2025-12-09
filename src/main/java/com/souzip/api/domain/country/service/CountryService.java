@@ -138,6 +138,6 @@ public class CountryService {
     }
 
     private boolean isInvalidCurrencyCode(String currencyCode) {
-        return currencyCode.isBlank();
+        return currencyCode == null || currencyCode.isBlank();
     }
 }

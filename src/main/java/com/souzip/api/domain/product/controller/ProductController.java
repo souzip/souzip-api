@@ -8,6 +8,9 @@ import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -18,19 +21,23 @@ public class ProductController {
 
     @PostMapping
     public SuccessResponse<ProductResponseDto> createProduct(
-            @RequestBody ProductCreateRequestDto request,
+            @RequestPart("product") ProductCreateRequestDto request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        return SuccessResponse.of(productService.createProduct(request, userId), "기념품이 성공적으로 등록되었습니다.");
+        ProductResponseDto response = productService.createProduct(request, userId, files);
+        return SuccessResponse.of(response, "기념품이 성공적으로 등록되었습니다.");
     }
 
     @PutMapping("/{id}")
     public SuccessResponse<ProductResponseDto> updateProduct(
             @PathVariable Long id,
-            @RequestBody ProductUpdateRequestDto request,
+            @RequestPart("product") ProductUpdateRequestDto request,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        return SuccessResponse.of(productService.updateProduct(id, request, userId), "기념품이 성공적으로 수정되었습니다.");
+        ProductResponseDto response = productService.updateProduct(id, request, userId, files);
+        return SuccessResponse.of(response, "기념품이 성공적으로 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}")

@@ -26,7 +26,7 @@ public class ProductService {
     private final FileService fileService;
 
     @Transactional
-    public ProductResponseDto createProduct(ProductCreateRequestDto request, Long userId) {
+    public ProductResponseDto createProduct(ProductCreateRequestDto request, Long userId, List<MultipartFile> files) {
 
         Product product = Product.of(
                 request.name(),
@@ -39,14 +39,12 @@ public class ProductService {
         );
 
         Product savedProduct = productRepository.save(product);
-
-        List<FileResponse> uploadedFiles = uploadProductFiles(savedProduct.getId(), userId, request.files());
-
+        List<FileResponse> uploadedFiles = uploadFiles(savedProduct.getId(), userId, files);
         return ProductResponseDto.from(savedProduct, uploadedFiles);
     }
 
     @Transactional
-    public ProductResponseDto updateProduct(Long id, ProductUpdateRequestDto request, Long userId) {
+    public ProductResponseDto updateProduct(Long id, ProductUpdateRequestDto request, Long userId, List<MultipartFile> files) {
         Product product = productRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -64,8 +62,7 @@ public class ProductService {
         );
 
         fileService.deleteFilesByEntity("Product", id);
-        List<FileResponse> uploadedFiles = uploadProductFiles(id, userId, request.files());
-
+        List<FileResponse> uploadedFiles = uploadFiles(id, userId, files);
         return ProductResponseDto.from(product, uploadedFiles);
     }
 
@@ -82,7 +79,7 @@ public class ProductService {
         product.delete();
     }
 
-    private List<FileResponse> uploadProductFiles(Long productId, Long userId, List<MultipartFile> files) {
+    private List<FileResponse> uploadFiles(Long productId, Long userId, List<MultipartFile> files) {
         return Optional.ofNullable(files)
                 .orElse(List.of())
                 .stream()

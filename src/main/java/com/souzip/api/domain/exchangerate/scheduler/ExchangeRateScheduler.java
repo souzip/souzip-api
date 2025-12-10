@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile("local")
+@Profile("dev")
 public class ExchangeRateScheduler {
 
     private final ExchangeRateService exchangeRateService;

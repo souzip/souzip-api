@@ -38,7 +38,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDto updateProduct(Long id, ProductUpdateRequestDto request) {
-        Product product = productRepository.findById(id)
+        Product product = productRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
         product.update(
@@ -53,5 +53,13 @@ public class ProductService {
         );
 
         return ProductResponseDto.fromEntity(product);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        product.delete();
     }
 }

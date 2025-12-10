@@ -27,4 +27,10 @@ public class ProductController {
     ) {
         return SuccessResponse.of(productService.updateProduct(id, request), "기념품이 성공적으로 수정되었습니다.");
     }
+
+    @DeleteMapping("/{id}")
+    public SuccessResponse<Void> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return SuccessResponse.of(null, "기념품이 성공적으로 삭제되었습니다.");
+    }
 }

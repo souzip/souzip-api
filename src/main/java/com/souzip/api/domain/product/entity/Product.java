@@ -66,6 +66,18 @@ public class Product extends BaseEntity {
                 .build();
     }
 
+    public void update(String name, Integer price, String imageUrl, String description,
+                       Category category, Purpose purpose, String location, String address) {
+        this.name = name;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.category = category;
+        this.purpose = purpose;
+        this.location = location;
+        this.address = address;
+    }
+
     public void delete() {
         this.deleted = true;
     }

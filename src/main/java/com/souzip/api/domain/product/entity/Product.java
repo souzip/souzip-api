@@ -40,6 +40,7 @@ public class Product extends BaseEntity {
     @Column
     private String address;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean deleted = false;
 

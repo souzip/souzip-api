@@ -40,6 +40,7 @@ public class Product extends BaseEntity {
     @Column
     private String address;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean deleted = false;
 
@@ -64,6 +65,18 @@ public class Product extends BaseEntity {
                 .address(address)
                 .deleted(false)
                 .build();
+    }
+
+    public void update(String name, Integer price, String imageUrl, String description,
+                       Category category, Purpose purpose, String location, String address) {
+        this.name = name;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.category = category;
+        this.purpose = purpose;
+        this.location = location;
+        this.address = address;
     }
 
     public void delete() {

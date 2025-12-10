@@ -19,46 +19,50 @@ public class ProductService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public ProductResponseDto createProduct(ProductCreateRequestDto request) {
+    public ProductResponseDto createProduct(ProductCreateRequestDto request, Long userId) {
         Product product = Product.of(
                 request.name(),
                 request.price(),
-                request.imageUrl(),
                 request.description(),
                 request.category(),
                 request.purpose(),
-                request.location(),
-                request.address()
+                request.cityId(),
+                userId
         );
 
         Product saved = productRepository.save(product);
-
-        return ProductResponseDto.fromEntity(saved);
+        return ProductResponseDto.from(saved);
     }
 
     @Transactional
-    public ProductResponseDto updateProduct(Long id, ProductUpdateRequestDto request) {
+    public ProductResponseDto updateProduct(Long id, ProductUpdateRequestDto request, Long userId) {
         Product product = productRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (!product.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
 
         product.update(
                 request.name(),
                 request.price(),
-                request.imageUrl(),
                 request.description(),
                 request.category(),
                 request.purpose(),
-                request.location(),
-                request.address()
+                request.cityId()
         );
 
-        return ProductResponseDto.fromEntity(product);
+        return ProductResponseDto.from(product);
     }
 
     @Transactional
-    public void deleteProduct(Long id) {
+    public void deleteProduct(Long id, Long userId) {
         Product product = productRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (!product.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
 
         product.delete();
     }

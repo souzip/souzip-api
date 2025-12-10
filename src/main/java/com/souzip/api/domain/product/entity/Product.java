@@ -21,9 +21,6 @@ public class Product extends BaseEntity {
     private Integer price;
 
     @Column
-    private String imageUrl;
-
-    @Column
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -35,10 +32,10 @@ public class Product extends BaseEntity {
     private Purpose purpose;
 
     @Column(nullable = false)
-    private String location;
+    private Long cityId;
 
-    @Column
-    private String address;
+    @Column(nullable = false)
+    private Long userId;
 
     @Builder.Default
     @Column(nullable = false)
@@ -47,36 +44,32 @@ public class Product extends BaseEntity {
     public static Product of(
             String name,
             Integer price,
-            String imageUrl,
             String description,
             Category category,
             Purpose purpose,
-            String location,
-            String address
+            Long cityId,
+            Long userId
     ) {
         return Product.builder()
                 .name(name)
                 .price(price)
-                .imageUrl(imageUrl)
                 .description(description)
                 .category(category)
                 .purpose(purpose)
-                .location(location)
-                .address(address)
+                .cityId(cityId)
+                .userId(userId)
                 .deleted(false)
                 .build();
     }
 
-    public void update(String name, Integer price, String imageUrl, String description,
-                       Category category, Purpose purpose, String location, String address) {
+    public void update(String name, Integer price, String description,
+                       Category category, Purpose purpose, Long cityId) {
         this.name = name;
         this.price = price;
-        this.imageUrl = imageUrl;
         this.description = description;
         this.category = category;
         this.purpose = purpose;
-        this.location = location;
-        this.address = address;
+        this.cityId = cityId;
     }
 
     public void delete() {

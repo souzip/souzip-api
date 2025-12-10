@@ -2,6 +2,9 @@ package com.souzip.api.domain.product.dto;
 
 import com.souzip.api.domain.product.entity.Category;
 import com.souzip.api.domain.product.entity.Purpose;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public record ProductUpdateRequestDto(
         String name,
@@ -9,5 +12,6 @@ public record ProductUpdateRequestDto(
         String description,
         Category category,
         Purpose purpose,
-        Long cityId
+        Long cityId,
+        List<MultipartFile> files
 ) {}

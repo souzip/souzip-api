@@ -1,5 +1,7 @@
 package com.souzip.api.domain.product.service;
 
+import com.souzip.api.domain.file.dto.FileResponse;
+import com.souzip.api.domain.file.service.FileService;
 import com.souzip.api.domain.product.dto.ProductCreateRequestDto;
 import com.souzip.api.domain.product.dto.ProductResponseDto;
 import com.souzip.api.domain.product.dto.ProductUpdateRequestDto;
@@ -10,6 +12,10 @@ import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final FileService fileService;
 
     @Transactional
     public ProductResponseDto createProduct(ProductCreateRequestDto request, Long userId) {
+
         Product product = Product.of(
                 request.name(),
                 request.price(),
@@ -30,8 +38,11 @@ public class ProductService {
                 userId
         );
 
-        Product saved = productRepository.save(product);
-        return ProductResponseDto.from(saved);
+        Product savedProduct = productRepository.save(product);
+
+        List<FileResponse> uploadedFiles = uploadProductFiles(savedProduct.getId(), userId, request.files());
+
+        return ProductResponseDto.from(savedProduct, uploadedFiles);
     }
 
     @Transactional
@@ -52,7 +63,10 @@ public class ProductService {
                 request.cityId()
         );
 
-        return ProductResponseDto.from(product);
+        fileService.deleteFilesByEntity("Product", id);
+        List<FileResponse> uploadedFiles = uploadProductFiles(id, userId, request.files());
+
+        return ProductResponseDto.from(product, uploadedFiles);
     }
 
     @Transactional
@@ -64,6 +78,21 @@ public class ProductService {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
+        fileService.deleteFilesByEntity("Product", id);
         product.delete();
+    }
+
+    private List<FileResponse> uploadProductFiles(Long productId, Long userId, List<MultipartFile> files) {
+        return Optional.ofNullable(files)
+                .orElse(List.of())
+                .stream()
+                .map(file -> fileService.uploadFile(
+                        userId.toString(),
+                        "Product",
+                        productId,
+                        file,
+                        null
+                ))
+                .toList();
     }
 }

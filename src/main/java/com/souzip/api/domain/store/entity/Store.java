@@ -30,4 +30,19 @@ public class Store extends BaseEntity {
     @Column(length = 255)
     private String note;
 
+    public static Store of(
+        Country country,
+        City city,
+        Double latitude,
+        Double longitude,
+        String note
+    ) {
+        return Store.builder()
+            .country(country)
+            .city(city)
+            .latitude(latitude)
+            .longitude(longitude)
+            .note(note)
+            .build();
+    }
 }

@@ -25,6 +25,14 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final FileService fileService;
 
+    public ProductResponseDto getProduct(Long productId) {
+        Product product = productRepository.findByIdAndDeletedFalse(productId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        List<FileResponse> files = fileService.getFilesByEntity("Product", productId);
+        return ProductResponseDto.from(product, files);
+    }
+
     @Transactional
     public ProductResponseDto createProduct(ProductCreateRequestDto request, Long userId, List<MultipartFile> files) {
 

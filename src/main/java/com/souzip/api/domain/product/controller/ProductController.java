@@ -19,6 +19,12 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @GetMapping("/{id}")
+    public SuccessResponse<ProductResponseDto> getProduct(@PathVariable Long id) {
+        ProductResponseDto response = productService.getProduct(id);
+        return SuccessResponse.of(response, "기념품이 성공적으로 조회되었습니다.");
+    }
+
     @PostMapping
     public SuccessResponse<ProductResponseDto> createProduct(
             @RequestPart("product") ProductCreateRequestDto request,

@@ -20,14 +20,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.error("[BUSINESS-ERROR] type={} message={}",
-            e.getErrorCode(),
-            e.getMessage(),
-            e
+        log.error("[BUSINESS-ERROR] errorCode={} status={} message={}",
+            e.getErrorCode().name(),
+            e.getErrorCode().getStatus(),
+            e.getMessage()
         );
 
         return ResponseEntity
             .status(e.getErrorCode().getStatus())
+            .body(ErrorResponse.of(e.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.error("[ILLEGAL-ARGUMENT-ERROR] message={}", e.getMessage(), e);
+
+        return ResponseEntity
+            .status(ErrorCode.INVALID_INPUT.getStatus())
             .body(ErrorResponse.of(e.getMessage()));
     }
 
@@ -47,7 +56,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             ))
             .collect(Collectors.toList());
 
-        log.error("[VALIDATION-ERROR] errors={}", errors, ex);
+        log.error("[VALIDATION-ERROR] errors={}", errors);
 
         return ResponseEntity
             .status(ErrorCode.INVALID_INPUT.getStatus())
@@ -55,8 +64,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
-        log.error("[UNEXPECTED-ERROR] message={}", e.getMessage(), e);
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e) {
+        log.error("[UNEXPECTED-ERROR] type={} message={}", e.getClass().getSimpleName(), e.getMessage());
 
         return ResponseEntity
             .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())

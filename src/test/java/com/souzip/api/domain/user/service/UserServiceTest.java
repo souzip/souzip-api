@@ -37,7 +37,7 @@ class UserServiceTest {
     @DisplayName("회원탈퇴 시 User는 익명화되고 soft delete된다")
     void withdraw_success() {
         // given
-        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트");
+        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트", null, null);
 
         RefreshToken refreshToken = RefreshToken.of(
             user,
@@ -78,7 +78,7 @@ class UserServiceTest {
     @DisplayName("Refresh Token이 없어도 회원탈퇴는 성공한다.")
     void withdraw_withoutRefreshToken_success() {
         // given
-        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트");
+        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트", null, null);
         User spyUser = spy(user);
 
         given(userRepository.findById(1L))

@@ -30,6 +30,8 @@ external:
 oauth:
   kakao:
     user-info-url: https://kapi.kakao.com/v2/user/me
+  google:
+    user-info-url: https://www.googleapis.com/oauth2/v2/userinfo
 
 ncp:
   object-storage:

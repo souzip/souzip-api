@@ -11,7 +11,7 @@ class UserTest {
     @DisplayName("anonymize 호출 시 개인정보가 익명화된다.")
     void anonymize_success() {
         // given
-        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트");
+        User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트", "test@kakao.com", null);
 
         // when
         user.anonymize();
@@ -25,7 +25,7 @@ class UserTest {
     @DisplayName("restore 호출 시 개인정보가 복구되고 restoredAt이 설정된다.")
     void restore_success() {
         // given
-        User user = User.of(Provider.KAKAO, "kakao123", "탈퇴한사용자", "탈퇴한사용자");
+        User user = User.of(Provider.KAKAO, "kakao123", "탈퇴한사용자", "탈퇴한사용자", "test@kakao.com", null);
 
         // when
         user.restore("테스트유저", "테스트");

@@ -10,6 +10,7 @@ import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
 import com.souzip.api.global.security.annotation.RequireAuth;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +23,9 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/login/kakao")
-    public SuccessResponse<LoginResponse> loginWithKakao(@RequestBody LoginRequest request) {
-        LoginResponse response = authService.login(Provider.KAKAO, request.accessToken());
+    @PostMapping("/login/{provider}")
+    public SuccessResponse<LoginResponse> login(@PathVariable String provider, @RequestBody LoginRequest request) {
+        LoginResponse response = authService.login(Provider.from(provider), request.accessToken());
         return SuccessResponse.of(response);
     }
 

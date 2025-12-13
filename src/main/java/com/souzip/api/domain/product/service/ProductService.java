@@ -7,6 +7,7 @@ import com.souzip.api.domain.product.dto.ProductResponseDto;
 import com.souzip.api.domain.product.dto.ProductUpdateRequestDto;
 import com.souzip.api.domain.product.entity.Product;
 import com.souzip.api.domain.product.repository.ProductRepository;
+import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
     private final FileService fileService;
 
     public ProductResponseDto getProduct(Long productId) {
@@ -88,11 +90,15 @@ public class ProductService {
     }
 
     private List<FileResponse> uploadFiles(Long productId, Long userId, List<MultipartFile> files) {
+        String uuid = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND))
+                .getUserId();
+
         return Optional.ofNullable(files)
                 .orElse(List.of())
                 .stream()
                 .map(file -> fileService.uploadFile(
-                        userId.toString(),
+                        uuid,
                         "Product",
                         productId,
                         file,

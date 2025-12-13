@@ -60,6 +60,11 @@ class AuthServiceTest {
             public String getName() {
                 return "수집";
             }
+
+            @Override
+            public String getEmail() {
+                return "test@gmail.com";
+            }
         };
     }
 

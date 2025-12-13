@@ -18,6 +18,7 @@ public class KakaoUserInfo implements OAuthUserInfo {
     public static class KakaoAccount {
 
         private Profile profile;
+        private String email;
 
         @Getter
         @NoArgsConstructor
@@ -34,5 +35,10 @@ public class KakaoUserInfo implements OAuthUserInfo {
     @Override
     public String getName() {
         return kakaoAccount.profile.nickname;
+    }
+
+    @Override
+    public String getEmail() {
+        return kakaoAccount.email;
     }
 }

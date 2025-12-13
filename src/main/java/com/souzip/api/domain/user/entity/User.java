@@ -16,6 +16,12 @@ import java.util.UUID;
 @Table(name = "\"user\"",
     uniqueConstraints = {
         @UniqueConstraint(columnNames = {"provider", "provider_id"})
+    },
+    indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id"),
+        @Index(name = "idx_provider", columnList = "provider, provider_id"),
+        @Index(name = "idx_deleted", columnList = "deleted"),
+        @Index(name = "idx_email", columnList = "email")
     }
 )
 @SQLDelete(sql = "UPDATE \"user\" SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
@@ -40,6 +46,10 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String nickname;
 
+    private String email;
+
+    private String profileImageUrl;
+
     private LocalDateTime deletedAt;
 
     @Column(nullable = false)
@@ -52,13 +62,22 @@ public class User extends BaseEntity {
         ensureUserId();
     }
 
-    public static User of(Provider provider, String providerId, String name, String nickname) {
+    public static User of(
+        Provider provider,
+        String providerId,
+        String name,
+        String nickname,
+        String email,
+        String profileImageUrl
+    ) {
         return User.builder()
             .userId(UUID.randomUUID().toString())
             .provider(provider)
             .providerId(providerId)
             .name(name)
             .nickname(nickname)
+            .email(email)
+            .profileImageUrl(profileImageUrl)
             .deleted(false)
             .build();
     }
@@ -69,7 +88,9 @@ public class User extends BaseEntity {
             provider,
             oauthUserInfo.getProviderId(),
             name,
-            name
+            name,
+            oauthUserInfo.getEmail(),
+            oauthUserInfo.getProfileImageUrl()
         );
     }
 

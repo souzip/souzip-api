@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OAuthProperties {
 
     private final Kakao kakao;
+    private final Google google;
 
     @Getter
     @RequiredArgsConstructor
@@ -17,4 +18,9 @@ public class OAuthProperties {
         private final String userInfoUrl;
     }
 
+    @Getter
+    @RequiredArgsConstructor
+    public static class Google {
+        private final String userInfoUrl;
+    }
 }

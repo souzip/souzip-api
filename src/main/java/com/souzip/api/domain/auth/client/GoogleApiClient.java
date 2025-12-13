@@ -1,6 +1,6 @@
 package com.souzip.api.domain.auth.client;
 
-import com.souzip.api.domain.auth.dto.KakaoUserInfo;
+import com.souzip.api.domain.auth.dto.GoogleUserInfo;
 import com.souzip.api.domain.auth.dto.OAuthUserInfo;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class KakaoApiClient implements OAuthClient {
+public class GoogleApiClient implements OAuthClient {
 
     private final RestTemplate restTemplate;
     private final OAuthProperties oAuthProperties;
@@ -25,23 +25,23 @@ public class KakaoApiClient implements OAuthClient {
     @Override
     public OAuthUserInfo getUserInfo(String accessToken) {
         try {
-            return callKakaoUserInfoApi(accessToken);
+            return callGoogleUserInfoApi(accessToken);
         } catch (Exception e) {
-            log.error("카카오 사용자 정보 조회 중 오류 발생", e);
-            throw new BusinessException(ErrorCode.KAKAO_API_ERROR);
+            log.error("구글 사용자 정보 조회 중 오류 발생", e);
+            throw new BusinessException(ErrorCode.GOOGLE_API_ERROR);
         }
     }
 
-    private KakaoUserInfo callKakaoUserInfoApi(String accessToken) {
-        String url = oAuthProperties.getKakao().getUserInfoUrl();
+    private GoogleUserInfo callGoogleUserInfoApi(String accessToken) {
+        String url = oAuthProperties.getGoogle().getUserInfoUrl();
         HttpHeaders headers = createAuthHeaders(accessToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        ResponseEntity<KakaoUserInfo> response = restTemplate.exchange(
+        ResponseEntity<GoogleUserInfo> response = restTemplate.exchange(
             url,
             HttpMethod.GET,
             request,
-            KakaoUserInfo.class
+            GoogleUserInfo.class
         );
 
         return response.getBody();

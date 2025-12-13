@@ -1,38 +1,158 @@
 [[auth-api]]
 == Authentication API
 
+[[auth-login]]
+=== 소셜 로그인
+
+OAuth를 통한 로그인 API입니다. 신규 사용자의 경우 자동으로 회원가입이 진행됩니다.
+
+==== 엔드포인트
+[source,http]
+----
+POST /api/auth/login/{provider}
+----
+
+==== 경로 파라미터
+[cols="1,1,1,3"]
+|===
+|파라미터 |타입 |필수 |설명
+
+|provider
+|String
+|O
+|OAuth Provider (kakao, google, apple)
+|===
+
 [[auth-login-kakao]]
-=== 카카오 로그인
+==== 카카오 로그인
 
-카카오 OAuth를 통한 로그인 API입니다. 신규 사용자의 경우 자동으로 회원가입이 진행됩니다.
+===== 신규 사용자
 
-==== 신규 사용자 로그인
-
-===== HTTP 요청
+====== HTTP 요청
 include::{snippets}/auth/login-kakao-new-user/http-request.adoc[]
 
-===== 요청 필드
+====== 경로 파라미터
+include::{snippets}/auth/login-kakao-new-user/path-parameters.adoc[]
+
+====== 요청 필드
 include::{snippets}/auth/login-kakao-new-user/request-fields.adoc[]
 
-===== HTTP 응답
+====== HTTP 응답
 include::{snippets}/auth/login-kakao-new-user/http-response.adoc[]
 
-===== 응답 필드
+====== 응답 필드
 include::{snippets}/auth/login-kakao-new-user/response-fields.adoc[]
 
-==== 기존 사용자 로그인
+===== 기존 사용자
 
-===== HTTP 요청
+====== HTTP 요청
 include::{snippets}/auth/login-kakao-existing-user/http-request.adoc[]
 
-===== 요청 필드
+====== 경로 파라미터
+include::{snippets}/auth/login-kakao-existing-user/path-parameters.adoc[]
+
+====== 요청 필드
 include::{snippets}/auth/login-kakao-existing-user/request-fields.adoc[]
 
-===== HTTP 응답
+====== HTTP 응답
 include::{snippets}/auth/login-kakao-existing-user/http-response.adoc[]
 
-===== 응답 필드
+====== 응답 필드
 include::{snippets}/auth/login-kakao-existing-user/response-fields.adoc[]
+
+===== 카카오 API 에러
+
+====== HTTP 요청
+include::{snippets}/auth/login-kakao-api-error/http-request.adoc[]
+
+====== 경로 파라미터
+include::{snippets}/auth/login-kakao-api-error/path-parameters.adoc[]
+
+====== 요청 필드
+include::{snippets}/auth/login-kakao-api-error/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/auth/login-kakao-api-error/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/auth/login-kakao-api-error/response-fields.adoc[]
+
+[[auth-login-google]]
+==== Google 로그인
+
+===== 신규 사용자
+
+====== HTTP 요청
+include::{snippets}/auth/login-google-new-user/http-request.adoc[]
+
+====== 경로 파라미터
+include::{snippets}/auth/login-google-new-user/path-parameters.adoc[]
+
+====== 요청 필드
+include::{snippets}/auth/login-google-new-user/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/auth/login-google-new-user/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/auth/login-google-new-user/response-fields.adoc[]
+
+[[auth-login-apple]]
+==== Apple 로그인
+
+===== 신규 사용자
+
+====== HTTP 요청
+include::{snippets}/auth/login-apple-new-user/http-request.adoc[]
+
+====== 경로 파라미터
+include::{snippets}/auth/login-apple-new-user/path-parameters.adoc[]
+
+====== 요청 필드
+include::{snippets}/auth/login-apple-new-user/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/auth/login-apple-new-user/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/auth/login-apple-new-user/response-fields.adoc[]
+
+[[auth-login-errors]]
+==== 로그인 에러 케이스
+
+===== 지원하지 않는 Provider
+
+====== HTTP 요청
+include::{snippets}/auth/login-unsupported-provider/http-request.adoc[]
+
+====== 경로 파라미터
+include::{snippets}/auth/login-unsupported-provider/path-parameters.adoc[]
+
+====== 요청 필드
+include::{snippets}/auth/login-unsupported-provider/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/auth/login-unsupported-provider/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/auth/login-unsupported-provider/response-fields.adoc[]
+
+===== 잘못된 Provider 형식
+
+====== HTTP 요청
+include::{snippets}/auth/login-invalid-provider/http-request.adoc[]
+
+====== 경로 파라미터
+include::{snippets}/auth/login-invalid-provider/path-parameters.adoc[]
+
+====== 요청 필드
+include::{snippets}/auth/login-invalid-provider/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/auth/login-invalid-provider/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/auth/login-invalid-provider/response-fields.adoc[]
 
 [[auth-refresh]]
 === 토큰 재발급

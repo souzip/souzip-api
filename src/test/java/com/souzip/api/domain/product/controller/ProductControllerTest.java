@@ -37,8 +37,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.multipart;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -76,10 +74,9 @@ class ProductControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("상품 생성 - 파일 업로드 포함")
+    @DisplayName("상품 생성")
     void createProductWithFiles() throws Exception {
 
-        // JSON part 생성 (ProductCreateRequestDto)
         ProductCreateRequestDto request = new ProductCreateRequestDto(
                 "테스트 기념품",
                 10000,
@@ -89,6 +86,7 @@ class ProductControllerTest extends RestDocsSupport {
                 1L,
                 Collections.emptyList()
         );
+
         MockMultipartFile productPart = new MockMultipartFile(
                 "product",
                 "product.json",
@@ -115,7 +113,6 @@ class ProductControllerTest extends RestDocsSupport {
                 "테스트 설명",
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
-                1L,
                 1L,
                 filesResponse
         );
@@ -147,7 +144,6 @@ class ProductControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
                                 fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("사용 목적"),
                                 fieldWithPath("data.cityId").type(JsonFieldType.NUMBER).description("도시 ID"),
-                                fieldWithPath("data.userId").type(JsonFieldType.NUMBER).description("등록 사용자 ID"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
@@ -159,7 +155,7 @@ class ProductControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("상품 수정 - 파일 업로드 포함")
+    @DisplayName("상품 수정")
     void updateProductWithFiles() throws Exception {
         Long productId = 1L;
 
@@ -200,7 +196,6 @@ class ProductControllerTest extends RestDocsSupport {
                 requestDto.category(),
                 requestDto.purpose(),
                 requestDto.cityId(),
-                1L,
                 filesResponse
         );
 
@@ -215,7 +210,7 @@ class ProductControllerTest extends RestDocsSupport {
                         .file(productPart)
                         .file(file1)
                         .file(file2)
-                        .with(request -> { request.setMethod("PUT"); return request; }) // 강제 PUT
+                        .with(request -> { request.setMethod("PUT"); return request; })
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -233,7 +228,6 @@ class ProductControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
                                 fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("사용 목적"),
                                 fieldWithPath("data.cityId").type(JsonFieldType.NUMBER).description("도시 ID"),
-                                fieldWithPath("data.userId").type(JsonFieldType.NUMBER).description("등록 사용자 ID"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
@@ -245,137 +239,7 @@ class ProductControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("상품 생성 - 파일 없이")
-    void createProductWithoutFiles() throws Exception {
-
-        ProductCreateRequestDto request = new ProductCreateRequestDto(
-                "파일 없는 기념품",
-                5000,
-                "파일 없는 설명",
-                Category.SOUVENIR_BASIC,
-                Purpose.GIFT,
-                1L,
-                Collections.emptyList()
-        );
-
-        MockMultipartFile productPart = new MockMultipartFile(
-                "product",
-                "product.json",
-                "application/json",
-                objectMapper.writeValueAsBytes(request)
-        );
-
-        ProductResponseDto response = new ProductResponseDto(
-                1L,
-                request.name(),
-                request.price(),
-                request.description(),
-                request.category(),
-                request.purpose(),
-                request.cityId(),
-                1L,
-                Collections.emptyList()
-        );
-
-        given(productService.createProduct(any(ProductCreateRequestDto.class), eq(1L), eq(null)))
-                .willReturn(response);
-
-        mockMvc.perform(multipart("/api/products")
-                        .file(productPart)
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(1L))
-                .andExpect(jsonPath("$.data.files").isEmpty())
-                .andDo(document("products/create-product-without-files",
-                        getDocumentRequest(),
-                        getDocumentResponse(),
-                        requestParts(
-                                partWithName("product").description("상품 생성 정보 (JSON)")
-                        ),
-                        apiResponseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
-                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("상세 설명"),
-                                fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("사용 목적"),
-                                fieldWithPath("data.cityId").type(JsonFieldType.NUMBER).description("도시 ID"),
-                                fieldWithPath("data.userId").type(JsonFieldType.NUMBER).description("등록 사용자 ID"),
-                                fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
-                        )
-                ));
-    }
-
-    @Test
-    @DisplayName("상품 수정 - 파일 없이")
-    void updateProductWithoutFiles() throws Exception {
-        Long productId = 1L;
-
-        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto(
-                "업데이트 파일 없는 기념품",
-                15000,
-                "업데이트 설명",
-                Category.SOUVENIR_BASIC,
-                Purpose.PERSONAL,
-                1L,
-                Collections.emptyList()
-        );
-
-        MockMultipartFile productPart = new MockMultipartFile(
-                "product",
-                "product.json",
-                "application/json",
-                objectMapper.writeValueAsBytes(requestDto)
-        );
-
-        ProductResponseDto response = new ProductResponseDto(
-                productId,
-                requestDto.name(),
-                requestDto.price(),
-                requestDto.description(),
-                requestDto.category(),
-                requestDto.purpose(),
-                requestDto.cityId(),
-                1L,
-                Collections.emptyList()
-        );
-
-        given(productService.updateProduct(eq(productId), any(ProductUpdateRequestDto.class), eq(1L), eq(null)))
-                .willReturn(response);
-
-        mockMvc.perform(multipart("/api/products/{id}", productId)
-                        .file(productPart)
-                        .with(request -> { request.setMethod("PUT"); return request; })
-                        .contentType(MediaType.MULTIPART_FORM_DATA))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(productId))
-                .andExpect(jsonPath("$.data.files").isEmpty())
-                .andDo(document("products/update-product-without-files",
-                        getDocumentRequest(),
-                        getDocumentResponse(),
-                        requestParts(
-                                partWithName("product").description("상품 수정 정보 (JSON)")
-                        ),
-                        apiResponseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
-                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("상세 설명"),
-                                fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("사용 목적"),
-                                fieldWithPath("data.cityId").type(JsonFieldType.NUMBER).description("도시 ID"),
-                                fieldWithPath("data.userId").type(JsonFieldType.NUMBER).description("등록 사용자 ID"),
-                                fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
-                        )
-                ));
-    }
-
-    @Test
-    @DisplayName("상품 삭제 - 성공")
+    @DisplayName("상품 삭제")
     void deleteProduct() throws Exception {
         Long productId = 1L;
 

@@ -47,7 +47,7 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_success() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            "수집왕",
+            "수집",
             "https://cdn.souzip.com/characters/character1.png",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH", "FASHION_ACCESSORY")
         );
@@ -60,7 +60,7 @@ class UserControllerTest extends RestDocsSupport {
 
         OnboardingResponse response = new OnboardingResponse(
             "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-            "수집왕",
+            "수집",
             "https://cdn.souzip.com/characters/character1.png",
             "test@gmail.com",
             categoryDtos
@@ -77,7 +77,7 @@ class UserControllerTest extends RestDocsSupport {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.userId").value("a1b2c3d4-e5f6-7890-abcd-ef1234567890"))
-            .andExpect(jsonPath("$.data.nickname").value("수집왕"))
+            .andExpect(jsonPath("$.data.nickname").value("수집"))
             .andExpect(jsonPath("$.data.profileImageUrl").value("https://cdn.souzip.com/characters/character1.png"))
             .andExpect(jsonPath("$.data.email").value("test@gmail.com"))
             .andExpect(jsonPath("$.data.categories").isArray())
@@ -124,7 +124,7 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_alreadyCompleted() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            "수집왕",
+            "수집",
             "https://cdn.souzip.com/characters/character1.png",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH")
         );
@@ -160,7 +160,7 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_invalidCategory() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            "수집왕",
+            "수집",
             "https://cdn.souzip.com/characters/character1.png",
             List.of("INVALID_CATEGORY", "BEAUTY_HEALTH")
         );
@@ -260,7 +260,7 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_emptyCategories() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            "수집왕",
+            "수집",
             "https://cdn.souzip.com/characters/character1.png",
             List.of()
         );

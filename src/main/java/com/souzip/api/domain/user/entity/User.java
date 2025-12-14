@@ -128,6 +128,8 @@ public class User extends BaseEntity {
         this.deleted = false;
         this.deletedAt = null;
         this.restoredAt = LocalDateTime.now();
+        this.onboardingCompleted = false;
+        this.categories.clear();
     }
 
     public boolean needsOnboarding() {

@@ -75,8 +75,9 @@ class AuthServiceTest {
         OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User newUser = User.of(Provider.KAKAO, oauthUserInfo);
         User spyUser = spy(newUser);
-        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now());
+
         given(spyUser.getUserId()).willReturn("550e8400");
+        given(spyUser.needsOnboarding()).willReturn(true);
 
         given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
         given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
@@ -94,22 +95,22 @@ class AuthServiceTest {
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
         assertThat(response.getUser().nickname()).isEqualTo("수집");
-        assertThat(response.isNewUser()).isTrue();
+        assertThat(response.isNeedsOnboarding()).isTrue();
 
         verify(userRepository).save(any(User.class));
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
     @Test
-    @DisplayName("기존 사용자 로그인 시 User를 조회하고 토큰을 발급한다.")
-    void login_existingUser_findsUserAndIssuesTokens() {
+    @DisplayName("온보딩 완료한 기존 사용자 로그인 시 needsOnboarding은 false다.")
+    void login_existingUserWithOnboardingCompleted_needsOnboardingFalse() {
         // given
         OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User existingUser = User.of(Provider.KAKAO, oauthUserInfo);
         User spyUser = spy(existingUser);
 
-        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now().minusDays(10));
         given(spyUser.getUserId()).willReturn("550e8400");
+        given(spyUser.needsOnboarding()).willReturn(false);
 
         RefreshToken existingToken = RefreshToken.of(
             spyUser,
@@ -131,23 +132,60 @@ class AuthServiceTest {
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
-        assertThat(response.isNewUser()).isFalse();
+        assertThat(response.isNeedsOnboarding()).isFalse();  // ← 온보딩 완료!
 
         verify(userRepository, never()).save(any(User.class));
         verify(spyUser, never()).restore(anyString(), anyString());
     }
 
     @Test
-    @DisplayName("탈퇴 회원 재로그인 시 User를 복구하고 isNewUser는 true다.")
-    void login_withdrawnUser_restoresUserAndIsNewUserTrue() {
+    @DisplayName("온보딩 안 한 기존 사용자 로그인 시 needsOnboarding은 true다.")
+    void login_existingUserWithoutOnboarding_needsOnboardingTrue() {
+        // given
+        OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
+        User existingUser = User.of(Provider.KAKAO, oauthUserInfo);
+        User spyUser = spy(existingUser);
+
+        given(spyUser.getUserId()).willReturn("550e8400");
+        given(spyUser.needsOnboarding()).willReturn(true);
+
+        RefreshToken existingToken = RefreshToken.of(
+            spyUser,
+            "old_refresh_token",
+            LocalDateTime.now().plusDays(20)
+        );
+
+        given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
+        given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
+        given(userRepository.findByProviderAndProviderId(Provider.KAKAO, "kakao123"))
+            .willReturn(Optional.of(spyUser));
+        given(jwtTokenProvider.generateToken("550e8400")).willReturn("access_token");
+        given(jwtTokenProvider.generateRefreshToken("550e8400")).willReturn("refresh_token");
+        given(refreshTokenRepository.findByUser(spyUser)).willReturn(Optional.of(existingToken));
+
+        // when
+        LoginResponse response = authService.login(Provider.KAKAO, "kakao_token");
+
+        // then
+        assertThat(response.getAccessToken()).isEqualTo("access_token");
+        assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
+        assertThat(response.isNeedsOnboarding()).isTrue();  // ← 온보딩 필요!
+
+        verify(userRepository, never()).save(any(User.class));
+        verify(spyUser, never()).restore(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("탈퇴 회원 재로그인 시 User를 복구하고 needsOnboarding은 true다.")
+    void login_withdrawnUser_restoresUserAndNeedsOnboardingTrue() {
         // given
         OAuthUserInfo oauthUserInfo = createOAuthUserInfo();
         User withdrawnUser = User.of(Provider.KAKAO, oauthUserInfo);
         User spyUser = spy(withdrawnUser);
 
-        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now().minusDays(10));
         given(spyUser.isDeleted()).willReturn(true);
         given(spyUser.getUserId()).willReturn("550e8400");
+        given(spyUser.needsOnboarding()).willReturn(true);
 
         doCallRealMethod().when(spyUser).restore(anyString(), anyString());
 
@@ -164,7 +202,7 @@ class AuthServiceTest {
 
         // then
         verify(spyUser).restore("수집", "수집");
-        assertThat(response.isNewUser()).isTrue();
+        assertThat(response.isNeedsOnboarding()).isTrue();
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -176,8 +214,8 @@ class AuthServiceTest {
         User newUser = User.of(Provider.KAKAO, oauthUserInfo);
         User spyUser = spy(newUser);
 
-        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now());
         given(spyUser.getUserId()).willReturn("550e8400");
+        given(spyUser.needsOnboarding()).willReturn(true);
 
         given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
         given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
@@ -203,8 +241,8 @@ class AuthServiceTest {
         User existingUser = User.of(Provider.KAKAO, oauthUserInfo);
         User spyUser = spy(existingUser);
 
-        given(spyUser.getCreatedAt()).willReturn(LocalDateTime.now().minusDays(10));
         given(spyUser.getUserId()).willReturn("550e8400");
+        given(spyUser.needsOnboarding()).willReturn(false);
 
         RefreshToken existingToken = spy(RefreshToken.of(
             spyUser,

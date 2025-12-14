@@ -18,9 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Slf4j
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class UserService {
 
@@ -29,41 +33,55 @@ public class UserService {
 
     @Transactional
     public OnboardingResponse completeOnboarding(Long userId, OnboardingRequest request) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = findUserById(userId);
+        validateOnboardingNotCompleted(user);
 
-        if (!user.needsOnboarding()) {
-            throw new BusinessException(ErrorCode.ONBOARDING_ALREADY_COMPLETED);
-        }
-
-        Set<Category> categories = new HashSet<>();
-        for (String categoryName : request.categories()) {
-            Optional<Category> category = Category.from(categoryName);
-            if (category.isEmpty()) {
-                throw new BusinessException(ErrorCode.INVALID_CATEGORY);
-            }
-            categories.add(category.get());
-        }
-
+        Set<Category> categories = convertToCategories(request.categories());
         user.completeOnboarding(request.nickname(), request.profileImageUrl(), categories);
 
-        List<CategoryDto> categoryDto = categories.stream()
-            .map(CategoryDto::from)
-            .toList();
-
+        List<CategoryDto> categoryDto = convertToCategoryDto(categories);
         return OnboardingResponse.of(user, categoryDto);
     }
 
     @Transactional
-    public void withdraw(Long currentUserId) {
-        User user = userRepository.findById(currentUserId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    public void withdraw(Long userId) {
+        User user = findUserById(userId);
+        deleteRefreshTokenIfExists(user);
 
         user.anonymize();
+        userRepository.delete(user);
+    }
 
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private void validateOnboardingNotCompleted(User user) {
+        if (!user.needsOnboarding()) {
+            throw new BusinessException(ErrorCode.ONBOARDING_ALREADY_COMPLETED);
+        }
+    }
+
+    private Set<Category> convertToCategories(List<String> categoryNames) {
+        return categoryNames.stream()
+            .map(this::convertToCategory)
+            .collect(Collectors.toSet());
+    }
+
+    private Category convertToCategory(String categoryName) {
+        return Category.from(categoryName)
+            .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CATEGORY));
+    }
+
+    private List<CategoryDto> convertToCategoryDto(Set<Category> categories) {
+        return categories.stream()
+            .map(CategoryDto::from)
+            .toList();
+    }
+
+    private void deleteRefreshTokenIfExists(User user) {
         refreshTokenRepository.findByUser(user)
             .ifPresent(refreshTokenRepository::delete);
-
-        userRepository.delete(user);
     }
 }

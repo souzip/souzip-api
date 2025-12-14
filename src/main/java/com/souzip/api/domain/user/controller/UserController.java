@@ -24,7 +24,7 @@ public class UserController {
         @Valid @RequestBody OnboardingRequest request
     ) {
         OnboardingResponse response = userService.completeOnboarding(currentUserId, request);
-        return SuccessResponse.of(response, "온보딩이 완료되었습니다.");
+        return SuccessResponse.of(response, "");
     }
 
     @DeleteMapping("/me")

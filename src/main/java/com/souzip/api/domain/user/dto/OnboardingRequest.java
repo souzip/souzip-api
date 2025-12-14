@@ -8,7 +8,7 @@ import java.util.List;
 
 public record OnboardingRequest(
     @NotBlank(message = "닉네임은 필수입니다.")
-    @Size(min = 2, max = 20, message = "닉네임은 2자 이상 20자 이하여야 합니다.")
+    @Size(max = 15, message = "닉네임은 15자 이하여야 합니다.")
     String nickname,
 
     String profileImageUrl,

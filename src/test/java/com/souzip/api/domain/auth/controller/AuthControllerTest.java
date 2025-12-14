@@ -72,7 +72,7 @@ class AuthControllerTest extends RestDocsSupport {
             .andExpect(jsonPath("$.data.refreshToken").exists())
             .andExpect(jsonPath("$.data.user.userId").value("20251204"))
             .andExpect(jsonPath("$.data.user.nickname").value("수집"))
-            .andExpect(jsonPath("$.data.newUser").value(true))
+            .andExpect(jsonPath("$.data.needsOnboarding").value(true))
             .andDo(document("auth/login-kakao-new-user",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -95,8 +95,8 @@ class AuthControllerTest extends RestDocsSupport {
                         .description("사용자 ID (UUID 앞 8자리)"),
                     fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
-                    fieldWithPath("data.newUser").type(JsonFieldType.BOOLEAN)
-                        .description("신규 사용자 여부"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
+                        .description("온보딩 필요 여부 (true = 온보딩 필요, false = 완료)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지").optional()
                 )
@@ -126,7 +126,7 @@ class AuthControllerTest extends RestDocsSupport {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.newUser").value(false))
+            .andExpect(jsonPath("$.data.needsOnboarding").value(false))
             .andDo(document("auth/login-kakao-existing-user",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -149,8 +149,8 @@ class AuthControllerTest extends RestDocsSupport {
                         .description("사용자 ID"),
                     fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
-                    fieldWithPath("data.newUser").type(JsonFieldType.BOOLEAN)
-                        .description("신규 사용자 여부 (false = 기존 사용자)"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
+                        .description("온보딩 필요 여부 (false = 온보딩 완료, true = 필요)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지").optional()
                 )
@@ -210,7 +210,7 @@ class AuthControllerTest extends RestDocsSupport {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.newUser").value(true))
+            .andExpect(jsonPath("$.data.needsOnboarding").value(true))
             .andDo(document("auth/login-google-new-user",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -233,8 +233,8 @@ class AuthControllerTest extends RestDocsSupport {
                         .description("사용자 ID"),
                     fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
-                    fieldWithPath("data.newUser").type(JsonFieldType.BOOLEAN)
-                        .description("신규 사용자 여부"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
+                        .description("온보딩 필요 여부"),  // ← 수정!
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지").optional()
                 )
@@ -264,7 +264,7 @@ class AuthControllerTest extends RestDocsSupport {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.newUser").value(false));
+            .andExpect(jsonPath("$.data.needsOnboarding").value(false));
     }
 
     @Test
@@ -290,7 +290,7 @@ class AuthControllerTest extends RestDocsSupport {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.newUser").value(true))
+            .andExpect(jsonPath("$.data.needsOnboarding").value(true))
             .andDo(document("auth/login-apple-new-user",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -313,8 +313,8 @@ class AuthControllerTest extends RestDocsSupport {
                         .description("사용자 ID"),
                     fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
-                    fieldWithPath("data.newUser").type(JsonFieldType.BOOLEAN)
-                        .description("신규 사용자 여부"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
+                        .description("온보딩 필요 여부"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지").optional()
                 )
@@ -344,7 +344,7 @@ class AuthControllerTest extends RestDocsSupport {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.newUser").value(false));
+            .andExpect(jsonPath("$.data.needsOnboarding").value(false));
     }
 
     @Test
@@ -418,7 +418,7 @@ class AuthControllerTest extends RestDocsSupport {
             .willReturn(response);
 
         // when & then
-        mockMvc.perform(post("/api/auth/login/{provider}", "KAKAO")  // 대문자
+        mockMvc.perform(post("/api/auth/login/{provider}", "KAKAO")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())

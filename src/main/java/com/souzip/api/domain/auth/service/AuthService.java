@@ -41,7 +41,6 @@ public class AuthService {
         OAuthUserInfo oauthUserInfo = oauthClient.getUserInfo(oauthAccessToken);
 
         User user = findOrCreateUser(provider, oauthUserInfo);
-        boolean isNewUser = isRecentlyJoined(user);
 
         String accessToken = jwtTokenProvider.generateToken(user.getUserId());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
@@ -49,7 +48,9 @@ public class AuthService {
         saveRefreshToken(user, refreshToken);
 
         LoginUserInfo userInfo = LoginUserInfo.from(user);
-        return LoginResponse.of(accessToken, refreshToken, userInfo, isNewUser);
+        boolean needsOnboarding = user.needsOnboarding();
+
+        return LoginResponse.of(accessToken, refreshToken, userInfo, needsOnboarding);
     }
 
     @Transactional
@@ -104,11 +105,6 @@ public class AuthService {
     private User createUser(Provider provider, OAuthUserInfo oauthUserInfo) {
         User user = User.of(provider, oauthUserInfo);
         return userRepository.save(user);
-    }
-
-    private boolean isRecentlyJoined(User user) {
-        LocalDateTime threshold = LocalDateTime.now().minusSeconds(5);
-        return user.isRecentlyCreated(threshold) || user.isRecentlyRestored(threshold);
     }
 
     private void saveRefreshToken(User user, String tokenValue) {

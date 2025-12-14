@@ -1,8 +1,11 @@
 package com.souzip.api.domain.user.entity;
 
 import com.souzip.api.domain.auth.dto.OAuthUserInfo;
+import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 
@@ -50,6 +53,18 @@ public class User extends BaseEntity {
 
     private String profileImageUrl;
 
+    private boolean onboardingCompleted;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+        name = "user_category",
+        joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "category")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Set<Category> categories = new HashSet<>();
+
     private LocalDateTime deletedAt;
 
     @Column(nullable = false)
@@ -78,6 +93,8 @@ public class User extends BaseEntity {
             .nickname(nickname)
             .email(email)
             .profileImageUrl(profileImageUrl)
+            .onboardingCompleted(false)
+            .categories(new HashSet<>())
             .deleted(false)
             .build();
     }
@@ -113,12 +130,15 @@ public class User extends BaseEntity {
         this.restoredAt = LocalDateTime.now();
     }
 
-    public boolean isRecentlyCreated(LocalDateTime threshold) {
-        return this.getCreatedAt().isAfter(threshold);
+    public boolean needsOnboarding() {
+        return !onboardingCompleted;
     }
 
-    public boolean isRecentlyRestored(LocalDateTime threshold) {
-        return this.restoredAt != null && this.restoredAt.isAfter(threshold);
+    public void completeOnboarding(String nickname, String profileImageUrl, Set<Category> categories) {
+        this.nickname = nickname;
+        this.profileImageUrl = profileImageUrl;
+        this.categories = this.categories;
+        this.onboardingCompleted = true;
     }
 
     public boolean isDeleted() {

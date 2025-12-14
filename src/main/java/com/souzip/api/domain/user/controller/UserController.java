@@ -1,9 +1,12 @@
 package com.souzip.api.domain.user.controller;
 
+import com.souzip.api.domain.user.dto.OnboardingRequest;
+import com.souzip.api.domain.user.dto.OnboardingResponse;
 import com.souzip.api.domain.user.service.UserService;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
 import com.souzip.api.global.security.annotation.RequireAuth;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +16,16 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping("/onboarding")
+    @RequireAuth
+    public SuccessResponse<OnboardingResponse> completeOnboarding(
+        @CurrentUserId Long currentUserId,
+        @Valid @RequestBody OnboardingRequest request
+    ) {
+        OnboardingResponse response = userService.completeOnboarding(currentUserId, request);
+        return SuccessResponse.of(response, "온보딩이 완료되었습니다.");
+    }
 
     @DeleteMapping("/me")
     @RequireAuth

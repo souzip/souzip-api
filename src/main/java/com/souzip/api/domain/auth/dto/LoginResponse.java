@@ -9,19 +9,19 @@ public class LoginResponse {
     private String accessToken;
     private String refreshToken;
     private LoginUserInfo user;
-    private boolean newUser;
+    private boolean needsOnboarding;
 
     public static LoginResponse of(
         String accessToken,
         String refreshToken,
         LoginUserInfo user,
-        boolean newUser
+        boolean needsOnboarding
     ) {
         return LoginResponse.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .user(user)
-            .newUser(newUser)
+            .needsOnboarding(needsOnboarding)
             .build();
     }
 }

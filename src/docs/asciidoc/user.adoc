@@ -1,6 +1,113 @@
 [[user-api]]
 == User API
 
+[[user-onboarding]]
+=== 온보딩 완료
+
+신규 사용자가 온보딩을 완료하고 닉네임, 프로필 이미지, 관심 카테고리를 설정하는 API입니다.
+
+* 온보딩은 최초 1회만 가능합니다.
+* 닉네임은 최대 15자까지 입력 가능합니다.
+* 카테고리는 최소 1개 이상 선택해야 합니다.
+
+==== HTTP 요청
+include::{snippets}/user/onboarding-success/http-request.adoc[]
+
+==== 요청 헤더
+[cols="1,1,1,3"]
+|===
+|헤더 |타입 |필수 |설명
+
+|Authorization
+|String
+|O
+|Bearer {accessToken}
+|===
+
+==== 요청 필드
+include::{snippets}/user/onboarding-success/request-fields.adoc[]
+
+==== HTTP 응답
+include::{snippets}/user/onboarding-success/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/user/onboarding-success/response-fields.adoc[]
+
+NOTE: 온보딩 완료 후 재로그인 시 `needsOnboarding: false`가 반환됩니다.
+
+[[user-onboarding-errors]]
+==== 온보딩 에러 케이스
+
+===== 이미 온보딩 완료
+
+====== HTTP 요청
+include::{snippets}/user/onboarding-already-completed/http-request.adoc[]
+
+====== 요청 필드
+include::{snippets}/user/onboarding-already-completed/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/user/onboarding-already-completed/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/user/onboarding-already-completed/response-fields.adoc[]
+
+===== 유효하지 않은 카테고리
+
+====== HTTP 요청
+include::{snippets}/user/onboarding-invalid-category/http-request.adoc[]
+
+====== 요청 필드
+include::{snippets}/user/onboarding-invalid-category/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/user/onboarding-invalid-category/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/user/onboarding-invalid-category/response-fields.adoc[]
+
+===== 닉네임 빈값
+
+====== HTTP 요청
+include::{snippets}/user/onboarding-empty-nickname/http-request.adoc[]
+
+====== 요청 필드
+include::{snippets}/user/onboarding-empty-nickname/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/user/onboarding-empty-nickname/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/user/onboarding-empty-nickname/response-fields.adoc[]
+
+===== 닉네임 길이 초과
+
+====== HTTP 요청
+include::{snippets}/user/onboarding-nickname-too-long/http-request.adoc[]
+
+====== 요청 필드
+include::{snippets}/user/onboarding-nickname-too-long/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/user/onboarding-nickname-too-long/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/user/onboarding-nickname-too-long/response-fields.adoc[]
+
+===== 카테고리 빈 배열
+
+====== HTTP 요청
+include::{snippets}/user/onboarding-empty-categories/http-request.adoc[]
+
+====== 요청 필드
+include::{snippets}/user/onboarding-empty-categories/request-fields.adoc[]
+
+====== HTTP 응답
+include::{snippets}/user/onboarding-empty-categories/http-response.adoc[]
+
+====== 응답 필드
+include::{snippets}/user/onboarding-empty-categories/response-fields.adoc[]
+
 [[user-withdraw]]
 === 회원탈퇴
 
@@ -25,3 +132,5 @@ include::{snippets}/user/withdraw/http-response.adoc[]
 
 ==== 응답 필드
 include::{snippets}/user/withdraw/response-fields.adoc[]
+
+NOTE: 회원탈퇴 후 동일한 OAuth 계정으로 재가입 시 새로운 사용자로 취급되며, 온보딩을 다시 진행해야 합니다.

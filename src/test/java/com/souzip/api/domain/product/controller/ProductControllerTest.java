@@ -1,11 +1,11 @@
 package com.souzip.api.domain.product.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
+import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.product.dto.ProductCreateRequestDto;
 import com.souzip.api.domain.product.dto.ProductResponseDto;
 import com.souzip.api.domain.product.dto.ProductUpdateRequestDto;
-import com.souzip.api.domain.product.entity.Category;
 import com.souzip.api.domain.product.entity.Purpose;
 import com.souzip.api.domain.product.service.ProductService;
 import com.souzip.api.global.security.annotation.CurrentUserId;

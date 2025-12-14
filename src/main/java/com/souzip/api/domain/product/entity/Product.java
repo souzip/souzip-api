@@ -1,5 +1,6 @@
 package com.souzip.api.domain.product.entity;
 
+import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

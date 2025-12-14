@@ -1,6 +1,6 @@
 package com.souzip.api.domain.product.dto;
 
-import com.souzip.api.domain.product.entity.Category;
+import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.product.entity.Purpose;
 import org.springframework.web.multipart.MultipartFile;
 

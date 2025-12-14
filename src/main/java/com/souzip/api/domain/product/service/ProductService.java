@@ -96,7 +96,7 @@ public class ProductService {
 
         return Optional.ofNullable(files)
                 .orElse(List.of())
-                .stream()
+            .stream()
                 .map(file -> fileService.uploadFile(
                         uuid,
                         "Product",

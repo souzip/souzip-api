@@ -53,6 +53,7 @@ public class User extends BaseEntity {
 
     private String profileImageUrl;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean onboardingCompleted;
 
     @ElementCollection(fetch = FetchType.LAZY)

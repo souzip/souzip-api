@@ -15,7 +15,6 @@ public record ProductResponseDto(
         Category category,
         Purpose purpose,
         Long cityId,
-        Long userId,
         List<FileResponse> files
 ) {
 
@@ -28,7 +27,6 @@ public record ProductResponseDto(
                 product.getCategory(),
                 product.getPurpose(),
                 product.getCityId(),
-                product.getUserId(),
                 files
         );
     }

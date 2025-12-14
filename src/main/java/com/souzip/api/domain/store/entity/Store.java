@@ -6,6 +6,8 @@ import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,27 +24,27 @@ public class Store extends BaseEntity {
     private City city;
 
     @Column(nullable = false, precision = 10, scale = 6)
-    private Double latitude;
+    private BigDecimal latitude;
 
     @Column(nullable = false, precision = 10, scale = 6)
-    private Double longitude;
+    private BigDecimal longitude;
 
     @Column(length = 255)
     private String note;
 
     public static Store of(
-        Country country,
-        City city,
-        Double latitude,
-        Double longitude,
-        String note
+            Country country,
+            City city,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            String note
     ) {
         return Store.builder()
-            .country(country)
-            .city(city)
-            .latitude(latitude)
-            .longitude(longitude)
-            .note(note)
-            .build();
+                .country(country)
+                .city(city)
+                .latitude(latitude)
+                .longitude(longitude)
+                .note(note)
+                .build();
     }
 }

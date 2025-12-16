@@ -3,9 +3,9 @@ package com.souzip.api.domain.souvenir.controller;
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.file.dto.FileResponse;
-import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequestDto;
-import com.souzip.api.domain.souvenir.dto.SouvenirResponseDto;
-import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequestDto;
+import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
+import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
+import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.entity.Purpose;
 import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.security.annotation.CurrentUserId;
@@ -76,7 +76,7 @@ class SouvenirControllerTest extends RestDocsSupport {
     @DisplayName("상품 생성")
     void createProductWithFiles() throws Exception {
 
-        SouvenirCreateRequestDto request = new SouvenirCreateRequestDto(
+        SouvenirCreateRequest request = new SouvenirCreateRequest(
                 "테스트 기념품",
                 10000,
                 "테스트 설명",
@@ -105,7 +105,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
         );
 
-        SouvenirResponseDto response = new SouvenirResponseDto(
+        SouvenirResponse response = new SouvenirResponse(
                 1L,
                 "테스트 기념품",
                 10000,
@@ -117,7 +117,7 @@ class SouvenirControllerTest extends RestDocsSupport {
         );
 
         given(souvenirService.createProduct(
-                any(SouvenirCreateRequestDto.class),
+                any(SouvenirCreateRequest.class),
                 eq(1L),
                 any(List.class)
         )).willReturn(response);
@@ -158,7 +158,7 @@ class SouvenirControllerTest extends RestDocsSupport {
     void updateProductWithFiles() throws Exception {
         Long productId = 1L;
 
-        SouvenirUpdateRequestDto requestDto = new SouvenirUpdateRequestDto(
+        SouvenirUpdateRequest requestDto = new SouvenirUpdateRequest(
                 "업데이트 기념품",
                 20000,
                 "업데이트 설명",
@@ -187,7 +187,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
         );
 
-        SouvenirResponseDto response = new SouvenirResponseDto(
+        SouvenirResponse response = new SouvenirResponse(
                 productId,
                 requestDto.name(),
                 requestDto.price(),
@@ -200,7 +200,7 @@ class SouvenirControllerTest extends RestDocsSupport {
 
         given(souvenirService.updateProduct(
                 eq(productId),
-                any(SouvenirUpdateRequestDto.class),
+                any(SouvenirUpdateRequest.class),
                 eq(1L),
                 any(List.class)
         )).willReturn(response);

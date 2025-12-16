@@ -7,7 +7,7 @@ import com.souzip.api.domain.souvenir.entity.Souvenir;
 
 import java.util.List;
 
-public record SouvenirResponseDto(
+public record SouvenirResponse(
         Long id,
         String name,
         Integer price,
@@ -18,8 +18,8 @@ public record SouvenirResponseDto(
         List<FileResponse> files
 ) {
 
-    public static SouvenirResponseDto from(Souvenir souvenir, List<FileResponse> files) {
-        return new SouvenirResponseDto(
+    public static SouvenirResponse from(Souvenir souvenir, List<FileResponse> files) {
+        return new SouvenirResponse(
                 souvenir.getId(),
                 souvenir.getName(),
                 souvenir.getPrice(),

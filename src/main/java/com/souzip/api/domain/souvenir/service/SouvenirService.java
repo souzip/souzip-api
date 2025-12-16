@@ -2,9 +2,9 @@ package com.souzip.api.domain.souvenir.service;
 
 import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.file.service.FileService;
-import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequestDto;
-import com.souzip.api.domain.souvenir.dto.SouvenirResponseDto;
-import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequestDto;
+import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
+import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
+import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
 import com.souzip.api.domain.user.repository.UserRepository;
@@ -27,16 +27,16 @@ public class SouvenirService {
     private final UserRepository userRepository;
     private final FileService fileService;
 
-    public SouvenirResponseDto getProduct(Long productId) {
+    public SouvenirResponse getProduct(Long productId) {
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(productId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
         List<FileResponse> files = fileService.getFilesByEntity("Product", productId);
-        return SouvenirResponseDto.from(souvenir, files);
+        return SouvenirResponse.from(souvenir, files);
     }
 
     @Transactional
-    public SouvenirResponseDto createProduct(SouvenirCreateRequestDto request, Long userId, List<MultipartFile> files) {
+    public SouvenirResponse createProduct(SouvenirCreateRequest request, Long userId, List<MultipartFile> files) {
 
         Souvenir souvenir = Souvenir.of(
                 request.name(),
@@ -50,11 +50,11 @@ public class SouvenirService {
 
         Souvenir savedProduct = souvenirRepository.save(souvenir);
         List<FileResponse> uploadedFiles = uploadFiles(savedProduct.getId(), userId, files);
-        return SouvenirResponseDto.from(savedProduct, uploadedFiles);
+        return SouvenirResponse.from(savedProduct, uploadedFiles);
     }
 
     @Transactional
-    public SouvenirResponseDto updateProduct(Long id, SouvenirUpdateRequestDto request, Long userId, List<MultipartFile> files) {
+    public SouvenirResponse updateProduct(Long id, SouvenirUpdateRequest request, Long userId, List<MultipartFile> files) {
         Souvenir product = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -73,7 +73,7 @@ public class SouvenirService {
 
         fileService.deleteFilesByEntity("Product", id);
         List<FileResponse> uploadedFiles = uploadFiles(id, userId, files);
-        return SouvenirResponseDto.from(product, uploadedFiles);
+        return SouvenirResponse.from(product, uploadedFiles);
     }
 
     @Transactional

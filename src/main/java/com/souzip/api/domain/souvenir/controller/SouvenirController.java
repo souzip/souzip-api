@@ -1,8 +1,8 @@
 package com.souzip.api.domain.souvenir.controller;
 
-import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequestDto;
-import com.souzip.api.domain.souvenir.dto.SouvenirResponseDto;
-import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequestDto;
+import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
+import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
+import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
@@ -20,29 +20,29 @@ public class SouvenirController {
     private final SouvenirService souvenirService;
 
     @GetMapping("/{id}")
-    public SuccessResponse<SouvenirResponseDto> getProduct(@PathVariable Long id) {
-        SouvenirResponseDto response = souvenirService.getProduct(id);
+    public SuccessResponse<SouvenirResponse> getProduct(@PathVariable Long id) {
+        SouvenirResponse response = souvenirService.getProduct(id);
         return SuccessResponse.of(response, "기념품이 성공적으로 조회되었습니다.");
     }
 
     @PostMapping
-    public SuccessResponse<SouvenirResponseDto> createProduct(
-            @RequestPart("product") SouvenirCreateRequestDto request,
+    public SuccessResponse<SouvenirResponse> createProduct(
+            @RequestPart("product") SouvenirCreateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        SouvenirResponseDto response = souvenirService.createProduct(request, userId, files);
+        SouvenirResponse response = souvenirService.createProduct(request, userId, files);
         return SuccessResponse.of(response, "기념품이 성공적으로 등록되었습니다.");
     }
 
     @PutMapping("/{id}")
-    public SuccessResponse<SouvenirResponseDto> updateProduct(
+    public SuccessResponse<SouvenirResponse> updateProduct(
             @PathVariable Long id,
-            @RequestPart("product") SouvenirUpdateRequestDto request,
+            @RequestPart("product") SouvenirUpdateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        SouvenirResponseDto response = souvenirService.updateProduct(id, request, userId, files);
+        SouvenirResponse response = souvenirService.updateProduct(id, request, userId, files);
         return SuccessResponse.of(response, "기념품이 성공적으로 수정되었습니다.");
     }
 

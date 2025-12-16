@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public record SouvenirUpdateRequestDto(
+public record SouvenirUpdateRequest(
         String name,
         Integer price,
         String description,

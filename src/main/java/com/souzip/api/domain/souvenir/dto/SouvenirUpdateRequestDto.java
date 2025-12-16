@@ -1,12 +1,12 @@
-package com.souzip.api.domain.product.dto;
+package com.souzip.api.domain.souvenir.dto;
 
 import com.souzip.api.domain.category.entity.Category;
-import com.souzip.api.domain.product.entity.Purpose;
+import com.souzip.api.domain.souvenir.entity.Purpose;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public record ProductUpdateRequestDto(
+public record SouvenirUpdateRequestDto(
         String name,
         Integer price,
         String description,

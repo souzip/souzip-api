@@ -1,19 +1,18 @@
-package com.souzip.api.domain.product.controller;
+package com.souzip.api.domain.souvenir.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.file.dto.FileResponse;
-import com.souzip.api.domain.product.dto.ProductCreateRequestDto;
-import com.souzip.api.domain.product.dto.ProductResponseDto;
-import com.souzip.api.domain.product.dto.ProductUpdateRequestDto;
-import com.souzip.api.domain.product.entity.Purpose;
-import com.souzip.api.domain.product.service.ProductService;
+import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequestDto;
+import com.souzip.api.domain.souvenir.dto.SouvenirResponseDto;
+import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequestDto;
+import com.souzip.api.domain.souvenir.entity.Purpose;
+import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.security.annotation.CurrentUserId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.RestDocumentationContextProvider;
@@ -41,13 +40,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class ProductControllerTest extends RestDocsSupport {
+class SouvenirControllerTest extends RestDocsSupport {
 
-    private final ProductService productService = org.mockito.Mockito.mock(ProductService.class);
+    private final SouvenirService souvenirService = org.mockito.Mockito.mock(SouvenirService.class);
 
     @Override
     protected Object initController() {
-        return new ProductController(productService);
+        return new SouvenirController(souvenirService);
     }
 
     @BeforeEach
@@ -77,7 +76,7 @@ class ProductControllerTest extends RestDocsSupport {
     @DisplayName("상품 생성")
     void createProductWithFiles() throws Exception {
 
-        ProductCreateRequestDto request = new ProductCreateRequestDto(
+        SouvenirCreateRequestDto request = new SouvenirCreateRequestDto(
                 "테스트 기념품",
                 10000,
                 "테스트 설명",
@@ -106,7 +105,7 @@ class ProductControllerTest extends RestDocsSupport {
                 new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
         );
 
-        ProductResponseDto response = new ProductResponseDto(
+        SouvenirResponseDto response = new SouvenirResponseDto(
                 1L,
                 "테스트 기념품",
                 10000,
@@ -117,8 +116,8 @@ class ProductControllerTest extends RestDocsSupport {
                 filesResponse
         );
 
-        given(productService.createProduct(
-                any(ProductCreateRequestDto.class),
+        given(souvenirService.createProduct(
+                any(SouvenirCreateRequestDto.class),
                 eq(1L),
                 any(List.class)
         )).willReturn(response);
@@ -159,7 +158,7 @@ class ProductControllerTest extends RestDocsSupport {
     void updateProductWithFiles() throws Exception {
         Long productId = 1L;
 
-        ProductUpdateRequestDto requestDto = new ProductUpdateRequestDto(
+        SouvenirUpdateRequestDto requestDto = new SouvenirUpdateRequestDto(
                 "업데이트 기념품",
                 20000,
                 "업데이트 설명",
@@ -188,7 +187,7 @@ class ProductControllerTest extends RestDocsSupport {
                 new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
         );
 
-        ProductResponseDto response = new ProductResponseDto(
+        SouvenirResponseDto response = new SouvenirResponseDto(
                 productId,
                 requestDto.name(),
                 requestDto.price(),
@@ -199,9 +198,9 @@ class ProductControllerTest extends RestDocsSupport {
                 filesResponse
         );
 
-        given(productService.updateProduct(
+        given(souvenirService.updateProduct(
                 eq(productId),
-                any(ProductUpdateRequestDto.class),
+                any(SouvenirUpdateRequestDto.class),
                 eq(1L),
                 any(List.class)
         )).willReturn(response);

@@ -1,12 +1,12 @@
-package com.souzip.api.domain.product.service;
+package com.souzip.api.domain.souvenir.service;
 
 import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.file.service.FileService;
-import com.souzip.api.domain.product.dto.ProductCreateRequestDto;
-import com.souzip.api.domain.product.dto.ProductResponseDto;
-import com.souzip.api.domain.product.dto.ProductUpdateRequestDto;
-import com.souzip.api.domain.product.entity.Product;
-import com.souzip.api.domain.product.repository.ProductRepository;
+import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequestDto;
+import com.souzip.api.domain.souvenir.dto.SouvenirResponseDto;
+import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequestDto;
+import com.souzip.api.domain.souvenir.entity.Souvenir;
+import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
 import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
@@ -21,24 +21,24 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ProductService {
+public class SouvenirService {
 
-    private final ProductRepository productRepository;
+    private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
     private final FileService fileService;
 
-    public ProductResponseDto getProduct(Long productId) {
-        Product product = productRepository.findByIdAndDeletedFalse(productId)
+    public SouvenirResponseDto getProduct(Long productId) {
+        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(productId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
         List<FileResponse> files = fileService.getFilesByEntity("Product", productId);
-        return ProductResponseDto.from(product, files);
+        return SouvenirResponseDto.from(souvenir, files);
     }
 
     @Transactional
-    public ProductResponseDto createProduct(ProductCreateRequestDto request, Long userId, List<MultipartFile> files) {
+    public SouvenirResponseDto createProduct(SouvenirCreateRequestDto request, Long userId, List<MultipartFile> files) {
 
-        Product product = Product.of(
+        Souvenir souvenir = Souvenir.of(
                 request.name(),
                 request.price(),
                 request.description(),
@@ -48,14 +48,14 @@ public class ProductService {
                 userId
         );
 
-        Product savedProduct = productRepository.save(product);
+        Souvenir savedProduct = souvenirRepository.save(souvenir);
         List<FileResponse> uploadedFiles = uploadFiles(savedProduct.getId(), userId, files);
-        return ProductResponseDto.from(savedProduct, uploadedFiles);
+        return SouvenirResponseDto.from(savedProduct, uploadedFiles);
     }
 
     @Transactional
-    public ProductResponseDto updateProduct(Long id, ProductUpdateRequestDto request, Long userId, List<MultipartFile> files) {
-        Product product = productRepository.findByIdAndDeletedFalse(id)
+    public SouvenirResponseDto updateProduct(Long id, SouvenirUpdateRequestDto request, Long userId, List<MultipartFile> files) {
+        Souvenir product = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (!product.getUserId().equals(userId)) {
@@ -73,12 +73,12 @@ public class ProductService {
 
         fileService.deleteFilesByEntity("Product", id);
         List<FileResponse> uploadedFiles = uploadFiles(id, userId, files);
-        return ProductResponseDto.from(product, uploadedFiles);
+        return SouvenirResponseDto.from(product, uploadedFiles);
     }
 
     @Transactional
     public void deleteProduct(Long id, Long userId) {
-        Product product = productRepository.findByIdAndDeletedFalse(id)
+        Souvenir product = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (!product.getUserId().equals(userId)) {

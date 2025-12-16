@@ -1,4 +1,4 @@
-package com.souzip.api.domain.product.entity;
+package com.souzip.api.domain.souvenir.entity;
 
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.global.entity.BaseEntity;
@@ -13,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
-public class Product extends BaseEntity {
+public class Souvenir extends BaseEntity {
 
     @Column(nullable = false)
     private String name;
@@ -42,7 +42,7 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Boolean deleted = false;
 
-    public static Product of(
+    public static Souvenir of(
             String name,
             Integer price,
             String description,
@@ -51,7 +51,7 @@ public class Product extends BaseEntity {
             Long cityId,
             Long userId
     ) {
-        return Product.builder()
+        return Souvenir.builder()
                 .name(name)
                 .price(price)
                 .description(description)

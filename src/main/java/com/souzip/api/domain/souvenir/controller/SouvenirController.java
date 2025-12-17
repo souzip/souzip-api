@@ -13,45 +13,47 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/souvenirs")
 @RequiredArgsConstructor
 public class SouvenirController {
 
     private final SouvenirService souvenirService;
 
+    // 기념품 가격 정보 조회 API (한화, 현지 가격)
+
     @GetMapping("/{id}")
-    public SuccessResponse<SouvenirResponse> getProduct(@PathVariable Long id) {
-        SouvenirResponse response = souvenirService.getProduct(id);
+    public SuccessResponse<SouvenirResponse> getSouvenir(@PathVariable Long id) {
+        SouvenirResponse response = souvenirService.getSouvenir(id);
         return SuccessResponse.of(response, "기념품이 성공적으로 조회되었습니다.");
     }
 
     @PostMapping
-    public SuccessResponse<SouvenirResponse> createProduct(
-            @RequestPart("product") SouvenirCreateRequest request,
+    public SuccessResponse<SouvenirResponse> createSouvenir(
+            @RequestPart("souvenir") SouvenirCreateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        SouvenirResponse response = souvenirService.createProduct(request, userId, files);
+        SouvenirResponse response = souvenirService.createSouvenir(request, userId, files);
         return SuccessResponse.of(response, "기념품이 성공적으로 등록되었습니다.");
     }
 
     @PutMapping("/{id}")
-    public SuccessResponse<SouvenirResponse> updateProduct(
+    public SuccessResponse<SouvenirResponse> updateSouvenir(
             @PathVariable Long id,
-            @RequestPart("product") SouvenirUpdateRequest request,
+            @RequestPart("souvenir") SouvenirUpdateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        SouvenirResponse response = souvenirService.updateProduct(id, request, userId, files);
+        SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId, files);
         return SuccessResponse.of(response, "기념품이 성공적으로 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}")
-    public SuccessResponse<Void> deleteProduct(
+    public SuccessResponse<Void> deleteSouvenir(
             @PathVariable Long id,
             @CurrentUserId Long userId
     ) {
-        souvenirService.deleteProduct(id, userId);
+        souvenirService.deleteSouvenir(id, userId);
         return SuccessResponse.of(null, "기념품이 성공적으로 삭제되었습니다.");
     }
 }

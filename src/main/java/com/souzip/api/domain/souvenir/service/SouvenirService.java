@@ -27,69 +27,90 @@ public class SouvenirService {
     private final UserRepository userRepository;
     private final FileService fileService;
 
-    public SouvenirResponse getProduct(Long productId) {
-        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(productId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+    public SouvenirResponse getSouvenir(Long souvenirId) {
+        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(souvenirId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
-        List<FileResponse> files = fileService.getFilesByEntity("Product", productId);
+        List<FileResponse> files = fileService.getFilesByEntity("Souvenir", souvenirId);
         return SouvenirResponse.from(souvenir, files);
     }
 
     @Transactional
-    public SouvenirResponse createProduct(SouvenirCreateRequest request, Long userId, List<MultipartFile> files) {
+    public SouvenirResponse createSouvenir(
+            SouvenirCreateRequest request,
+            Long userId,
+            List<MultipartFile> files
+    ) {
 
         Souvenir souvenir = Souvenir.of(
                 request.name(),
-                request.price(),
+                request.localPrice(),
+                request.localCurrency(),
+                request.krwPrice(),
                 request.description(),
+                request.address(),
+                request.locationDetail(),
+                request.latitude(),
+                request.longitude(),
                 request.category(),
                 request.purpose(),
-                request.cityId(),
                 userId
         );
 
-        Souvenir savedProduct = souvenirRepository.save(souvenir);
-        List<FileResponse> uploadedFiles = uploadFiles(savedProduct.getId(), userId, files);
-        return SouvenirResponse.from(savedProduct, uploadedFiles);
+        Souvenir savedSouvenir = souvenirRepository.save(souvenir);
+        List<FileResponse> uploadedFiles = uploadFiles(savedSouvenir.getId(), userId, files);
+
+        return SouvenirResponse.from(savedSouvenir, uploadedFiles);
     }
 
     @Transactional
-    public SouvenirResponse updateProduct(Long id, SouvenirUpdateRequest request, Long userId, List<MultipartFile> files) {
-        Souvenir product = souvenirRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+    public SouvenirResponse updateSouvenir(
+            Long id,
+            SouvenirUpdateRequest request,
+            Long userId,
+            List<MultipartFile> files
+    ) {
+        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
-        if (!product.getUserId().equals(userId)) {
+        if (!souvenir.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
-        product.update(
+        souvenir.update(
                 request.name(),
-                request.price(),
+                request.localPrice(),
+                request.localCurrency(),
+                request.krwPrice(),
                 request.description(),
+                request.address(),
+                request.locationDetail(),
+                request.latitude(),
+                request.longitude(),
                 request.category(),
-                request.purpose(),
-                request.cityId()
+                request.purpose()
         );
 
-        fileService.deleteFilesByEntity("Product", id);
+        fileService.deleteFilesByEntity("Souvenir", id);
         List<FileResponse> uploadedFiles = uploadFiles(id, userId, files);
-        return SouvenirResponse.from(product, uploadedFiles);
+
+        return SouvenirResponse.from(souvenir, uploadedFiles);
     }
 
     @Transactional
-    public void deleteProduct(Long id, Long userId) {
-        Souvenir product = souvenirRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+    public void deleteSouvenir(Long id, Long userId) {
+        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
-        if (!product.getUserId().equals(userId)) {
+        if (!souvenir.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
-        fileService.deleteFilesByEntity("Product", id);
-        product.delete();
+        fileService.deleteFilesByEntity("Souvenir", id);
+        souvenir.delete();
     }
 
-    private List<FileResponse> uploadFiles(Long productId, Long userId, List<MultipartFile> files) {
+    private List<FileResponse> uploadFiles(Long souvenirId, Long userId, List<MultipartFile> files) {
         String uuid = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND))
                 .getUserId();
@@ -99,8 +120,8 @@ public class SouvenirService {
             .stream()
                 .map(file -> fileService.uploadFile(
                         uuid,
-                        "Product",
-                        productId,
+                        "Souvenir",
+                        souvenirId,
                         file,
                         null
                 ))

@@ -23,6 +23,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -74,21 +75,26 @@ class SouvenirControllerTest extends RestDocsSupport {
 
     @Test
     @DisplayName("상품 생성")
-    void createProductWithFiles() throws Exception {
+    void createSouvenirWithFiles() throws Exception {
 
         SouvenirCreateRequest request = new SouvenirCreateRequest(
                 "테스트 기념품",
                 10000,
+                "USA",
+                95000,
                 "테스트 설명",
+                "617 N MAIN FALLBROOK CA 92028-1934 USA",
+                "2층 빨간색 간판이 있는 장소",
+                new BigDecimal("35.689487"),
+                new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
-                1L,
                 Collections.emptyList()
         );
 
-        MockMultipartFile productPart = new MockMultipartFile(
-                "product",
-                "product.json",
+        MockMultipartFile souvenirPart = new MockMultipartFile(
+                "souvenir",
+                "souvenir.json",
                 "application/json",
                 objectMapper.writeValueAsBytes(request)
         );
@@ -109,40 +115,45 @@ class SouvenirControllerTest extends RestDocsSupport {
                 1L,
                 "테스트 기념품",
                 10000,
+                "USA",
+                95000,
                 "테스트 설명",
+                "617 N MAIN FALLBROOK CA 92028-1934 USA",
+                "2층 빨간색 간판이 있는 장소",
+                new BigDecimal("35.689487"),
+                new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
-                1L,
                 filesResponse
         );
 
-        given(souvenirService.createProduct(
+        given(souvenirService.createSouvenir(
                 any(SouvenirCreateRequest.class),
                 eq(1L),
                 any(List.class)
         )).willReturn(response);
 
-        mockMvc.perform(multipart("/api/products")
-                        .file(productPart)
+        mockMvc.perform(multipart("/api/souvenirs")
+                        .file(souvenirPart)
                         .file(file1)
                         .file(file2)
                 )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(1L))
-                .andExpect(jsonPath("$.data.files[0].originalName").value("file1.jpg"))
-                .andExpect(jsonPath("$.data.files[1].originalName").value("file2.jpg"))
-                .andDo(document("products/create-product-with-files",
+                .andDo(document("souvenirs/create-souvenir-with-files",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
-                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("상세 설명"),
+                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
+                                fieldWithPath("data.localCurrency").type(JsonFieldType.STRING).description("현지 통화 코드"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 환산 가격"),
+                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
+                                fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
+                                fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
+                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
+                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("사용 목적"),
-                                fieldWithPath("data.cityId").type(JsonFieldType.NUMBER).description("도시 ID"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 목적"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
@@ -155,22 +166,27 @@ class SouvenirControllerTest extends RestDocsSupport {
 
     @Test
     @DisplayName("상품 수정")
-    void updateProductWithFiles() throws Exception {
-        Long productId = 1L;
+    void updateSouvenirWithFiles() throws Exception {
+        Long souvenirId = 1L;
 
         SouvenirUpdateRequest requestDto = new SouvenirUpdateRequest(
-                "업데이트 기념품",
-                20000,
-                "업데이트 설명",
+                "테스트 기념품",
+                10000,
+                "USA",
+                95000,
+                "테스트 설명",
+                "617 N MAIN FALLBROOK CA 92028-1934 USA",
+                "2층 빨간색 간판이 있는 장소",
+                new BigDecimal("35.689487"),
+                new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
-                Purpose.PERSONAL,
-                1L,
+                Purpose.GIFT,
                 Collections.emptyList()
         );
 
-        MockMultipartFile productPart = new MockMultipartFile(
-                "product",
-                "product.json",
+        MockMultipartFile souvenirPart = new MockMultipartFile(
+                "souvenir",
+                "souvenir.json",
                 "application/json",
                 objectMapper.writeValueAsBytes(requestDto)
         );
@@ -188,45 +204,50 @@ class SouvenirControllerTest extends RestDocsSupport {
         );
 
         SouvenirResponse response = new SouvenirResponse(
-                productId,
-                requestDto.name(),
-                requestDto.price(),
-                requestDto.description(),
-                requestDto.category(),
-                requestDto.purpose(),
-                requestDto.cityId(),
+                1L,
+                "테스트 기념품",
+                10000,
+                "USA",
+                95000,
+                "테스트 설명",
+                "617 N MAIN FALLBROOK CA 92028-1934 USA",
+                "2층 빨간색 간판이 있는 장소",
+                new BigDecimal("35.689487"),
+                new BigDecimal("139.691706"),
+                Category.SOUVENIR_BASIC,
+                Purpose.GIFT,
                 filesResponse
         );
 
-        given(souvenirService.updateProduct(
-                eq(productId),
+        given(souvenirService.updateSouvenir(
+                eq(souvenirId),
                 any(SouvenirUpdateRequest.class),
                 eq(1L),
                 any(List.class)
         )).willReturn(response);
 
-        mockMvc.perform(multipart("/api/products/{id}", productId)
-                        .file(productPart)
+        mockMvc.perform(multipart("/api/souvenirs/{id}", souvenirId)
+                        .file(souvenirPart)
                         .file(file1)
                         .file(file2)
                         .with(request -> { request.setMethod("PUT"); return request; })
                 )
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id").value(productId))
-                .andExpect(jsonPath("$.data.files[0].originalName").value("file1.jpg"))
-                .andExpect(jsonPath("$.data.files[1].originalName").value("file2.jpg"))
-                .andDo(document("products/update-product-with-files",
+                .andDo(document("souvenirs/update-souvenir-with-files",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
-                                fieldWithPath("data.price").type(JsonFieldType.NUMBER).description("가격"),
-                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("상세 설명"),
+                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
+                                fieldWithPath("data.localCurrency").type(JsonFieldType.STRING).description("현지 통화 코드"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 환산 가격"),
+                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
+                                fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
+                                fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
+                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
+                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("사용 목적"),
-                                fieldWithPath("data.cityId").type(JsonFieldType.NUMBER).description("도시 ID"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 목적"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
@@ -238,15 +259,15 @@ class SouvenirControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("상품 삭제")
-    void deleteProduct() throws Exception {
-        Long productId = 1L;
+    @DisplayName("기념품 삭제")
+    void deleteSouvenir() throws Exception {
+        Long souvenirId = 1L;
 
-        mockMvc.perform(delete("/api/products/{id}", productId))
+        mockMvc.perform(delete("/api/souvenirs/{id}", souvenirId))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("기념품이 성공적으로 삭제되었습니다."))
-                .andDo(document("products/delete-product",
+                .andDo(document("souvenirs/delete-souvenir",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(

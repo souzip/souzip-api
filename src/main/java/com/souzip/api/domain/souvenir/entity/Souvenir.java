@@ -8,6 +8,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -15,14 +17,29 @@ import lombok.*;
 @Entity
 public class Souvenir extends BaseEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String name;
 
-    @Column(nullable = false)
-    private Integer price;
+    @Column
+    private Integer localPrice;
 
     @Column
+    private String localCurrency;
+
+    @Column
+    private Integer krwPrice;
+
+    @Column(length = 1000)
     private String description;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false, precision = 10, scale = 7)
+    private BigDecimal latitude;
+
+    @Column(nullable = false, precision = 10, scale = 7)
+    private BigDecimal longitude;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -33,10 +50,10 @@ public class Souvenir extends BaseEntity {
     private Purpose purpose;
 
     @Column(nullable = false)
-    private Long cityId;
-
-    @Column(nullable = false)
     private Long userId;
+
+    @Column(length = 255)
+    private String locationDetail;
 
     @Builder.Default
     @Column(nullable = false)
@@ -44,33 +61,59 @@ public class Souvenir extends BaseEntity {
 
     public static Souvenir of(
             String name,
-            Integer price,
+            Integer localPrice,
+            String localCurrency,
+            Integer krwPrice,
             String description,
+            String address,
+            String locationDetail,
+            BigDecimal latitude,
+            BigDecimal longitude,
             Category category,
             Purpose purpose,
-            Long cityId,
             Long userId
     ) {
         return Souvenir.builder()
                 .name(name)
-                .price(price)
+                .localPrice(localPrice)
+                .localCurrency(localCurrency)
+                .krwPrice(krwPrice)
                 .description(description)
+                .address(address)
+                .locationDetail(locationDetail)
+                .latitude(latitude)
+                .longitude(longitude)
                 .category(category)
                 .purpose(purpose)
-                .cityId(cityId)
                 .userId(userId)
                 .deleted(false)
                 .build();
     }
 
-    public void update(String name, Integer price, String description,
-                       Category category, Purpose purpose, Long cityId) {
+    public void update(
+            String name,
+            Integer localPrice,
+            String localCurrency,
+            Integer krwPrice,
+            String description,
+            String address,
+            String locationDetail,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Category category,
+            Purpose purpose
+    ) {
         this.name = name;
-        this.price = price;
+        this.localPrice = localPrice;
+        this.localCurrency = localCurrency;
+        this.krwPrice = krwPrice;
         this.description = description;
+        this.address = address;
+        this.locationDetail = locationDetail;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.category = category;
         this.purpose = purpose;
-        this.cityId = cityId;
     }
 
     public void delete() {

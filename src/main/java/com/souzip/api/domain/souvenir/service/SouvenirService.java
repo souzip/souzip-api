@@ -1,5 +1,7 @@
 package com.souzip.api.domain.souvenir.service;
 
+import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
+import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.file.service.FileService;
 import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
@@ -26,12 +28,15 @@ public class SouvenirService {
     private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final ExchangeRateService exchangeRateService;
 
     public SouvenirResponse getSouvenir(Long souvenirId) {
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(souvenirId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
-        List<FileResponse> files = fileService.getFilesByEntity("Souvenir", souvenirId);
+        List<FileResponse> files =
+                fileService.getFilesByEntity("Souvenir", souvenirId);
+
         return SouvenirResponse.from(souvenir, files);
     }
 
@@ -41,12 +46,17 @@ public class SouvenirService {
             Long userId,
             List<MultipartFile> files
     ) {
+        ExchangeCalculatedPrice price = exchangeRateService.calculatePrice(
+                request.countryCode(),
+                request.localPrice(),
+                request.krwPrice()
+        );
 
         Souvenir souvenir = Souvenir.of(
                 request.name(),
-                request.localPrice(),
-                request.localCurrency(),
-                request.krwPrice(),
+                price.localPrice(),
+                request.currencySymbol(),
+                price.krwPrice(),
                 request.description(),
                 request.address(),
                 request.locationDetail(),
@@ -54,13 +64,14 @@ public class SouvenirService {
                 request.longitude(),
                 request.category(),
                 request.purpose(),
+                request.countryCode(),
                 userId
         );
 
-        Souvenir savedSouvenir = souvenirRepository.save(souvenir);
-        List<FileResponse> uploadedFiles = uploadFiles(savedSouvenir.getId(), userId, files);
+        souvenirRepository.save(souvenir);
+        uploadFiles(souvenir.getId(), userId, files);
 
-        return SouvenirResponse.from(savedSouvenir, uploadedFiles);
+        return null;
     }
 
     @Transactional
@@ -80,7 +91,7 @@ public class SouvenirService {
         souvenir.update(
                 request.name(),
                 request.localPrice(),
-                request.localCurrency(),
+                request.currencySymbol(),
                 request.krwPrice(),
                 request.description(),
                 request.address(),
@@ -88,13 +99,14 @@ public class SouvenirService {
                 request.latitude(),
                 request.longitude(),
                 request.category(),
-                request.purpose()
+                request.purpose(),
+                request.countryCode()
         );
 
         fileService.deleteFilesByEntity("Souvenir", id);
-        List<FileResponse> uploadedFiles = uploadFiles(id, userId, files);
+        uploadFiles(id, userId, files);
 
-        return SouvenirResponse.from(souvenir, uploadedFiles);
+        return null;
     }
 
     @Transactional

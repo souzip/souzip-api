@@ -9,7 +9,6 @@ public record OnboardingResponse(
     String userId,
     String nickname,
     String profileImageUrl,
-    String email,
     List<CategoryDto> categories
 ) {
     public static OnboardingResponse of(User user, List<CategoryDto> categories) {
@@ -17,7 +16,6 @@ public record OnboardingResponse(
             user.getUserId(),
             user.getNickname(),
             user.getProfileImageUrl(),
-            user.getEmail(),
             categories
         );
     }
@@ -31,7 +29,6 @@ public record OnboardingResponse(
             user.getUserId(),
             user.getNickname(),
             user.getProfileImageUrl(),
-            user.getEmail(),
             categoryDtos
         );
     }

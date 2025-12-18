@@ -5,6 +5,7 @@ import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
+import com.souzip.api.domain.user.dto.ProfileColorsResponse;
 import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
@@ -19,10 +20,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -34,6 +38,9 @@ class UserServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private ProfileImageService profileImageService;
 
     @InjectMocks
     private UserService userService;
@@ -48,16 +55,18 @@ class UserServiceTest {
 
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "red",  // ← 색상으로 변경
             List.of("FOOD_SNACK", "BEAUTY_HEALTH", "FASHION_ACCESSORY")
         );
 
-        given(userRepository.findById(1L))
-            .willReturn(Optional.of(spyUser));
+        String expectedImageUrl = "https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg";
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
         given(spyUser.needsOnboarding()).willReturn(true);
+        given(profileImageService.resolveProfileImageUrl("red")).willReturn(expectedImageUrl);
         given(spyUser.getUserId()).willReturn("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
         given(spyUser.getNickname()).willReturn("수집");
-        given(spyUser.getProfileImageUrl()).willReturn("https://cdn.souzip.com/characters/character1.png");
+        given(spyUser.getProfileImageUrl()).willReturn(expectedImageUrl);
         given(spyUser.getEmail()).willReturn("test@kakao.com");
 
         // when
@@ -66,13 +75,13 @@ class UserServiceTest {
         // then
         assertThat(response.userId()).isEqualTo("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
         assertThat(response.nickname()).isEqualTo("수집");
-        assertThat(response.profileImageUrl()).isEqualTo("https://cdn.souzip.com/characters/character1.png");
-        assertThat(response.email()).isEqualTo("test@kakao.com");
+        assertThat(response.profileImageUrl()).isEqualTo(expectedImageUrl);
         assertThat(response.categories()).hasSize(3);
 
+        verify(profileImageService).resolveProfileImageUrl("red");
         verify(spyUser).completeOnboarding(
             eq("수집"),
-            eq("https://cdn.souzip.com/characters/character1.png"),
+            eq(expectedImageUrl),
             any()
         );
     }
@@ -82,24 +91,24 @@ class UserServiceTest {
     void completeOnboarding_alreadyCompleted() {
         // given
         User user = User.of(Provider.KAKAO, "kakao123", "수집", "수집",
-            "test@kakao.com", "https://cdn.souzip.com/characters/character1.png");
+            "test@kakao.com", "https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg");
         User spyUser = spy(user);
 
         OnboardingRequest request = new OnboardingRequest(
             "새닉네임",
-            "https://cdn.souzip.com/characters/character2.png",
+            "blue",
             List.of("FOOD_SNACK")
         );
 
-        given(userRepository.findById(1L))
-            .willReturn(Optional.of(spyUser));
-        given(spyUser.needsOnboarding()).willReturn(false);  // 이미 완료!
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
+        given(spyUser.needsOnboarding()).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> userService.completeOnboarding(1L, request))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining("이미 온보딩을 완료한 사용자입니다.");
 
+        verify(profileImageService, never()).resolveProfileImageUrl(anyString());
         verify(spyUser, never()).completeOnboarding(anyString(), anyString(), any());
     }
 
@@ -113,12 +122,11 @@ class UserServiceTest {
 
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "red",
             List.of("INVALID_CATEGORY", "FOOD_SNACK")
         );
 
-        given(userRepository.findById(1L))
-            .willReturn(Optional.of(spyUser));
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
         given(spyUser.needsOnboarding()).willReturn(true);
 
         // when & then
@@ -135,12 +143,11 @@ class UserServiceTest {
         // given
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "red",
             List.of("FOOD_SNACK")
         );
 
-        given(userRepository.findById(999L))
-            .willReturn(Optional.empty());
+        given(userRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> userService.completeOnboarding(999L, request))
@@ -158,33 +165,48 @@ class UserServiceTest {
 
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "yellow",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH")
         );
 
-        given(userRepository.findById(1L))
-            .willReturn(Optional.of(spyUser));
+        String expectedImageUrl = "https://kr.object.ncloudstorage.com/souzip-dev-images/profile/yellow.svg";
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
         given(spyUser.needsOnboarding()).willReturn(true);
+        given(profileImageService.resolveProfileImageUrl("yellow")).willReturn(expectedImageUrl);
         given(spyUser.getUserId()).willReturn("a1b2c3d4");
         given(spyUser.getNickname()).willReturn("수집");
-        given(spyUser.getProfileImageUrl()).willReturn("https://cdn.souzip.com/characters/character1.png");
+        given(spyUser.getProfileImageUrl()).willReturn(expectedImageUrl);
         given(spyUser.getEmail()).willReturn("test@kakao.com");
 
         // when
         OnboardingResponse response = userService.completeOnboarding(1L, request);
 
         // then
-        List<String> categoryNames = response.categories().stream()
-            .map(CategoryDto::name)
-            .toList();
+        assertThat(response.categories())
+            .extracting(CategoryDto::name)
+            .containsExactlyInAnyOrder("FOOD_SNACK", "BEAUTY_HEALTH");
 
-        assertThat(categoryNames).containsExactlyInAnyOrder("FOOD_SNACK", "BEAUTY_HEALTH");
+        assertThat(response.categories())
+            .extracting(CategoryDto::label)
+            .containsExactlyInAnyOrder("먹거리·간식", "뷰티·헬스");
+    }
 
-        List<String> categoryLabels = response.categories().stream()
-            .map(CategoryDto::label)
-            .toList();
+    @Test
+    @DisplayName("사용 가능한 프로필 색상 목록을 조회한다.")
+    void getAvailableProfileColors() {
+        // given
+        Set<String> expectedColors = Set.of("red", "blue", "yellow", "purple");
+        given(profileImageService.getAvailableColors()).willReturn(expectedColors);
 
-        assertThat(categoryLabels).contains("먹거리·간식", "뷰티·헬스");
+        // when
+        ProfileColorsResponse response = userService.getAvailableProfileColors();
+
+        // then
+        assertThat(response.colors())
+            .containsExactlyInAnyOrder("red", "blue", "yellow", "purple");
+
+        verify(profileImageService).getAvailableColors();
     }
 
     @Test
@@ -199,10 +221,8 @@ class UserServiceTest {
             LocalDateTime.now().plusDays(30)
         );
 
-        given(userRepository.findById(1L))
-            .willReturn(Optional.of(user));
-        given(refreshTokenRepository.findByUser(user))
-            .willReturn(Optional.of(refreshToken));
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+        given(refreshTokenRepository.findByUser(user)).willReturn(Optional.of(refreshToken));
 
         // when
         userService.withdraw(1L);
@@ -219,8 +239,7 @@ class UserServiceTest {
     @DisplayName("존재하지 않는 사용자로 회원탈퇴 시 에러가 발생한다.")
     void withdraw_withNotExistUser_throwsException() {
         // given
-        given(userRepository.findById(999L))
-            .willReturn(Optional.empty());
+        given(userRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> userService.withdraw(999L))
@@ -235,10 +254,8 @@ class UserServiceTest {
         User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트", null, null);
         User spyUser = spy(user);
 
-        given(userRepository.findById(1L))
-            .willReturn(Optional.of(spyUser));
-        given(refreshTokenRepository.findByUser(spyUser))
-            .willReturn(Optional.empty());
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
+        given(refreshTokenRepository.findByUser(spyUser)).willReturn(Optional.empty());
 
         // when
         userService.withdraw(1L);

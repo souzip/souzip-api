@@ -22,7 +22,7 @@ public class SouvenirController {
     @GetMapping("/{id}")
     public SuccessResponse<SouvenirResponse> getSouvenir(@PathVariable Long id) {
         SouvenirResponse response = souvenirService.getSouvenir(id);
-        return SuccessResponse.of(response, "기념품이 성공적으로 조회되었습니다.");
+        return SuccessResponse.of(response);
     }
 
     @PostMapping
@@ -32,7 +32,7 @@ public class SouvenirController {
             @CurrentUserId Long userId
     ) {
         SouvenirResponse response = souvenirService.createSouvenir(request, userId, files);
-        return SuccessResponse.of(response, "기념품이 성공적으로 등록되었습니다.");
+        return SuccessResponse.of(response);
     }
 
     @PutMapping("/{id}")
@@ -43,7 +43,7 @@ public class SouvenirController {
             @CurrentUserId Long userId
     ) {
         SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId, files);
-        return SuccessResponse.of(response, "기념품이 성공적으로 수정되었습니다.");
+        return SuccessResponse.of(response);
     }
 
     @DeleteMapping("/{id}")

@@ -22,6 +22,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -74,7 +75,70 @@ class SouvenirControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("상품 생성")
+    @DisplayName("기념품 조회")
+    void getSouvenir() throws Exception {
+        Long souvenirId = 1L;
+
+        List<FileResponse> filesResponse = List.of(
+                new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 0),
+                new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
+        );
+
+        SouvenirResponse response = new SouvenirResponse(
+                souvenirId,
+                "테스트 기념품",
+                10000,
+                "$",
+                95000,
+                "테스트 설명",
+                "617 N MAIN FALLBROOK CA 92028-1934 USA",
+                "2층 빨간색 간판이 있는 장소",
+                new BigDecimal("35.689487"),
+                new BigDecimal("139.691706"),
+                Category.SOUVENIR_BASIC,
+                Purpose.GIFT,
+                "US",
+                filesResponse
+        );
+
+        given(souvenirService.getSouvenir(souvenirId))
+                .willReturn(response);
+
+        mockMvc.perform(get("/api/souvenirs/{id}", souvenirId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(souvenirId))
+                .andExpect(jsonPath("$.data.name").value("테스트 기념품"))
+                .andDo(document("souvenirs/get-souvenir",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        apiResponseFields(
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("기념품명"),
+                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
+                                fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격"),
+                                fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
+                                fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
+                                fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
+                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
+                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
+                                fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 구매 목적"),
+                                fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
+                                fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
+                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
+                                fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
+                                fieldWithPath("data.files[].originalName").type(JsonFieldType.STRING).description("원본 파일명"),
+                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("기념품 생성")
     void createSouvenirWithFiles() throws Exception {
 
         SouvenirCreateRequest request = new SouvenirCreateRequest(
@@ -144,19 +208,20 @@ class SouvenirControllerTest extends RestDocsSupport {
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("기념품명"),
                                 fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
                                 fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
-                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 환산 가격"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격"),
                                 fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
                                 fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
                                 fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
                                 fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
                                 fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 목적"),
-                                fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("나라 코드"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 구매 목적"),
+                                fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
@@ -168,7 +233,7 @@ class SouvenirControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("상품 수정")
+    @DisplayName("기념품 수정")
     void updateSouvenirWithFiles() throws Exception {
         Long souvenirId = 1L;
 
@@ -241,19 +306,20 @@ class SouvenirControllerTest extends RestDocsSupport {
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
-                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.name").type(JsonFieldType.STRING).description("기념품명"),
                                 fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
                                 fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
-                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 환산 가격"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격"),
                                 fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
                                 fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
                                 fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
                                 fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
                                 fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 목적"),
-                                fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("나라 코드"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 구매 목적"),
+                                fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
@@ -277,7 +343,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
-                                fieldWithPath("data").type(JsonFieldType.NULL).optional().description("삭제된 데이터는 null"),
+                                fieldWithPath("data").type(JsonFieldType.NULL).optional().description("소프트 딜리트 처리, 응답에는 데이터 포함 X"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                         )
                 ));

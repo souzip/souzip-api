@@ -80,7 +80,7 @@ class SouvenirControllerTest extends RestDocsSupport {
         SouvenirCreateRequest request = new SouvenirCreateRequest(
                 "테스트 기념품",
                 10000,
-                "USA",
+                "$",
                 95000,
                 "테스트 설명",
                 "617 N MAIN FALLBROOK CA 92028-1934 USA",
@@ -89,6 +89,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
+                "US",
                 Collections.emptyList()
         );
 
@@ -115,7 +116,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 1L,
                 "테스트 기념품",
                 10000,
-                "USA",
+                "$",
                 95000,
                 "테스트 설명",
                 "617 N MAIN FALLBROOK CA 92028-1934 USA",
@@ -124,6 +125,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
+                "US",
                 filesResponse
         );
 
@@ -145,7 +147,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
                                 fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
-                                fieldWithPath("data.localCurrency").type(JsonFieldType.STRING).description("현지 통화 코드"),
+                                fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
                                 fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 환산 가격"),
                                 fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
                                 fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
@@ -154,6 +156,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
                                 fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 목적"),
+                                fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("나라 코드"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
@@ -172,7 +175,7 @@ class SouvenirControllerTest extends RestDocsSupport {
         SouvenirUpdateRequest requestDto = new SouvenirUpdateRequest(
                 "테스트 기념품",
                 10000,
-                "USA",
+                "$",
                 95000,
                 "테스트 설명",
                 "617 N MAIN FALLBROOK CA 92028-1934 USA",
@@ -181,6 +184,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
+                "US",
                 Collections.emptyList()
         );
 
@@ -207,7 +211,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 1L,
                 "테스트 기념품",
                 10000,
-                "USA",
+                "$",
                 95000,
                 "테스트 설명",
                 "617 N MAIN FALLBROOK CA 92028-1934 USA",
@@ -216,6 +220,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
+                "US",
                 filesResponse
         );
 
@@ -239,7 +244,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("상품 ID"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("상품명"),
                                 fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
-                                fieldWithPath("data.localCurrency").type(JsonFieldType.STRING).description("현지 통화 코드"),
+                                fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
                                 fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 환산 가격"),
                                 fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
                                 fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
@@ -248,6 +253,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리"),
                                 fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 목적"),
+                                fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("나라 코드"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                                 fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),

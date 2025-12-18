@@ -1,4 +1,4 @@
-package com.souzip.api.domain.product.entity;
+package com.souzip.api.domain.souvenir.entity;
 
 import lombok.Getter;
 import java.util.Arrays;

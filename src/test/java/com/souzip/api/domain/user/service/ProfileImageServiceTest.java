@@ -22,8 +22,8 @@ class ProfileImageServiceTest {
     void setUp() {
         properties = new ObjectStorageProperties(
             "https://kr.object.ncloudstorage.com",
-            "souzip-dev-images",
             "kr-standard",
+            "souzip-dev-images",
             "test-access-key",
             "test-secret-key"
         );

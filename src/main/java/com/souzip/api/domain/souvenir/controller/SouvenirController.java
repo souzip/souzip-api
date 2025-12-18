@@ -6,6 +6,7 @@ import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,7 @@ public class SouvenirController {
 
     @PostMapping
     public SuccessResponse<SouvenirResponse> createSouvenir(
+            @Valid
             @RequestPart("souvenir") SouvenirCreateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
@@ -37,6 +39,7 @@ public class SouvenirController {
 
     @PutMapping("/{id}")
     public SuccessResponse<SouvenirResponse> updateSouvenir(
+            @Valid
             @PathVariable Long id,
             @RequestPart("souvenir") SouvenirUpdateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,

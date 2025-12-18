@@ -91,7 +91,7 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentResponse(),
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임 (최대 15자)"),
+                        .description("사용자 닉네임 (최대 11자)"),
                     fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
                         .description("프로필 이미지 색상 (red, blue, yellow, purple)"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)
@@ -259,11 +259,11 @@ class UserControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("닉네임이 15자를 초과하면 400 에러가 발생한다.")
+    @DisplayName("닉네임이 11자를 초과하면 400 에러가 발생한다.")
     void completeOnboarding_nicknameTooLong() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            "이것은15자를초과하는닉네임입니다",
+            "이것은11자를초과하는닉네임입니다",
             "purple",
             List.of("FOOD_SNACK")
         );
@@ -280,7 +280,7 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentResponse(),
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("15자를 초과하는 닉네임"),
+                        .description("11자를 초과하는 닉네임"),
                     fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
                         .description("프로필 이미지 색상"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)

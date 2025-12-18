@@ -23,9 +23,9 @@ NOTE: 현재 사용 가능한 색상은 red, blue, yellow, purple 입니다.
 신규 사용자가 온보딩을 완료하고 닉네임, 프로필 이미지 색상, 관심 카테고리를 설정하는 API입니다.
 
 * 온보딩은 최초 1회만 가능합니다.
-* 닉네임은 최대 15자까지 입력 가능합니다.
+* 닉네임은 최대 11자까지 입력 가능합니다.
 * 프로필 이미지는 색상(red, blue, yellow, purple) 중 선택합니다.
-* 카테고리는 최소 1개 이상 선택해야 합니다.
+* 카테고리는 최소 1개, 최대 5개 선택이 가능합니다.
 
 ==== HTTP 요청
 include::{snippets}/user/onboarding-success/http-request.adoc[]

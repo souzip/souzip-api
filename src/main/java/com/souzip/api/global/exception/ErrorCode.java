@@ -35,6 +35,7 @@ public enum ErrorCode {
     EXCHANGE_RATE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 환율 정보를 찾을 수 없습니다."),
 
     SOUVENIR_NOT_FOUND(HttpStatus.NOT_FOUND, "기념품을 찾을 수 없습니다."),
+    INVALID_SOUVENIR_LOCATION(HttpStatus.BAD_REQUEST, "기념품의 위치 정보가 유효하지 않습니다."),
 
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
     FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기가 50MB를 초과합니다."),

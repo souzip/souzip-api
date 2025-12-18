@@ -67,4 +67,5 @@ jobs:
               -e NCP_BUCKET=${{ secrets.NCP_BUCKET }} \
               -e NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }} \
               -e NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }} \
+              -e GEOCODING_API_KEY=${{ secrets.GEOCODING_API_KEY }} \
               souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest

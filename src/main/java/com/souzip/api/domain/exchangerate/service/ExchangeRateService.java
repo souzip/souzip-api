@@ -3,6 +3,7 @@ package com.souzip.api.domain.exchangerate.service;
 import com.souzip.api.domain.country.dto.CountryResponseDto;
 import com.souzip.api.domain.country.service.CountryService;
 import com.souzip.api.domain.exchangerate.client.ExchangeRateExternalApiClient;
+import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateListResponse;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
@@ -15,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +33,61 @@ public class ExchangeRateService {
     private final ExchangeRateRepository exchangeRateRepository;
     private final CountryService countryService;
     private final ExchangeRateExternalApiClient apiClient;
+
+    public ExchangeCalculatedPrice calculatePrice(
+            String countryCode,
+            Integer localPrice,
+            Integer krwPrice
+    ) {
+        CountryResponseDto country = countryService.getCountryByCode(countryCode);
+        ExchangeRateResponseDto rate = getRate(country.currency().code());
+
+        if (localPrice != null) {
+            return fromLocalPrice(localPrice, rate, country);
+        }
+        return fromKrwPrice(krwPrice, rate, country);
+    }
+
+    private ExchangeCalculatedPrice fromLocalPrice(
+            Integer localPrice,
+            ExchangeRateResponseDto rate,
+            CountryResponseDto country
+    ) {
+        int krw = multiply(localPrice, rate.rate());
+
+        return new ExchangeCalculatedPrice(
+                localPrice,
+                krw,
+                country.currency().symbol()
+        );
+    }
+
+    private ExchangeCalculatedPrice fromKrwPrice(
+            Integer krwPrice,
+            ExchangeRateResponseDto rate,
+            CountryResponseDto country
+    ) {
+        int local = divide(krwPrice, rate.rate());
+
+        return new ExchangeCalculatedPrice(
+                local,
+                krwPrice,
+                country.currency().symbol()
+        );
+    }
+
+    private int multiply(Integer value, BigDecimal rate) {
+        return BigDecimal.valueOf(value)
+                .multiply(rate)
+                .setScale(0, RoundingMode.HALF_UP)
+                .intValue();
+    }
+
+    private int divide(Integer value, BigDecimal rate) {
+        return BigDecimal.valueOf(value)
+                .divide(rate, 0, RoundingMode.HALF_UP)
+                .intValue();
+    }
 
     public ExchangeRateResponseDto getRateByCountry(String countryCode) {
         CountryResponseDto country = countryService.getCountryByCode(countryCode);

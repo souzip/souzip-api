@@ -67,7 +67,6 @@ class UserServiceTest {
         given(spyUser.getUserId()).willReturn("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
         given(spyUser.getNickname()).willReturn("수집");
         given(spyUser.getProfileImageUrl()).willReturn(expectedImageUrl);
-        given(spyUser.getEmail()).willReturn("test@kakao.com");
 
         // when
         OnboardingResponse response = userService.completeOnboarding(1L, request);
@@ -177,7 +176,6 @@ class UserServiceTest {
         given(spyUser.getUserId()).willReturn("a1b2c3d4");
         given(spyUser.getNickname()).willReturn("수집");
         given(spyUser.getProfileImageUrl()).willReturn(expectedImageUrl);
-        given(spyUser.getEmail()).willReturn("test@kakao.com");
 
         // when
         OnboardingResponse response = userService.completeOnboarding(1L, request);
@@ -210,7 +208,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원탈퇴 시 User는 익명화되고 soft delete된다")
+    @DisplayName("회원탈퇴 시 User는 익명화되고 soft delete된다.")
     void withdraw_success() {
         // given
         User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트", null, null);

@@ -102,7 +102,7 @@ class ProfileImageServiceTest {
     @DisplayName("사용 가능한 색상 목록을 반환한다.")
     void getAvailableColors() {
         // when
-        var colors = ProfileImageService.getAvailableColors();
+        var colors = profileImageService.getAvailableColors();
 
         // then
         assertThat(colors)

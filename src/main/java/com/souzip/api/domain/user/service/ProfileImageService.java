@@ -35,7 +35,7 @@ public class ProfileImageService {
         return buildColorUrlOrThrow(input);
     }
 
-    public static Set<String> getAvailableColors() {
+    public Set<String> getAvailableColors() {
         return AVAILABLE_COLORS;
     }
 

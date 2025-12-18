@@ -69,9 +69,9 @@ public class SouvenirService {
         );
 
         souvenirRepository.save(souvenir);
-        uploadFiles(souvenir.getId(), userId, files);
+        List<FileResponse> uploadedFiles = uploadFiles(souvenir.getId(), userId, files);
 
-        return null;
+        return SouvenirResponse.from(souvenir, uploadedFiles);
     }
 
     @Transactional
@@ -88,11 +88,17 @@ public class SouvenirService {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
+        ExchangeCalculatedPrice price = exchangeRateService.calculatePrice(
+                request.countryCode(),
+                request.localPrice(),
+                request.krwPrice()
+        );
+
         souvenir.update(
                 request.name(),
-                request.localPrice(),
+                price.localPrice(),
                 request.currencySymbol(),
-                request.krwPrice(),
+                price.krwPrice(),
                 request.description(),
                 request.address(),
                 request.locationDetail(),
@@ -104,9 +110,9 @@ public class SouvenirService {
         );
 
         fileService.deleteFilesByEntity("Souvenir", id);
-        uploadFiles(id, userId, files);
+        List<FileResponse> uploadedFiles = uploadFiles(id, userId, files);
 
-        return null;
+        return SouvenirResponse.from(souvenir, uploadedFiles);
     }
 
     @Transactional

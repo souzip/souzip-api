@@ -26,24 +26,24 @@ public class SouvenirController {
     }
 
     @PostMapping
-    public SuccessResponse<Void> createSouvenir(
+    public SuccessResponse<SouvenirResponse> createSouvenir(
             @RequestPart("souvenir") SouvenirCreateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        souvenirService.createSouvenir(request, userId, files);
-        return SuccessResponse.of(null, "기념품이 성공적으로 등록되었습니다.");
+        SouvenirResponse response = souvenirService.createSouvenir(request, userId, files);
+        return SuccessResponse.of(response, "기념품이 성공적으로 등록되었습니다.");
     }
 
     @PutMapping("/{id}")
-    public SuccessResponse<Void> updateSouvenir(
+    public SuccessResponse<SouvenirResponse> updateSouvenir(
             @PathVariable Long id,
             @RequestPart("souvenir") SouvenirUpdateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        souvenirService.updateSouvenir(id, request, userId, files);
-        return SuccessResponse.of(null, "기념품이 성공적으로 수정되었습니다.");
+        SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId, files);
+        return SuccessResponse.of(response, "기념품이 성공적으로 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}")

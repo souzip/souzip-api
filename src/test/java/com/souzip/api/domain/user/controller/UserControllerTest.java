@@ -4,6 +4,7 @@ import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
+import com.souzip.api.domain.user.dto.ProfileColorsResponse;
 import com.souzip.api.domain.user.service.UserService;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentRequest;
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
@@ -48,7 +51,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "red",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH", "FASHION_ACCESSORY")
         );
 
@@ -61,8 +64,7 @@ class UserControllerTest extends RestDocsSupport {
         OnboardingResponse response = new OnboardingResponse(
             "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
-            "test@gmail.com",
+            "https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg",
             categoryDtos
         );
 
@@ -78,8 +80,7 @@ class UserControllerTest extends RestDocsSupport {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.userId").value("a1b2c3d4-e5f6-7890-abcd-ef1234567890"))
             .andExpect(jsonPath("$.data.nickname").value("수집"))
-            .andExpect(jsonPath("$.data.profileImageUrl").value("https://cdn.souzip.com/characters/character1.png"))
-            .andExpect(jsonPath("$.data.email").value("test@gmail.com"))
+            .andExpect(jsonPath("$.data.profileImageUrl").value("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg"))
             .andExpect(jsonPath("$.data.categories").isArray())
             .andExpect(jsonPath("$.data.categories.length()").value(3))
             .andExpect(jsonPath("$.data.categories[0].name").value("FOOD_SNACK"))
@@ -91,8 +92,8 @@ class UserControllerTest extends RestDocsSupport {
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임 (최대 15자)"),
-                    fieldWithPath("profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL (캐릭터 이미지)"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상 (red, blue, yellow, purple)"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)
                         .description("관심 카테고리 목록 (최소 1개, Category ENUM name)")
                 ),
@@ -104,9 +105,7 @@ class UserControllerTest extends RestDocsSupport {
                     fieldWithPath("data.nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
                     fieldWithPath("data.profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL"),
-                    fieldWithPath("data.email").type(JsonFieldType.STRING)
-                        .description("사용자 이메일"),
+                        .description("프로필 이미지 URL (NCP Object Storage 공개 URL)"),
                     fieldWithPath("data.categories").type(JsonFieldType.ARRAY)
                         .description("선택한 카테고리 목록"),
                     fieldWithPath("data.categories[].name").type(JsonFieldType.STRING)
@@ -125,7 +124,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "blue",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH")
         );
 
@@ -146,12 +145,12 @@ class UserControllerTest extends RestDocsSupport {
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
-                    fieldWithPath("profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)
                         .description("관심 카테고리 목록")
                 ),
-                responseFields(errorResponseFields())  // ← Business Exception
+                responseFields(errorResponseFields())
             ));
     }
 
@@ -161,7 +160,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "yellow",
             List.of("INVALID_CATEGORY", "BEAUTY_HEALTH")
         );
 
@@ -182,12 +181,48 @@ class UserControllerTest extends RestDocsSupport {
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
-                    fieldWithPath("profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)
                         .description("관심 카테고리 목록 (유효하지 않은 카테고리 포함)")
                 ),
-                responseFields(errorResponseFields())  // ← Business Exception
+                responseFields(errorResponseFields())
+            ));
+    }
+
+    @Test
+    @DisplayName("유효하지 않은 프로필 색상으로 온보딩 시 에러가 발생한다.")
+    void completeOnboarding_invalidProfileColor() throws Exception {
+        // given
+        OnboardingRequest request = new OnboardingRequest(
+            "수집",
+            "invalid_color",
+            List.of("FOOD_SNACK")
+        );
+
+        given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
+            .willThrow(new BusinessException(ErrorCode.INVALID_PROFILE_IMAGE_COLOR));
+
+        // when & then
+        mockMvc.perform(post("/api/users/onboarding")
+                .header("Authorization", "Bearer valid_access_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("유효하지 않은 프로필 이미지 색상입니다."))
+            .andDo(document("user/onboarding-invalid-profile-color",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("nickname").type(JsonFieldType.STRING)
+                        .description("사용자 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("유효하지 않은 프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
+                        .description("관심 카테고리 목록")
+                ),
+                responseFields(errorResponseFields())
             ));
     }
 
@@ -197,7 +232,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             "",
-            "https://cdn.souzip.com/characters/character1.png",
+            "red",
             List.of("FOOD_SNACK")
         );
 
@@ -214,12 +249,12 @@ class UserControllerTest extends RestDocsSupport {
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("빈 닉네임"),
-                    fieldWithPath("profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)
                         .description("관심 카테고리 목록")
                 ),
-                responseFields(validationErrorResponseFields())  // ← Validation Error!
+                responseFields(validationErrorResponseFields())
             ));
     }
 
@@ -228,8 +263,8 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_nicknameTooLong() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            "이것은15자를초과하는닉네임입니다",  // 16자
-            "https://cdn.souzip.com/characters/character1.png",
+            "이것은15자를초과하는닉네임입니다",
+            "purple",
             List.of("FOOD_SNACK")
         );
 
@@ -246,12 +281,12 @@ class UserControllerTest extends RestDocsSupport {
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("15자를 초과하는 닉네임"),
-                    fieldWithPath("profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)
                         .description("관심 카테고리 목록")
                 ),
-                responseFields(validationErrorResponseFields())  // ← Validation Error!
+                responseFields(validationErrorResponseFields())
             ));
     }
 
@@ -261,7 +296,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             "수집",
-            "https://cdn.souzip.com/characters/character1.png",
+            "red",
             List.of()
         );
 
@@ -278,12 +313,42 @@ class UserControllerTest extends RestDocsSupport {
                 requestFields(
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
-                    fieldWithPath("profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상"),
                     fieldWithPath("categories").type(JsonFieldType.ARRAY)
                         .description("빈 카테고리 목록")
                 ),
-                responseFields(validationErrorResponseFields())  // ← Validation Error!
+                responseFields(validationErrorResponseFields())
+            ));
+    }
+
+    @Test
+    @DisplayName("사용 가능한 프로필 색상 목록을 조회한다.")
+    void getAvailableProfileColors() throws Exception {
+        // given
+        ProfileColorsResponse response = ProfileColorsResponse.of(
+            Set.of("red", "blue", "yellow", "purple")
+        );
+
+        given(userService.getAvailableProfileColors()).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/users/profile-colors"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.colors").isArray())
+            .andExpect(jsonPath("$.data.colors.length()").value(4))
+            .andDo(document("user/get-profile-colors",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("응답 데이터"),
+                    fieldWithPath("data.colors").type(JsonFieldType.ARRAY)
+                        .description("사용 가능한 프로필 색상 목록 (red, blue, yellow, purple)"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지").optional()
+                )
             ));
     }
 

@@ -1,6 +1,7 @@
 package com.souzip.api.domain.category.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
+import com.souzip.api.domain.category.dto.CategoriesResponse;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.service.CategoryService;
 import org.junit.jupiter.api.DisplayName;
@@ -42,28 +43,32 @@ class CategoryControllerTest extends RestDocsSupport {
             new CategoryDto("SOUVENIR_BASIC", "기념품·기본템")
         );
 
+        CategoriesResponse response = CategoriesResponse.of(categories);
+
         given(categoryService.getAllCategories())
-            .willReturn(categories);
+            .willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/categories"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data.length()").value(5))
-            .andExpect(jsonPath("$.data[0].name").value("FOOD_SNACK"))
-            .andExpect(jsonPath("$.data[0].label").value("먹거리·간식"))
-            .andExpect(jsonPath("$.data[1].name").value("BEAUTY_HEALTH"))
-            .andExpect(jsonPath("$.data[1].label").value("뷰티·헬스"))
+            .andExpect(jsonPath("$.data.categories").isArray())
+            .andExpect(jsonPath("$.data.categories.length()").value(5))
+            .andExpect(jsonPath("$.data.categories[0].name").value("FOOD_SNACK"))
+            .andExpect(jsonPath("$.data.categories[0].label").value("먹거리·간식"))
+            .andExpect(jsonPath("$.data.categories[1].name").value("BEAUTY_HEALTH"))
+            .andExpect(jsonPath("$.data.categories[1].label").value("뷰티·헬스"))
             .andDo(document("category/get-all-categories",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.ARRAY)
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("응답 데이터"),
+                    fieldWithPath("data.categories").type(JsonFieldType.ARRAY)
                         .description("카테고리 목록"),
-                    fieldWithPath("data[].name").type(JsonFieldType.STRING)
+                    fieldWithPath("data.categories[].name").type(JsonFieldType.STRING)
                         .description("카테고리 ENUM name (예: FOOD_SNACK)"),
-                    fieldWithPath("data[].label").type(JsonFieldType.STRING)
+                    fieldWithPath("data.categories[].label").type(JsonFieldType.STRING)
                         .description("카테고리 한글 라벨 (예: 먹거리·간식)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지").optional()
@@ -75,14 +80,16 @@ class CategoryControllerTest extends RestDocsSupport {
     @DisplayName("카테고리가 비어있어도 빈 배열을 반환한다.")
     void getAllCategories_emptyList() throws Exception {
         // given
+        CategoriesResponse emptyResponse = CategoriesResponse.of(List.of());
+
         given(categoryService.getAllCategories())
-            .willReturn(List.of());
+            .willReturn(emptyResponse);
 
         // when & then
         mockMvc.perform(get("/api/categories"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data").isArray())
-            .andExpect(jsonPath("$.data.length()").value(0));
+            .andExpect(jsonPath("$.data.categories").isArray())
+            .andExpect(jsonPath("$.data.categories.length()").value(0));
     }
 }

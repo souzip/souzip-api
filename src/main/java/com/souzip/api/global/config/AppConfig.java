@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties({
     JwtProperties.class,
     OAuthProperties.class,
-    ObjectStorageProperties.class
+    ObjectStorageProperties.class,
 })
 public class AppConfig {
 }

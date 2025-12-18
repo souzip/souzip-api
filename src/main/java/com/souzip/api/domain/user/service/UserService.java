@@ -5,22 +5,18 @@ import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
+import com.souzip.api.domain.user.dto.ProfileColorsResponse;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,14 +26,25 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ProfileImageService profileImageService;
+
+    public ProfileColorsResponse getAvailableProfileColors() {
+        Set<String> colors = profileImageService.getAvailableColors();
+        return ProfileColorsResponse.of(colors);
+    }
 
     @Transactional
     public OnboardingResponse completeOnboarding(Long userId, OnboardingRequest request) {
         User user = findUserById(userId);
         validateOnboardingNotCompleted(user);
 
+        String profileImageUrl = profileImageService.resolveProfileImageUrl(
+            request.profileImageColor()
+        );
+
         Set<Category> categories = convertToCategories(request.categories());
-        user.completeOnboarding(request.nickname(), request.profileImageUrl(), categories);
+
+        user.completeOnboarding(request.nickname(), profileImageUrl, categories);
 
         List<CategoryDto> categoryDto = convertToCategoryDto(categories);
         return OnboardingResponse.of(user, categoryDto);

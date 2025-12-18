@@ -140,7 +140,7 @@ public class User extends BaseEntity {
     public void completeOnboarding(String nickname, String profileImageUrl, Set<Category> categories) {
         this.nickname = nickname;
         this.profileImageUrl = profileImageUrl;
-        this.categories = this.categories;
+        this.categories = categories;
         this.onboardingCompleted = true;
     }
 

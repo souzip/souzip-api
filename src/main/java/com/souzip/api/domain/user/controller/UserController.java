@@ -2,11 +2,13 @@ package com.souzip.api.domain.user.controller;
 
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
+import com.souzip.api.domain.user.dto.ProfileColorsResponse;
 import com.souzip.api.domain.user.service.UserService;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
 import com.souzip.api.global.security.annotation.RequireAuth;
 import jakarta.validation.Valid;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +26,13 @@ public class UserController {
         @Valid @RequestBody OnboardingRequest request
     ) {
         OnboardingResponse response = userService.completeOnboarding(currentUserId, request);
-        return SuccessResponse.of(response, "");
+        return SuccessResponse.of(response);
+    }
+
+    @GetMapping("/profile-colors")
+    public SuccessResponse<ProfileColorsResponse> getAvailableProfileColors() {
+        ProfileColorsResponse response = userService.getAvailableProfileColors();
+        return SuccessResponse.of(response);
     }
 
     @DeleteMapping("/me")

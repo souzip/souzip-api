@@ -12,7 +12,7 @@ public record SouvenirResponse(
         Long id,
         String name,
         Integer localPrice,
-        String localCurrency,
+        String currencySymbol,
         Integer krwPrice,
         String description,
         String address,
@@ -21,6 +21,7 @@ public record SouvenirResponse(
         BigDecimal longitude,
         Category category,
         Purpose purpose,
+        String countryCode,
         List<FileResponse> files
 ) {
 
@@ -29,7 +30,7 @@ public record SouvenirResponse(
                 souvenir.getId(),
                 souvenir.getName(),
                 souvenir.getLocalPrice(),
-                souvenir.getLocalCurrency(),
+                souvenir.getCurrencySymbol(),
                 souvenir.getKrwPrice(),
                 souvenir.getDescription(),
                 souvenir.getAddress(),
@@ -38,6 +39,7 @@ public record SouvenirResponse(
                 souvenir.getLongitude(),
                 souvenir.getCategory(),
                 souvenir.getPurpose(),
+                souvenir.getCountryCode(),
                 files
         );
     }

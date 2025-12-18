@@ -10,7 +10,7 @@ import java.util.List;
 public record SouvenirCreateRequest(
         String name,
         Integer localPrice,
-        String localCurrency,
+        String currencySymbol,
         Integer krwPrice,
         String description,
         String address,
@@ -19,5 +19,6 @@ public record SouvenirCreateRequest(
         BigDecimal longitude,
         Category category,
         Purpose purpose,
+        String countryCode,
         List<MultipartFile> files
 ) {}

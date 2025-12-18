@@ -19,8 +19,6 @@ public class SouvenirController {
 
     private final SouvenirService souvenirService;
 
-    // 기념품 가격 정보 조회 API (한화, 현지 가격)
-
     @GetMapping("/{id}")
     public SuccessResponse<SouvenirResponse> getSouvenir(@PathVariable Long id) {
         SouvenirResponse response = souvenirService.getSouvenir(id);
@@ -28,24 +26,24 @@ public class SouvenirController {
     }
 
     @PostMapping
-    public SuccessResponse<SouvenirResponse> createSouvenir(
+    public SuccessResponse<Void> createSouvenir(
             @RequestPart("souvenir") SouvenirCreateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        SouvenirResponse response = souvenirService.createSouvenir(request, userId, files);
-        return SuccessResponse.of(response, "기념품이 성공적으로 등록되었습니다.");
+        souvenirService.createSouvenir(request, userId, files);
+        return SuccessResponse.of(null, "기념품이 성공적으로 등록되었습니다.");
     }
 
     @PutMapping("/{id}")
-    public SuccessResponse<SouvenirResponse> updateSouvenir(
+    public SuccessResponse<Void> updateSouvenir(
             @PathVariable Long id,
             @RequestPart("souvenir") SouvenirUpdateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId, files);
-        return SuccessResponse.of(response, "기념품이 성공적으로 수정되었습니다.");
+        souvenirService.updateSouvenir(id, request, userId, files);
+        return SuccessResponse.of(null, "기념품이 성공적으로 수정되었습니다.");
     }
 
     @DeleteMapping("/{id}")

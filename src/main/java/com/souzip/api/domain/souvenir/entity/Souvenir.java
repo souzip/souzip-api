@@ -2,10 +2,7 @@ package com.souzip.api.domain.souvenir.entity;
 
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.global.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -23,8 +20,8 @@ public class Souvenir extends BaseEntity {
     @Column
     private Integer localPrice;
 
-    @Column
-    private String localCurrency;
+    @Column(length = 10)
+    private String currencySymbol;
 
     @Column
     private Integer krwPrice;
@@ -59,10 +56,13 @@ public class Souvenir extends BaseEntity {
     @Column(nullable = false)
     private Boolean deleted = false;
 
+    @Column
+    private String countryCode;
+
     public static Souvenir of(
             String name,
             Integer localPrice,
-            String localCurrency,
+            String currencySymbol,
             Integer krwPrice,
             String description,
             String address,
@@ -71,12 +71,13 @@ public class Souvenir extends BaseEntity {
             BigDecimal longitude,
             Category category,
             Purpose purpose,
+            String countryCode,
             Long userId
     ) {
         return Souvenir.builder()
                 .name(name)
                 .localPrice(localPrice)
-                .localCurrency(localCurrency)
+                .currencySymbol(currencySymbol)
                 .krwPrice(krwPrice)
                 .description(description)
                 .address(address)
@@ -85,6 +86,7 @@ public class Souvenir extends BaseEntity {
                 .longitude(longitude)
                 .category(category)
                 .purpose(purpose)
+                .countryCode(countryCode)
                 .userId(userId)
                 .deleted(false)
                 .build();
@@ -93,7 +95,7 @@ public class Souvenir extends BaseEntity {
     public void update(
             String name,
             Integer localPrice,
-            String localCurrency,
+            String currencySymbol,
             Integer krwPrice,
             String description,
             String address,
@@ -101,11 +103,12 @@ public class Souvenir extends BaseEntity {
             BigDecimal latitude,
             BigDecimal longitude,
             Category category,
-            Purpose purpose
+            Purpose purpose,
+            String countryCode
     ) {
         this.name = name;
         this.localPrice = localPrice;
-        this.localCurrency = localCurrency;
+        this.currencySymbol = currencySymbol;
         this.krwPrice = krwPrice;
         this.description = description;
         this.address = address;
@@ -114,6 +117,7 @@ public class Souvenir extends BaseEntity {
         this.longitude = longitude;
         this.category = category;
         this.purpose = purpose;
+        this.countryCode = countryCode;
     }
 
     public void delete() {

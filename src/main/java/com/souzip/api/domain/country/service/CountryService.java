@@ -41,20 +41,9 @@ public class CountryService {
         return CountryResponseDto.from(country);
     }
 
-    public CountryListResponse getCountriesByRegion(String englishName) {
-        Region region = getRegionOrThrow(englishName);
-        List<Country> countries = countryRepository.findByRegion(region);
-        return convertToListResponse(countries);
-    }
-
-    public CountryListResponse searchCountriesByName(String name) {
-        List<Country> countries = countryRepository.findByNameContaining(name);
-        return convertToListResponse(countries);
-    }
-
-    public long getCountryCountByRegion(String englishName) {
-        Region region = getRegionOrThrow(englishName);
-        return countryRepository.countByRegion(region);
+    private Country findCountryByCodeOrThrow(String code) {
+        return countryRepository.findByCode(code)
+                .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
     }
 
     @Transactional
@@ -64,7 +53,7 @@ public class CountryService {
 
         List<Country> newCountries = extractNewCountries(externalCountries, existingCodes);
 
-        if (hasNoNewCountries(newCountries)) {
+        if (newCountries.isEmpty()) {
             log.info("저장할 새로운 국가가 없습니다");
             return;
         }
@@ -72,31 +61,26 @@ public class CountryService {
         countryRepository.saveAll(newCountries);
     }
 
-    private Country findCountryByCodeOrThrow(String code) {
-        return countryRepository.findByCode(code)
-            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
-    }
-
     private Region getRegionOrThrow(String englishName) {
         return Region.from(englishName)
-            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_REGION_INVALID));
     }
 
     private Set<String> getExistingCountryCodes() {
         return countryRepository.findAll().stream()
-            .map(Country::getCode)
-            .collect(Collectors.toSet());
+                .map(Country::getCode)
+                .collect(Collectors.toSet());
     }
 
     private List<Country> extractNewCountries(
-        List<CountryExternalDto> externalCountries,
-        Set<String> existingCodes
+            List<CountryExternalDto> externalCountries,
+            Set<String> existingCodes
     ) {
         return externalCountries.stream()
-            .filter(dto -> isNewCountry(dto, existingCodes))
-            .filter(this::hasValidCurrency)
-            .map(this::convertToEntity)
-            .toList();
+                .filter(dto -> !existingCodes.contains(dto.cca2()))
+                .filter(this::hasValidCurrency)
+                .map(this::convertToEntity)
+                .toList();
     }
 
     private Country convertToEntity(CountryExternalDto dto) {
@@ -107,22 +91,22 @@ public class CountryService {
 
     private CountryListResponse convertToListResponse(List<Country> countries) {
         return CountryListResponse.from(
-            countries.stream()
-                .map(CountryResponseDto::from)
-                .toList()
+                countries.stream()
+                        .map(CountryResponseDto::from)
+                        .toList()
         );
     }
 
     private Currency getOrCreateCurrency(CountryExternalDto dto) {
         String currencyCode = dto.getPrimaryCurrencyCode();
 
-        if (isInvalidCurrencyCode(currencyCode)) {
+        if (currencyCode == null || currencyCode.isBlank()) {
             log.debug("통화 정보 없음 - 국가: {}", dto.cca2());
             return null;
         }
 
         return currencyRepository.findByCode(currencyCode)
-            .orElseGet(() -> createAndSaveCurrency(currencyCode, dto.getPrimaryCurrencySymbol()));
+                .orElseGet(() -> createAndSaveCurrency(currencyCode, dto.getPrimaryCurrencySymbol()));
     }
 
     private Currency createAndSaveCurrency(String currencyCode, String currencySymbol) {
@@ -130,20 +114,8 @@ public class CountryService {
         return currencyRepository.save(newCurrency);
     }
 
-    private boolean isNewCountry(CountryExternalDto dto, Set<String> existingCodes) {
-        return !existingCodes.contains(dto.cca2());
-    }
-
     private boolean hasValidCurrency(CountryExternalDto dto) {
         String currencyCode = dto.getPrimaryCurrencyCode();
         return currencyCode != null && !currencyCode.isBlank();
-    }
-
-    private boolean hasNoNewCountries(List<Country> newCountries) {
-        return newCountries.isEmpty();
-    }
-
-    private boolean isInvalidCurrencyCode(String currencyCode) {
-        return currencyCode == null || currencyCode.isBlank();
     }
 }

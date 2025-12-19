@@ -5,5 +5,5 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ExchangeRateServiceTest {
-    // 환율 계산? 테스트 필요
+    // TODO: 환율 정보를 이용해 기념품 가격을 현지 가격과 원화로 계산
 }

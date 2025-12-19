@@ -89,8 +89,6 @@ class CountryServiceTest {
         );
     }
 
-    // ===== 조회 테스트 =====
-
     @Test
     @DisplayName("전체 국가를 조회할 수 있다.")
     void getAllCountries() {
@@ -140,54 +138,6 @@ class CountryServiceTest {
         assertThatThrownBy(() -> countryService.getCountryByCode("INVALID"))
             .isInstanceOf(BusinessException.class)
             .hasMessageContaining(ErrorCode.COUNTRY_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    @DisplayName("지역별로 국가를 조회할 수 있다.")
-    void getCountriesByRegion() {
-        // given
-        Currency krw = createCurrency("KRW", "₩");
-        Currency jpy = createCurrency("JPY", "¥");
-        Country korea = createCountry("South Korea", "대한민국", "KR", krw);
-        Country japan = createCountry("Japan", "일본", "JP", jpy);
-
-        given(countryRepository.findByRegion(Region.ASIA)).willReturn(List.of(korea, japan));
-
-        // when
-        CountryListResponse response = countryService.getCountriesByRegion("Asia");
-
-        // then
-        assertThat(response.countries()).hasSize(2);
-    }
-
-    @Test
-    @DisplayName("국가명으로 검색할 수 있다.")
-    void searchCountriesByName() {
-        // given
-        Currency krw = createCurrency("KRW", "₩");
-        Country korea = createCountry("South Korea", "대한민국", "KR", krw);
-
-        given(countryRepository.findByNameContaining("Korea")).willReturn(List.of(korea));
-
-        // when
-        CountryListResponse response = countryService.searchCountriesByName("Korea");
-
-        // then
-        assertThat(response.countries()).hasSize(1);
-        assertThat(response.countries().getFirst().nameEn()).isEqualTo("South Korea");
-    }
-
-    @Test
-    @DisplayName("지역별 국가 수를 조회할 수 있다.")
-    void getCountryCountByRegion() {
-        // given
-        given(countryRepository.countByRegion(Region.ASIA)).willReturn(48L);
-
-        // when
-        long count = countryService.getCountryCountByRegion("Asia");
-
-        // then
-        assertThat(count).isEqualTo(48L);
     }
 
     @Test

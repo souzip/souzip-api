@@ -44,4 +44,8 @@ public class ExchangeRate {
                 .rate(rate)
                 .build();
     }
+
+    public void updateRate(BigDecimal rate) {
+        this.rate = rate;
+    }
 }

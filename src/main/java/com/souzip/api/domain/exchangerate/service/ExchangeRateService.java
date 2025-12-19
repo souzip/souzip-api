@@ -5,7 +5,6 @@ import com.souzip.api.domain.country.service.CountryService;
 import com.souzip.api.domain.exchangerate.client.ExchangeRateExternalApiClient;
 import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateExternalDto;
-import com.souzip.api.domain.exchangerate.dto.ExchangeRateListResponse;
 import com.souzip.api.domain.exchangerate.dto.ExchangeRateResponseDto;
 import com.souzip.api.domain.exchangerate.entity.ExchangeRate;
 import com.souzip.api.domain.exchangerate.repository.ExchangeRateRepository;
@@ -19,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -89,84 +86,37 @@ public class ExchangeRateService {
                 .intValue();
     }
 
-    public ExchangeRateResponseDto getRateByCountry(String countryCode) {
-        CountryResponseDto country = countryService.getCountryByCode(countryCode);
-        return getRate(country.currency().code());
-    }
-
-    public ExchangeRateListResponse getRatesByCountries(Set<String> countryCodes) {
-        List<ExchangeRateResponseDto> list = resolveRates(countryCodes);
-        return ExchangeRateListResponse.from(list);
-    }
-
-    private List<ExchangeRateResponseDto> resolveRates(Set<String> countryCodes) {
-        if (isEmpty(countryCodes)) {
-            return getRatesInternal(null);
-        }
-        return getRatesInternal(mapCountriesToCurrencyCodes(countryCodes));
-    }
-
     public ExchangeRateResponseDto getRate(String currencyCode) {
-        return getRatesInternal(Set.of(currencyCode)).stream()
-                .findFirst()
+        ExchangeRate rate = exchangeRateRepository
+                .findByCurrencyCodeAndBaseCode(currencyCode, DEFAULT_BASE_CURRENCY)
                 .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
-    }
 
-    private List<ExchangeRateResponseDto> getRatesInternal(Set<String> currencyCodes) {
-        return exchangeRateRepository.findAll().stream()
-                .filter(rate -> rate.getBaseCode().equals(DEFAULT_BASE_CURRENCY)
-                        && (currencyCodes == null || currencyCodes.contains(rate.getCurrencyCode())))
-                .map(ExchangeRateResponseDto::from)
-                .toList();
-    }
-
-    private Set<String> mapCountriesToCurrencyCodes(Set<String> countryCodes) {
-        return countryCodes.stream()
-                .map(code -> countryService.getCountryByCode(code).currency().code())
-                .collect(Collectors.toSet());
-    }
-
-    private boolean isEmpty(Set<?> set) {
-        return set == null || set.isEmpty();
+        return ExchangeRateResponseDto.from(rate);
     }
 
     @Transactional
     public void fetchAndSaveExchangeRates() {
         ExchangeRateExternalDto externalDto = apiClient.fetchRates();
-        Set<String> existingPairs = getExistingCurrencyPairs();
-        List<ExchangeRate> newRates = extractNewRates(externalDto, existingPairs);
 
-        saveIfNotEmpty(newRates);
-    }
-
-    private Set<String> getExistingCurrencyPairs() {
-        return exchangeRateRepository.findAll().stream()
-                .map(this::toPairKey)
-                .collect(Collectors.toSet());
-    }
-
-    private List<ExchangeRate> extractNewRates(ExchangeRateExternalDto externalDto, Set<String> existingPairs) {
-        return externalDto.toEntities().stream()
-                .filter(rate -> isNewRate(rate, existingPairs))
-                .toList();
-    }
-
-    private boolean isNewRate(ExchangeRate rate, Set<String> existingPairs) {
-        return !existingPairs.contains(toPairKey(rate));
-    }
-
-    @Transactional
-    public void saveIfNotEmpty(List<ExchangeRate> rates) {
+        List<ExchangeRate> rates = externalDto.toEntities();
         if (rates.isEmpty()) {
-            log.info("저장할 새로운 환율 데이터가 없습니다.");
+            log.info("저장할 환율 데이터가 없습니다.");
             return;
         }
 
-        exchangeRateRepository.saveAll(rates);
-        log.info("환율 데이터 저장 완료: {}건", rates.size());
+        rates.forEach(this::saveOrUpdate);
+        log.info("환율 데이터 갱신 완료: {}건", rates.size());
     }
 
-    private String toPairKey(ExchangeRate rate) {
-        return rate.getCurrencyCode() + "->" + rate.getBaseCode();
+    private void saveOrUpdate(ExchangeRate newRate) {
+        exchangeRateRepository
+                .findByCurrencyCodeAndBaseCode(
+                        newRate.getCurrencyCode(),
+                        newRate.getBaseCode()
+                )
+                .ifPresentOrElse(
+                        existing -> existing.updateRate(newRate.getRate()),
+                        () -> exchangeRateRepository.save(newRate)
+                );
     }
 }

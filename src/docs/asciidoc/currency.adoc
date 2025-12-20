@@ -1,0 +1,14 @@
+[[currency-api]]
+== Currency API
+
+[[currency-get-by-country]]
+=== 국가 코드 기반 통화 기호 조회
+
+==== HTTP 요청
+include::{snippets}/currency/get-by-country/http-request.adoc[]
+
+==== HTTP 응답
+include::{snippets}/currency/get-by-country/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/currency/get-by-country/response-fields.adoc[]

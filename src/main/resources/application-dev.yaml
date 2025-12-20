@@ -17,7 +17,7 @@ spring:
         default_schema: public
 
   elasticsearch:
-    uris: ${ELASTICSEARCH_URIS}
+    uris: http://souzip-elasticsearch:9200
 
 jwt:
   secret: ${JWT_SECRET}

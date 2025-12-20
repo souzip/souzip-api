@@ -16,7 +16,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   elasticsearch:
-    uris: ${LOCAL_ELASTICSEARCH_URIS}
+    uris: ${ELASTICSEARCH_URIS}
 
 jwt:
   secret: ${JWT_SECRET}

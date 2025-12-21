@@ -368,8 +368,6 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.NULL)
-                        .description("응답 데이터 (null)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("성공 메시지")
                 )

@@ -4,7 +4,9 @@ import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.file.service.FileService;
+import com.souzip.api.domain.file.service.FileStorageService;
 import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
+import com.souzip.api.domain.souvenir.dto.SouvenirNearbyResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
@@ -25,10 +27,33 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class SouvenirService {
 
+    private static final double NEARBY_RADIUS_METER = 4000;
+
     private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
     private final FileService fileService;
     private final ExchangeRateService exchangeRateService;
+    private final FileStorageService fileStorageService;
+    public List<SouvenirNearbyResponse> getNearbySouvenirs(double latitude, double longitude) {
+        List<Object[]> results =
+                souvenirRepository.findNearbySouvenirs(latitude, longitude, NEARBY_RADIUS_METER);
+
+        return results.stream()
+                .map(row -> {
+                    Long id = ((Number) row[0]).longValue();
+                    String name = (String) row[1];
+                    String categoryName = (String) row[2];
+                    String thumbnail = (String) row[3];
+                    Double distance = ((Number) row[4]).doubleValue();
+
+                    String imageUrl = thumbnail != null
+                            ? fileStorageService.generatePresignedUrl(thumbnail)
+                            : null;
+
+                    return SouvenirNearbyResponse.from(id, name, categoryName, imageUrl, distance);
+                })
+                .toList();
+    }
 
     public SouvenirResponse getSouvenir(Long souvenirId) {
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(souvenirId)

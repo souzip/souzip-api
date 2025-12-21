@@ -1,6 +1,7 @@
 package com.souzip.api.domain.souvenir.controller;
 
 import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
+import com.souzip.api.domain.souvenir.dto.SouvenirNearbyResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.service.SouvenirService;
@@ -19,6 +20,14 @@ import java.util.List;
 public class SouvenirController {
 
     private final SouvenirService souvenirService;
+
+    @GetMapping("/nearby")
+    public SuccessResponse<List<SouvenirNearbyResponse>> getNearbySouvenirs(
+            @RequestParam double latitude,
+            @RequestParam double longitude
+    ) {
+        return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude));
+    }
 
     @GetMapping("/{id}")
     public SuccessResponse<SouvenirResponse> getSouvenir(@PathVariable Long id) {

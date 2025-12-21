@@ -361,7 +361,7 @@ public class SearchService {
         Map<String, List<String>> highlight = buildCustomHighlight(doc, keyword);
         Float score = hit.getScore();
 
-        return SearchResponse.from(doc, score, highlight);
+        return SearchResponse.from(doc, highlight);
     }
 
     private Map<String, List<String>> buildCustomHighlight(LocationDocument doc, String keyword) {

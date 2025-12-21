@@ -29,11 +29,11 @@ public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
           AND ST_DWithin(
                 ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
                 ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography,
-                10000
+                :radiusMeter
           )
         ORDER BY distance
         LIMIT 10
         """, nativeQuery = true)
     List<Object[]> findNearbySouvenirs(@Param("latitude") double latitude,
-                                       @Param("longitude") double longitude);
+                                       @Param("longitude") double longitude, double radiusMeter);
 }

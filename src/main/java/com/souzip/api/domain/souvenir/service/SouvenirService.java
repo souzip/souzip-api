@@ -27,13 +27,16 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class SouvenirService {
 
+    private static final double NEARBY_RADIUS_METER = 4000;
+
     private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
     private final FileService fileService;
     private final ExchangeRateService exchangeRateService;
     private final FileStorageService fileStorageService;
     public List<SouvenirNearbyResponse> getNearbySouvenirs(double latitude, double longitude) {
-        List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude);
+        List<Object[]> results =
+                souvenirRepository.findNearbySouvenirs(latitude, longitude, NEARBY_RADIUS_METER);
 
         return results.stream()
                 .map(row -> {
@@ -43,10 +46,9 @@ public class SouvenirService {
                     String thumbnail = (String) row[3];
                     Double distance = ((Number) row[4]).doubleValue();
 
-                    String imageUrl = null;
-                    if (thumbnail != null) {
-                        imageUrl = fileStorageService.generatePresignedUrl(thumbnail);
-                    }
+                    String imageUrl = thumbnail != null
+                            ? fileStorageService.generatePresignedUrl(thumbnail)
+                            : null;
 
                     return SouvenirNearbyResponse.from(id, name, categoryName, imageUrl, distance);
                 })

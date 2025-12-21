@@ -32,6 +32,8 @@ public enum ErrorCode {
     COUNTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 국가 정보를 찾을 수 없습니다."),
     COUNTRY_REGION_INVALID(HttpStatus.BAD_REQUEST, "국가의 지역 코드가 유효하지 않습니다."),
 
+    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 도시 정보를 찾을 수 없습니다."),
+
     EXCHANGE_RATE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 환율 정보를 찾을 수 없습니다."),
 
     SOUVENIR_NOT_FOUND(HttpStatus.NOT_FOUND, "기념품을 찾을 수 없습니다."),
@@ -45,6 +47,12 @@ public enum ErrorCode {
     FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다."),
 
     INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리입니다."),
+
+    SEARCH_INDEX_NOT_READY(HttpStatus.SERVICE_UNAVAILABLE, "검색 인덱스가 준비되지 않았습니다."),
+    SEARCH_INDEX_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "검색 인덱스 생성에 실패했습니다."),
+    SEARCH_INDEX_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "검색 인덱스 삭제에 실패했습니다."),
+    SEARCH_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "검색 데이터 저장에 실패했습니다."),
+    SEARCH_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "검색 서비스에 오류가 발생했습니다."),
     ;
 
     private final HttpStatus status;

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
     Optional<Souvenir> findByIdAndDeletedFalse(Long id);

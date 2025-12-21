@@ -1,5 +1,6 @@
 package com.souzip.api.global.exception;
 
+import com.souzip.api.global.aop.MdcTraceId;
 import com.souzip.api.global.common.dto.ErrorResponse;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        ensureTraceId();
+
         log.error("[BUSINESS-ERROR] errorCode={} status={} message={}",
             e.getErrorCode().name(),
             e.getErrorCode().getStatus(),
@@ -33,6 +36,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        ensureTraceId();
+
         log.error("[ILLEGAL-ARGUMENT-ERROR] message={}", e.getMessage(), e);
 
         return ResponseEntity
@@ -46,6 +51,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpStatusCode status,
                                                                   WebRequest request
     ) {
+        ensureTraceId();
+
         List<ErrorResponse.FieldError> errors = ex.getBindingResult()
             .getFieldErrors()
             .stream()
@@ -65,10 +72,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e) {
+        ensureTraceId();
+
         log.error("[UNEXPECTED-ERROR] type={} message={}", e.getClass().getSimpleName(), e.getMessage());
 
         return ResponseEntity
             .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
             .body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage()));
+    }
+
+    private void ensureTraceId() {
+        MdcTraceId.putIfAbsent();
     }
 }

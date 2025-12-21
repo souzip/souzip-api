@@ -15,7 +15,7 @@ public class PaginationResponse<T> {
     private final PageInfo pagination;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private PaginationResponse(List<T> content, PageInfo pagination) {
+    protected PaginationResponse(List<T> content, PageInfo pagination) {
         this.content = content;
         this.pagination = pagination;
     }

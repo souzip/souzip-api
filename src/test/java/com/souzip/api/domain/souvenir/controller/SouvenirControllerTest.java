@@ -4,6 +4,7 @@ import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
+import com.souzip.api.domain.souvenir.dto.SouvenirNearbyResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.entity.Purpose;
@@ -76,6 +77,59 @@ class SouvenirControllerTest extends RestDocsSupport {
                 })
                 .apply(documentationConfiguration(provider))
                 .build();
+    }
+
+    @Test
+    @DisplayName("사용자 위치 기반 근처 기념품 조회")
+    void getNearbySouvenirs() throws Exception {
+        double userLatitude = 40.7128;
+        double userLongitude = -74.0060;
+
+        List<SouvenirNearbyResponse> nearbySouvenirs = List.of(
+                SouvenirNearbyResponse.from(
+                        1L,
+                        "Souvenir A",
+                        "FOOD_SNACK",
+                        "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
+                        500.0
+                ),
+                SouvenirNearbyResponse.from(
+                        2L,
+                        "Souvenir B",
+                        "BEAUTY_HEALTH",
+                        null,
+                        1200.0
+                )
+        );
+
+        given(souvenirService.getNearbySouvenirs(userLatitude, userLongitude))
+                .willReturn(nearbySouvenirs);
+
+        mockMvc.perform(get("/api/souvenirs/nearby")
+                        .param("latitude", String.valueOf(userLatitude))
+                        .param("longitude", String.valueOf(userLongitude))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(1L))
+                .andExpect(jsonPath("$.data[0].name").value("Souvenir A"))
+                .andExpect(jsonPath("$.data[0].distanceMeter").value(500.0))
+                .andExpect(jsonPath("$.data[1].id").value(2L))
+                .andExpect(jsonPath("$.data[1].name").value("Souvenir B"))
+                .andExpect(jsonPath("$.data[1].distanceMeter").value(1200.0))
+                .andDo(document("souvenirs/get-nearby-souvenirs",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        apiResponseFields(
+                                fieldWithPath("data").type(JsonFieldType.ARRAY).description("응답 데이터"),
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data[].name").type(JsonFieldType.STRING).description("기념품명"),
+                                fieldWithPath("data[].categoryName").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data[].thumbnail").type(JsonFieldType.STRING).description("대표 이미지 URL").optional(),
+                                fieldWithPath("data[].distanceMeter").type(JsonFieldType.NUMBER).description("사용자와 기념품 거리(m)"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
+                        )
+                ));
     }
 
     @Test

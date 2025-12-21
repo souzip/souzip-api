@@ -36,8 +36,9 @@ public class LocationDocument {
         mainField = @Field(type = FieldType.Text, analyzer = "korean_analyzer"),
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
-            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_analyzer"),
-            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer")
+            @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
+            @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }
     )
     private String nameEn;
@@ -46,8 +47,9 @@ public class LocationDocument {
         mainField = @Field(type = FieldType.Text, analyzer = "korean_analyzer"),
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
-            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_analyzer"),
-            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer")
+            @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
+            @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }
     )
     private String nameKr;
@@ -56,8 +58,9 @@ public class LocationDocument {
         mainField = @Field(type = FieldType.Text, analyzer = "korean_analyzer"),
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
-            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_analyzer"),
-            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer")
+            @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
+            @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }
     )
     private String countryNameEn;
@@ -66,8 +69,9 @@ public class LocationDocument {
         mainField = @Field(type = FieldType.Text, analyzer = "korean_analyzer"),
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
-            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_analyzer"),
-            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer")
+            @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
+            @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }
     )
     private String countryNameKr;

@@ -268,8 +268,9 @@ public class SearchService {
         LocationDocument doc = hit.getContent();
         String keyword = CURRENT_KEYWORD.get();
         Map<String, List<String>> highlight = buildCustomHighlight(doc, keyword);
+        Float score = hit.getScore();
 
-        return SearchResponse.from(doc, highlight);
+        return SearchResponse.from(doc, score, highlight);
     }
 
     private Map<String, List<String>> buildCustomHighlight(LocationDocument doc, String keyword) {

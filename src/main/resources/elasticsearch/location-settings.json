@@ -1,15 +1,19 @@
 {
   "analysis": {
     "tokenizer": {
-      "edge_ngram_tokenizer": {
-        "type": "edge_ngram",
-        "min_gram": 1,
-        "max_gram": 10,
-        "token_chars": ["letter", "digit"]
+      "jaso_search_tokenizer": {
+        "type": "jaso_tokenizer",
+        "mistype": true,
+        "chosung": true
+      },
+      "jaso_index_tokenizer": {
+        "type": "jaso_tokenizer",
+        "mistype": true,
+        "chosung": true
       },
       "ngram_tokenizer": {
         "type": "ngram",
-        "min_gram": 2,
+        "min_gram": 1,
         "max_gram": 3,
         "token_chars": ["letter", "digit"]
       }
@@ -20,6 +24,11 @@
         "synonyms": [
           "한국, 대한민국"
         ]
+      },
+      "autocomplete_filter": {
+        "type": "edge_ngram",
+        "min_gram": 1,
+        "max_gram": 20
       }
     },
     "analyzer": {
@@ -28,21 +37,30 @@
         "tokenizer": "nori_tokenizer",
         "filter": ["lowercase", "nori_readingform", "korean_synonym"]
       },
-      "chosung_analyzer": {
+      "jaso_index_analyzer": {
         "type": "custom",
-        "tokenizer": "keyword",
-        "filter": ["lowercase"]
+        "tokenizer": "jaso_index_tokenizer"
+      },
+      "jaso_search_analyzer": {
+        "type": "custom",
+        "tokenizer": "jaso_search_tokenizer"
       },
       "ngram_analyzer": {
         "type": "custom",
         "tokenizer": "ngram_tokenizer",
         "filter": ["lowercase"]
       },
-      "edge_ngram_analyzer": {
+      "autocomplete_analyzer": {
         "type": "custom",
-        "tokenizer": "edge_ngram_tokenizer",
+        "tokenizer": "standard",
+        "filter": ["lowercase", "autocomplete_filter"]
+      },
+      "autocomplete_search_analyzer": {
+        "type": "custom",
+        "tokenizer": "standard",
         "filter": ["lowercase"]
       }
     }
-  }
+  },
+  "max_ngram_diff": 10
 }

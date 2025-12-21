@@ -22,16 +22,16 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
     @Override
     public List<SearchHit<LocationDocument>> searchByKeywordWithFuzzy(String keyword) {
         Query query = buildFunctionScoreQuery(keyword, false);
-        return executeSearchWithHighlight(query, 100.0f);
+        return executeSearch(query, 1.0f);
     }
 
     @Override
     public List<SearchHit<LocationDocument>> searchWithMultipleKeywords(String[] keywords) {
         Query query = buildMultiKeywordQuery(keywords);
-        return executeSearchWithHighlight(query, 100.0f);
+        return executeSearch(query, 1.0f);
     }
 
-    private List<SearchHit<LocationDocument>> executeSearchWithHighlight(Query query, float minScore) {
+    private List<SearchHit<LocationDocument>> executeSearch(Query query, float minScore) {
         NativeQuery searchQuery = NativeQuery.builder()
             .withQuery(query)
             .withMinScore(minScore)
@@ -43,6 +43,193 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         );
 
         return searchHits.stream().toList();
+    }
+
+    private Query buildFunctionScoreQuery(String keyword, boolean includeCountry) {
+        return FunctionScoreQuery.of(fs -> fs
+            .query(buildBaseQuery(keyword, includeCountry))
+            .functions(
+                // 1. 완전 일치 - 최고 점수
+                FunctionScore.of(f -> f
+                    .filter(buildExactMatchFilter(keyword, includeCountry))
+                    .weight(100000.0)
+                ),
+                // 2. Prefix 매칭
+                FunctionScore.of(f -> f
+                    .filter(buildPrefixFilter(keyword, includeCountry))
+                    .weight(50000.0)
+                ),
+                // 3. Fuzzy 매칭 (편집 거리 1-2)
+                FunctionScore.of(f -> f
+                    .filter(buildFuzzyFilter(keyword, includeCountry))
+                    .weight(30000.0)
+                ),
+                // 4. 자소 매칭 - 낮춤 (부분 매칭 허용)
+                FunctionScore.of(f -> f
+                    .filter(buildJasoFilter(keyword, includeCountry))
+                    .weight(5000.0)
+                ),
+                // 5. Autocomplete
+                FunctionScore.of(f -> f
+                    .filter(buildAutocompleteFilter(keyword, includeCountry))
+                    .weight(1000.0)
+                ),
+                // 6. Ngram
+                FunctionScore.of(f -> f
+                    .filter(buildNgramFilter(keyword, includeCountry))
+                    .weight(500.0)
+                ),
+                // 7. Wildcard
+                FunctionScore.of(f -> f
+                    .filter(buildWildcardFilter(keyword, includeCountry))
+                    .weight(100.0)
+                )
+            )
+            .scoreMode(FunctionScoreMode.Sum)
+            .boostMode(FunctionBoostMode.Replace)
+        )._toQuery();
+    }
+
+    private Query buildBaseQuery(String keyword, boolean includeCountry) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            // 일반 매칭
+            .should(buildMatch("nameEn", keyword, 50.0f))
+            .should(buildMatch("nameKr", keyword, 50.0f))
+            // Fuzzy 매칭 - 가중치 높임
+            .should(buildConditionalFuzzy("nameEn", keyword, 200.0f))
+            .should(buildConditionalFuzzy("nameKr", keyword, 200.0f))
+            // 자소 매칭 - 가중치 낮춤
+            .should(buildMatch("nameEn.jaso", keyword, 100.0f))
+            .should(buildMatch("nameKr.jaso", keyword, 100.0f))
+            // Autocomplete
+            .should(buildMatch("nameEn.autocomplete", keyword, 30.0f))
+            .should(buildMatch("nameKr.autocomplete", keyword, 30.0f))
+            // Ngram
+            .should(buildMatch("nameEn.ngram", keyword, 80.0f))
+            .should(buildMatch("nameKr.ngram", keyword, 80.0f))
+            // Wildcard
+            .should(buildWildcard("nameKr", keyword, 20.0f))
+            .should(buildWildcard("nameEn", keyword, 20.0f));
+
+        if (includeCountry) {
+            builder
+                .should(buildMatch("countryNameEn", keyword, 25.0f))
+                .should(buildMatch("countryNameKr", keyword, 25.0f))
+                .should(buildMatch("countryNameEn.jaso", keyword, 50.0f))
+                .should(buildMatch("countryNameKr.jaso", keyword, 50.0f))
+                .should(buildMatch("countryNameEn.ngram", keyword, 40.0f))
+                .should(buildMatch("countryNameKr.ngram", keyword, 40.0f))
+                .should(buildConditionalFuzzy("countryNameEn", keyword, 50.0f))
+                .should(buildConditionalFuzzy("countryNameKr", keyword, 50.0f));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    private Query buildExactMatchFilter(String keyword, boolean includeCountry) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(buildTerm("nameEn.keyword", keyword))
+            .should(buildTerm("nameKr.keyword", keyword));
+
+        if (includeCountry) {
+            builder
+                .should(buildTerm("countryNameEn.keyword", keyword))
+                .should(buildTerm("countryNameKr.keyword", keyword));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    private Query buildPrefixFilter(String keyword, boolean includeCountry) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(buildPrefix("nameEn", keyword))
+            .should(buildPrefix("nameKr", keyword))
+            .should(buildPrefix("nameEn.keyword", keyword))
+            .should(buildPrefix("nameKr.keyword", keyword));
+
+        if (includeCountry) {
+            builder
+                .should(buildPrefix("countryNameEn", keyword))
+                .should(buildPrefix("countryNameKr", keyword))
+                .should(buildPrefix("countryNameEn.keyword", keyword))
+                .should(buildPrefix("countryNameKr.keyword", keyword));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    private Query buildJasoFilter(String keyword, boolean includeCountry) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(buildMatch("nameEn.jaso", keyword, 5.0f))
+            .should(buildMatch("nameKr.jaso", keyword, 5.0f));
+
+        if (includeCountry) {
+            builder
+                .should(buildMatch("countryNameEn.jaso", keyword, 2.0f))
+                .should(buildMatch("countryNameKr.jaso", keyword, 2.0f));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    private Query buildFuzzyFilter(String keyword, boolean includeCountry) {
+        if (keyword.length() <= 1) {
+            return buildTerm("_id", "never_match");
+        }
+
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(buildFuzzyQuery("nameEn", keyword, 10.0f))
+            .should(buildFuzzyQuery("nameKr", keyword, 10.0f));
+
+        if (includeCountry) {
+            builder
+                .should(buildFuzzyQuery("countryNameEn", keyword, 5.0f))
+                .should(buildFuzzyQuery("countryNameKr", keyword, 5.0f));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    private Query buildAutocompleteFilter(String keyword, boolean includeCountry) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(buildMatch("nameEn.autocomplete", keyword, 1.0f))
+            .should(buildMatch("nameKr.autocomplete", keyword, 1.0f));
+
+        if (includeCountry) {
+            builder
+                .should(buildMatch("countryNameEn.autocomplete", keyword, 1.0f))
+                .should(buildMatch("countryNameKr.autocomplete", keyword, 1.0f));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    private Query buildWildcardFilter(String keyword, boolean includeCountry) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(buildWildcardQuery("nameKr.keyword", keyword + "*"))
+            .should(buildWildcardQuery("nameEn.keyword", keyword + "*"));
+
+        if (includeCountry) {
+            builder
+                .should(buildWildcardQuery("countryNameKr.keyword", keyword + "*"))
+                .should(buildWildcardQuery("countryNameEn.keyword", keyword + "*"));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    private Query buildNgramFilter(String keyword, boolean includeCountry) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(buildNgramMatch("nameEn.ngram", keyword))
+            .should(buildNgramMatch("nameKr.ngram", keyword));
+
+        if (includeCountry) {
+            builder
+                .should(buildNgramMatch("countryNameEn.ngram", keyword))
+                .should(buildNgramMatch("countryNameKr.ngram", keyword));
+        }
+
+        return builder.build()._toQuery();
     }
 
     private Query buildMultiKeywordQuery(String[] keywords) {
@@ -57,19 +244,23 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
             .functions(
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordExactFilter(keywords))
-                    .weight(200.0)
+                    .weight(1000.0)
+                ),
+                FunctionScore.of(f -> f
+                    .filter(buildMultiKeywordJasoFilter(keywords))
+                    .weight(500.0)
                 ),
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordPrefixFilter(keywords))
-                    .weight(50.0)
+                    .weight(300.0)
                 ),
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordWildcardFilter(keywords))
-                    .weight(30.0)
+                    .weight(200.0)
                 )
             )
-            .scoreMode(FunctionScoreMode.Multiply)
-            .boostMode(FunctionBoostMode.Multiply)
+            .scoreMode(FunctionScoreMode.Sum)
+            .boostMode(FunctionBoostMode.Replace)
         )._toQuery();
     }
 
@@ -79,28 +270,12 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
             .should(buildMatch("nameKr", keyword, 5.0f))
             .should(buildMatch("countryNameEn", keyword, 10.0f))
             .should(buildMatch("countryNameKr", keyword, 10.0f))
-            .should(buildConditionalFuzzy("nameEn", keyword, 1.0f))
-            .should(buildConditionalFuzzy("nameKr", keyword, 1.0f))
-            .should(buildConditionalFuzzy("countryNameEn", keyword, 2.0f))
-            .should(buildConditionalFuzzy("countryNameKr", keyword, 2.0f))
-        )._toQuery();
-    }
-
-    private Query buildConditionalFuzzy(String field, String keyword, float boost) {
-        if (keyword.length() <= 2) {
-            return MatchQuery.of(m -> m
-                .field(field)
-                .query(keyword)
-                .boost(0.1f)
-            )._toQuery();
-        }
-
-        return MatchQuery.of(m -> m
-            .field(field)
-            .query(keyword)
-            .fuzziness("1")
-            .prefixLength(1)
-            .boost(boost)
+            .should(buildMatch("nameEn.jaso", keyword, 50.0f))
+            .should(buildMatch("nameKr.jaso", keyword, 50.0f))
+            .should(buildMatch("countryNameEn.jaso", keyword, 70.0f))
+            .should(buildMatch("countryNameKr.jaso", keyword, 70.0f))
+            .should(buildConditionalFuzzy("nameEn", keyword, 20.0f))
+            .should(buildConditionalFuzzy("nameKr", keyword, 20.0f))
         )._toQuery();
     }
 
@@ -108,14 +283,23 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         BoolQuery.Builder mustBuilder = new BoolQuery.Builder();
 
         for (String keyword : keywords) {
-            mustBuilder.must(
-                BoolQuery.of(b -> b
-                    .should(TermQuery.of(t -> t.field("nameEn.keyword").value(keyword))._toQuery())
-                    .should(TermQuery.of(t -> t.field("nameKr.keyword").value(keyword))._toQuery())
-                    .should(TermQuery.of(t -> t.field("countryNameEn.keyword").value(keyword))._toQuery())
-                    .should(TermQuery.of(t -> t.field("countryNameKr.keyword").value(keyword))._toQuery())
-                )._toQuery()
-            );
+            mustBuilder.must(buildMultiFieldOr(keyword, "keyword"));
+        }
+
+        return mustBuilder.build()._toQuery();
+    }
+
+    private Query buildMultiKeywordJasoFilter(String[] keywords) {
+        BoolQuery.Builder mustBuilder = new BoolQuery.Builder();
+
+        for (String keyword : keywords) {
+            BoolQuery.Builder shouldBuilder = new BoolQuery.Builder()
+                .should(buildMatch("nameEn.jaso", keyword, 1.0f))
+                .should(buildMatch("nameKr.jaso", keyword, 1.0f))
+                .should(buildMatch("countryNameEn.jaso", keyword, 1.0f))
+                .should(buildMatch("countryNameKr.jaso", keyword, 1.0f));
+
+            mustBuilder.must(shouldBuilder.build()._toQuery());
         }
 
         return mustBuilder.build()._toQuery();
@@ -125,18 +309,17 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         BoolQuery.Builder mustBuilder = new BoolQuery.Builder();
 
         for (String keyword : keywords) {
-            mustBuilder.must(
-                BoolQuery.of(b -> b
-                    .should(PrefixQuery.of(p -> p.field("nameEn").value(keyword.toLowerCase()))._toQuery())
-                    .should(PrefixQuery.of(p -> p.field("nameKr").value(keyword))._toQuery())
-                    .should(PrefixQuery.of(p -> p.field("nameEn.keyword").value(keyword))._toQuery())
-                    .should(PrefixQuery.of(p -> p.field("nameKr.keyword").value(keyword))._toQuery())
-                    .should(PrefixQuery.of(p -> p.field("countryNameEn").value(keyword.toLowerCase()))._toQuery())
-                    .should(PrefixQuery.of(p -> p.field("countryNameKr").value(keyword))._toQuery())
-                    .should(PrefixQuery.of(p -> p.field("countryNameEn.keyword").value(keyword))._toQuery())
-                    .should(PrefixQuery.of(p -> p.field("countryNameKr.keyword").value(keyword))._toQuery())
-                )._toQuery()
-            );
+            BoolQuery.Builder shouldBuilder = new BoolQuery.Builder()
+                .should(buildPrefix("nameEn", keyword))
+                .should(buildPrefix("nameKr", keyword))
+                .should(buildPrefix("nameEn.keyword", keyword))
+                .should(buildPrefix("nameKr.keyword", keyword))
+                .should(buildPrefix("countryNameEn", keyword))
+                .should(buildPrefix("countryNameKr", keyword))
+                .should(buildPrefix("countryNameEn.keyword", keyword))
+                .should(buildPrefix("countryNameKr.keyword", keyword));
+
+            mustBuilder.must(shouldBuilder.build()._toQuery());
         }
 
         return mustBuilder.build()._toQuery();
@@ -146,133 +329,25 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         BoolQuery.Builder mustBuilder = new BoolQuery.Builder();
 
         for (String keyword : keywords) {
-            mustBuilder.must(
-                BoolQuery.of(b -> b
-                    .should(WildcardQuery.of(w -> w.field("nameKr.keyword").value(keyword + "*").caseInsensitive(true))._toQuery())
-                    .should(WildcardQuery.of(w -> w.field("nameEn.keyword").value(keyword + "*").caseInsensitive(true))._toQuery())
-                    .should(WildcardQuery.of(w -> w.field("countryNameKr.keyword").value(keyword + "*").caseInsensitive(true))._toQuery())
-                    .should(WildcardQuery.of(w -> w.field("countryNameEn.keyword").value(keyword + "*").caseInsensitive(true))._toQuery())
-                )._toQuery()
-            );
+            BoolQuery.Builder shouldBuilder = new BoolQuery.Builder()
+                .should(buildWildcardQuery("nameKr.keyword", keyword + "*"))
+                .should(buildWildcardQuery("nameEn.keyword", keyword + "*"))
+                .should(buildWildcardQuery("countryNameKr.keyword", keyword + "*"))
+                .should(buildWildcardQuery("countryNameEn.keyword", keyword + "*"));
+
+            mustBuilder.must(shouldBuilder.build()._toQuery());
         }
 
         return mustBuilder.build()._toQuery();
     }
 
-    private Query buildFunctionScoreQuery(String keyword, boolean includeCountry) {
-        return FunctionScoreQuery.of(fs -> fs
-            .query(buildBaseQuery(keyword, includeCountry))
-            .functions(
-                FunctionScore.of(f -> f
-                    .filter(buildExactMatchFilter(keyword, includeCountry))
-                    .weight(100.0)
-                ),
-                FunctionScore.of(f -> f
-                    .filter(buildPrefixFilter(keyword, includeCountry))
-                    .weight(50.0)
-                ),
-                FunctionScore.of(f -> f
-                    .filter(buildWildcardFilter(keyword, includeCountry))
-                    .weight(20.0)
-                )
-            )
-            .scoreMode(FunctionScoreMode.Multiply)
-            .boostMode(FunctionBoostMode.Multiply)
+    private Query buildMultiFieldOr(String keyword, String suffix) {
+        return BoolQuery.of(b -> b
+            .should(buildTerm("nameEn." + suffix, keyword))
+            .should(buildTerm("nameKr." + suffix, keyword))
+            .should(buildTerm("countryNameEn." + suffix, keyword))
+            .should(buildTerm("countryNameKr." + suffix, keyword))
         )._toQuery();
-    }
-
-    private Query buildBaseQuery(String keyword, boolean includeCountry) {
-        BoolQuery.Builder builder = new BoolQuery.Builder()
-            .should(buildMatch("nameEn", keyword, 5.0f))
-            .should(buildMatch("nameKr", keyword, 5.0f))
-
-            .should(WildcardQuery.of(w -> w
-                .field("nameKr")
-                .value("*" + keyword + "*")
-                .boost(8.0f)
-                .caseInsensitive(true)
-            )._toQuery())
-            .should(WildcardQuery.of(w -> w
-                .field("nameEn")
-                .value("*" + keyword.toLowerCase() + "*")
-                .boost(8.0f)
-                .caseInsensitive(true)
-            )._toQuery())
-
-            .should(buildConditionalFuzzy("nameEn", keyword, 2.0f))
-            .should(buildConditionalFuzzy("nameKr", keyword, 2.0f));
-
-        if (includeCountry) {
-            builder
-                .should(buildMatch("countryNameEn", keyword, 3.0f))
-                .should(buildMatch("countryNameKr", keyword, 3.0f))
-                .should(buildConditionalFuzzy("countryNameEn", keyword, 1.0f))
-                .should(buildConditionalFuzzy("countryNameKr", keyword, 1.0f));
-        }
-
-        return builder.build()._toQuery();
-    }
-
-    private Query buildExactMatchFilter(String keyword, boolean includeCountry) {
-        BoolQuery.Builder builder = new BoolQuery.Builder()
-            .should(TermQuery.of(t -> t.field("nameEn.keyword").value(keyword))._toQuery())
-            .should(TermQuery.of(t -> t.field("nameKr.keyword").value(keyword))._toQuery());
-
-        if (includeCountry) {
-            builder
-                .should(TermQuery.of(t -> t.field("countryNameEn.keyword").value(keyword))._toQuery())
-                .should(TermQuery.of(t -> t.field("countryNameKr.keyword").value(keyword))._toQuery());
-        }
-
-        return builder.build()._toQuery();
-    }
-
-    private Query buildPrefixFilter(String keyword, boolean includeCountry) {
-        BoolQuery.Builder builder = new BoolQuery.Builder()
-            .should(PrefixQuery.of(p -> p.field("nameEn").value(keyword.toLowerCase()))._toQuery())
-            .should(PrefixQuery.of(p -> p.field("nameKr").value(keyword))._toQuery())
-            .should(PrefixQuery.of(p -> p.field("nameEn.keyword").value(keyword))._toQuery())
-            .should(PrefixQuery.of(p -> p.field("nameKr.keyword").value(keyword))._toQuery());
-
-        if (includeCountry) {
-            builder
-                .should(PrefixQuery.of(p -> p.field("countryNameEn").value(keyword.toLowerCase()))._toQuery())
-                .should(PrefixQuery.of(p -> p.field("countryNameKr").value(keyword))._toQuery())
-                .should(PrefixQuery.of(p -> p.field("countryNameEn.keyword").value(keyword))._toQuery())
-                .should(PrefixQuery.of(p -> p.field("countryNameKr.keyword").value(keyword))._toQuery());
-        }
-
-        return builder.build()._toQuery();
-    }
-
-    private Query buildWildcardFilter(String keyword, boolean includeCountry) {
-        BoolQuery.Builder builder = new BoolQuery.Builder()
-            .should(WildcardQuery.of(w -> w
-                .field("nameKr.keyword")
-                .value(keyword + "*")
-                .caseInsensitive(true)
-            )._toQuery())
-            .should(WildcardQuery.of(w -> w
-                .field("nameEn.keyword")
-                .value(keyword.toLowerCase() + "*")
-                .caseInsensitive(true)
-            )._toQuery());
-
-        if (includeCountry) {
-            builder
-                .should(WildcardQuery.of(w -> w
-                    .field("countryNameKr.keyword")
-                    .value(keyword + "*")
-                    .caseInsensitive(true)
-                )._toQuery())
-                .should(WildcardQuery.of(w -> w
-                    .field("countryNameEn.keyword")
-                    .value(keyword.toLowerCase() + "*")
-                    .caseInsensitive(true)
-                )._toQuery());
-        }
-
-        return builder.build()._toQuery();
     }
 
     private Query buildMatch(String field, String keyword, float boost) {
@@ -280,6 +355,74 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
             .field(field)
             .query(keyword)
             .boost(boost)
+        )._toQuery();
+    }
+
+    private Query buildTerm(String field, String keyword) {
+        return TermQuery.of(t -> t
+            .field(field)
+            .value(keyword)
+        )._toQuery();
+    }
+
+    private Query buildPrefix(String field, String keyword) {
+        String value = field.contains("En") ? keyword.toLowerCase() : keyword;
+        return PrefixQuery.of(p -> p
+            .field(field)
+            .value(value)
+        )._toQuery();
+    }
+
+    private Query buildWildcard(String field, String keyword, float boost) {
+        String pattern = "*" + (field.contains("En") ? keyword.toLowerCase() : keyword) + "*";
+        return WildcardQuery.of(w -> w
+            .field(field)
+            .value(pattern)
+            .boost(boost)
+            .caseInsensitive(true)
+        )._toQuery();
+    }
+
+    private Query buildWildcardQuery(String field, String pattern) {
+        return WildcardQuery.of(w -> w
+            .field(field)
+            .value(pattern)
+            .caseInsensitive(true)
+        )._toQuery();
+    }
+
+    private Query buildNgramMatch(String field, String keyword) {
+        return MatchQuery.of(m -> m
+            .field(field)
+            .query(keyword)
+            .minimumShouldMatch("70%")
+        )._toQuery();
+    }
+
+    private Query buildFuzzyQuery(String field, String keyword, float boost) {
+        return FuzzyQuery.of(fq -> fq
+            .field(field)
+            .value(keyword)
+            .fuzziness("AUTO")
+            .boost(boost)
+        )._toQuery();
+    }
+
+    private Query buildConditionalFuzzy(String field, String keyword, float boost) {
+        if (keyword.length() <= 1) {
+            return buildMatch(field, keyword, 0.1f);
+        }
+
+        String fuzziness = keyword.length() <= 2 ? "1" : "AUTO";
+
+        return MatchQuery.of(m -> m
+            .field(field)
+            .query(keyword)
+            .fuzziness(fuzziness)
+            .prefixLength(0)
+            .maxExpansions(50)
+            .boost(boost)
+            .fuzzyTranspositions(true)
         )._toQuery();
     }
 }

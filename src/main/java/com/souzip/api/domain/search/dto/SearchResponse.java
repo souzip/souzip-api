@@ -12,9 +12,10 @@ public record SearchResponse(
     String countryName,
     String countryNameEn,
     String countryNameKr,
+    Float score,
     Map<String, List<String>> highlight
 ) {
-    public static SearchResponse from(LocationDocument document, Map<String, List<String>> highlight) {
+    public static SearchResponse from(LocationDocument document, Float score, Map<String, List<String>> highlight) {
         return new SearchResponse(
             document.getType(),
             document.getNameKr(),
@@ -23,6 +24,7 @@ public record SearchResponse(
             document.getCountryNameKr(),
             document.getCountryNameEn(),
             document.getCountryNameKr(),
+            score,
             highlight
         );
     }

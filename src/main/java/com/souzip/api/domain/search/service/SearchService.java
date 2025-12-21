@@ -266,11 +266,10 @@ public class SearchService {
 
     private SearchResponse convertToResponse(SearchHit<LocationDocument> hit) {
         LocationDocument doc = hit.getContent();
-        Float score = hit.getScore();
         String keyword = CURRENT_KEYWORD.get();
         Map<String, List<String>> highlight = buildCustomHighlight(doc, keyword);
 
-        return SearchResponse.from(doc, score, highlight);
+        return SearchResponse.from(doc, highlight);
     }
 
     private Map<String, List<String>> buildCustomHighlight(LocationDocument doc, String keyword) {

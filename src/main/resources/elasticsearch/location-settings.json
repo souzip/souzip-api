@@ -11,6 +11,16 @@
         "mistype": true,
         "chosung": true
       },
+      "chosung_index_tokenizer": {
+        "type": "jaso_tokenizer",
+        "mistype": false,
+        "chosung": true
+      },
+      "chosung_search_tokenizer": {
+        "type": "jaso_tokenizer",
+        "mistype": false,
+        "chosung": true
+      },
       "ngram_tokenizer": {
         "type": "ngram",
         "min_gram": 1,
@@ -44,6 +54,14 @@
       "jaso_search_analyzer": {
         "type": "custom",
         "tokenizer": "jaso_search_tokenizer"
+      },
+      "chosung_index_analyzer": {
+        "type": "custom",
+        "tokenizer": "chosung_index_tokenizer"
+      },
+      "chosung_search_analyzer": {
+        "type": "custom",
+        "tokenizer": "chosung_search_tokenizer"
       },
       "ngram_analyzer": {
         "type": "custom",

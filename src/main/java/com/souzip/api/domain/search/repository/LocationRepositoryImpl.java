@@ -19,16 +19,19 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private final ElasticsearchOperations elasticsearchOperations;
 
+    // 최소 점수 임계값 (이 점수 미만은 결과에서 제외)
+    private static final float MIN_SCORE_THRESHOLD = 100.0f;
+
     @Override
     public List<SearchHit<LocationDocument>> searchByKeywordWithFuzzy(String keyword) {
         Query query = buildFunctionScoreQuery(keyword, false);
-        return executeSearch(query, 1.0f);
+        return executeSearch(query, MIN_SCORE_THRESHOLD);
     }
 
     @Override
     public List<SearchHit<LocationDocument>> searchWithMultipleKeywords(String[] keywords) {
         Query query = buildMultiKeywordQuery(keywords);
-        return executeSearch(query, 1.0f);
+        return executeSearch(query, MIN_SCORE_THRESHOLD);
     }
 
     private List<SearchHit<LocationDocument>> executeSearch(Query query, float minScore) {
@@ -59,27 +62,32 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                     .filter(buildPrefixFilter(keyword, includeCountry))
                     .weight(50000.0)
                 ),
-                // 3. Fuzzy 매칭 (편집 거리 1-2)
+                // 3. 자소 기반 Fuzzy (한글 오타 교정)
+                FunctionScore.of(f -> f
+                    .filter(buildJasoBasedFuzzyFilter(keyword, includeCountry))
+                    .weight(40000.0)
+                ),
+                // 4. 일반 Fuzzy (영문)
                 FunctionScore.of(f -> f
                     .filter(buildFuzzyFilter(keyword, includeCountry))
                     .weight(30000.0)
                 ),
-                // 4. 자소 매칭 - 낮춤 (부분 매칭 허용)
+                // 5. 자소 부분 매칭
                 FunctionScore.of(f -> f
                     .filter(buildJasoFilter(keyword, includeCountry))
                     .weight(5000.0)
                 ),
-                // 5. Autocomplete
-                FunctionScore.of(f -> f
-                    .filter(buildAutocompleteFilter(keyword, includeCountry))
-                    .weight(1000.0)
-                ),
-                // 6. Ngram
+                // 6. Ngram (띄어쓰기 없는 검색 지원)
                 FunctionScore.of(f -> f
                     .filter(buildNgramFilter(keyword, includeCountry))
-                    .weight(500.0)
+                    .weight(1000.0)  // 500 -> 1000으로 증가
                 ),
-                // 7. Wildcard
+                // 7. Autocomplete
+                FunctionScore.of(f -> f
+                    .filter(buildAutocompleteFilter(keyword, includeCountry))
+                    .weight(800.0)
+                ),
+                // 8. Wildcard
                 FunctionScore.of(f -> f
                     .filter(buildWildcardFilter(keyword, includeCountry))
                     .weight(100.0)
@@ -92,22 +100,16 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private Query buildBaseQuery(String keyword, boolean includeCountry) {
         BoolQuery.Builder builder = new BoolQuery.Builder()
-            // 일반 매칭
             .should(buildMatch("nameEn", keyword, 50.0f))
             .should(buildMatch("nameKr", keyword, 50.0f))
-            // Fuzzy 매칭 - 가중치 높임
             .should(buildConditionalFuzzy("nameEn", keyword, 200.0f))
             .should(buildConditionalFuzzy("nameKr", keyword, 200.0f))
-            // 자소 매칭 - 가중치 낮춤
             .should(buildMatch("nameEn.jaso", keyword, 100.0f))
             .should(buildMatch("nameKr.jaso", keyword, 100.0f))
-            // Autocomplete
             .should(buildMatch("nameEn.autocomplete", keyword, 30.0f))
             .should(buildMatch("nameKr.autocomplete", keyword, 30.0f))
-            // Ngram
             .should(buildMatch("nameEn.ngram", keyword, 80.0f))
             .should(buildMatch("nameKr.ngram", keyword, 80.0f))
-            // Wildcard
             .should(buildWildcard("nameKr", keyword, 20.0f))
             .should(buildWildcard("nameEn", keyword, 20.0f));
 
@@ -153,6 +155,55 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 .should(buildPrefix("countryNameKr", keyword))
                 .should(buildPrefix("countryNameEn.keyword", keyword))
                 .should(buildPrefix("countryNameKr.keyword", keyword));
+        }
+
+        return builder.build()._toQuery();
+    }
+
+    // 새로 추가: 자소 기반 Fuzzy 필터 (한글 오타 교정용)
+    private Query buildJasoBasedFuzzyFilter(String keyword, boolean includeCountry) {
+        if (keyword.length() <= 1) {
+            return buildTerm("_id", "never_match");
+        }
+
+        String fuzziness = keyword.length() <= 3 ? "1" : "2";
+
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+            .should(MatchQuery.of(m -> m
+                .field("nameKr.jaso")
+                .query(keyword)
+                .fuzziness(fuzziness)
+                .prefixLength(0)
+                .maxExpansions(50)
+                .boost(20.0f)
+            )._toQuery())
+            .should(MatchQuery.of(m -> m
+                .field("nameEn.jaso")
+                .query(keyword)
+                .fuzziness(fuzziness)
+                .prefixLength(0)
+                .maxExpansions(50)
+                .boost(10.0f)
+            )._toQuery());
+
+        if (includeCountry) {
+            builder
+                .should(MatchQuery.of(m -> m
+                    .field("countryNameKr.jaso")
+                    .query(keyword)
+                    .fuzziness(fuzziness)
+                    .prefixLength(0)
+                    .maxExpansions(50)
+                    .boost(5.0f)
+                )._toQuery())
+                .should(MatchQuery.of(m -> m
+                    .field("countryNameEn.jaso")
+                    .query(keyword)
+                    .fuzziness(fuzziness)
+                    .prefixLength(0)
+                    .maxExpansions(50)
+                    .boost(3.0f)
+                )._toQuery());
         }
 
         return builder.build()._toQuery();
@@ -244,19 +295,19 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
             .functions(
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordExactFilter(keywords))
-                    .weight(1000.0)
-                ),
-                FunctionScore.of(f -> f
-                    .filter(buildMultiKeywordJasoFilter(keywords))
-                    .weight(500.0)
+                    .weight(10000.0)
                 ),
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordPrefixFilter(keywords))
-                    .weight(300.0)
+                    .weight(5000.0)
+                ),
+                FunctionScore.of(f -> f
+                    .filter(buildMultiKeywordJasoFilter(keywords))
+                    .weight(3000.0)
                 ),
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordWildcardFilter(keywords))
-                    .weight(200.0)
+                    .weight(1000.0)
                 )
             )
             .scoreMode(FunctionScoreMode.Sum)

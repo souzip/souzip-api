@@ -29,6 +29,7 @@ public class SearchController {
         @RequestParam(required = false) Integer pageNo,
         @RequestParam(required = false) Integer pageSize
     ) {
+        log.info("검색어: {}, 페이지 번호: {}, 페이지 크기: {}", keyword, pageNo, pageSize);
         PaginationRequest paginationRequest = new PaginationRequest(pageNo, pageSize);
         return SuccessResponse.of(searchService.search(keyword, paginationRequest));
     }

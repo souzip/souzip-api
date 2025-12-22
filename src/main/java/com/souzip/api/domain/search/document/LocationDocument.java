@@ -37,6 +37,7 @@ public class LocationDocument {
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
             @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_index_analyzer", searchAnalyzer = "chosung_search_analyzer"),
             @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
             @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }
@@ -48,6 +49,7 @@ public class LocationDocument {
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
             @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_index_analyzer", searchAnalyzer = "chosung_search_analyzer"),
             @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
             @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }
@@ -59,6 +61,7 @@ public class LocationDocument {
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
             @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_index_analyzer", searchAnalyzer = "chosung_search_analyzer"),
             @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
             @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }
@@ -70,6 +73,7 @@ public class LocationDocument {
         otherFields = {
             @InnerField(suffix = "keyword", type = FieldType.Keyword),
             @InnerField(suffix = "jaso", type = FieldType.Text, analyzer = "jaso_index_analyzer", searchAnalyzer = "jaso_search_analyzer"),
+            @InnerField(suffix = "chosung", type = FieldType.Text, analyzer = "chosung_index_analyzer", searchAnalyzer = "chosung_search_analyzer"),
             @InnerField(suffix = "ngram", type = FieldType.Text, analyzer = "ngram_analyzer"),
             @InnerField(suffix = "autocomplete", type = FieldType.Text, analyzer = "autocomplete_analyzer", searchAnalyzer = "autocomplete_search_analyzer")
         }

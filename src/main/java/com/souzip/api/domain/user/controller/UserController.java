@@ -29,12 +29,6 @@ public class UserController {
         return SuccessResponse.of(response);
     }
 
-    @GetMapping("/profile-colors")
-    public SuccessResponse<ProfileColorsResponse> getAvailableProfileColors() {
-        ProfileColorsResponse response = userService.getAvailableProfileColors();
-        return SuccessResponse.of(response);
-    }
-
     @DeleteMapping("/me")
     @RequireAuth
     public SuccessResponse<Void> withdraw(@CurrentUserId Long currentUserId) {

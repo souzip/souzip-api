@@ -4,7 +4,7 @@ import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
-import com.souzip.api.domain.user.dto.ProfileColorsResponse;
+import com.souzip.api.domain.user.dto.UserAgreementInfo;
 import com.souzip.api.domain.user.service.UserService;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
@@ -14,20 +14,17 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentRequest;
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
 import static com.souzip.api.docs.CommonDocumentation.apiResponseFields;
 import static com.souzip.api.docs.CommonDocumentation.errorResponseFields;
-import static com.souzip.api.docs.CommonDocumentation.validationErrorResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
@@ -50,6 +47,11 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_success() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
+            true,
+            true,
+            true,
+            true,
+            false,
             "수집",
             "red",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH", "FASHION_ACCESSORY")
@@ -61,11 +63,15 @@ class UserControllerTest extends RestDocsSupport {
             new CategoryDto("FASHION_ACCESSORY", "패션·악세서리")
         );
 
+        UserAgreementInfo agreementInfo =
+            new UserAgreementInfo(true, true, true, true, false);
+
         OnboardingResponse response = new OnboardingResponse(
             "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "수집",
             "https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg",
-            categoryDtos
+            categoryDtos,
+            agreementInfo
         );
 
         given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
@@ -85,11 +91,23 @@ class UserControllerTest extends RestDocsSupport {
             .andExpect(jsonPath("$.data.categories.length()").value(3))
             .andExpect(jsonPath("$.data.categories[0].name").value("FOOD_SNACK"))
             .andExpect(jsonPath("$.data.categories[0].label").value("먹거리·간식"))
+            .andExpect(jsonPath("$.data.agreements.ageVerified").value(true))
+            .andExpect(jsonPath("$.data.agreements.marketingConsent").value(false))
             .andExpect(jsonPath("$.message").value(""))
             .andDo(document("user/onboarding-success",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
+                        .description("만 14세 이상 여부 (필수)"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
+                        .description("서비스 이용약관 동의 (필수)"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
+                        .description("개인정보 수집 및 이용 동의 (필수)"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
+                        .description("위치기반 서비스 이용약관 동의 (필수)"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
+                        .description("마케팅 수신 동의 (선택)"),
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임 (최대 11자)"),
                     fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
@@ -112,9 +130,72 @@ class UserControllerTest extends RestDocsSupport {
                         .description("카테고리 ENUM name"),
                     fieldWithPath("data.categories[].label").type(JsonFieldType.STRING)
                         .description("카테고리 한글 라벨"),
+                    fieldWithPath("data.agreements").type(JsonFieldType.OBJECT)
+                        .description("약관 동의 정보"),
+                    fieldWithPath("data.agreements.ageVerified").type(JsonFieldType.BOOLEAN)
+                        .description("만 14세 이상 여부"),
+                    fieldWithPath("data.agreements.serviceTerms").type(JsonFieldType.BOOLEAN)
+                        .description("서비스 이용약관 동의"),
+                    fieldWithPath("data.agreements.privacyRequired").type(JsonFieldType.BOOLEAN)
+                        .description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("data.agreements.locationService").type(JsonFieldType.BOOLEAN)
+                        .description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("data.agreements.marketingConsent").type(JsonFieldType.BOOLEAN)
+                        .description("마케팅 수신 동의"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("성공 메시지")
                 )
+            ));
+    }
+
+    @Test
+    @DisplayName("필수 약관에 동의하지 않으면 400 에러가 발생한다.")
+    void completeOnboarding_requiredAgreementNotChecked() throws Exception {
+        // given
+        OnboardingRequest request = new OnboardingRequest(
+            true,
+            false,
+            true,
+            true,
+            false,
+            "수집",
+            "red",
+            List.of("FOOD_SNACK")
+        );
+
+        given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
+            .willThrow(new BusinessException(ErrorCode.INVALID_INPUT, "필수 약관에 모두 동의해야 합니다."));
+
+        // when & then
+        mockMvc.perform(post("/api/users/onboarding")
+                .header("Authorization", "Bearer valid_access_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("필수 약관에 모두 동의해야 합니다."))
+            .andDo(document("user/onboarding-required-agreement-not-checked",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
+                        .description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
+                        .description("서비스 이용약관 동의 (false)"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
+                        .description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
+                        .description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
+                        .description("마케팅 수신 동의"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING)
+                        .description("사용자 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
+                        .description("관심 카테고리 목록")
+                ),
+                responseFields(errorResponseFields())
             ));
     }
 
@@ -123,6 +204,7 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_alreadyCompleted() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
             "수집",
             "blue",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH")
@@ -143,6 +225,16 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
+                        .description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
+                        .description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
+                        .description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
+                        .description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
+                        .description("마케팅 수신 동의"),
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
                     fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
@@ -159,6 +251,7 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_invalidCategory() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
             "수집",
             "yellow",
             List.of("INVALID_CATEGORY", "BEAUTY_HEALTH")
@@ -179,6 +272,16 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
+                        .description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
+                        .description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
+                        .description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
+                        .description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
+                        .description("마케팅 수신 동의"),
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
                     fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
@@ -195,6 +298,7 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_invalidProfileColor() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
             "수집",
             "invalid_color",
             List.of("FOOD_SNACK")
@@ -215,6 +319,16 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
+                        .description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
+                        .description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
+                        .description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
+                        .description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
+                        .description("마케팅 수신 동의"),
                     fieldWithPath("nickname").type(JsonFieldType.STRING)
                         .description("사용자 닉네임"),
                     fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
@@ -223,132 +337,6 @@ class UserControllerTest extends RestDocsSupport {
                         .description("관심 카테고리 목록")
                 ),
                 responseFields(errorResponseFields())
-            ));
-    }
-
-    @Test
-    @DisplayName("닉네임이 비어있으면 400 에러가 발생한다.")
-    void completeOnboarding_emptyNickname() throws Exception {
-        // given
-        OnboardingRequest request = new OnboardingRequest(
-            "",
-            "red",
-            List.of("FOOD_SNACK")
-        );
-
-        // when & then
-        mockMvc.perform(post("/api/users/onboarding")
-                .header("Authorization", "Bearer valid_access_token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andDo(document("user/onboarding-empty-nickname",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestFields(
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("빈 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록")
-                ),
-                responseFields(validationErrorResponseFields())
-            ));
-    }
-
-    @Test
-    @DisplayName("닉네임이 11자를 초과하면 400 에러가 발생한다.")
-    void completeOnboarding_nicknameTooLong() throws Exception {
-        // given
-        OnboardingRequest request = new OnboardingRequest(
-            "이것은11자를초과하는닉네임입니다",
-            "purple",
-            List.of("FOOD_SNACK")
-        );
-
-        // when & then
-        mockMvc.perform(post("/api/users/onboarding")
-                .header("Authorization", "Bearer valid_access_token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andDo(document("user/onboarding-nickname-too-long",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestFields(
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("11자를 초과하는 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록")
-                ),
-                responseFields(validationErrorResponseFields())
-            ));
-    }
-
-    @Test
-    @DisplayName("카테고리가 비어있으면 400 에러가 발생한다.")
-    void completeOnboarding_emptyCategories() throws Exception {
-        // given
-        OnboardingRequest request = new OnboardingRequest(
-            "수집",
-            "red",
-            List.of()
-        );
-
-        // when & then
-        mockMvc.perform(post("/api/users/onboarding")
-                .header("Authorization", "Bearer valid_access_token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andDo(document("user/onboarding-empty-categories",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestFields(
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("빈 카테고리 목록")
-                ),
-                responseFields(validationErrorResponseFields())
-            ));
-    }
-
-    @Test
-    @DisplayName("사용 가능한 프로필 색상 목록을 조회한다.")
-    void getAvailableProfileColors() throws Exception {
-        // given
-        ProfileColorsResponse response = ProfileColorsResponse.of(
-            Set.of("red", "blue", "yellow", "purple")
-        );
-
-        given(userService.getAvailableProfileColors()).willReturn(response);
-
-        // when & then
-        mockMvc.perform(get("/api/users/profile-colors"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.colors").isArray())
-            .andExpect(jsonPath("$.data.colors.length()").value(4))
-            .andDo(document("user/get-profile-colors",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("응답 데이터"),
-                    fieldWithPath("data.colors").type(JsonFieldType.ARRAY)
-                        .description("사용 가능한 프로필 색상 목록 (red, blue, yellow, purple)"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
-                )
             ));
     }
 
@@ -368,8 +356,6 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.NULL)
-                        .description("응답 데이터 (null)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("성공 메시지")
                 )

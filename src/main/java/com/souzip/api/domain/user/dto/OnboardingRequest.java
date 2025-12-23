@@ -1,12 +1,28 @@
+// src/main/java/com/souzip/api/domain/user/dto/OnboardingRequest.java
 package com.souzip.api.domain.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.util.List;
 
 public record OnboardingRequest(
+    @NotNull(message = "만 14세 이상 여부는 필수입니다")
+    Boolean ageVerified,
+
+    @NotNull(message = "서비스 이용약관 동의는 필수입니다")
+    Boolean serviceTerms,
+
+    @NotNull(message = "개인정보 수집 및 이용 동의는 필수입니다")
+    Boolean privacyRequired,
+
+    @NotNull(message = "위치기반 서비스 이용약관 동의는 필수입니다")
+    Boolean locationService,
+
+    @NotNull(message = "마케팅 수신 동의 여부는 필수입니다")
+    Boolean marketingConsent,
+
     @NotBlank(message = "닉네임은 필수입니다.")
     @Size(max = 11, message = "닉네임은 11자 이하여야 합니다.")
     String nickname,

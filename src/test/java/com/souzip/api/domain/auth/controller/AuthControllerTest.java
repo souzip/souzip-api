@@ -572,8 +572,6 @@ class AuthControllerTest extends RestDocsSupport {
             .andDo(document("auth/logout",
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.NULL)
-                        .description("응답 데이터 (null)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지").optional()
                 )

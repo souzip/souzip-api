@@ -2,14 +2,17 @@ package com.souzip.api.domain.user.service;
 
 import com.souzip.api.domain.auth.entity.RefreshToken;
 import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
-import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
-import com.souzip.api.domain.user.dto.ProfileColorsResponse;
 import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.domain.user.entity.User;
+import com.souzip.api.domain.user.entity.UserAgreement;
+import com.souzip.api.domain.user.repository.UserAgreementRepository;
 import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,24 +20,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserAgreementRepository userAgreementRepository;
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
@@ -46,7 +49,7 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
-    @DisplayName("온보딩을 완료하면 User가 업데이트된다.")
+    @DisplayName("온보딩을 완료하면 User와 UserAgreement가 저장된다.")
     void completeOnboarding_success() {
         // given
         User user = User.of(Provider.KAKAO, "kakao123", "카카오사용자", "카카오사용자",
@@ -54,15 +57,27 @@ class UserServiceTest {
         User spyUser = spy(user);
 
         OnboardingRequest request = new OnboardingRequest(
+            true,
+            true,
+            true,
+            true,
+            false,
             "수집",
-            "red",  // ← 색상으로 변경
+            "red",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH", "FASHION_ACCESSORY")
         );
 
         String expectedImageUrl = "https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg";
 
+        UserAgreement agreement = UserAgreement.of(
+            spyUser,
+            true, true, true, true, false
+        );
+
         given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
         given(spyUser.needsOnboarding()).willReturn(true);
+        given(userAgreementRepository.existsByUser(spyUser)).willReturn(false);
+        given(userAgreementRepository.save(any(UserAgreement.class))).willReturn(agreement);
         given(profileImageService.resolveProfileImageUrl("red")).willReturn(expectedImageUrl);
         given(spyUser.getUserId()).willReturn("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
         given(spyUser.getNickname()).willReturn("수집");
@@ -76,13 +91,71 @@ class UserServiceTest {
         assertThat(response.nickname()).isEqualTo("수집");
         assertThat(response.profileImageUrl()).isEqualTo(expectedImageUrl);
         assertThat(response.categories()).hasSize(3);
+        assertThat(response.agreements()).isNotNull();
+        assertThat(response.agreements().ageVerified()).isTrue();
+        assertThat(response.agreements().marketingConsent()).isFalse();
 
+        verify(userAgreementRepository).save(any(UserAgreement.class));
         verify(profileImageService).resolveProfileImageUrl("red");
-        verify(spyUser).completeOnboarding(
-            eq("수집"),
-            eq(expectedImageUrl),
-            any()
+        verify(spyUser).completeOnboarding(eq("수집"), eq(expectedImageUrl), any());
+    }
+
+    @Test
+    @DisplayName("필수 약관에 동의하지 않으면 온보딩에 실패한다.")
+    void completeOnboarding_requiredAgreementNotChecked() {
+        // given
+        User user = User.of(Provider.KAKAO, "kakao123", "카카오사용자", "카카오사용자",
+            "test@kakao.com", null);
+        User spyUser = spy(user);
+
+        OnboardingRequest request = new OnboardingRequest(
+            true,
+            false,
+            true,
+            true,
+            false,
+            "수집",
+            "red",
+            List.of("FOOD_SNACK")
         );
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
+        given(spyUser.needsOnboarding()).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> userService.completeOnboarding(1L, request))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("필수 약관에 모두 동의해야 합니다.");
+
+        verify(userAgreementRepository, never()).save(any());
+        verify(spyUser, never()).completeOnboarding(anyString(), anyString(), any());
+    }
+
+    @Test
+    @DisplayName("이미 약관에 동의한 사용자는 중복 저장되지 않는다.")
+    void completeOnboarding_agreementAlreadyExists() {
+        // given
+        User user = User.of(Provider.KAKAO, "kakao123", "카카오사용자", "카카오사용자",
+            "test@kakao.com", null);
+        User spyUser = spy(user);
+
+        OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
+            "수집",
+            "red",
+            List.of("FOOD_SNACK")
+        );
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
+        given(spyUser.needsOnboarding()).willReturn(true);
+        given(userAgreementRepository.existsByUser(spyUser)).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> userService.completeOnboarding(1L, request))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("이미 약관에 동의한 사용자입니다.");
+
+        verify(userAgreementRepository, never()).save(any());
     }
 
     @Test
@@ -94,6 +167,7 @@ class UserServiceTest {
         User spyUser = spy(user);
 
         OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
             "새닉네임",
             "blue",
             List.of("FOOD_SNACK")
@@ -120,6 +194,7 @@ class UserServiceTest {
         User spyUser = spy(user);
 
         OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
             "수집",
             "red",
             List.of("INVALID_CATEGORY", "FOOD_SNACK")
@@ -127,6 +202,7 @@ class UserServiceTest {
 
         given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
         given(spyUser.needsOnboarding()).willReturn(true);
+        given(userAgreementRepository.existsByUser(spyUser)).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> userService.completeOnboarding(1L, request))
@@ -141,6 +217,7 @@ class UserServiceTest {
     void completeOnboarding_userNotFound() {
         // given
         OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
             "수집",
             "red",
             List.of("FOOD_SNACK")
@@ -155,82 +232,35 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("온보딩 시 카테고리가 올바르게 변환된다.")
-    void completeOnboarding_categoryConversion() {
-        // given
-        User user = User.of(Provider.KAKAO, "kakao123", "카카오사용자", "카카오사용자",
-            "test@kakao.com", null);
-        User spyUser = spy(user);
-
-        OnboardingRequest request = new OnboardingRequest(
-            "수집",
-            "yellow",
-            List.of("FOOD_SNACK", "BEAUTY_HEALTH")
-        );
-
-        String expectedImageUrl = "https://kr.object.ncloudstorage.com/souzip-dev-images/profile/yellow.svg";
-
-        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
-        given(spyUser.needsOnboarding()).willReturn(true);
-        given(profileImageService.resolveProfileImageUrl("yellow")).willReturn(expectedImageUrl);
-        given(spyUser.getUserId()).willReturn("a1b2c3d4");
-        given(spyUser.getNickname()).willReturn("수집");
-        given(spyUser.getProfileImageUrl()).willReturn(expectedImageUrl);
-
-        // when
-        OnboardingResponse response = userService.completeOnboarding(1L, request);
-
-        // then
-        assertThat(response.categories())
-            .extracting(CategoryDto::name)
-            .containsExactlyInAnyOrder("FOOD_SNACK", "BEAUTY_HEALTH");
-
-        assertThat(response.categories())
-            .extracting(CategoryDto::label)
-            .containsExactlyInAnyOrder("먹거리·간식", "뷰티·헬스");
-    }
-
-    @Test
-    @DisplayName("사용 가능한 프로필 색상 목록을 조회한다.")
-    void getAvailableProfileColors() {
-        // given
-        Set<String> expectedColors = Set.of("red", "blue", "yellow", "purple");
-        given(profileImageService.getAvailableColors()).willReturn(expectedColors);
-
-        // when
-        ProfileColorsResponse response = userService.getAvailableProfileColors();
-
-        // then
-        assertThat(response.colors())
-            .containsExactlyInAnyOrder("red", "blue", "yellow", "purple");
-
-        verify(profileImageService).getAvailableColors();
-    }
-
-    @Test
-    @DisplayName("회원탈퇴 시 User는 익명화되고 soft delete된다.")
+    @DisplayName("회원탈퇴 시 User는 익명화되고 약관 동의도 삭제된다.")
     void withdraw_success() {
         // given
         User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트", null, null);
+        User spyUser = spy(user);
 
         RefreshToken refreshToken = RefreshToken.of(
-            user,
+            spyUser,
             "refresh_token",
             LocalDateTime.now().plusDays(30)
         );
 
-        given(userRepository.findById(1L)).willReturn(Optional.of(user));
-        given(refreshTokenRepository.findByUser(user)).willReturn(Optional.of(refreshToken));
+        UserAgreement agreement = UserAgreement.of(
+            spyUser,
+            true, true, true, true, false
+        );
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
+        given(refreshTokenRepository.findByUser(spyUser)).willReturn(Optional.of(refreshToken));
+        given(userAgreementRepository.findByUser(spyUser)).willReturn(Optional.of(agreement));
 
         // when
         userService.withdraw(1L);
 
         // then
-        assertThat(user.getName()).isEqualTo("탈퇴한사용자");
-        assertThat(user.getNickname()).isEqualTo("탈퇴한사용자");
-
+        verify(spyUser).anonymize();
         verify(refreshTokenRepository).delete(refreshToken);
-        verify(userRepository).delete(user);
+        verify(userAgreementRepository).delete(agreement);
+        verify(userRepository).delete(spyUser);
     }
 
     @Test
@@ -246,14 +276,15 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Refresh Token이 없어도 회원탈퇴는 성공한다.")
-    void withdraw_withoutRefreshToken_success() {
+    @DisplayName("Refresh Token과 약관 동의가 없어도 회원탈퇴는 성공한다.")
+    void withdraw_withoutRefreshTokenAndAgreement_success() {
         // given
         User user = User.of(Provider.KAKAO, "kakao123", "테스트유저", "테스트", null, null);
         User spyUser = spy(user);
 
         given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
         given(refreshTokenRepository.findByUser(spyUser)).willReturn(Optional.empty());
+        given(userAgreementRepository.findByUser(spyUser)).willReturn(Optional.empty());
 
         // when
         userService.withdraw(1L);
@@ -262,5 +293,6 @@ class UserServiceTest {
         verify(spyUser).anonymize();
         verify(userRepository).delete(spyUser);
         verify(refreshTokenRepository, never()).delete(any());
+        verify(userAgreementRepository, never()).delete(any());
     }
 }

@@ -121,6 +121,79 @@ class UserControllerTest extends RestDocsSupport {
     }
 
     @Test
+    @DisplayName("닉네임 형식이 올바르지 않으면 400 에러가 발생한다.")
+    void checkNickname_invalidFormat() throws Exception {
+        // given
+        NicknameCheckRequest request = new NicknameCheckRequest("!@#$%");
+
+        // when & then
+        mockMvc.perform(post("/api/users/check-nickname")
+                .header("Authorization", "Bearer valid_access_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
+            .andExpect(jsonPath("$.errors").isArray())
+            .andDo(document("user/check-nickname-invalid-format",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("nickname").type(JsonFieldType.STRING)
+                        .description("유효하지 않은 형식의 닉네임")
+                ),
+                responseFields(errorResponseFields())
+            ));
+    }
+
+    @Test
+    @DisplayName("온보딩 시 닉네임이 중복되면 409 에러가 발생한다.")
+    void completeOnboarding_nicknameAlreadyExists() throws Exception {
+        // given
+        OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
+            "중복닉네임",
+            "red",
+            List.of("FOOD_SNACK")
+        );
+
+        given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
+            .willThrow(new BusinessException(ErrorCode.NICKNAME_DUPLICATED));
+
+        // when & then
+        mockMvc.perform(post("/api/users/onboarding")
+                .header("Authorization", "Bearer valid_access_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.message").value("이미 사용 중인 닉네임입니다."))
+            .andDo(document("user/onboarding-nickname-duplicated",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
+                        .description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
+                        .description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
+                        .description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
+                        .description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
+                        .description("마케팅 수신 동의"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING)
+                        .description("중복된 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
+                        .description("관심 카테고리 목록")
+                ),
+                responseFields(errorResponseFields())
+            ));
+    }
+
+    @Test
     @DisplayName("온보딩을 완료한다.")
     void completeOnboarding_success() throws Exception {
         // given

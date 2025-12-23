@@ -2,6 +2,7 @@ package com.souzip.api.domain.user.service;
 
 import com.souzip.api.domain.auth.entity.RefreshToken;
 import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
+import com.souzip.api.domain.user.dto.NicknameCheckResponse;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
 import com.souzip.api.domain.user.entity.Provider;
@@ -47,6 +48,67 @@ class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
+
+    @Test
+    @DisplayName("사용 가능한 닉네임을 확인한다.")
+    void checkNickname_available() {
+        // given
+        String nickname = "새로운닉네임";
+        given(userRepository.existsByNickname(nickname)).willReturn(false);
+
+        // when
+        NicknameCheckResponse response = userService.checkNickname(nickname);
+
+        // then
+        assertThat(response.isAvailable()).isTrue();
+        assertThat(response.getMessage()).isEqualTo("사용 가능한 닉네임입니다.");
+        verify(userRepository).existsByNickname(nickname);
+    }
+
+    @Test
+    @DisplayName("이미 사용 중인 닉네임을 확인한다.")
+    void checkNickname_unavailable() {
+        // given
+        String nickname = "중복닉네임";
+        given(userRepository.existsByNickname(nickname)).willReturn(true);
+
+        // when
+        NicknameCheckResponse response = userService.checkNickname(nickname);
+
+        // then
+        assertThat(response.isAvailable()).isFalse();
+        assertThat(response.getMessage()).isEqualTo("이미 사용 중인 닉네임입니다.");
+        verify(userRepository).existsByNickname(nickname);
+    }
+
+    @Test
+    @DisplayName("온보딩 시 닉네임이 중복되면 에러가 발생한다.")
+    void completeOnboarding_nicknameAlreadyExists() {
+        // given
+        User user = User.of(Provider.KAKAO, "kakao123", "카카오사용자", "카카오사용자",
+            "test@kakao.com", null);
+        User spyUser = spy(user);
+
+        OnboardingRequest request = new OnboardingRequest(
+            true, true, true, true, false,
+            "중복닉네임",
+            "red",
+            List.of("FOOD_SNACK")
+        );
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(spyUser));
+        given(spyUser.needsOnboarding()).willReturn(true);
+        given(userRepository.existsByNickname("중복닉네임")).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> userService.completeOnboarding(1L, request))
+            .isInstanceOf(BusinessException.class)
+            .hasMessageContaining("이미 사용 중인 닉네임입니다.");
+
+        verify(userRepository).existsByNickname("중복닉네임");
+        verify(userAgreementRepository, never()).save(any());
+        verify(spyUser, never()).completeOnboarding(anyString(), anyString(), any());
+    }
 
     @Test
     @DisplayName("온보딩을 완료하면 User와 UserAgreement가 저장된다.")

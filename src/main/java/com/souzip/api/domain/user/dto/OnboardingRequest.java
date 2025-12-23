@@ -1,7 +1,5 @@
-// src/main/java/com/souzip/api/domain/user/dto/OnboardingRequest.java
 package com.souzip.api.domain.user.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,8 +21,6 @@ public record OnboardingRequest(
     @NotNull(message = "마케팅 수신 동의 여부는 필수입니다")
     Boolean marketingConsent,
 
-    @NotBlank(message = "닉네임은 필수입니다.")
-    @Size(max = 11, message = "닉네임은 11자 이하여야 합니다.")
     String nickname,
 
     String profileImageColor,

@@ -2,6 +2,8 @@ package com.souzip.api.domain.user.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.dto.CategoryDto;
+import com.souzip.api.domain.user.dto.NicknameCheckRequest;
+import com.souzip.api.domain.user.dto.NicknameCheckResponse;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
 import com.souzip.api.domain.user.dto.UserAgreementInfo;
@@ -40,6 +42,82 @@ class UserControllerTest extends RestDocsSupport {
     @Override
     protected Object initController() {
         return new UserController(userService);
+    }
+
+    @Test
+    @DisplayName("사용 가능한 닉네임을 확인한다.")
+    void checkNickname_available() throws Exception {
+        // given
+        NicknameCheckRequest request = new NicknameCheckRequest("새로운닉네임");
+        NicknameCheckResponse response = NicknameCheckResponse.available();
+
+        given(userService.checkNickname("새로운닉네임")).willReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/api/users/check-nickname")
+                .header("Authorization", "Bearer valid_access_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.available").value(true))
+            .andExpect(jsonPath("$.data.message").value("사용 가능한 닉네임입니다."))
+            .andDo(document("user/check-nickname-available",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("nickname").type(JsonFieldType.STRING)
+                        .description("확인할 닉네임 (2~11자, 한글/영문/숫자만 가능)")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("닉네임 중복 확인 결과"),
+                    fieldWithPath("data.available").type(JsonFieldType.BOOLEAN)
+                        .description("사용 가능 여부 (true: 사용 가능, false: 사용 불가)"),
+                    fieldWithPath("data.message").type(JsonFieldType.STRING)
+                        .description("확인 결과 메시지"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지")
+                )
+            ));
+    }
+
+    @Test
+    @DisplayName("이미 사용 중인 닉네임을 확인한다.")
+    void checkNickname_unavailable() throws Exception {
+        // given
+        NicknameCheckRequest request = new NicknameCheckRequest("중복닉네임");
+        NicknameCheckResponse response = NicknameCheckResponse.unavailable();
+
+        given(userService.checkNickname("중복닉네임")).willReturn(response);
+
+        // when & then
+        mockMvc.perform(post("/api/users/check-nickname")
+                .header("Authorization", "Bearer valid_access_token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.available").value(false))
+            .andExpect(jsonPath("$.data.message").value("이미 사용 중인 닉네임입니다."))
+            .andDo(document("user/check-nickname-unavailable",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestFields(
+                    fieldWithPath("nickname").type(JsonFieldType.STRING)
+                        .description("확인할 닉네임 (이미 사용 중)")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("닉네임 중복 확인 결과"),
+                    fieldWithPath("data.available").type(JsonFieldType.BOOLEAN)
+                        .description("사용 가능 여부 (false: 중복됨)"),
+                    fieldWithPath("data.message").type(JsonFieldType.STRING)
+                        .description("확인 결과 메시지"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지")
+                )
+            ));
     }
 
     @Test

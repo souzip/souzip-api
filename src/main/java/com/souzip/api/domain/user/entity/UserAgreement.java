@@ -1,5 +1,6 @@
 package com.souzip.api.domain.user.entity;
 
+import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,21 +49,14 @@ public class UserAgreement extends BaseEntity {
             .build();
     }
 
-    public void updateAgreements(
-        Boolean ageVerified,
-        Boolean serviceTerms,
-        Boolean privacyRequired,
-        Boolean locationService,
-        Boolean marketingConsent
-    ) {
-        this.ageVerified = ageVerified;
-        this.serviceTerms = serviceTerms;
-        this.privacyRequired = privacyRequired;
-        this.locationService = locationService;
-        this.marketingConsent = marketingConsent;
-    }
-
-    public boolean isAllRequiredAgreed() {
-        return ageVerified && serviceTerms && privacyRequired && locationService;
+    public static UserAgreement of(User user, OnboardingRequest request) {
+        return of(
+            user,
+            request.ageVerified(),
+            request.serviceTerms(),
+            request.privacyRequired(),
+            request.locationService(),
+            request.marketingConsent()
+        );
     }
 }

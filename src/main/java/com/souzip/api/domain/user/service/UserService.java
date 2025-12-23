@@ -3,6 +3,7 @@ package com.souzip.api.domain.user.service;
 import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.user.dto.NicknameCheckResponse;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
 import com.souzip.api.domain.user.dto.ProfileColorsResponse;
@@ -31,12 +32,21 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ProfileImageService profileImageService;
 
+    public NicknameCheckResponse checkNickname(String nickname) {
+        if (userRepository.existsByNickname(nickname)) {
+            return NicknameCheckResponse.unavailable();
+        }
+
+        return NicknameCheckResponse.available();
+    }
+
     @Transactional
     public OnboardingResponse completeOnboarding(Long userId, OnboardingRequest request) {
         User user = findUserById(userId);
-        validateOnboardingNotCompleted(user);
 
+        validateOnboardingNotCompleted(user);
         validateRequiredAgreements(request);
+        validateNicknameNotDuplicated(request.nickname());
 
         UserAgreement agreement = saveUserAgreement(user, request);
 
@@ -71,28 +81,24 @@ public class UserService {
     }
 
     private void validateRequiredAgreements(OnboardingRequest request) {
-        if (!request.ageVerified() || !request.serviceTerms()
-            || !request.privacyRequired() || !request.locationService()) {
+        if (isRequiredAgreementNotAccepted(request)) {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "필수 약관에 모두 동의해야 합니다.");
         }
     }
 
     private UserAgreement saveUserAgreement(User user, OnboardingRequest request) {
-        // 이미 약관 동의가 있는지 확인
         if (userAgreementRepository.existsByUser(user)) {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "이미 약관에 동의한 사용자입니다.");
         }
 
-        UserAgreement agreement = UserAgreement.of(
-            user,
-            request.ageVerified(),
-            request.serviceTerms(),
-            request.privacyRequired(),
-            request.locationService(),
-            request.marketingConsent()
-        );
-
+        UserAgreement agreement = UserAgreement.of(user, request);
         return userAgreementRepository.save(agreement);
+    }
+
+    private void validateNicknameNotDuplicated(String nickname) {
+        if (userRepository.existsByNickname(nickname)) {
+            throw new BusinessException(ErrorCode.NICKNAME_DUPLICATED);
+        }
     }
 
     private Set<Category> convertToCategories(List<String> categoryNames) {
@@ -110,6 +116,13 @@ public class UserService {
         return categories.stream()
             .map(CategoryDto::from)
             .toList();
+    }
+
+    private boolean isRequiredAgreementNotAccepted(OnboardingRequest request) {
+        return !request.ageVerified()
+            || !request.serviceTerms()
+            || !request.privacyRequired()
+            || !request.locationService();
     }
 
     private void deleteRefreshTokenIfExists(User user) {

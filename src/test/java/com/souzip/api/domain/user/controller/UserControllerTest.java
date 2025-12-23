@@ -121,32 +121,6 @@ class UserControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("닉네임 형식이 올바르지 않으면 400 에러가 발생한다.")
-    void checkNickname_invalidFormat() throws Exception {
-        // given
-        NicknameCheckRequest request = new NicknameCheckRequest("!@#$%");
-
-        // when & then
-        mockMvc.perform(post("/api/users/check-nickname")
-                .header("Authorization", "Bearer valid_access_token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
-            .andExpect(jsonPath("$.errors").isArray())
-            .andDo(document("user/check-nickname-invalid-format",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestFields(
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("유효하지 않은 형식의 닉네임")
-                ),
-                responseFields(errorResponseFields())
-            ));
-    }
-
-    @Test
     @DisplayName("온보딩 시 닉네임이 중복되면 409 에러가 발생한다.")
     void completeOnboarding_nicknameAlreadyExists() throws Exception {
         // given

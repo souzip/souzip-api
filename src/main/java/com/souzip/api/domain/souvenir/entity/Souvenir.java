@@ -57,14 +57,16 @@ public class Souvenir extends BaseEntity {
     @Column(length = 255)
     private String locationDetail;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean deleted = false;
 
     @Column
     private String countryCode;
 
+    @Builder.Default
     @Column(nullable = false)
-    private Boolean isOwned;
+    private Boolean isOwned = false;
 
     public static Souvenir of(
             String name,

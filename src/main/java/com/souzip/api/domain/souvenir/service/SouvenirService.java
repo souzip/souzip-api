@@ -90,7 +90,8 @@ public class SouvenirService {
                 request.category(),
                 request.purpose(),
                 request.countryCode(),
-                userId
+                userId,
+                true
         );
 
         souvenirRepository.save(souvenir);

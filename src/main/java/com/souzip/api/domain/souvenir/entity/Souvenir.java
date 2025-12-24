@@ -47,7 +47,7 @@ public class Souvenir extends BaseEntity {
     @Column(nullable = false)
     private Purpose purpose;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false, insertable = false, updatable = false)
     private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)

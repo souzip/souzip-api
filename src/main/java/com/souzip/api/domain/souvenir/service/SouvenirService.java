@@ -1,14 +1,14 @@
 package com.souzip.api.domain.souvenir.service;
 
+import com.souzip.api.domain.category.dto.CategoryDto;
+import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.file.service.FileService;
 import com.souzip.api.domain.file.service.FileStorageService;
-import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
-import com.souzip.api.domain.souvenir.dto.SouvenirNearbyResponse;
-import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
-import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
+import com.souzip.api.domain.souvenir.dto.*;
+import com.souzip.api.domain.souvenir.entity.Purpose;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
 import com.souzip.api.domain.user.entity.User;
@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Nullable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,22 +41,41 @@ public class SouvenirService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public List<SouvenirNearbyResponse> getNearbySouvenirs(double latitude, double longitude) {
-        List<Object[]> results =
-                souvenirRepository.findNearbySouvenirs(latitude, longitude, NEARBY_RADIUS_METER);
+        List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, NEARBY_RADIUS_METER);
 
         return results.stream()
                 .map(row -> {
                     Long id = ((Number) row[0]).longValue();
                     String name = (String) row[1];
-                    String categoryName = (String) row[2];
-                    String thumbnail = (String) row[3];
-                    int distance = (int) ((Number) row[4]).doubleValue();
+                    Category category = Category.valueOf((String) row[2]);
+                    Purpose purpose = Purpose.valueOf((String) row[3]);
+                    int localPrice = ((Number) row[4]).intValue();
+                    int krwPrice = ((Number) row[5]).intValue();
+                    String currencySymbol = (String) row[6];
+                    String thumbnail = (String) row[7];
+                    double distance = ((Number) row[8]).doubleValue();
+                    BigDecimal lat = (BigDecimal) row[9];
+                    BigDecimal lon = (BigDecimal) row[10];
+                    String address = (String) row[11];
 
                     String imageUrl = thumbnail != null
                             ? fileStorageService.generatePresignedUrl(thumbnail)
                             : null;
 
-                    return SouvenirNearbyResponse.from(id, name, categoryName, imageUrl, distance);
+                    return SouvenirNearbyResponse.from(
+                            id,
+                            name,
+                            CategoryDto.from(category),
+                            PurposeDto.from(purpose),
+                            localPrice,
+                            krwPrice,
+                            currencySymbol,
+                            imageUrl,
+                            distance,
+                            lat,
+                            lon,
+                            address
+                    );
                 })
                 .toList();
     }

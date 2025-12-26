@@ -5,7 +5,7 @@ public record SouvenirNearbyResponse(
         String name,
         String categoryName,
         String thumbnail,
-        Double distanceMeter
+        int distanceMeter
 ) {
 
     public static SouvenirNearbyResponse from(
@@ -13,14 +13,14 @@ public record SouvenirNearbyResponse(
             String name,
             String categoryName,
             String thumbnail,
-            Double distanceMeter
+            int distanceMeter
     ) {
         return new SouvenirNearbyResponse(
                 id,
                 name,
                 categoryName,
                 thumbnail,
-                distanceMeter
+                (int) Math.round(distanceMeter)
         );
     }
 }

@@ -45,7 +45,7 @@ public class SouvenirService {
                     String name = (String) row[1];
                     String categoryName = (String) row[2];
                     String thumbnail = (String) row[3];
-                    Double distance = ((Number) row[4]).doubleValue();
+                    int distance = (int) ((Number) row[4]).doubleValue();
 
                     String imageUrl = thumbnail != null
                             ? fileStorageService.generatePresignedUrl(thumbnail)

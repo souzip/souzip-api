@@ -13,28 +13,37 @@ public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
     Optional<Souvenir> findByIdAndDeletedFalse(Long id);
 
     @Query(value = """
-        SELECT s.id,
-               s.name,
-               s.category,
-               f.storage_key,
-               ST_Distance(
-                   ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
-                   ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography
-               ) AS distance
-        FROM souvenir s
-        LEFT JOIN file f
-               ON f.entity_type = 'Souvenir'
-               AND f.entity_id = s.id
-               AND f.display_order = 1
-        WHERE s.deleted = false
-          AND ST_DWithin(
-                ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
-                ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography,
-                :radiusMeter
-          )
-        ORDER BY distance
-        LIMIT 10
-        """, nativeQuery = true)
-    List<Object[]> findNearbySouvenirs(@Param("latitude") double latitude,
-                                       @Param("longitude") double longitude, double radiusMeter);
+    SELECT s.id,
+           s.name,
+           s.category,
+           s.purpose,
+           s.local_price,
+           s.krw_price,
+           s.currency_symbol,
+           f.storage_key,
+           ST_Distance(
+               ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
+               ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography
+           ) AS distance,
+           s.latitude,
+           s.longitude,
+           s.address
+    FROM souvenir s
+    LEFT JOIN file f
+           ON f.entity_type = 'Souvenir'
+           AND f.entity_id = s.id
+           AND f.display_order = 1
+    WHERE s.deleted = false
+      AND ST_DWithin(
+            ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
+            ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography,
+            :radiusMeter
+      )
+    ORDER BY distance
+    LIMIT 10
+    """, nativeQuery = true)
+    List<Object[]> findNearbySouvenirs(
+            @Param("latitude") double latitude,
+            @Param("longitude") double longitude,
+            @Param("radiusMeter") double radiusMeter);
 }

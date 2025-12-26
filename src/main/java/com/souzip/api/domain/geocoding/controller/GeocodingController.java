@@ -21,6 +21,6 @@ public class GeocodingController {
             @RequestParam double latitude,
             @RequestParam double longitude
     ) {
-        return SuccessResponse.of(geocodingService.getAddress(latitude, longitude), "주소가 성공적으로 조회되었습니다.");
+        return SuccessResponse.of(geocodingService.getAddress(latitude, longitude));
     }
 }

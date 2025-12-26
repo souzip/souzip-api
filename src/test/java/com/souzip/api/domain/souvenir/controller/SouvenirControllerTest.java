@@ -1,12 +1,10 @@
 package com.souzip.api.domain.souvenir.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
+import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.file.dto.FileResponse;
-import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
-import com.souzip.api.domain.souvenir.dto.SouvenirNearbyResponse;
-import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
-import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
+import com.souzip.api.domain.souvenir.dto.*;
 import com.souzip.api.domain.souvenir.entity.Purpose;
 import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.security.annotation.CurrentUserId;
@@ -80,25 +78,39 @@ class SouvenirControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("사용자 위치 기반 근처 기념품 조회")
+    @DisplayName("근처 기념품 조회")
     void getNearbySouvenirs() throws Exception {
-        double userLatitude = 40.7128;
-        double userLongitude = -74.0060;
+        double userLatitude = 40.7128123;
+        double userLongitude = -74.0060123;
 
         List<SouvenirNearbyResponse> nearbySouvenirs = List.of(
                 SouvenirNearbyResponse.from(
                         1L,
                         "Souvenir A",
-                        "FOOD_SNACK",
+                        CategoryDto.from(Category.SOUVENIR_BASIC),
+                        PurposeDto.from(Purpose.GIFT),
+                        10000,
+                        120000,
+                        "$",
                         "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
-                        500.0
+                        500,
+                        new BigDecimal("40.7128123"),
+                        new BigDecimal("-74.0060123"),
+                        "Some address A"
                 ),
                 SouvenirNearbyResponse.from(
                         2L,
                         "Souvenir B",
-                        "BEAUTY_HEALTH",
-                        null,
-                        1200.0
+                        CategoryDto.from(Category.BEAUTY_HEALTH),
+                        PurposeDto.from(Purpose.PERSONAL),
+                        20000,
+                        240000,
+                        "$",
+                        "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd123.png",
+                        1200,
+                        new BigDecimal("40.7228123"),
+                        new BigDecimal("-74.0010123"),
+                        "Some address B"
                 )
         );
 
@@ -113,20 +125,37 @@ class SouvenirControllerTest extends RestDocsSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id").value(1L))
                 .andExpect(jsonPath("$.data[0].name").value("Souvenir A"))
-                .andExpect(jsonPath("$.data[0].distanceMeter").value(500.0))
-                .andExpect(jsonPath("$.data[1].id").value(2L))
-                .andExpect(jsonPath("$.data[1].name").value("Souvenir B"))
-                .andExpect(jsonPath("$.data[1].distanceMeter").value(1200.0))
+                .andExpect(jsonPath("$.data[0].categoryDto.name").value("SOUVENIR_BASIC"))
+                .andExpect(jsonPath("$.data[0].purposeDto.name").value("GIFT"))
+                .andExpect(jsonPath("$.data[0].localPrice").value(10000))
+                .andExpect(jsonPath("$.data[0].krwPrice").value(120000))
+                .andExpect(jsonPath("$.data[0].currencySymbol").value("$"))
+                .andExpect(jsonPath("$.data[0].thumbnail").value("https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png"))
+                .andExpect(jsonPath("$.data[0].distanceMeter").value(500))
+                .andExpect(jsonPath("$.data[0].latitude").value(40.7128123))
+                .andExpect(jsonPath("$.data[0].longitude").value(-74.0060123))
+                .andExpect(jsonPath("$.data[0].address").value("Some address A"))
                 .andDo(document("souvenirs/get-nearby-souvenirs",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.ARRAY).description("응답 데이터"),
-                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("기념품명"),
-                                fieldWithPath("data[].categoryName").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data[].categoryDto").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                                fieldWithPath("data[].categoryDto.name").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data[].categoryDto.label").type(JsonFieldType.STRING).description("카테고리 한글명"),
+                                fieldWithPath("data[].purposeDto").type(JsonFieldType.OBJECT).description("구매 목적 정보"),
+                                fieldWithPath("data[].purposeDto.name").type(JsonFieldType.STRING).description("목적 ENUM name"),
+                                fieldWithPath("data[].purposeDto.label").type(JsonFieldType.STRING).description("목적 한글명"),
+                                fieldWithPath("data[].localPrice").type(JsonFieldType.NUMBER).description("현지 가격 (integer)"),
+                                fieldWithPath("data[].krwPrice").type(JsonFieldType.NUMBER).description("원화 가격 (integer)"),
+                                fieldWithPath("data[].currencySymbol").type(JsonFieldType.STRING).description("통화 기호"),
                                 fieldWithPath("data[].thumbnail").type(JsonFieldType.STRING).description("대표 이미지 URL").optional(),
-                                fieldWithPath("data[].distanceMeter").type(JsonFieldType.NUMBER).description("사용자와 기념품 거리(m)"),
+                                fieldWithPath("data[].distanceMeter").type(JsonFieldType.NUMBER).description("사용자와 기념품 거리(m) - (integer)"),
+                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("위도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("경도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data[].address").type(JsonFieldType.STRING).description("기념품 주소"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
                         )
                 ));
@@ -153,16 +182,21 @@ class SouvenirControllerTest extends RestDocsSupport {
                 "2층 빨간색 간판이 있는 장소",
                 new BigDecimal("35.689487"),
                 new BigDecimal("139.691706"),
-                Category.SOUVENIR_BASIC,
-                Purpose.GIFT,
+                new CategoryDto(Category.SOUVENIR_BASIC.name(), Category.SOUVENIR_BASIC.getLabel()),
+                new PurposeDto(Purpose.GIFT.name(), Purpose.GIFT.getLabel()),
                 "US",
+                "닉네임",
+                "https://example.com/profile.jpg",
+                true,
                 filesResponse
         );
 
-        given(souvenirService.getSouvenir(souvenirId))
+        String jwt = "Bearer test.jwt.token";
+        given(souvenirService.getSouvenir(souvenirId, jwt))
                 .willReturn(response);
 
-        mockMvc.perform(get("/api/souvenirs/{id}", souvenirId))
+        mockMvc.perform(get("/api/souvenirs/{id}", souvenirId)
+                .header("Authorization", jwt))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(souvenirId))
@@ -172,24 +206,31 @@ class SouvenirControllerTest extends RestDocsSupport {
                         getDocumentResponse(),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("기념품명"),
-                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
+                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격 (integer)"),
                                 fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
-                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격 (integer)"),
                                 fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
                                 fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
                                 fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
-                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
-                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
-                                fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 구매 목적 ENUM name"),
+                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data.category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                                fieldWithPath("data.category.name").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data.category.label").type(JsonFieldType.STRING).description("카테고리 label"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.OBJECT).description("기념품 구매 목적"),
+                                fieldWithPath("data.purpose.name").type(JsonFieldType.STRING).description("목적 ENUM name"),
+                                fieldWithPath("data.purpose.label").type(JsonFieldType.STRING).description("목적 label"),
                                 fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
+                                fieldWithPath("data.isOwned").type(JsonFieldType.BOOLEAN).description("조회자가 소유자인지 여부"),
+                                fieldWithPath("data.userNickname").type(JsonFieldType.STRING).description("기념품 소유자 닉네임"),
+                                fieldWithPath("data.userProfileImageUrl").type(JsonFieldType.STRING).description("기념품 소유자 프로필 이미지 URL"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
-                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
+                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID (integer)"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("data.files[].originalName").type(JsonFieldType.STRING).description("원본 파일명"),
-                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서"),
+                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서 (integer)"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
                         )
                 ));
@@ -245,9 +286,12 @@ class SouvenirControllerTest extends RestDocsSupport {
                 "2층 빨간색 간판이 있는 장소",
                 new BigDecimal("35.689487"),
                 new BigDecimal("139.691706"),
-                Category.SOUVENIR_BASIC,
-                Purpose.GIFT,
+                new CategoryDto(Category.SOUVENIR_BASIC.name(), Category.SOUVENIR_BASIC.getLabel()),
+                new PurposeDto(Purpose.GIFT.name(), Purpose.GIFT.getLabel()),
                 "US",
+                "닉네임",
+                "https://example.com/profile.jpg",
+                true,
                 filesResponse
         );
 
@@ -271,14 +315,14 @@ class SouvenirControllerTest extends RestDocsSupport {
                         ),
                         requestPartFields("souvenir",
                                 fieldWithPath("name").description("기념품 이름"),
-                                fieldWithPath("localPrice").description("현지 가격"),
+                                fieldWithPath("localPrice").description("현지 가격 (integer)"),
                                 fieldWithPath("currencySymbol").description("현지 통화 기호"),
-                                fieldWithPath("krwPrice").description("원화 가격"),
+                                fieldWithPath("krwPrice").description("원화 가격 (integer)"),
                                 fieldWithPath("description").description("기념품 설명"),
                                 fieldWithPath("address").description("주소"),
                                 fieldWithPath("locationDetail").description("상세 위치"),
-                                fieldWithPath("latitude").description("위도"),
-                                fieldWithPath("longitude").description("경도"),
+                                fieldWithPath("latitude").description("위도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("longitude").description("경도 (decimal, 소수점 7자리까지)"),
                                 fieldWithPath("category").description("카테고리 ENUM name"),
                                 fieldWithPath("purpose").description("구매 목적 ENUM name"),
                                 fieldWithPath("countryCode").description("국가 코드"),
@@ -286,24 +330,31 @@ class SouvenirControllerTest extends RestDocsSupport {
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("기념품명"),
-                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
+                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격 (integer)"),
                                 fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
-                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격 (integer)"),
                                 fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
                                 fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
                                 fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
-                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
-                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
-                                fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 구매 목적 ENUM name"),
+                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data.category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                                fieldWithPath("data.category.name").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data.category.label").type(JsonFieldType.STRING).description("카테고리 label"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.OBJECT).description("기념품 구매 목적"),
+                                fieldWithPath("data.purpose.name").type(JsonFieldType.STRING).description("목적 ENUM name"),
+                                fieldWithPath("data.purpose.label").type(JsonFieldType.STRING).description("목적 label"),
                                 fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
+                                fieldWithPath("data.isOwned").type(JsonFieldType.BOOLEAN).description("조회자가 소유자인지 여부"),
+                                fieldWithPath("data.userNickname").type(JsonFieldType.STRING).description("기념품 소유자 닉네임"),
+                                fieldWithPath("data.userProfileImageUrl").type(JsonFieldType.STRING).description("기념품 소유자 프로필 이미지 URL"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
-                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
+                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID (integer)"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("data.files[].originalName").type(JsonFieldType.STRING).description("원본 파일명"),
-                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서"),
+                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서 (integer)"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
                         )
                 ));
@@ -360,9 +411,12 @@ class SouvenirControllerTest extends RestDocsSupport {
                 "2층 빨간색 간판이 있는 장소",
                 new BigDecimal("35.689487"),
                 new BigDecimal("139.691706"),
-                Category.SOUVENIR_BASIC,
-                Purpose.GIFT,
+                new CategoryDto(Category.SOUVENIR_BASIC.name(), Category.SOUVENIR_BASIC.getLabel()),
+                new PurposeDto(Purpose.GIFT.name(), Purpose.GIFT.getLabel()),
                 "US",
+                "닉네임",
+                "https://example.com/profile.jpg",
+                true,
                 filesResponse
         );
 
@@ -388,14 +442,14 @@ class SouvenirControllerTest extends RestDocsSupport {
                         ),
                         requestPartFields("souvenir",
                                 fieldWithPath("name").description("기념품 이름"),
-                                fieldWithPath("localPrice").description("현지 가격"),
+                                fieldWithPath("localPrice").description("현지 가격 (integer)"),
                                 fieldWithPath("currencySymbol").description("현지 통화 기호"),
-                                fieldWithPath("krwPrice").description("원화 가격"),
+                                fieldWithPath("krwPrice").description("원화 가격 (integer)"),
                                 fieldWithPath("description").description("기념품 설명"),
                                 fieldWithPath("address").description("주소"),
                                 fieldWithPath("locationDetail").description("상세 위치"),
-                                fieldWithPath("latitude").description("위도"),
-                                fieldWithPath("longitude").description("경도"),
+                                fieldWithPath("latitude").description("위도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("longitude").description("경도 (decimal, 소수점 7자리까지"),
                                 fieldWithPath("category").description("카테고리 ENUM name"),
                                 fieldWithPath("purpose").description("구매 목적 ENUM name"),
                                 fieldWithPath("countryCode").description("국가 코드"),
@@ -403,24 +457,31 @@ class SouvenirControllerTest extends RestDocsSupport {
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
                                 fieldWithPath("data.name").type(JsonFieldType.STRING).description("기념품명"),
-                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격"),
+                                fieldWithPath("data.localPrice").type(JsonFieldType.NUMBER).description("현지 가격 (integer)"),
                                 fieldWithPath("data.currencySymbol").type(JsonFieldType.STRING).description("현지 통화 기호"),
-                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격"),
+                                fieldWithPath("data.krwPrice").type(JsonFieldType.NUMBER).description("원화 가격 (integer)"),
                                 fieldWithPath("data.description").type(JsonFieldType.STRING).description("기념품 설명"),
                                 fieldWithPath("data.address").type(JsonFieldType.STRING).description("주소"),
                                 fieldWithPath("data.locationDetail").type(JsonFieldType.STRING).description("위치 상세 설명"),
-                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도"),
-                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도"),
-                                fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
-                                fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("기념품 구매 목적 ENUM name"),
+                                fieldWithPath("data.latitude").type(JsonFieldType.NUMBER).description("위도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data.longitude").type(JsonFieldType.NUMBER).description("경도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data.category").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                                fieldWithPath("data.category.name").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data.category.label").type(JsonFieldType.STRING).description("카테고리 label"),
+                                fieldWithPath("data.purpose").type(JsonFieldType.OBJECT).description("기념품 구매 목적"),
+                                fieldWithPath("data.purpose.name").type(JsonFieldType.STRING).description("목적 ENUM name"),
+                                fieldWithPath("data.purpose.label").type(JsonFieldType.STRING).description("목적 label"),
                                 fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
+                                fieldWithPath("data.isOwned").type(JsonFieldType.BOOLEAN).description("조회자가 소유자인지 여부"),
+                                fieldWithPath("data.userNickname").type(JsonFieldType.STRING).description("기념품 소유자 닉네임"),
+                                fieldWithPath("data.userProfileImageUrl").type(JsonFieldType.STRING).description("기념품 소유자 프로필 이미지 URL"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
-                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID"),
+                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID (integer)"),
                                 fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
                                 fieldWithPath("data.files[].originalName").type(JsonFieldType.STRING).description("원본 파일명"),
-                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서"),
+                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서 (integer)"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
                         )
                 ));

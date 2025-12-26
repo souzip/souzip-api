@@ -7,6 +7,8 @@ import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
+import com.souzip.api.global.security.annotation.RequireAuth;
+import io.micrometer.common.lang.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +32,15 @@ public class SouvenirController {
     }
 
     @GetMapping("/{id}")
-    public SuccessResponse<SouvenirResponse> getSouvenir(@PathVariable Long id) {
-        SouvenirResponse response = souvenirService.getSouvenir(id);
+    public SuccessResponse<SouvenirResponse> getSouvenir(
+            @PathVariable Long id,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
+    ) {
+        SouvenirResponse response = souvenirService.getSouvenir(id, authorizationHeader);
         return SuccessResponse.of(response);
     }
 
+    @RequireAuth
     @PostMapping
     public SuccessResponse<SouvenirResponse> createSouvenir(
             @Valid
@@ -46,6 +52,7 @@ public class SouvenirController {
         return SuccessResponse.of(response);
     }
 
+    @RequireAuth
     @PutMapping("/{id}")
     public SuccessResponse<SouvenirResponse> updateSouvenir(
             @Valid
@@ -58,6 +65,7 @@ public class SouvenirController {
         return SuccessResponse.of(response);
     }
 
+    @RequireAuth
     @DeleteMapping("/{id}")
     public SuccessResponse<Void> deleteSouvenir(
             @PathVariable Long id,

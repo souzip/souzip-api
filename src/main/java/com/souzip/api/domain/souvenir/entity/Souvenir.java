@@ -2,6 +2,7 @@ package com.souzip.api.domain.souvenir.entity;
 
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,8 +47,9 @@ public class Souvenir extends BaseEntity {
     @Column(nullable = false)
     private Purpose purpose;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(length = 255)
     private String locationDetail;
@@ -58,6 +60,10 @@ public class Souvenir extends BaseEntity {
 
     @Column
     private String countryCode;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean isOwned = false;
 
     public static Souvenir of(
             String name,
@@ -72,7 +78,8 @@ public class Souvenir extends BaseEntity {
             Category category,
             Purpose purpose,
             String countryCode,
-            Long userId
+            User user,
+            Boolean isOwned
     ) {
         return Souvenir.builder()
                 .name(name)
@@ -87,7 +94,8 @@ public class Souvenir extends BaseEntity {
                 .category(category)
                 .purpose(purpose)
                 .countryCode(countryCode)
-                .userId(userId)
+                .user(user)
+                .isOwned(isOwned)
                 .deleted(false)
                 .build();
     }

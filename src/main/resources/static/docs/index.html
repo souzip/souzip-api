@@ -650,6 +650,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </li>
+<li><a href="#geocoding-api">Address API</a>
+<ul class="sectlevel2">
+<li><a href="#geocoding-get-address">위도/경도 기준 주소 조회 (기념품 업로드 시 사용)</a>
+<ul class="sectlevel3">
+<li><a href="#_http_요청_30">HTTP 요청</a></li>
+<li><a href="#_http_응답_30">HTTP 응답</a></li>
+<li><a href="#_응답_필드_31">응답 필드</a></li>
+<li><a href="#_response_fields_30">Response Fields</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -1286,7 +1298,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "카카오 API 호출에 실패했습니다."
 }</code></pre>
 </div>
@@ -1728,7 +1740,7 @@ Content-Type: application/json
 Content-Length: 98
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "지원하지 않는 로그인 방식입니다: naver"
 }</code></pre>
 </div>
@@ -1847,7 +1859,7 @@ Content-Type: application/json
 Content-Length: 103
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "지원하지 않는 로그인 방식입니다: invalid123"
 }</code></pre>
 </div>
@@ -2183,7 +2195,7 @@ Content-Type: application/json
 Content-Length: 79
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "만료된 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -2280,7 +2292,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "유효하지 않은 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -3087,7 +3099,7 @@ Content-Type: application/json
 Content-Length: 93
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "필수 약관에 모두 동의해야 합니다."
 }</code></pre>
 </div>
@@ -3234,7 +3246,7 @@ Content-Type: application/json
 Content-Length: 86
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "이미 사용 중인 닉네임입니다."
 }</code></pre>
 </div>
@@ -3381,7 +3393,7 @@ Content-Type: application/json
 Content-Length: 95
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "이미 온보딩을 완료한 사용자입니다."
 }</code></pre>
 </div>
@@ -3528,7 +3540,7 @@ Content-Type: application/json
 Content-Length: 88
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "유효하지 않은 카테고리입니다."
 }</code></pre>
 </div>
@@ -3675,7 +3687,7 @@ Content-Type: application/json
 Content-Length: 102
 
 {
-  "traceId" : "e6a745e1",
+  "traceId" : "94ae9074",
   "message" : "유효하지 않은 프로필 이미지 색상입니다."
 }</code></pre>
 </div>
@@ -3831,6 +3843,9 @@ Content-Length: 58
 <li>
 <p>삭제된(soft delete) 기념품은 조회할 수 없습니다.</p>
 </li>
+<li>
+<p>인증 불필요하지만, 로그인한 사용자가 조회하면 내 기념품 여부(isOwned) 함께 반환</p>
+</li>
 </ul>
 </div>
 <div class="sect3">
@@ -3838,6 +3853,7 @@ Content-Length: 58
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/souvenirs/1 HTTP/1.1
+Authorization: Bearer test.jwt.token
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -3848,7 +3864,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 755
+Content-Length: 988
 
 {
   "data" : {
@@ -3862,9 +3878,18 @@ Content-Length: 755
     "locationDetail" : "2층 빨간색 간판이 있는 장소",
     "latitude" : 35.689487,
     "longitude" : 139.691706,
-    "category" : "SOUVENIR_BASIC",
-    "purpose" : "GIFT",
+    "category" : {
+      "name" : "SOUVENIR_BASIC",
+      "label" : "기념품 기본템"
+    },
+    "purpose" : {
+      "name" : "GIFT",
+      "label" : "선물용"
+    },
     "countryCode" : "US",
+    "userNickname" : "닉네임",
+    "userProfileImageUrl" : "https://example.com/profile.jpg",
+    "isOwned" : true,
     "files" : [ {
       "id" : 1,
       "url" : "https://example.com/file1.jpg",
@@ -3910,7 +3935,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.name</p></td>
@@ -3920,7 +3945,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.localPrice</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.currencySymbol</p></td>
@@ -3930,7 +3955,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.krwPrice</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.description</p></td>
@@ -3950,27 +3975,62 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.latitude</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.longitude</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.category</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.category.name</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ENUM name</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.category.label</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 구매 목적 ENUM name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 label</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 구매 목적</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose.name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 ENUM name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose.label</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 label</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.isOwned</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회자가 소유자인지 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.userNickname</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 소유자 닉네임</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.userProfileImageUrl</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 소유자 프로필 이미지 URL</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files</p></td>
@@ -3980,7 +4040,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">파일 ID (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].url</p></td>
@@ -3995,7 +4055,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].displayOrder</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 순서</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">파일 순서 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
@@ -4155,7 +4215,7 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>localPrice</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>currencySymbol</code></p></td>
@@ -4165,7 +4225,7 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>krwPrice</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
@@ -4185,12 +4245,12 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>latitude</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>longitude</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>category</code></p></td>
@@ -4216,7 +4276,7 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 755
+Content-Length: 988
 
 {
   "data" : {
@@ -4230,9 +4290,18 @@ Content-Length: 755
     "locationDetail" : "2층 빨간색 간판이 있는 장소",
     "latitude" : 35.689487,
     "longitude" : 139.691706,
-    "category" : "SOUVENIR_BASIC",
-    "purpose" : "GIFT",
+    "category" : {
+      "name" : "SOUVENIR_BASIC",
+      "label" : "기념품 기본템"
+    },
+    "purpose" : {
+      "name" : "GIFT",
+      "label" : "선물용"
+    },
     "countryCode" : "US",
+    "userNickname" : "닉네임",
+    "userProfileImageUrl" : "https://example.com/profile.jpg",
+    "isOwned" : true,
     "files" : [ {
       "id" : 1,
       "url" : "https://example.com/file1.jpg",
@@ -4278,7 +4347,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.name</p></td>
@@ -4288,7 +4357,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.localPrice</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.currencySymbol</p></td>
@@ -4298,7 +4367,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.krwPrice</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.description</p></td>
@@ -4318,27 +4387,62 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.latitude</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.longitude</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.category</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.category.name</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ENUM name</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.category.label</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 구매 목적 ENUM name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 label</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 구매 목적</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose.name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 ENUM name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose.label</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 label</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.isOwned</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회자가 소유자인지 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.userNickname</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 소유자 닉네임</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.userProfileImageUrl</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 소유자 프로필 이미지 URL</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files</p></td>
@@ -4348,7 +4452,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">파일 ID (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].url</p></td>
@@ -4363,7 +4467,7 @@ Content-Length: 755
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].displayOrder</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 순서</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">파일 순서 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
@@ -4523,7 +4627,7 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>localPrice</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>currencySymbol</code></p></td>
@@ -4533,7 +4637,7 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>krwPrice</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
@@ -4553,12 +4657,12 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>latitude</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>longitude</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도 (decimal, 소수점 7자리까지</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>category</code></p></td>
@@ -4584,7 +4688,7 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 775
+Content-Length: 1008
 
 {
   "data" : {
@@ -4598,9 +4702,18 @@ Content-Length: 775
     "locationDetail" : "2층 빨간색 간판이 있는 장소",
     "latitude" : 35.689487,
     "longitude" : 139.691706,
-    "category" : "SOUVENIR_BASIC",
-    "purpose" : "GIFT",
+    "category" : {
+      "name" : "SOUVENIR_BASIC",
+      "label" : "기념품 기본템"
+    },
+    "purpose" : {
+      "name" : "GIFT",
+      "label" : "선물용"
+    },
     "countryCode" : "US",
+    "userNickname" : "닉네임",
+    "userProfileImageUrl" : "https://example.com/profile.jpg",
+    "isOwned" : true,
     "files" : [ {
       "id" : 1,
       "url" : "https://example.com/file1.jpg",
@@ -4646,7 +4759,7 @@ Content-Length: 775
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.name</p></td>
@@ -4656,7 +4769,7 @@ Content-Length: 775
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.localPrice</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.currencySymbol</p></td>
@@ -4666,7 +4779,7 @@ Content-Length: 775
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.krwPrice</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.description</p></td>
@@ -4686,27 +4799,62 @@ Content-Length: 775
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.latitude</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.longitude</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도 (decimal, 소수점 7자리까지)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.category</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.category.name</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ENUM name</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.category.label</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 구매 목적 ENUM name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 label</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 구매 목적</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose.name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 ENUM name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.purpose.label</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 label</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.isOwned</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Boolean</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회자가 소유자인지 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.userNickname</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 소유자 닉네임</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.userProfileImageUrl</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 소유자 프로필 이미지 URL</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files</p></td>
@@ -4716,7 +4864,7 @@ Content-Length: 775
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">파일 ID (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].url</p></td>
@@ -4731,7 +4879,7 @@ Content-Length: 775
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].displayOrder</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 순서</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">파일 순서 (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
@@ -4876,7 +5024,7 @@ Content-Length: 71
 <div class="ulist">
 <ul>
 <li>
-<p>인증 필요</p>
+<p>인증 불필요 (Public API)</p>
 </li>
 <li>
 <p>삭제된(soft delete) 기념품은 조회할 수 없습니다.</p>
@@ -4890,7 +5038,7 @@ Content-Length: 71
 <h4 id="_http_요청_26"><a class="link" href="#_http_요청_26">HTTP 요청</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/souvenirs/nearby?latitude=40.7128&amp;longitude=-74.006 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/souvenirs/nearby?latitude=40.7128123&amp;longitude=-74.0060123 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -4942,15 +5090,15 @@ Host: localhost:8080</code></pre>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">latitude</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Decimal</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">사용자 위치 위도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">longitude</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Decimal</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">사용자 위치 경도</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
 </tr>
 </tbody>
 </table>
@@ -4961,21 +5109,47 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 412
+Content-Length: 1140
 
 {
   "data" : [ {
     "id" : 1,
     "name" : "Souvenir A",
-    "categoryName" : "FOOD_SNACK",
+    "categoryDto" : {
+      "name" : "SOUVENIR_BASIC",
+      "label" : "기념품 기본템"
+    },
+    "purposeDto" : {
+      "name" : "GIFT",
+      "label" : "선물용"
+    },
+    "localPrice" : 10000,
+    "krwPrice" : 120000,
+    "currencySymbol" : "$",
     "thumbnail" : "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
-    "distanceMeter" : 500.0
+    "distanceMeter" : 500,
+    "latitude" : 40.7128123,
+    "longitude" : -74.0060123,
+    "address" : "Some address A"
   }, {
     "id" : 2,
     "name" : "Souvenir B",
-    "categoryName" : "BEAUTY_HEALTH",
-    "thumbnail" : null,
-    "distanceMeter" : 1200.0
+    "categoryDto" : {
+      "name" : "BEAUTY_HEALTH",
+      "label" : "뷰티·헬스"
+    },
+    "purposeDto" : {
+      "name" : "PERSONAL",
+      "label" : "개인용"
+    },
+    "localPrice" : 20000,
+    "krwPrice" : 240000,
+    "currencySymbol" : "$",
+    "thumbnail" : "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd123.png",
+    "distanceMeter" : 1200,
+    "latitude" : 40.7228123,
+    "longitude" : -74.0010123,
+    "address" : "Some address B"
   } ],
   "message" : ""
 }</code></pre>
@@ -5010,7 +5184,7 @@ Content-Length: 412
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].id</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID (integer)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].name</p></td>
@@ -5018,9 +5192,49 @@ Content-Length: 412
 <td class="tableblock halign-left valign-top"><p class="tableblock">기념품명</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data[].categoryName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].categoryDto</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].categoryDto.name</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ENUM name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].categoryDto.label</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 한글명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].purposeDto</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">구매 목적 정보</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].purposeDto.name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 ENUM name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].purposeDto.label</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">목적 한글명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].localPrice</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">현지 가격 (integer)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].krwPrice</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">원화 가격 (integer)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].currencySymbol</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">통화 기호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].thumbnail</p></td>
@@ -5030,7 +5244,22 @@ Content-Length: 412
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].distanceMeter</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">사용자와 기념품 거리(m)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">사용자와 기념품 거리(m) - (integer)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].latitude</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도 (decimal, 소수점 7자리까지)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].longitude</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도 (decimal, 소수점 7자리까지)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].address</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 주소</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
@@ -5415,11 +5644,95 @@ Content-Length: 79
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="geocoding-api"><a class="link" href="#geocoding-api">Address API</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="geocoding-get-address"><a class="link" href="#geocoding-get-address">위도/경도 기준 주소 조회 (기념품 업로드 시 사용)</a></h3>
+<div class="sect3">
+<h4 id="_http_요청_30"><a class="link" href="#_http_요청_30">HTTP 요청</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/geocoding/address?latitude=37.5665&amp;longitude=126.978 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_http_응답_30"><a class="link" href="#_http_응답_30">HTTP 응답</a></h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 165
+
+{
+  "data" : {
+    "formattedAddress" : "110 Sejong-daero, Jung District, Seoul, South Korea",
+    "city" : "Seoul",
+    "countryCode" : "KR"
+  },
+  "message" : ""
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_필드_31"><a class="link" href="#_응답_필드_31">응답 필드</a></h4>
+
+</div>
+<div class="sect3">
+<h4 id="_response_fields_30"><a class="link" href="#_response_fields_30">Response Fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">응답 데이터</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.formattedAddress</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 주소</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.city</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">도시 이름</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">응답 메시지</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-12-21 20:27:04 +0900
+Last updated 2025-12-26 23:42:56 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

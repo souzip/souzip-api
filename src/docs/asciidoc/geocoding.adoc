@@ -1,0 +1,14 @@
+[[geocoding-api]]
+== Address API
+
+[[geocoding-get-address]]
+=== 위도/경도 기준 주소 조회 (기념품 업로드 시 사용)
+
+==== HTTP 요청
+include::{snippets}/geocoding/get-address/http-request.adoc[]
+
+==== HTTP 응답
+include::{snippets}/geocoding/get-address/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/geocoding/get-address/response-fields.adoc[]

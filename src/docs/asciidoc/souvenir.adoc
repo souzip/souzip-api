@@ -8,6 +8,7 @@
 
 * 인증 불필요 (Public API)
 * 삭제된(soft delete) 기념품은 조회할 수 없습니다.
+* 인증 불필요하지만, 로그인한 사용자가 조회하면 내 기념품 여부(isOwned) 함께 반환
 
 ==== HTTP 요청
 include::{snippets}/souvenirs/get-souvenir/http-request.adoc[]
@@ -138,7 +139,7 @@ NOTE: 삭제 성공 시 `data`는 반환되지 않으며, 메시지만 전달됩
 
 사용자의 위도/경도 기준으로 특정 반경 내 기념품을 조회하는 API입니다.
 
-* 인증 필요
+* 인증 불필요 (Public API)
 * 삭제된(soft delete) 기념품은 조회할 수 없습니다.
 * 거리 단위는 미터(m)이며, 서버에서 계산된 거리를 함께 반환합니다.
 
@@ -162,14 +163,14 @@ include::{snippets}/souvenirs/get-nearby-souvenirs/http-request.adoc[]
 |파라미터 |타입 |필수 |설명
 
 |latitude
-|Number
+|Decimal
 |O
-|사용자 위치 위도
+|위도
 
 |longitude
-|Number
+|Decimal
 |O
-|사용자 위치 경도
+|경도
 |===
 
 ==== HTTP 응답

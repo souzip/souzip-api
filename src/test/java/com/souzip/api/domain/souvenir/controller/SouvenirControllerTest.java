@@ -80,8 +80,8 @@ class SouvenirControllerTest extends RestDocsSupport {
     @Test
     @DisplayName("근처 기념품 조회")
     void getNearbySouvenirs() throws Exception {
-        double userLatitude = 40.7128;
-        double userLongitude = -74.0060;
+        double userLatitude = 40.7128123;
+        double userLongitude = -74.0060123;
 
         List<SouvenirNearbyResponse> nearbySouvenirs = List.of(
                 SouvenirNearbyResponse.from(
@@ -94,8 +94,8 @@ class SouvenirControllerTest extends RestDocsSupport {
                         "$",
                         "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
                         500,
-                        new BigDecimal("40.7128"),
-                        new BigDecimal("-74.0060"),
+                        new BigDecimal("40.7128123"),
+                        new BigDecimal("-74.0060123"),
                         "Some address A"
                 ),
                 SouvenirNearbyResponse.from(
@@ -108,8 +108,8 @@ class SouvenirControllerTest extends RestDocsSupport {
                         "$",
                         "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd123.png",
                         1200,
-                        new BigDecimal("40.7228"),
-                        new BigDecimal("-74.0010"),
+                        new BigDecimal("40.7228123"),
+                        new BigDecimal("-74.0010123"),
                         "Some address B"
                 )
         );
@@ -132,8 +132,8 @@ class SouvenirControllerTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data[0].currencySymbol").value("$"))
                 .andExpect(jsonPath("$.data[0].thumbnail").value("https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png"))
                 .andExpect(jsonPath("$.data[0].distanceMeter").value(500))
-                .andExpect(jsonPath("$.data[0].latitude").value(40.7128))
-                .andExpect(jsonPath("$.data[0].longitude").value(-74.0060))
+                .andExpect(jsonPath("$.data[0].latitude").value(40.7128123))
+                .andExpect(jsonPath("$.data[0].longitude").value(-74.0060123))
                 .andExpect(jsonPath("$.data[0].address").value("Some address A"))
                 .andDo(document("souvenirs/get-nearby-souvenirs",
                         getDocumentRequest(),
@@ -153,8 +153,8 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data[].currencySymbol").type(JsonFieldType.STRING).description("통화 기호"),
                                 fieldWithPath("data[].thumbnail").type(JsonFieldType.STRING).description("대표 이미지 URL").optional(),
                                 fieldWithPath("data[].distanceMeter").type(JsonFieldType.NUMBER).description("사용자와 기념품 거리(m) - (integer)"),
-                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("기념품 위도 (decimal)"),
-                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("기념품 경도 (decimal)"),
+                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("위도 (decimal, 소수점 7자리까지)"),
+                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("경도 (decimal, 소수점 7자리까지)"),
                                 fieldWithPath("data[].address").type(JsonFieldType.STRING).description("기념품 주소"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
                         )

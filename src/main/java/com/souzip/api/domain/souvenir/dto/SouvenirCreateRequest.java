@@ -31,7 +31,6 @@ public record SouvenirCreateRequest(
         @NotBlank(message = "주소는 필수입니다.")
         String address,
 
-        @NotBlank(message = "상세 위치는 필수입니다.")
         String locationDetail,
 
         @NotNull(message = "위도는 필수입니다.")
@@ -49,5 +48,6 @@ public record SouvenirCreateRequest(
         @NotBlank(message = "국가 코드는 필수입니다.")
         String countryCode,
 
+        @NotNull(message = "기념품 이미지는 필수입니다.")
         List<MultipartFile> files
 ) {}

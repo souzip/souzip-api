@@ -47,11 +47,8 @@ public class Souvenir extends BaseEntity {
     @Column(nullable = false)
     private Purpose purpose;
 
-    @Column(name = "user_id", nullable = false, insertable = false, updatable = false)
-    private Long userId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(length = 255)
@@ -81,7 +78,7 @@ public class Souvenir extends BaseEntity {
             Category category,
             Purpose purpose,
             String countryCode,
-            Long userId,
+            User user,
             Boolean isOwned
     ) {
         return Souvenir.builder()
@@ -97,7 +94,7 @@ public class Souvenir extends BaseEntity {
                 .category(category)
                 .purpose(purpose)
                 .countryCode(countryCode)
-                .userId(userId)
+                .user(user)
                 .isOwned(isOwned)
                 .deleted(false)
                 .build();

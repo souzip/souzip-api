@@ -32,8 +32,11 @@ public class SouvenirController {
     }
 
     @GetMapping("/{id}")
-    public SuccessResponse<SouvenirResponse> getSouvenir(@PathVariable Long id) {
-        SouvenirResponse response = souvenirService.getSouvenir(id);
+    public SuccessResponse<SouvenirResponse> getSouvenir(
+            @PathVariable Long id,
+            @CurrentUserId Long currentUserId
+    ) {
+        SouvenirResponse response = souvenirService.getSouvenir(id, currentUserId);
         return SuccessResponse.of(response);
     }
 

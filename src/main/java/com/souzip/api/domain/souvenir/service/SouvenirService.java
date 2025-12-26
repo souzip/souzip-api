@@ -11,6 +11,7 @@ import com.souzip.api.domain.souvenir.dto.SouvenirResponse;
 import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
+import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
@@ -55,14 +56,18 @@ public class SouvenirService {
                 .toList();
     }
 
-    public SouvenirResponse getSouvenir(Long souvenirId) {
+    public SouvenirResponse getSouvenir(Long souvenirId, Long currentUserId) {
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(souvenirId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
-        List<FileResponse> files =
-                fileService.getFilesByEntity("Souvenir", souvenirId);
+        List<FileResponse> files = fileService.getFilesByEntity("Souvenir", souvenirId);
 
-        return SouvenirResponse.from(souvenir, files);
+        boolean isOwned = false;
+        if (currentUserId != null) {
+            isOwned = souvenir.getUser().getId().equals(currentUserId);
+        }
+
+        return SouvenirResponse.of(souvenir, files, isOwned);
     }
 
     @Transactional
@@ -71,6 +76,8 @@ public class SouvenirService {
             Long userId,
             List<MultipartFile> files
     ) {
+        User user = validateUser(userId);
+
         ExchangeCalculatedPrice price = exchangeRateService.calculatePrice(
                 request.countryCode(),
                 request.localPrice(),
@@ -90,14 +97,15 @@ public class SouvenirService {
                 request.category(),
                 request.purpose(),
                 request.countryCode(),
-                userId,
+                user,
                 true
         );
 
         souvenirRepository.save(souvenir);
-        List<FileResponse> uploadedFiles = uploadFiles(souvenir.getId(), userId, files);
+        List<FileResponse> uploadedFiles =
+                uploadFiles(souvenir.getId(), userId, files);
 
-        return SouvenirResponse.from(souvenir, uploadedFiles);
+        return SouvenirResponse.of(souvenir, uploadedFiles, true);
     }
 
     @Transactional
@@ -110,7 +118,7 @@ public class SouvenirService {
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
-        if (!souvenir.getUserId().equals(userId)) {
+        if (!souvenir.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -136,9 +144,10 @@ public class SouvenirService {
         );
 
         fileService.deleteFilesByEntity("Souvenir", id);
-        List<FileResponse> uploadedFiles = uploadFiles(id, userId, files);
+        List<FileResponse> uploadedFiles =
+                uploadFiles(souvenir.getId(), userId, files);
 
-        return SouvenirResponse.from(souvenir, uploadedFiles);
+        return SouvenirResponse.of(souvenir, uploadedFiles, true);
     }
 
     @Transactional
@@ -146,7 +155,7 @@ public class SouvenirService {
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
-        if (!souvenir.getUserId().equals(userId)) {
+        if (!souvenir.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -161,7 +170,7 @@ public class SouvenirService {
 
         return Optional.ofNullable(files)
                 .orElse(List.of())
-            .stream()
+                .stream()
                 .map(file -> fileService.uploadFile(
                         uuid,
                         "Souvenir",
@@ -170,5 +179,10 @@ public class SouvenirService {
                         null
                 ))
                 .toList();
+    }
+
+    private User validateUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }

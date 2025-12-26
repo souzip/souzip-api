@@ -8,6 +8,7 @@ import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
 import com.souzip.api.global.security.annotation.RequireAuth;
+import io.micrometer.common.lang.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,6 @@ public class SouvenirController {
 
     private final SouvenirService souvenirService;
 
-    @RequireAuth
     @GetMapping("/nearby")
     public SuccessResponse<List<SouvenirNearbyResponse>> getNearbySouvenirs(
             @RequestParam double latitude,
@@ -34,9 +34,9 @@ public class SouvenirController {
     @GetMapping("/{id}")
     public SuccessResponse<SouvenirResponse> getSouvenir(
             @PathVariable Long id,
-            @CurrentUserId Long currentUserId
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
     ) {
-        SouvenirResponse response = souvenirService.getSouvenir(id, currentUserId);
+        SouvenirResponse response = souvenirService.getSouvenir(id, authorizationHeader);
         return SuccessResponse.of(response);
     }
 

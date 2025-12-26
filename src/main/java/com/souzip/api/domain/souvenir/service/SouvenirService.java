@@ -15,11 +15,13 @@ import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
+import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +37,8 @@ public class SouvenirService {
     private final FileService fileService;
     private final ExchangeRateService exchangeRateService;
     private final FileStorageService fileStorageService;
+    private final JwtTokenProvider jwtTokenProvider;
+
     public List<SouvenirNearbyResponse> getNearbySouvenirs(double latitude, double longitude) {
         List<Object[]> results =
                 souvenirRepository.findNearbySouvenirs(latitude, longitude, NEARBY_RADIUS_METER);
@@ -56,15 +60,22 @@ public class SouvenirService {
                 .toList();
     }
 
-    public SouvenirResponse getSouvenir(Long souvenirId, Long currentUserId) {
+    public SouvenirResponse getSouvenir(Long souvenirId, @Nullable String authorizationHeader) {
+        String userId = null;
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring(7);
+            userId = jwtTokenProvider.getUserIdFromToken(token);
+        }
+
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(souvenirId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
         List<FileResponse> files = fileService.getFilesByEntity("Souvenir", souvenirId);
 
         boolean isOwned = false;
-        if (currentUserId != null) {
-            isOwned = souvenir.getUser().getId().equals(currentUserId);
+        if (userId != null) {
+            isOwned = souvenir.getUser().getUserId().equals(userId);
         }
 
         return SouvenirResponse.of(souvenir, files, isOwned);
@@ -76,6 +87,7 @@ public class SouvenirService {
             Long userId,
             List<MultipartFile> files
     ) {
+        requireUserId(userId);
         User user = validateUser(userId);
 
         ExchangeCalculatedPrice price = exchangeRateService.calculatePrice(
@@ -115,6 +127,7 @@ public class SouvenirService {
             Long userId,
             List<MultipartFile> files
     ) {
+        requireUserId(userId);
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
@@ -152,6 +165,7 @@ public class SouvenirService {
 
     @Transactional
     public void deleteSouvenir(Long id, Long userId) {
+        requireUserId(userId);
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
@@ -184,5 +198,11 @@ public class SouvenirService {
     private User validateUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private void requireUserId(Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }

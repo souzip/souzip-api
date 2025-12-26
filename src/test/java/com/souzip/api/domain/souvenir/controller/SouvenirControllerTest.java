@@ -78,7 +78,7 @@ class SouvenirControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("사용자 위치 기반 근처 기념품 조회")
+    @DisplayName("근처 기념품 조회")
     void getNearbySouvenirs() throws Exception {
         double userLatitude = 40.7128;
         double userLongitude = -74.0060;
@@ -87,16 +87,30 @@ class SouvenirControllerTest extends RestDocsSupport {
                 SouvenirNearbyResponse.from(
                         1L,
                         "Souvenir A",
-                        "FOOD_SNACK",
+                        CategoryDto.from(Category.SOUVENIR_BASIC),
+                        PurposeDto.from(Purpose.GIFT),
+                        10000,
+                        120000,
+                        "$",
                         "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
-                        500
+                        500,
+                        new BigDecimal("40.7128"),
+                        new BigDecimal("-74.0060"),
+                        "Some address A"
                 ),
                 SouvenirNearbyResponse.from(
                         2L,
                         "Souvenir B",
-                        "BEAUTY_HEALTH",
-                        null,
-                        1200
+                        CategoryDto.from(Category.BEAUTY_HEALTH),
+                        PurposeDto.from(Purpose.PERSONAL),
+                        20000,
+                        240000,
+                        "$",
+                        "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd123.png",
+                        1200,
+                        new BigDecimal("40.7228"),
+                        new BigDecimal("-74.0010"),
+                        "Some address B"
                 )
         );
 
@@ -111,10 +125,16 @@ class SouvenirControllerTest extends RestDocsSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id").value(1L))
                 .andExpect(jsonPath("$.data[0].name").value("Souvenir A"))
-                .andExpect(jsonPath("$.data[0].distanceMeter").value(500.0))
-                .andExpect(jsonPath("$.data[1].id").value(2L))
-                .andExpect(jsonPath("$.data[1].name").value("Souvenir B"))
-                .andExpect(jsonPath("$.data[1].distanceMeter").value(1200.0))
+                .andExpect(jsonPath("$.data[0].categoryDto.name").value("SOUVENIR_BASIC"))
+                .andExpect(jsonPath("$.data[0].purposeDto.name").value("GIFT"))
+                .andExpect(jsonPath("$.data[0].localPrice").value(10000))
+                .andExpect(jsonPath("$.data[0].krwPrice").value(120000))
+                .andExpect(jsonPath("$.data[0].currencySymbol").value("$"))
+                .andExpect(jsonPath("$.data[0].thumbnail").value("https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png"))
+                .andExpect(jsonPath("$.data[0].distanceMeter").value(500))
+                .andExpect(jsonPath("$.data[0].latitude").value(40.7128))
+                .andExpect(jsonPath("$.data[0].longitude").value(-74.0060))
+                .andExpect(jsonPath("$.data[0].address").value("Some address A"))
                 .andDo(document("souvenirs/get-nearby-souvenirs",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -122,9 +142,20 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data").type(JsonFieldType.ARRAY).description("응답 데이터"),
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("기념품명"),
-                                fieldWithPath("data[].categoryName").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data[].categoryDto").type(JsonFieldType.OBJECT).description("카테고리 정보"),
+                                fieldWithPath("data[].categoryDto.name").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                                fieldWithPath("data[].categoryDto.label").type(JsonFieldType.STRING).description("카테고리 한글명"),
+                                fieldWithPath("data[].purposeDto").type(JsonFieldType.OBJECT).description("구매 목적 정보"),
+                                fieldWithPath("data[].purposeDto.name").type(JsonFieldType.STRING).description("목적 ENUM name"),
+                                fieldWithPath("data[].purposeDto.label").type(JsonFieldType.STRING).description("목적 한글명"),
+                                fieldWithPath("data[].localPrice").type(JsonFieldType.NUMBER).description("현지 가격 (integer)"),
+                                fieldWithPath("data[].krwPrice").type(JsonFieldType.NUMBER).description("원화 가격 (integer)"),
+                                fieldWithPath("data[].currencySymbol").type(JsonFieldType.STRING).description("통화 기호"),
                                 fieldWithPath("data[].thumbnail").type(JsonFieldType.STRING).description("대표 이미지 URL").optional(),
                                 fieldWithPath("data[].distanceMeter").type(JsonFieldType.NUMBER).description("사용자와 기념품 거리(m) - (integer)"),
+                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("기념품 위도 (decimal)"),
+                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("기념품 경도 (decimal)"),
+                                fieldWithPath("data[].address").type(JsonFieldType.STRING).description("기념품 주소"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
                         )
                 ));
@@ -160,10 +191,12 @@ class SouvenirControllerTest extends RestDocsSupport {
                 filesResponse
         );
 
-        given(souvenirService.getSouvenir(souvenirId, 1L))
+        String jwt = "Bearer test.jwt.token";
+        given(souvenirService.getSouvenir(souvenirId, jwt))
                 .willReturn(response);
 
-        mockMvc.perform(get("/api/souvenirs/{id}", souvenirId))
+        mockMvc.perform(get("/api/souvenirs/{id}", souvenirId)
+                .header("Authorization", jwt))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(souvenirId))

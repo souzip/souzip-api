@@ -1,7 +1,8 @@
 package com.souzip.api.domain.souvenir.dto;
 
-import com.souzip.api.domain.category.dto.CategoryDto;
+import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.file.dto.FileResponse;
+import com.souzip.api.domain.souvenir.entity.Purpose;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 
 import java.math.BigDecimal;
@@ -18,8 +19,8 @@ public record SouvenirResponse(
         String locationDetail,
         BigDecimal latitude,
         BigDecimal longitude,
-        CategoryDto category,
-        PurposeDto purpose,
+        Category category,
+        Purpose purpose,
         String countryCode,
         String userNickname,
         String userProfileImageUrl,
@@ -43,8 +44,8 @@ public record SouvenirResponse(
                 souvenir.getLocationDetail(),
                 souvenir.getLatitude(),
                 souvenir.getLongitude(),
-                CategoryDto.from(souvenir.getCategory()),
-                PurposeDto.from(souvenir.getPurpose()),
+                souvenir.getCategory(),
+                souvenir.getPurpose(),
                 souvenir.getCountryCode(),
                 souvenir.getUser().getNickname(),
                 souvenir.getUser().getProfileImageUrl(),

@@ -1,13 +1,15 @@
 package com.souzip.api.domain.souvenir.dto;
 
-import com.souzip.api.domain.category.dto.CategoryDto;
+import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.souvenir.entity.Purpose;
+
 import java.math.BigDecimal;
 
 public record SouvenirNearbyResponse(
         Long id,
         String name,
-        CategoryDto categoryDto,
-        PurposeDto purposeDto,
+        Category category,
+        Purpose purpose,
         int localPrice,
         int krwPrice,
         String currencySymbol,
@@ -20,8 +22,8 @@ public record SouvenirNearbyResponse(
     public static SouvenirNearbyResponse from(
             Long id,
             String name,
-            CategoryDto categoryDto,
-            PurposeDto purposeDto,
+            Category category,
+            Purpose purpose,
             int localPrice,
             int krwPrice,
             String currencySymbol,
@@ -34,8 +36,8 @@ public record SouvenirNearbyResponse(
         return new SouvenirNearbyResponse(
                 id,
                 name,
-                categoryDto,
-                purposeDto,
+                category,
+                purpose,
                 localPrice,
                 krwPrice,
                 currencySymbol,

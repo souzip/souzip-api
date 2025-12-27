@@ -23,9 +23,10 @@ public class SouvenirController {
     @GetMapping("/nearby")
     public SuccessResponse<SouvenirNearbyListResponse> getNearbySouvenirs(
             @RequestParam double latitude,
-            @RequestParam double longitude
+            @RequestParam double longitude,
+            @RequestParam(required = false, defaultValue = "4000") double radiusMeter
     ) {
-        return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude));
+        return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude, radiusMeter));
     }
 
     @GetMapping("/{id}")
@@ -42,7 +43,7 @@ public class SouvenirController {
     public SuccessResponse<SouvenirResponse> createSouvenir(
             @Valid
             @RequestPart("souvenir") SouvenirCreateRequest request,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestPart(value = "files") List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
         SouvenirResponse response = souvenirService.createSouvenir(request, userId, files);

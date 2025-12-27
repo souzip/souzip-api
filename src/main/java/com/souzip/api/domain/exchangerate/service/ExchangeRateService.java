@@ -42,7 +42,16 @@ public class ExchangeRateService {
         if (localPrice != null) {
             return fromLocalPrice(localPrice, rate, country);
         }
-        return fromKrwPrice(krwPrice, rate, country);
+
+        if (krwPrice != null) {
+            return fromKrwPrice(krwPrice, rate, country);
+        }
+
+        return new ExchangeCalculatedPrice(
+                0,
+                0,
+                country.currency().symbol()
+        );
     }
 
     private ExchangeCalculatedPrice fromLocalPrice(

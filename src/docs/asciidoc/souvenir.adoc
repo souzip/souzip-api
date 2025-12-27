@@ -165,12 +165,17 @@ include::{snippets}/souvenirs/get-nearby-souvenirs/http-request.adoc[]
 |latitude
 |Decimal
 |O
-|위도
+|위도 (decimal, 소수점 7자리까지)
 
 |longitude
 |Decimal
 |O
-|경도
+|경도 (decimal, 소수점 7자리까지)
+
+|radiusMeter
+|Integer
+|X
+|조회 반경 (미터 단위, 기본값 4000m)
 |===
 
 ==== HTTP 응답

@@ -81,6 +81,7 @@ class SouvenirControllerTest extends RestDocsSupport {
     void getNearbySouvenirs() throws Exception {
         double userLatitude = 40.7128123;
         double userLongitude = -74.0060123;
+        int radiusMeter = 4000;
 
         List<SouvenirNearbyResponse> nearbySouvenirs = List.of(
                 SouvenirNearbyResponse.from(
@@ -92,7 +93,6 @@ class SouvenirControllerTest extends RestDocsSupport {
                         120000,
                         "$",
                         "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
-                        500,
                         new BigDecimal("40.7128123"),
                         new BigDecimal("-74.0060123"),
                         "Some address A"
@@ -106,19 +106,19 @@ class SouvenirControllerTest extends RestDocsSupport {
                         240000,
                         "$",
                         "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd123.png",
-                        1200,
                         new BigDecimal("40.7228123"),
                         new BigDecimal("-74.0010123"),
                         "Some address B"
                 )
         );
 
-        given(souvenirService.getNearbySouvenirs(userLatitude, userLongitude))
+        given(souvenirService.getNearbySouvenirs(userLatitude, userLongitude, radiusMeter))
                 .willReturn(SouvenirNearbyListResponse.from(nearbySouvenirs));
 
         mockMvc.perform(get("/api/souvenirs/nearby")
                         .param("latitude", String.valueOf(userLatitude))
                         .param("longitude", String.valueOf(userLongitude))
+                        .param("radiusMeter", String.valueOf(radiusMeter))
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -130,7 +130,6 @@ class SouvenirControllerTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.souvenirs[0].krwPrice").value(120000))
                 .andExpect(jsonPath("$.data.souvenirs[0].currencySymbol").value("$"))
                 .andExpect(jsonPath("$.data.souvenirs[0].thumbnail").value("https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png"))
-                .andExpect(jsonPath("$.data.souvenirs[0].distanceMeter").value(500))
                 .andExpect(jsonPath("$.data.souvenirs[0].latitude").value(40.7128123))
                 .andExpect(jsonPath("$.data.souvenirs[0].longitude").value(-74.0060123))
                 .andExpect(jsonPath("$.data.souvenirs[0].address").value("Some address A"))
@@ -148,7 +147,6 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.souvenirs[].krwPrice").type(JsonFieldType.NUMBER).description("원화 가격 (integer)"),
                                 fieldWithPath("data.souvenirs[].currencySymbol").type(JsonFieldType.STRING).description("통화 기호"),
                                 fieldWithPath("data.souvenirs[].thumbnail").type(JsonFieldType.STRING).description("대표 이미지 URL").optional(),
-                                fieldWithPath("data.souvenirs[].distanceMeter").type(JsonFieldType.NUMBER).description("사용자와 기념품 거리(m) - (integer)"),
                                 fieldWithPath("data.souvenirs[].latitude").type(JsonFieldType.NUMBER).description("위도 (decimal, 소수점 7자리까지)"),
                                 fieldWithPath("data.souvenirs[].longitude").type(JsonFieldType.NUMBER).description("경도 (decimal, 소수점 7자리까지)"),
                                 fieldWithPath("data.souvenirs[].address").type(JsonFieldType.STRING).description("기념품 주소"),
@@ -302,22 +300,22 @@ class SouvenirControllerTest extends RestDocsSupport {
                         getDocumentRequest(),
                         getDocumentResponse(),
                         requestParts(
-                                partWithName("souvenir").description("기념품 정보(JSON)"),
-                                partWithName("files").description("업로드 이미지 파일 리스트").optional()
+                                partWithName("souvenir").description("기념품 정보(JSON) (필수)"),
+                                partWithName("files").description("업로드 이미지 파일 리스트 (필수)")
                         ),
                         requestPartFields("souvenir",
-                                fieldWithPath("name").description("기념품 이름"),
-                                fieldWithPath("localPrice").description("현지 가격 (integer)"),
-                                fieldWithPath("currencySymbol").description("현지 통화 기호"),
-                                fieldWithPath("krwPrice").description("원화 가격 (integer)"),
-                                fieldWithPath("description").description("기념품 설명"),
-                                fieldWithPath("address").description("주소"),
-                                fieldWithPath("locationDetail").description("상세 위치"),
-                                fieldWithPath("latitude").description("위도 (decimal, 소수점 7자리까지)"),
-                                fieldWithPath("longitude").description("경도 (decimal, 소수점 7자리까지)"),
-                                fieldWithPath("category").description("카테고리 ENUM name"),
-                                fieldWithPath("purpose").description("구매 목적 ENUM name"),
-                                fieldWithPath("countryCode").description("국가 코드"),
+                                fieldWithPath("name").description("기념품 이름 (필수)"),
+                                fieldWithPath("localPrice").description("현지 가격 (integer) (선택)").optional(),
+                                fieldWithPath("currencySymbol").description("현지 통화 기호 (선택)").optional(),
+                                fieldWithPath("krwPrice").description("원화 가격 (integer) (선택)").optional(),
+                                fieldWithPath("description").description("기념품 설명 (필수)"),
+                                fieldWithPath("address").description("주소 (필수)"),
+                                fieldWithPath("locationDetail").description("상세 위치 (선택)").optional(),
+                                fieldWithPath("latitude").description("위도 (decimal, 소수점 7자리까지) (필수)"),
+                                fieldWithPath("longitude").description("경도 (decimal, 소수점 7자리까지) (필수)"),
+                                fieldWithPath("category").description("카테고리 ENUM name (필수)"),
+                                fieldWithPath("purpose").description("구매 목적 ENUM name (필수)"),
+                                fieldWithPath("countryCode").description("국가 코드 (필수)"),
                                 fieldWithPath("files").ignored()
                         ),
                         apiResponseFields(
@@ -425,22 +423,22 @@ class SouvenirControllerTest extends RestDocsSupport {
                         getDocumentRequest(),
                         getDocumentResponse(),
                         requestParts(
-                                partWithName("souvenir").description("수정할 기념품 정보(JSON)"),
-                                partWithName("files").description("업로드 이미지 파일 리스트").optional()
+                                partWithName("souvenir").description("기념품 정보(JSON) (필수)"),
+                                partWithName("files").description("업로드 이미지 파일 리스트 (필수)")
                         ),
                         requestPartFields("souvenir",
-                                fieldWithPath("name").description("기념품 이름"),
-                                fieldWithPath("localPrice").description("현지 가격 (integer)"),
-                                fieldWithPath("currencySymbol").description("현지 통화 기호"),
-                                fieldWithPath("krwPrice").description("원화 가격 (integer)"),
-                                fieldWithPath("description").description("기념품 설명"),
-                                fieldWithPath("address").description("주소"),
-                                fieldWithPath("locationDetail").description("상세 위치"),
-                                fieldWithPath("latitude").description("위도 (decimal, 소수점 7자리까지)"),
-                                fieldWithPath("longitude").description("경도 (decimal, 소수점 7자리까지"),
-                                fieldWithPath("category").description("카테고리 ENUM name"),
-                                fieldWithPath("purpose").description("구매 목적 ENUM name"),
-                                fieldWithPath("countryCode").description("국가 코드"),
+                                fieldWithPath("name").description("기념품 이름 (필수)"),
+                                fieldWithPath("localPrice").description("현지 가격 (integer) (선택)").optional(),
+                                fieldWithPath("currencySymbol").description("현지 통화 기호 (선택)").optional(),
+                                fieldWithPath("krwPrice").description("원화 가격 (integer) (선택)").optional(),
+                                fieldWithPath("description").description("기념품 설명 (필수)"),
+                                fieldWithPath("address").description("주소 (필수)"),
+                                fieldWithPath("locationDetail").description("상세 위치 (선택)").optional(),
+                                fieldWithPath("latitude").description("위도 (decimal, 소수점 7자리까지) (필수)"),
+                                fieldWithPath("longitude").description("경도 (decimal, 소수점 7자리까지) (필수)"),
+                                fieldWithPath("category").description("카테고리 ENUM name (필수)"),
+                                fieldWithPath("purpose").description("구매 목적 ENUM name (필수)"),
+                                fieldWithPath("countryCode").description("국가 코드 (필수)"),
                                 fieldWithPath("files").ignored()
                         ),
                         apiResponseFields(

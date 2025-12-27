@@ -14,7 +14,6 @@ public record SouvenirNearbyResponse(
         int krwPrice,
         String currencySymbol,
         String thumbnail,
-        int distanceMeter,
         BigDecimal latitude,
         BigDecimal longitude,
         String address
@@ -28,7 +27,6 @@ public record SouvenirNearbyResponse(
             int krwPrice,
             String currencySymbol,
             String thumbnail,
-            double distanceMeter,
             BigDecimal latitude,
             BigDecimal longitude,
             String address
@@ -42,7 +40,6 @@ public record SouvenirNearbyResponse(
                 krwPrice,
                 currencySymbol,
                 thumbnail,
-                (int) Math.round(distanceMeter),
                 latitude,
                 longitude,
                 address

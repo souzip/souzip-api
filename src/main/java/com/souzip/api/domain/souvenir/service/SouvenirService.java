@@ -31,8 +31,6 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class SouvenirService {
 
-    private static final double NEARBY_RADIUS_METER = 4000;
-
     private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
     private final FileService fileService;
@@ -40,8 +38,8 @@ public class SouvenirService {
     private final FileStorageService fileStorageService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public SouvenirNearbyListResponse getNearbySouvenirs(double latitude, double longitude) {
-        List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, NEARBY_RADIUS_METER);
+    public SouvenirNearbyListResponse getNearbySouvenirs(double latitude, double longitude, double radiusMeter) {
+        List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
 
         List<SouvenirNearbyResponse> list = results.stream()
                 .map(row -> {
@@ -53,10 +51,9 @@ public class SouvenirService {
                     int krwPrice = ((Number) row[5]).intValue();
                     String currencySymbol = (String) row[6];
                     String thumbnail = (String) row[7];
-                    double distance = ((Number) row[8]).doubleValue();
-                    BigDecimal lat = (BigDecimal) row[9];
-                    BigDecimal lon = (BigDecimal) row[10];
-                    String address = (String) row[11];
+                    BigDecimal lat = (BigDecimal) row[8];
+                    BigDecimal lon = (BigDecimal) row[9];
+                    String address = (String) row[10];
 
                     String imageUrl = thumbnail != null
                             ? fileStorageService.generatePresignedUrl(thumbnail)
@@ -71,7 +68,6 @@ public class SouvenirService {
                             krwPrice,
                             currencySymbol,
                             imageUrl,
-                            distance,
                             lat,
                             lon,
                             address

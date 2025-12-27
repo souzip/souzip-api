@@ -21,10 +21,6 @@ public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
            s.krw_price,
            s.currency_symbol,
            f.storage_key,
-           ST_Distance(
-               ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
-               ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography
-           ) AS distance,
            s.latitude,
            s.longitude,
            s.address
@@ -39,7 +35,10 @@ public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
             ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography,
             :radiusMeter
       )
-    ORDER BY distance
+    ORDER BY ST_Distance(
+            ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
+            ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography
+    )
     LIMIT 10
     """, nativeQuery = true)
     List<Object[]> findNearbySouvenirs(

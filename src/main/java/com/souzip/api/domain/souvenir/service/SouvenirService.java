@@ -40,10 +40,10 @@ public class SouvenirService {
     private final FileStorageService fileStorageService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public List<SouvenirNearbyResponse> getNearbySouvenirs(double latitude, double longitude) {
+    public SouvenirNearbyListResponse getNearbySouvenirs(double latitude, double longitude) {
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, NEARBY_RADIUS_METER);
 
-        return results.stream()
+        List<SouvenirNearbyResponse> list = results.stream()
                 .map(row -> {
                     Long id = ((Number) row[0]).longValue();
                     String name = (String) row[1];
@@ -65,8 +65,8 @@ public class SouvenirService {
                     return SouvenirNearbyResponse.from(
                             id,
                             name,
-                            CategoryDto.from(category),
-                            PurposeDto.from(purpose),
+                            category,
+                            purpose,
                             localPrice,
                             krwPrice,
                             currencySymbol,
@@ -78,6 +78,8 @@ public class SouvenirService {
                     );
                 })
                 .toList();
+
+        return SouvenirNearbyListResponse.from(list);
     }
 
     public SouvenirResponse getSouvenir(Long souvenirId, @Nullable String authorizationHeader) {

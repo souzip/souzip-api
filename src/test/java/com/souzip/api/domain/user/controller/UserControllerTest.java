@@ -2,11 +2,14 @@ package com.souzip.api.domain.user.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.dto.CategoryDto;
+import com.souzip.api.domain.souvenir.dto.MySouvenirListResponse;
+import com.souzip.api.domain.souvenir.dto.MySouvenirResponse;
 import com.souzip.api.domain.user.dto.NicknameCheckRequest;
 import com.souzip.api.domain.user.dto.NicknameCheckResponse;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
 import com.souzip.api.domain.user.dto.UserAgreementInfo;
+import com.souzip.api.domain.user.dto.UserProfileResponse;
 import com.souzip.api.domain.user.service.UserService;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentRequest;
@@ -22,15 +26,19 @@ import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
 import static com.souzip.api.docs.CommonDocumentation.apiResponseFields;
 import static com.souzip.api.docs.CommonDocumentation.errorResponseFields;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -483,6 +491,248 @@ class UserControllerTest extends RestDocsSupport {
                 apiResponseFields(
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("성공 메시지")
+                )
+            ));
+    }
+
+    @Test
+    @DisplayName("내 프로필을 조회한다.")
+    void getMyProfile_success() throws Exception {
+        // given
+        UserProfileResponse response = new UserProfileResponse(
+            "a1b2c3d4...",
+            "테스트닉네임",
+            "test@kakao.com",
+            "https://example.com/profile.jpg"
+        );
+
+        given(userService.getUserProfile(any())).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/users/me")
+                .header("Authorization", "Bearer valid_access_token"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.userId").value("a1b2c3d4..."))
+            .andExpect(jsonPath("$.data.nickname").value("테스트닉네임"))
+            .andExpect(jsonPath("$.data.email").value("test@kakao.com"))
+            .andExpect(jsonPath("$.data.profileImageUrl").value("https://example.com/profile.jpg"))
+            .andDo(document("user/my-profile",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("사용자 프로필 정보"),
+                    fieldWithPath("data.userId").type(JsonFieldType.STRING)
+                        .description("사용자 ID"),
+                    fieldWithPath("data.nickname").type(JsonFieldType.STRING)
+                        .description("닉네임"),
+                    fieldWithPath("data.email").type(JsonFieldType.STRING)
+                        .description("이메일"),
+                    fieldWithPath("data.profileImageUrl").type(JsonFieldType.STRING)
+                        .description("프로필 이미지 URL"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지")
+                )
+            ));
+    }
+
+    @Test
+    @DisplayName("내가 등록한 기념품 목록을 조회한다.")
+    void getMySouvenirs_success() throws Exception {
+        // given
+        List<MySouvenirResponse> souvenirs = List.of(
+            new MySouvenirResponse(
+                1L,
+                "https://example.com/image1.jpg",
+                LocalDateTime.of(2024, 1, 15, 10, 30),
+                LocalDateTime.of(2024, 1, 20, 15, 0)
+            ),
+            new MySouvenirResponse(
+                2L,
+                "https://example.com/image2.jpg",
+                LocalDateTime.of(2024, 1, 10, 9, 0),
+                LocalDateTime.of(2024, 1, 10, 9, 0)
+            )
+        );
+
+        MySouvenirListResponse.PaginationInfo pagination =
+            new MySouvenirListResponse.PaginationInfo(1, 12, 2, 1, false);
+
+        MySouvenirListResponse response = new MySouvenirListResponse(souvenirs, pagination);
+
+        given(userService.getMySouvenirs(any(), eq(1), eq(12))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/users/me/souvenirs")
+                .header("Authorization", "Bearer valid_access_token")
+                .param("page", "1")
+                .param("size", "12"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.souvenirs").isArray())
+            .andExpect(jsonPath("$.data.souvenirs.length()").value(2))
+            .andExpect(jsonPath("$.data.souvenirs[0].id").value(1))
+            .andExpect(jsonPath("$.data.souvenirs[0].thumbnailUrl").value("https://example.com/image1.jpg"))
+            .andExpect(jsonPath("$.data.souvenirs[0].createdAt").exists())
+            .andExpect(jsonPath("$.data.souvenirs[0].updatedAt").exists())
+            .andExpect(jsonPath("$.data.pagination.currentPage").value(1))
+            .andExpect(jsonPath("$.data.pagination.pageSize").value(12))
+            .andExpect(jsonPath("$.data.pagination.totalElements").value(2))
+            .andExpect(jsonPath("$.data.pagination.totalPages").value(1))
+            .andExpect(jsonPath("$.data.pagination.hasNext").value(false))
+            .andDo(document("user/my-souvenirs",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                queryParameters(
+                    parameterWithName("page").description("페이지 번호 (기본값: 1)").optional(),
+                    parameterWithName("size").description("페이지 크기 (기본값: 12)").optional()
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("기념품 목록 응답"),
+                    fieldWithPath("data.souvenirs").type(JsonFieldType.ARRAY)
+                        .description("기념품 목록"),
+                    fieldWithPath("data.souvenirs[].id").type(JsonFieldType.NUMBER)
+                        .description("기념품 ID"),
+                    fieldWithPath("data.souvenirs[].thumbnailUrl").type(JsonFieldType.STRING)
+                        .description("썸네일 이미지 URL"),
+                    fieldWithPath("data.souvenirs[].createdAt").type(JsonFieldType.STRING)
+                        .description("생성일시"),
+                    fieldWithPath("data.souvenirs[].updatedAt").type(JsonFieldType.STRING)
+                        .description("수정일시"),
+                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
+                        .description("페이지네이션 정보"),
+                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
+                        .description("현재 페이지 번호"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
+                        .description("페이지 크기"),
+                    fieldWithPath("data.pagination.totalElements").type(JsonFieldType.NUMBER)
+                        .description("전체 기념품 개수"),
+                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
+                        .description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
+                        .description("다음 페이지 존재 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지")
+                )
+            ));
+    }
+
+    @Test
+    @DisplayName("기념품 목록 조회 시 페이지 번호를 지정할 수 있다.")
+    void getMySouvenirs_withPage() throws Exception {
+        // given
+        List<MySouvenirResponse> souvenirs = List.of(
+            new MySouvenirResponse(
+                3L,
+                null,
+                LocalDateTime.of(2024, 1, 5, 10, 0),
+                LocalDateTime.of(2024, 1, 5, 10, 0)
+            )
+        );
+
+        MySouvenirListResponse.PaginationInfo pagination =
+            new MySouvenirListResponse.PaginationInfo(2, 12, 25, 3, false);
+
+        MySouvenirListResponse response = new MySouvenirListResponse(souvenirs, pagination);
+
+        given(userService.getMySouvenirs(any(), eq(2), eq(12))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/users/me/souvenirs")
+                .header("Authorization", "Bearer valid_access_token")
+                .param("page", "2")
+                .param("size", "12"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.pagination.currentPage").value(2))
+            .andExpect(jsonPath("$.data.pagination.totalPages").value(3))
+            .andExpect(jsonPath("$.data.pagination.hasNext").value(false))
+            .andDo(document("user/my-souvenirs-page-2",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                queryParameters(
+                    parameterWithName("page").description("페이지 번호 (2페이지 조회)"),
+                    parameterWithName("size").description("페이지 크기")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("기념품 목록 응답"),
+                    fieldWithPath("data.souvenirs").type(JsonFieldType.ARRAY)
+                        .description("기념품 목록"),
+                    fieldWithPath("data.souvenirs[].id").type(JsonFieldType.NUMBER)
+                        .description("기념품 ID"),
+                    fieldWithPath("data.souvenirs[].thumbnailUrl").type(JsonFieldType.NULL)
+                        .description("썸네일 이미지 URL"),
+                    fieldWithPath("data.souvenirs[].createdAt").type(JsonFieldType.STRING)
+                        .description("생성일시"),
+                    fieldWithPath("data.souvenirs[].updatedAt").type(JsonFieldType.STRING)
+                        .description("수정일시"),
+                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
+                        .description("페이지네이션 정보"),
+                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
+                        .description("현재 페이지 번호 (2)"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
+                        .description("페이지 크기"),
+                    fieldWithPath("data.pagination.totalElements").type(JsonFieldType.NUMBER)
+                        .description("전체 기념품 개수"),
+                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
+                        .description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
+                        .description("다음 페이지 존재 여부 (false)"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지")
+                )
+            ));
+    }
+
+    @Test
+    @DisplayName("등록한 기념품이 없으면 빈 목록을 반환한다.")
+    void getMySouvenirs_empty() throws Exception {
+        // given
+        MySouvenirListResponse.PaginationInfo pagination =
+            new MySouvenirListResponse.PaginationInfo(1, 12, 0, 0, false);
+
+        MySouvenirListResponse response = new MySouvenirListResponse(List.of(), pagination);
+
+        given(userService.getMySouvenirs(any(), eq(1), eq(12))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/users/me/souvenirs")
+                .header("Authorization", "Bearer valid_access_token")
+                .param("page", "1")
+                .param("size", "12"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.souvenirs").isEmpty())
+            .andExpect(jsonPath("$.data.pagination.totalElements").value(0))
+            .andDo(document("user/my-souvenirs-empty",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                queryParameters(
+                    parameterWithName("page").description("페이지 번호"),
+                    parameterWithName("size").description("페이지 크기")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT)
+                        .description("기념품 목록 응답"),
+                    fieldWithPath("data.souvenirs").type(JsonFieldType.ARRAY)
+                        .description("빈 기념품 목록"),
+                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
+                        .description("페이지네이션 정보"),
+                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
+                        .description("현재 페이지 번호"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
+                        .description("페이지 크기"),
+                    fieldWithPath("data.pagination.totalElements").type(JsonFieldType.NUMBER)
+                        .description("전체 기념품 개수 (0)"),
+                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
+                        .description("전체 페이지 수 (0)"),
+                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
+                        .description("다음 페이지 존재 여부 (false)"),
+                    fieldWithPath("message").type(JsonFieldType.STRING)
+                        .description("응답 메시지")
                 )
             ));
     }

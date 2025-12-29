@@ -1,6 +1,9 @@
 package com.souzip.api.domain.souvenir.repository;
 
 import com.souzip.api.domain.souvenir.entity.Souvenir;
+import com.souzip.api.domain.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -45,4 +48,6 @@ public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
             @Param("latitude") double latitude,
             @Param("longitude") double longitude,
             @Param("radiusMeter") double radiusMeter);
+
+    Page<Souvenir> findByUserAndDeletedFalse(User user, Pageable pageable);
 }

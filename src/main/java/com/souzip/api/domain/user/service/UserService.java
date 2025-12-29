@@ -3,10 +3,16 @@ package com.souzip.api.domain.user.service;
 import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.file.dto.FileResponse;
+import com.souzip.api.domain.file.service.FileService;
+import com.souzip.api.domain.souvenir.dto.MySouvenirListResponse;
+import com.souzip.api.domain.souvenir.dto.MySouvenirResponse;
+import com.souzip.api.domain.souvenir.entity.Souvenir;
+import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
 import com.souzip.api.domain.user.dto.NicknameCheckResponse;
 import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.dto.OnboardingResponse;
-import com.souzip.api.domain.user.dto.ProfileColorsResponse;
+import com.souzip.api.domain.user.dto.UserProfileResponse;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.entity.UserAgreement;
 import com.souzip.api.domain.user.repository.UserAgreementRepository;
@@ -18,6 +24,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +41,8 @@ public class UserService {
     private final UserAgreementRepository userAgreementRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ProfileImageService profileImageService;
+    private final SouvenirRepository souvenirRepository;
+    private final FileService fileService;
 
     public NicknameCheckResponse checkNickname(String nickname) {
         if (userRepository.existsByNickname(nickname)) {
@@ -67,6 +79,29 @@ public class UserService {
         deleteUserAgreementIfExists(user);
         user.anonymize();
         userRepository.delete(user);
+    }
+
+    public UserProfileResponse getUserProfile(Long userId) {
+        User user = findUserById(userId);
+        return UserProfileResponse.from(user);
+    }
+
+    public MySouvenirListResponse getMySouvenirs(Long userId, int page, int size) {
+        User user = findUserById(userId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Souvenir> souvenirPage = souvenirRepository.findByUserAndDeletedFalse(user, pageable);
+
+        Page<MySouvenirResponse> responsePage = souvenirPage.map(souvenir -> {
+            String thumbnailUrl = getThumbnailUrl(souvenir.getId());
+            return MySouvenirResponse.of(souvenir, thumbnailUrl);
+        });
+
+        return MySouvenirListResponse.from(responsePage);
+    }
+
+    private String getThumbnailUrl(Long souvenirId) {
+        FileResponse firstFile = fileService.getFirstFile("Souvenir", souvenirId);
+        return firstFile.url();
     }
 
     private User findUserById(Long userId) {

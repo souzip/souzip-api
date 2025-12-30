@@ -1,6 +1,7 @@
 package com.souzip.api.domain.country.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;
 import com.souzip.api.domain.currency.entity.Currency;
@@ -17,7 +18,7 @@ public record CountryExternalDto(
     String region,
     Flags flags,
     String cca2,
-    List<Double> latlng,
+    CapitalInfo capitalInfo,
     Map<String, Translation> translations,
     Map<String, CurrencyInfo> currencies
 ) {
@@ -33,6 +34,9 @@ public record CountryExternalDto(
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record CurrencyInfo(String name, String symbol) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record CapitalInfo(@JsonProperty("latlng") List<Double> latlng) {}
 
     public String getKoreanName() {
         return Optional.ofNullable(translations)
@@ -83,11 +87,11 @@ public record CountryExternalDto(
     }
 
     private BigDecimal getLatitude() {
-        return getCoordinateAtAsBigDecimal(0);
+        return getCapitalCoordinateAt(0);
     }
 
     private BigDecimal getLongitude() {
-        return getCoordinateAtAsBigDecimal(1);
+        return getCapitalCoordinateAt(1);
     }
 
     private String getFirstOrNull(List<String> list) {
@@ -101,8 +105,9 @@ public record CountryExternalDto(
         return list != null && !list.isEmpty();
     }
 
-    private BigDecimal getCoordinateAtAsBigDecimal(int index) {
-        return Optional.ofNullable(latlng)
+    private BigDecimal getCapitalCoordinateAt(int index) {
+        return Optional.ofNullable(capitalInfo)
+            .map(CapitalInfo::latlng)
             .filter(coords -> hasIndexInList(coords, index))
             .map(coords -> coords.get(index))
             .map(BigDecimal::valueOf)

@@ -20,7 +20,7 @@ public class CountryExternalApiClient {
     @Value("${external.api.countries-base-url}")
     private String baseUrl;
 
-    private static final String COUNTRIES_API_PATH = "/all?fields=name,capital,region,flags,cca2,latlng,translations,currencies";
+    private static final String COUNTRIES_API_PATH = "/all?fields=name,capital,capitalInfo,region,flags,cca2,translations,currencies";
 
     public List<CountryExternalDto> fetchCountries() {
         try {

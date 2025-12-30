@@ -6,10 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public record SouvenirUpdateRequest(
         @NotBlank(message = "기념품 이름은 필수입니다.")
@@ -46,8 +44,5 @@ public record SouvenirUpdateRequest(
         Purpose purpose,
 
         @NotBlank(message = "국가 코드는 필수입니다.")
-        String countryCode,
-
-        @NotNull(message = "기념품 이미지는 필수입니다.")
-        List<MultipartFile> files
+        String countryCode
 ) {}

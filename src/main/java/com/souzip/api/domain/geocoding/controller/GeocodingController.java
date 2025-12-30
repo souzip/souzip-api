@@ -3,6 +3,7 @@ package com.souzip.api.domain.geocoding.controller;
 import com.souzip.api.domain.geocoding.dto.GeocodingAddressResponse;
 import com.souzip.api.domain.geocoding.service.GeocodingService;
 import com.souzip.api.global.common.dto.SuccessResponse;
+import com.souzip.api.global.security.annotation.RequireAuth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ public class GeocodingController {
 
     private final GeocodingService geocodingService;
 
+    @RequireAuth
     @GetMapping("/address")
     public SuccessResponse<GeocodingAddressResponse> getAddress(
             @RequestParam double latitude,

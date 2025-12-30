@@ -31,8 +31,8 @@ class GeocodingControllerTest extends RestDocsSupport {
     @Test
     @DisplayName("위도와 경도를 통해 주소를 조회할 수 있다.")
     void getAddress() throws Exception {
-        double latitude = 37.5665;
-        double longitude = 126.9780;
+        double latitude = 37.5665121;
+        double longitude = 126.9780123;
 
         GeocodingAddressResponse response = new GeocodingAddressResponse(
                 "110 Sejong-daero, Jung District, Seoul, South Korea",

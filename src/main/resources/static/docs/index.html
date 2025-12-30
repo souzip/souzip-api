@@ -572,7 +572,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#souvenir-nearby">근처 기념품 조회</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_21">HTTP 요청</a></li>
-<li><a href="#_요청_헤더_7">요청 헤더</a></li>
 <li><a href="#_요청_파라미터_4">요청 파라미터</a></li>
 <li><a href="#_http_응답_21">HTTP 응답</a></li>
 <li><a href="#_응답_필드_22">응답 필드</a></li>
@@ -610,6 +609,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#currency-get-by-country">국가 코드 기반 통화 기호 조회</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_24">HTTP 요청</a></li>
+<li><a href="#_요청_헤더_7">요청 헤더</a></li>
 <li><a href="#_http_응답_24">HTTP 응답</a></li>
 <li><a href="#_응답_필드_25">응답 필드</a></li>
 <li><a href="#_response_fields_24">Response Fields</a></li>
@@ -622,6 +622,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#geocoding-get-address">위도/경도 기준 주소 조회 (기념품 업로드 시 사용)</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_25">HTTP 요청</a></li>
+<li><a href="#_요청_헤더_8">요청 헤더</a></li>
+<li><a href="#_요청_파라미터_5">요청 파라미터</a></li>
 <li><a href="#_http_응답_25">HTTP 응답</a></li>
 <li><a href="#_응답_필드_26">응답 필드</a></li>
 <li><a href="#_response_fields_25">Response Fields</a></li>
@@ -1265,7 +1267,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "f7880e0c",
+  "traceId" : "f235d643",
   "message" : "카카오 API 호출에 실패했습니다."
 }</code></pre>
 </div>
@@ -1707,7 +1709,7 @@ Content-Type: application/json
 Content-Length: 98
 
 {
-  "traceId" : "f7880e0c",
+  "traceId" : "f235d643",
   "message" : "지원하지 않는 로그인 방식입니다: naver"
 }</code></pre>
 </div>
@@ -1826,7 +1828,7 @@ Content-Type: application/json
 Content-Length: 103
 
 {
-  "traceId" : "f7880e0c",
+  "traceId" : "f235d643",
   "message" : "지원하지 않는 로그인 방식입니다: invalid123"
 }</code></pre>
 </div>
@@ -2162,7 +2164,7 @@ Content-Type: application/json
 Content-Length: 79
 
 {
-  "traceId" : "f7880e0c",
+  "traceId" : "f235d643",
   "message" : "만료된 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -2259,7 +2261,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "f7880e0c",
+  "traceId" : "f235d643",
   "message" : "유효하지 않은 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -3226,7 +3228,7 @@ Content-Length: 874
 <p>기념품 정보(JSON) + 이미지 파일 업로드 가능</p>
 </li>
 <li>
-<p>파일은 선택 사항입니다.</p>
+<p>기념품 업로드 시 이미지 파일은 필수 입니다.</p>
 </li>
 </ul>
 </div>
@@ -3315,8 +3317,8 @@ dummy content
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파트로 전달되며, 해당 필드는 아래의 ‘요청 필드’에서 문서화됩니다.
-이미지 파일과 같은 바이너리 파일은 files 파트로 전달되며, 구조화된 필드가 없기 때문에 ‘요청 필드’에는 포함되지 않고, 바로 위의 Part 표에서 이름과 설명만 문서화됩니다.
+이미지 파일 업로드 시 각 파일 최대 50MB까지 허용됩니다.
+      업로드 가능한 확장자는 jpg, jpeg, png, gif, webp입니다.
 </td>
 </tr>
 </table>
@@ -3400,6 +3402,18 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+현지 가격(localPrice)과 원화 가격(krwPrice)은 선택 필드입니다. 둘 중 하나라도 전달된 값이 있으면 해당 값을 기준으로 환율을 적용해 현지 가격과 원화 가격을 계산하며, 가격을 모르는 경우에는 둘 다 전달하지 않고 서버에서 각각 0원으로 처리합니다.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_http_응답_18"><a class="link" href="#_http_응답_18">HTTP 응답</a></h4>
@@ -3612,7 +3626,10 @@ Content-Length: 874
 <p>multipart/form-data 요청</p>
 </li>
 <li>
-<p>기존 파일은 모두 삭제 후 재업로드 됩니다.</p>
+<p>현재는 이미지 파일 수정이 불가하여 <code>files</code> 파트는 전달받지 않습니다.</p>
+</li>
+<li>
+<p>추후 이미지 수정 기능이 추가되면 해당 시점에 <code>files</code> 파트를 포함하는 방식으로 확장할 예정입니다.</p>
 </li>
 </ul>
 </div>
@@ -3628,17 +3645,7 @@ Host: localhost:8080
 Content-Disposition: form-data; name=souvenir; filename=souvenir.json
 Content-Type: application/json
 
-{"name":"수정된 테스트 기념품","localPrice":10000,"currencySymbol":"$","krwPrice":95000,"description":"수정된 테스트 설명","address":"617 N MAIN FALLBROOK CA 92028-1934 USA","locationDetail":"2층 빨간색 간판이 있는 장소","latitude":35.689487,"longitude":139.691706,"category":"SOUVENIR_BASIC","purpose":"GIFT","countryCode":"US","files":[]}
---6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm
-Content-Disposition: form-data; name=files; filename=file1.jpg
-Content-Type: image/jpeg
-
-dummy content
---6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm
-Content-Disposition: form-data; name=files; filename=file2.jpg
-Content-Type: image/jpeg
-
-dummy content
+{"name":"수정된 테스트 기념품","localPrice":10000,"currencySymbol":"$","krwPrice":95000,"description":"수정된 테스트 설명","address":"617 N MAIN FALLBROOK CA 92028-1934 USA","locationDetail":"2층 빨간색 간판이 있는 장소","latitude":35.689487,"longitude":139.691706,"category":"SOUVENIR_BASIC","purpose":"GIFT","countryCode":"US"}
 --6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm--</code></pre>
 </div>
 </div>
@@ -3674,39 +3681,28 @@ dummy content
 <h4 id="_part_multipartform_data에서_전달되는_파트_2"><a class="link" href="#_part_multipartform_data에서_전달되는_파트_2">Part (multipart/form-data에서 전달되는 파트)</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
 </colgroup>
 <thead>
 <tr>
-<th class="tableblock halign-left valign-top">Part</th>
-<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">파트명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수</th>
+<th class="tableblock halign-left valign-top">설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>souvenir</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 정보(JSON) (필수)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>files</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">업로드 이미지 파일 리스트 (필수)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">souvenir</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정할 기념품 정보</p></td>
 </tr>
 </tbody>
 </table>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파트로 전달되며, 해당 필드는 아래의 ‘요청 필드’에서 문서화됩니다.
-이미지 파일과 같은 바이너리 파일은 files 파트로 전달되며, 구조화된 필드가 없기 때문에 ‘요청 필드’에는 포함되지 않고, 바로 위의 Part 표에서 이름과 설명만 문서화됩니다.
-</td>
-</tr>
-</table>
-</div>
 </div>
 <div class="sect3">
 <h4 id="_요청_필드_souvenir_json_안의_상세_필드_2"><a class="link" href="#_요청_필드_souvenir_json_안의_상세_필드_2">요청 필드 (souvenir JSON 안의 상세 필드)</a></h4>
@@ -3786,6 +3782,18 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+현지 가격(localPrice)과 원화 가격(krwPrice)은 선택 필드입니다. 둘 중 하나라도 전달된 값이 있으면 해당 값을 기준으로 환율을 적용해 현지 가격과 원화 가격을 계산하며, 가격을 모르는 경우에는 둘 다 전달하지 않고 서버에서 각각 0원으로 처리합니다.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_http_응답_19"><a class="link" href="#_http_응답_19">HTTP 응답</a></h4>
@@ -3793,7 +3801,7 @@ multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 894
+Content-Length: 629
 
 {
   "data" : {
@@ -3813,17 +3821,7 @@ Content-Length: 894
     "userNickname" : "닉네임",
     "userProfileImageUrl" : "https://example.com/profile.jpg",
     "isOwned" : true,
-    "files" : [ {
-      "id" : 1,
-      "url" : "https://example.com/file1.jpg",
-      "originalName" : "file1.jpg",
-      "displayOrder" : 0
-    }, {
-      "id" : 2,
-      "url" : "https://example.com/file2.jpg",
-      "originalName" : "file2.jpg",
-      "displayOrder" : 1
-    } ]
+    "files" : [ ]
   },
   "message" : ""
 }</code></pre>
@@ -3936,49 +3934,12 @@ Content-Length: 894
 <td class="tableblock halign-left valign-top"><p class="tableblock">기념품 소유자 프로필 이미지 URL</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.files</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">업로드된 파일 리스트</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].id</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 ID (integer)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].url</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 URL</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].originalName</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">원본 파일명</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data.files[].displayOrder</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">파일 순서 (integer)</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">message</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">응답 메시지</p></td>
 </tr>
 </tbody>
 </table>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-수정 시 전달되지 않은 파일은 유지되지 않습니다.
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect2">
@@ -4098,7 +4059,7 @@ Content-Length: 71
 <div class="sect2">
 <h3 id="souvenir-nearby"><a class="link" href="#souvenir-nearby">근처 기념품 조회</a></h3>
 <div class="paragraph">
-<p>사용자의 위도/경도 기준으로 특정 반경 내 기념품을 조회하는 API입니다.</p>
+<p>위도/경도를 통해 특정 반경 내 근처 기념품을 조회하는 API입니다.</p>
 </div>
 <div class="ulist">
 <ul>
@@ -4109,7 +4070,7 @@ Content-Length: 71
 <p>삭제된(soft delete) 기념품은 조회할 수 없습니다.</p>
 </li>
 <li>
-<p>거리 단위는 미터(m)이며, 서버에서 계산된 거리를 함께 반환합니다.</p>
+<p>조회 반경 단위는 미터(m)</p>
 </li>
 </ul>
 </div>
@@ -4121,33 +4082,6 @@ Content-Length: 71
 Host: localhost:8080</code></pre>
 </div>
 </div>
-</div>
-<div class="sect3">
-<h4 id="_요청_헤더_7"><a class="link" href="#_요청_헤더_7">요청 헤더</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 16.6666%;">
-<col style="width: 16.6666%;">
-<col style="width: 16.6666%;">
-<col style="width: 50.0002%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">헤더</th>
-<th class="tableblock halign-left valign-top">타입</th>
-<th class="tableblock halign-left valign-top">필수</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Authorization</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Bearer {accessToken}</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="sect3">
 <h4 id="_요청_파라미터_4"><a class="link" href="#_요청_파라미터_4">요청 파라미터</a></h4>
@@ -4183,7 +4117,7 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">radiusMeter</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">X</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">조회 반경 (미터 단위, 기본값 4000m)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회 반경 (미터 단위, 기본값 5000m)</p></td>
 </tr>
 </tbody>
 </table>
@@ -4624,6 +4558,13 @@ Content-Length: 850
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="currency-get-by-country"><a class="link" href="#currency-get-by-country">국가 코드 기반 통화 기호 조회</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>인증 필요</p>
+</li>
+</ul>
+</div>
 <div class="sect3">
 <h4 id="_http_요청_24"><a class="link" href="#_http_요청_24">HTTP 요청</a></h4>
 <div class="listingblock">
@@ -4632,6 +4573,33 @@ Content-Length: 850
 Host: localhost:8080</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_요청_헤더_7"><a class="link" href="#_요청_헤더_7">요청 헤더</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">헤더</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authorization</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bearer {accessToken}</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_http_응답_24"><a class="link" href="#_http_응답_24">HTTP 응답</a></h4>
@@ -4702,14 +4670,81 @@ Content-Length: 79
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="geocoding-get-address"><a class="link" href="#geocoding-get-address">위도/경도 기준 주소 조회 (기념품 업로드 시 사용)</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p>인증 필요</p>
+</li>
+</ul>
+</div>
 <div class="sect3">
 <h4 id="_http_요청_25"><a class="link" href="#_http_요청_25">HTTP 요청</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/geocoding/address?latitude=37.5665&amp;longitude=126.978 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/geocoding/address?latitude=37.5665121&amp;longitude=126.9780123 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_요청_헤더_8"><a class="link" href="#_요청_헤더_8">요청 헤더</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">헤더</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Authorization</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Bearer {accessToken}</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_요청_파라미터_5"><a class="link" href="#_요청_파라미터_5">요청 파라미터</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">파라미터</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">latitude</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Decimal</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도 (decimal, 소수점 7자리까지)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">longitude</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Decimal</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도 (decimal, 소수점 7자리까지)</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_http_응답_25"><a class="link" href="#_http_응답_25">HTTP 응답</a></h4>
@@ -4785,7 +4820,7 @@ Content-Length: 165
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2025-12-29 18:58:14 +0900
+Last updated 2025-12-27 00:01:55 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

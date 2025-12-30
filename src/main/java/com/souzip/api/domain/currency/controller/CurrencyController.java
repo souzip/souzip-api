@@ -3,6 +3,7 @@ package com.souzip.api.domain.currency.controller;
 import com.souzip.api.domain.currency.dto.CurrencyResponse;
 import com.souzip.api.domain.currency.service.CurrencyService;
 import com.souzip.api.global.common.dto.SuccessResponse;
+import com.souzip.api.global.security.annotation.RequireAuth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ public class CurrencyController {
 
     private final CurrencyService currencyService;
 
+    @RequireAuth
     @GetMapping("/{countryCode}")
     public SuccessResponse<CurrencyResponse> getCurrencyByCountry(
             @PathVariable String countryCode

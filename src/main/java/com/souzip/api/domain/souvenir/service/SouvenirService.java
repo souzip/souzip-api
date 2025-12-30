@@ -142,10 +142,10 @@ public class SouvenirService {
     public SouvenirResponse updateSouvenir(
             Long id,
             SouvenirUpdateRequest request,
-            Long userId,
-            List<MultipartFile> files
+            Long userId
     ) {
         requireUserId(userId);
+
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
@@ -174,9 +174,7 @@ public class SouvenirService {
                 request.countryCode()
         );
 
-        fileService.deleteFilesByEntity("Souvenir", id);
-        List<FileResponse> uploadedFiles =
-                uploadFiles(souvenir.getId(), userId, files);
+        List<FileResponse> uploadedFiles = List.of();
 
         return SouvenirResponse.of(souvenir, uploadedFiles, true);
     }

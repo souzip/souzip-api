@@ -29,7 +29,7 @@ NOTE: 기념품에는 위치 정보(위도/경도)와 업로드된 파일 목록
 * 인증 필요
 * multipart/form-data 요청
 * 기념품 정보(JSON) + 이미지 파일 업로드 가능
-* 파일은 선택 사항입니다.
+* 기념품 업로드 시 이미지 파일은 필수 입니다.
 
 ==== HTTP 요청
 include::{snippets}/souvenirs/create-souvenir/http-request.adoc[]
@@ -48,11 +48,13 @@ include::{snippets}/souvenirs/create-souvenir/http-request.adoc[]
 ==== Part (multipart/form-data에서 전달되는 파트)
 include::{snippets}/souvenirs/create-souvenir/request-parts.adoc[]
 
-NOTE: multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파트로 전달되며, 해당 필드는 아래의 ‘요청 필드’에서 문서화됩니다.
-이미지 파일과 같은 바이너리 파일은 files 파트로 전달되며, 구조화된 필드가 없기 때문에 ‘요청 필드’에는 포함되지 않고, 바로 위의 Part 표에서 이름과 설명만 문서화됩니다.
+NOTE: 이미지 파일 업로드 시 각 파일 최대 50MB까지 허용됩니다.
+      업로드 가능한 확장자는 jpg, jpeg, png, gif, webp입니다.
 
 ==== 요청 필드 (souvenir JSON 안의 상세 필드)
 include::{snippets}/souvenirs/create-souvenir/request-part-souvenir-fields.adoc[]
+
+NOTE: 현지 가격(localPrice)과 원화 가격(krwPrice)은 선택 필드입니다. 둘 중 하나라도 전달된 값이 있으면 해당 값을 기준으로 환율을 적용해 현지 가격과 원화 가격을 계산하며, 가격을 모르는 경우에는 둘 다 전달하지 않고 서버에서 각각 0원으로 처리합니다.
 
 ==== HTTP 응답
 include::{snippets}/souvenirs/create-souvenir/http-response.adoc[]
@@ -70,7 +72,8 @@ NOTE: 가격은 현지 통화 또는 원화 기준으로 입력할 수 있으며
 * 인증 필요
 * 본인이 등록한 기념품만 수정 가능
 * multipart/form-data 요청
-* 기존 파일은 모두 삭제 후 재업로드 됩니다.
+* 현재는 이미지 파일 수정이 불가하여 `files` 파트는 전달받지 않습니다.
+* 추후 이미지 수정 기능이 추가되면 해당 시점에 `files` 파트를 포함하는 방식으로 확장할 예정입니다.
 
 ==== HTTP 요청
 include::{snippets}/souvenirs/update-souvenir/http-request.adoc[]
@@ -87,21 +90,26 @@ include::{snippets}/souvenirs/update-souvenir/http-request.adoc[]
 |===
 
 ==== Part (multipart/form-data에서 전달되는 파트)
-include::{snippets}/souvenirs/update-souvenir/request-parts.adoc[]
+[cols="1,1,1,3"]
+|===
+|파트명 |타입 |필수 |설명
 
-NOTE: multipart/form-data 요청에서 JSON 형태의 기념품 정보는 souvenir 파트로 전달되며, 해당 필드는 아래의 ‘요청 필드’에서 문서화됩니다.
-이미지 파일과 같은 바이너리 파일은 files 파트로 전달되며, 구조화된 필드가 없기 때문에 ‘요청 필드’에는 포함되지 않고, 바로 위의 Part 표에서 이름과 설명만 문서화됩니다.
+|souvenir
+|JSON
+|O
+|수정할 기념품 정보
+|===
 
 ==== 요청 필드 (souvenir JSON 안의 상세 필드)
 include::{snippets}/souvenirs/update-souvenir/request-part-souvenir-fields.adoc[]
+
+NOTE: 현지 가격(localPrice)과 원화 가격(krwPrice)은 선택 필드입니다. 둘 중 하나라도 전달된 값이 있으면 해당 값을 기준으로 환율을 적용해 현지 가격과 원화 가격을 계산하며, 가격을 모르는 경우에는 둘 다 전달하지 않고 서버에서 각각 0원으로 처리합니다.
 
 ==== HTTP 응답
 include::{snippets}/souvenirs/update-souvenir/http-response.adoc[]
 
 ==== 응답 필드
 include::{snippets}/souvenirs/update-souvenir/response-fields.adoc[]
-
-NOTE: 수정 시 전달되지 않은 파일은 유지되지 않습니다.
 
 [[souvenir-delete]]
 === 기념품 삭제
@@ -137,25 +145,14 @@ NOTE: 삭제 성공 시 `data`는 반환되지 않으며, 메시지만 전달됩
 [[souvenir-nearby]]
 === 근처 기념품 조회
 
-사용자의 위도/경도 기준으로 특정 반경 내 기념품을 조회하는 API입니다.
+위도/경도를 통해 특정 반경 내 근처 기념품을 조회하는 API입니다.
 
 * 인증 불필요 (Public API)
 * 삭제된(soft delete) 기념품은 조회할 수 없습니다.
-* 거리 단위는 미터(m)이며, 서버에서 계산된 거리를 함께 반환합니다.
+* 조회 반경 단위는 미터(m)
 
 ==== HTTP 요청
 include::{snippets}/souvenirs/get-nearby-souvenirs/http-request.adoc[]
-
-==== 요청 헤더
-[cols="1,1,1,3"]
-|===
-|헤더 |타입 |필수 |설명
-
-|Authorization
-|String
-|O
-|Bearer {accessToken}
-|===
 
 ==== 요청 파라미터
 [cols="1,1,1,3"]
@@ -175,7 +172,7 @@ include::{snippets}/souvenirs/get-nearby-souvenirs/http-request.adoc[]
 |radiusMeter
 |Integer
 |X
-|조회 반경 (미터 단위, 기본값 4000m)
+|조회 반경 (미터 단위, 기본값 5000m)
 |===
 
 ==== HTTP 응답

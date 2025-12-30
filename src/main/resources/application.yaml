@@ -50,3 +50,6 @@ ncp:
     endpoint: ${NCP_ENDPOINT}
     bucket: ${NCP_BUCKET}
     region: ${NCP_REGION}
+  clova-studio:
+    api-key: ${CLOVA_STUDIO_API_KEY}
+    api-url: ${CLOVA_STUDIO_API_URL}

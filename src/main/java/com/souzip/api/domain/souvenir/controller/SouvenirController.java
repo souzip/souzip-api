@@ -24,7 +24,7 @@ public class SouvenirController {
     public SuccessResponse<SouvenirNearbyListResponse> getNearbySouvenirs(
             @RequestParam double latitude,
             @RequestParam double longitude,
-            @RequestParam(required = false, defaultValue = "4000") double radiusMeter
+            @RequestParam(required = false, defaultValue = "5000") double radiusMeter
     ) {
         return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude, radiusMeter));
     }
@@ -56,10 +56,9 @@ public class SouvenirController {
             @Valid
             @PathVariable Long id,
             @RequestPart("souvenir") SouvenirUpdateRequest request,
-            @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @CurrentUserId Long userId
     ) {
-        SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId, files);
+        SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId);
         return SuccessResponse.of(response);
     }
 

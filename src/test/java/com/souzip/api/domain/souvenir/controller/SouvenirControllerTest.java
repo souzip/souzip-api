@@ -348,7 +348,7 @@ class SouvenirControllerTest extends RestDocsSupport {
 
     @Test
     @DisplayName("기념품 수정")
-    void updateSouvenirWithFiles() throws Exception {
+    void updateSouvenir() throws Exception {
         Long souvenirId = 1L;
 
         SouvenirUpdateRequest requestDto = new SouvenirUpdateRequest(
@@ -363,8 +363,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                 new BigDecimal("139.691706"),
                 Category.SOUVENIR_BASIC,
                 Purpose.GIFT,
-                "US",
-                Collections.emptyList()
+                "US"
         );
 
         MockMultipartFile souvenirPart = new MockMultipartFile(
@@ -372,18 +371,6 @@ class SouvenirControllerTest extends RestDocsSupport {
                 "souvenir.json",
                 "application/json",
                 objectMapper.writeValueAsBytes(requestDto)
-        );
-
-        MockMultipartFile file1 = new MockMultipartFile(
-                "files", "file1.jpg", "image/jpeg", "dummy content".getBytes()
-        );
-        MockMultipartFile file2 = new MockMultipartFile(
-                "files", "file2.jpg", "image/jpeg", "dummy content".getBytes()
-        );
-
-        List<FileResponse> filesResponse = List.of(
-                new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 0),
-                new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
         );
 
         SouvenirResponse response = new SouvenirResponse(
@@ -403,28 +390,24 @@ class SouvenirControllerTest extends RestDocsSupport {
                 "닉네임",
                 "https://example.com/profile.jpg",
                 true,
-                filesResponse
+                List.of()
         );
 
         given(souvenirService.updateSouvenir(
                 eq(souvenirId),
                 any(SouvenirUpdateRequest.class),
-                eq(1L),
-                any(List.class)
+                eq(1L)
         )).willReturn(response);
 
         mockMvc.perform(multipart("/api/souvenirs/{id}", souvenirId)
                         .file(souvenirPart)
-                        .file(file1)
-                        .file(file2)
                         .with(request -> { request.setMethod("PUT"); return request; })
                 )
                 .andDo(document("souvenirs/update-souvenir",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         requestParts(
-                                partWithName("souvenir").description("기념품 정보(JSON) (필수)"),
-                                partWithName("files").description("업로드 이미지 파일 리스트 (필수)")
+                                partWithName("souvenir").description("기념품 정보(JSON) (필수)")
                         ),
                         requestPartFields("souvenir",
                                 fieldWithPath("name").description("기념품 이름 (필수)"),
@@ -438,8 +421,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("longitude").description("경도 (decimal, 소수점 7자리까지) (필수)"),
                                 fieldWithPath("category").description("카테고리 ENUM name (필수)"),
                                 fieldWithPath("purpose").description("구매 목적 ENUM name (필수)"),
-                                fieldWithPath("countryCode").description("국가 코드 (필수)"),
-                                fieldWithPath("files").ignored()
+                                fieldWithPath("countryCode").description("국가 코드 (필수)")
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
@@ -459,11 +441,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.isOwned").type(JsonFieldType.BOOLEAN).description("조회자가 소유자인지 여부"),
                                 fieldWithPath("data.userNickname").type(JsonFieldType.STRING).description("기념품 소유자 닉네임"),
                                 fieldWithPath("data.userProfileImageUrl").type(JsonFieldType.STRING).description("기념품 소유자 프로필 이미지 URL").optional(),
-                                fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
-                                fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID (integer)"),
-                                fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),
-                                fieldWithPath("data.files[].originalName").type(JsonFieldType.STRING).description("원본 파일명"),
-                                fieldWithPath("data.files[].displayOrder").type(JsonFieldType.NUMBER).description("파일 순서 (integer)"),
+                                fieldWithPath("data.files").ignored(),
                                 fieldWithPath("message").type(JsonFieldType.STRING).optional().description("응답 메시지")
                         )
                 ));

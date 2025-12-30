@@ -1,0 +1,75 @@
+[[discovery-api]]
+== Discovery API
+
+[[discovery-category-top10]]
+=== 카테고리별 추천 기념품 TOP 10
+
+특정 카테고리에 속하는 추천 기념품 Top 10을 조회하는 API입니다.
+
+* 인증 불필요
+* 삭제된 기념품은 조회되지 않습니다
+
+==== HTTP 요청
+include::{snippets}/recommend/general/category-top10/http-request.adoc[]
+
+==== Path Variables
+[cols="1,1,1,3"]
+|===
+|변수명 |타입 |필수 |설명
+
+|categoryName
+|String
+|O
+|조회할 카테고리 이름 (Ex. FOOD_SNACK)
+|===
+
+==== HTTP 응답
+include::{snippets}/recommend/general/category-top10/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/recommend/general/category-top10/response-fields.adoc[]
+
+[[discovery-country-top10]]
+=== 나라별 추천 기념품 TOP 10
+
+특정 나라에서 등록된 추천 기념품 Top 10을 조회하는 API입니다.
+
+* 인증 불필요
+* 삭제된 기념품은 조회되지 않습니다
+
+==== HTTP 요청
+include::{snippets}/recommend/general/country-top10/http-request.adoc[]
+
+==== Path Variables
+[cols="1,1,1,3"]
+|===
+|변수명 |타입 |필수 |설명
+
+|countryCode
+|String
+|O
+|조회할 국가 코드 (예: KR, JP)
+|===
+
+==== HTTP 응답
+include::{snippets}/recommend/general/country-top10/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/recommend/general/country-top10/response-fields.adoc[]
+
+[[discovery-top-countries]]
+=== 이번 달 기념품 등록이 가장 많은 나라 TOP 3
+
+이번 달 등록된 기념품 수 기준으로 상위 3개 나라를 조회하는 API입니다.
+
+* 인증 불필요
+* 삭제된 기념품은 count 되지 않습니다
+
+==== HTTP 요청
+include::{snippets}/recommend/general/stats-top3/http-request.adoc[]
+
+==== HTTP 응답
+include::{snippets}/recommend/general/stats-top3/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/recommend/general/stats-top3/response-fields.adoc[]

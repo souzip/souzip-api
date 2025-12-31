@@ -5,7 +5,6 @@ import com.souzip.api.domain.souvenir.service.SouvenirService;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.CurrentUserId;
 import com.souzip.api.global.security.annotation.RequireAuth;
-import io.micrometer.common.lang.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

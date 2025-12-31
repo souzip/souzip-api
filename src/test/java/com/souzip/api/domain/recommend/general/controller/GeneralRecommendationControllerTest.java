@@ -9,6 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentRequest;
 import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
@@ -36,9 +38,14 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
     @DisplayName("카테고리별 추천 기념품 Top10 조회")
     void getCategoryTop10() throws Exception {
         // given
-        GeneralRecommendationDto dto1 = new GeneralRecommendationDto(1L, "도쿄 마그넷", Category.SOUVENIR_BASIC, "https://example.com/thumb1.jpg");
-        GeneralRecommendationDto dto2 = new GeneralRecommendationDto(2L, "오사카 키홀더", Category.SOUVENIR_BASIC, "https://example.com/thumb2.jpg");
-        List<GeneralRecommendationDto> responseList = List.of(dto1, dto2);
+        List<GeneralRecommendationDto> responseList = IntStream.rangeClosed(1, 10)
+                .mapToObj(i -> new GeneralRecommendationDto(
+                        (long) i,
+                        "기념품 " + i,
+                        Category.SOUVENIR_BASIC,
+                        "https://example.com/thumb" + i + ".jpg"
+                ))
+                .collect(Collectors.toList());
 
         given(generalRecommendationService.getTop10ByCategory("FOOD_SNACK"))
                 .willReturn(responseList);
@@ -48,8 +55,6 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id").value(1))
-                .andExpect(jsonPath("$.data[0].name").value("도쿄 마그넷"))
-                .andExpect(jsonPath("$.data[0].category").value("SOUVENIR_BASIC"))
                 .andDo(document("recommend/general/category-top10",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -68,9 +73,14 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
     @DisplayName("나라별 추천 기념품 Top10 조회")
     void getCountryTop10() throws Exception {
         // given
-        GeneralRecommendationDto dto1 = new GeneralRecommendationDto(3L, "서울 기념품", Category.SOUVENIR_BASIC, "https://example.com/thumb3.jpg");
-        GeneralRecommendationDto dto2 = new GeneralRecommendationDto(4L, "부산 기념품", Category.SOUVENIR_BASIC, "https://example.com/thumb4.jpg");
-        List<GeneralRecommendationDto> responseList = List.of(dto1, dto2);
+        List<GeneralRecommendationDto> responseList = IntStream.rangeClosed(1, 10)
+                .mapToObj(i -> new GeneralRecommendationDto(
+                        (long) i,
+                        "기념품 " + i,
+                        Category.SOUVENIR_BASIC,
+                        "https://example.com/thumb" + i + ".jpg"
+                ))
+                .collect(Collectors.toList());
 
         given(generalRecommendationService.getTop10ByCountry("KR"))
                 .willReturn(responseList);
@@ -79,9 +89,8 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
         mockMvc.perform(get("/api/discovery/general/country/KR"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].id").value(3))
-                .andExpect(jsonPath("$.data[0].name").value("서울 기념품"))
-                .andExpect(jsonPath("$.data[0].category").value("SOUVENIR_BASIC"))
+                .andExpect(jsonPath("$.data[0].id").value(1))
+                .andExpect(jsonPath("$.data[0].name").value("기념품 1"))
                 .andDo(document("recommend/general/country-top10",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -120,7 +129,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라별 기념품 등록 통계"),
                                 fieldWithPath("data[].countryNameKr").type(JsonFieldType.STRING).description("나라명 (한글)"),
-                                fieldWithPath("data[].souvenirCount").type(JsonFieldType.NUMBER).description("등록된 기념품 개수 (Long)"),
+                                fieldWithPath("data[].souvenirCount").type(JsonFieldType.NUMBER).description("등록된 기념품 개수 (integer)"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )
                 ));

@@ -1,6 +1,5 @@
 package com.souzip.api.domain.souvenir.service;
 
-import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
@@ -79,24 +78,35 @@ public class SouvenirService {
     }
 
     public SouvenirResponse getSouvenir(Long souvenirId, @Nullable String authorizationHeader) {
-        String userId = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-            userId = jwtTokenProvider.getUserIdFromToken(token);
-        }
+        String userId = extractUserId(authorizationHeader);
 
         Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(souvenirId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
         List<FileResponse> files = fileService.getFilesByEntity("Souvenir", souvenirId);
 
-        boolean isOwned = false;
-        if (userId != null) {
-            isOwned = souvenir.getUser().getUserId().equals(userId);
-        }
+        boolean isOwned = souvenir.getUser().getUserId().equals(userId);
 
         return SouvenirResponse.of(souvenir, files, isOwned);
+    }
+
+    @Nullable
+    private String extractUserId(@Nullable String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        String token = authorizationHeader.substring(7).trim();
+        if (token.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return jwtTokenProvider.getUserIdFromToken(token);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Transactional

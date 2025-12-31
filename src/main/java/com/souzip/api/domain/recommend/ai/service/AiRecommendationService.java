@@ -1,0 +1,104 @@
+package com.souzip.api.domain.recommend.ai.service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.file.service.FileService;
+import com.souzip.api.domain.recommend.ai.dto.AiRecommendationResponse;
+import com.souzip.api.domain.recommend.ai.repository.AiRecommendationRepositoryCustom;
+import com.souzip.api.domain.souvenir.entity.Souvenir;
+import com.souzip.api.global.clova.ClovaStudioClient;
+import com.souzip.api.global.clova.PromptLoader;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class AiRecommendationService {
+
+    private final AiRecommendationRepositoryCustom aiRecommendationRepository;
+    private final ClovaStudioClient clovaStudioClient;
+    private final PromptLoader promptLoader;
+    private final ObjectMapper objectMapper;
+    private final FileService fileService;
+
+    public AiRecommendationResponse getCategoryRecommendations() {
+        Map<String, List<Souvenir>> souvenirsByCategory = loadSouvenirsByCategory();
+        String prompt = buildPrompt(souvenirsByCategory);
+        String clovaResponse = callClova(prompt);
+        Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
+
+        List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs = mapToRecommendedSouvenirs(recommendedNamesByCategory);
+
+        return new AiRecommendationResponse(finalSouvenirs);
+    }
+
+    private Map<String, List<Souvenir>> loadSouvenirsByCategory() {
+        return Arrays.stream(Category.values())
+                .collect(Collectors.toMap(
+                        Category::name,
+                        aiRecommendationRepository::findAllByCategory
+                ));
+    }
+
+    private String buildPrompt(Map<String, List<Souvenir>> souvenirsByCategory) {
+        StringBuilder sb = new StringBuilder();
+        souvenirsByCategory.forEach((categoryName, list) -> {
+            sb.append(categoryName).append(":\n");
+            list.forEach(s -> sb.append(" - ").append(s.getName()).append("\n"));
+        });
+
+        return promptLoader.loadPrompt("souvenir-recommendation.txt")
+                .replace("{souvenirList}", sb.toString());
+    }
+
+    private String callClova(String prompt) {
+        String response = clovaStudioClient.chatAsCurator(prompt);
+        response = response.replaceAll("(?s)```json|```", "");
+        log.info("Clova response: {}", response);
+        return response;
+    }
+
+    private Map<String, List<String>> parseClovaResponse(String clovaResponse) {
+        try {
+            return objectMapper.readValue(
+                            clovaResponse,
+                            new TypeReference<Map<String, List<Map<String, String>>>>() {}
+                    ).entrySet().stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            e -> e.getValue().stream()
+                                    .map(m -> m.get("name"))
+                                    .collect(Collectors.toList())
+                    ));
+        } catch (Exception e) {
+            throw new RuntimeException("클로바 응답 JSON 파싱 실패", e);
+        }
+    }
+
+    private List<AiRecommendationResponse.RecommendedSouvenir> mapToRecommendedSouvenirs(
+            Map<String, List<String>> recommendedNamesByCategory
+    ) {
+        return recommendedNamesByCategory.values().stream()
+                .flatMap(List::stream)
+                .map(aiRecommendationRepository::findByName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
+                        s.getId(),
+                        s.getName(),
+                        s.getCategory().name(),
+                        getThumbnailUrl(s.getId())
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private String getThumbnailUrl(Long souvenirId) {
+        return fileService.getFirstFile("Souvenir", souvenirId).url();
+    }
+}

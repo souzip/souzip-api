@@ -582,7 +582,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#discovery-api">Discovery API</a>
 <ul class="sectlevel2">
-<li><a href="#discovery-category-top10">카테고리별 추천 기념품 TOP 10</a>
+<li><a href="#discovery-country-top10">나라별 추천 기념품 TOP 10</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_22">HTTP 요청</a></li>
 <li><a href="#_path_variables">Path Variables</a></li>
@@ -591,7 +591,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_response_fields_22">Response Fields</a></li>
 </ul>
 </li>
-<li><a href="#discovery-country-top10">나라별 추천 기념품 TOP 10</a>
+<li><a href="#discovery-category-top10">카테고리별 기념품 추천</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_23">HTTP 요청</a></li>
 <li><a href="#_path_variables_2">Path Variables</a></li>
@@ -600,7 +600,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_response_fields_23">Response Fields</a></li>
 </ul>
 </li>
-<li><a href="#discovery-top-countries">이번 달 기념품 등록이 가장 많은 나라 TOP 3</a>
+<li><a href="#discovery-top-countries">이번 달 가장 많은 기념품이 등록된 나라 Top 3</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_24">HTTP 요청</a></li>
 <li><a href="#_http_응답_24">HTTP 응답</a></li>
@@ -1297,7 +1297,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "bbbca4de",
+  "traceId" : "024b4ebe",
   "message" : "카카오 API 호출에 실패했습니다."
 }</code></pre>
 </div>
@@ -1739,7 +1739,7 @@ Content-Type: application/json
 Content-Length: 98
 
 {
-  "traceId" : "bbbca4de",
+  "traceId" : "024b4ebe",
   "message" : "지원하지 않는 로그인 방식입니다: naver"
 }</code></pre>
 </div>
@@ -1858,7 +1858,7 @@ Content-Type: application/json
 Content-Length: 103
 
 {
-  "traceId" : "bbbca4de",
+  "traceId" : "024b4ebe",
   "message" : "지원하지 않는 로그인 방식입니다: invalid123"
 }</code></pre>
 </div>
@@ -2194,7 +2194,7 @@ Content-Type: application/json
 Content-Length: 79
 
 {
-  "traceId" : "bbbca4de",
+  "traceId" : "024b4ebe",
   "message" : "만료된 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -2291,7 +2291,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "bbbca4de",
+  "traceId" : "024b4ebe",
   "message" : "유효하지 않은 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -4293,17 +4293,27 @@ Content-Length: 915
 <h2 id="discovery-api"><a class="link" href="#discovery-api">Discovery API</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="discovery-category-top10"><a class="link" href="#discovery-category-top10">카테고리별 추천 기념품 TOP 10</a></h3>
+<h3 id="discovery-country-top10"><a class="link" href="#discovery-country-top10">나라별 추천 기념품 TOP 10</a></h3>
 <div class="paragraph">
-<p>특정 카테고리에 속하는 추천 기념품 Top 10을 조회하는 API입니다.</p>
+<p>특정 나라에서 등록된 추천 기념품을 조회하는 API입니다.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+조회 결과는 최근 생성된 기념품 10개까지 제공됩니다.
+      (1차 개발 기간에서는 찜, 조회수 등의 기능이 없어 생성일을 기준으로 추천합니다.)
+</td>
+</tr>
+</table>
 </div>
 <div class="ulist">
 <ul>
 <li>
 <p>인증 불필요</p>
-</li>
-<li>
-<p>삭제된 기념품은 조회되지 않습니다</p>
 </li>
 </ul>
 </div>
@@ -4311,7 +4321,7 @@ Content-Length: 915
 <h4 id="_http_요청_22"><a class="link" href="#_http_요청_22">HTTP 요청</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/general/category/FOOD_SNACK HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/general/country/KR HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -4335,10 +4345,10 @@ Host: localhost:8080</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">categoryName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">조회할 카테고리 이름 (Ex. FOOD_SNACK)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회할 국가 코드 (Ex. KR, JP)</p></td>
 </tr>
 </tbody>
 </table>
@@ -4349,19 +4359,59 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 324
+Content-Length: 1418
 
 {
   "data" : [ {
     "id" : 1,
-    "name" : "도쿄 마그넷",
+    "name" : "기념품 1",
     "category" : "SOUVENIR_BASIC",
     "thumbnailUrl" : "https://example.com/thumb1.jpg"
   }, {
     "id" : 2,
-    "name" : "오사카 키홀더",
+    "name" : "기념품 2",
     "category" : "SOUVENIR_BASIC",
     "thumbnailUrl" : "https://example.com/thumb2.jpg"
+  }, {
+    "id" : 3,
+    "name" : "기념품 3",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb3.jpg"
+  }, {
+    "id" : 4,
+    "name" : "기념품 4",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb4.jpg"
+  }, {
+    "id" : 5,
+    "name" : "기념품 5",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb5.jpg"
+  }, {
+    "id" : 6,
+    "name" : "기념품 6",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb6.jpg"
+  }, {
+    "id" : 7,
+    "name" : "기념품 7",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb7.jpg"
+  }, {
+    "id" : 8,
+    "name" : "기념품 8",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb8.jpg"
+  }, {
+    "id" : 9,
+    "name" : "기념품 9",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb9.jpg"
+  }, {
+    "id" : 10,
+    "name" : "기념품 10",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb10.jpg"
   } ],
   "message" : ""
 }</code></pre>
@@ -4423,17 +4473,27 @@ Content-Length: 324
 </div>
 </div>
 <div class="sect2">
-<h3 id="discovery-country-top10"><a class="link" href="#discovery-country-top10">나라별 추천 기념품 TOP 10</a></h3>
+<h3 id="discovery-category-top10"><a class="link" href="#discovery-category-top10">카테고리별 기념품 추천</a></h3>
 <div class="paragraph">
-<p>특정 나라에서 등록된 추천 기념품 Top 10을 조회하는 API입니다.</p>
+<p>특정 카테고리에 속하는 추천 기념품을 조회하는 API입니다.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+조회 결과는 최근 생성된 기념품 10개까지 제공됩니다.
+      (1차 개발 기간에서는 찜, 조회수 등의 기능이 없어 생성일을 기준으로 추천합니다.)
+</td>
+</tr>
+</table>
 </div>
 <div class="ulist">
 <ul>
 <li>
 <p>인증 불필요</p>
-</li>
-<li>
-<p>삭제된 기념품은 조회되지 않습니다</p>
 </li>
 </ul>
 </div>
@@ -4441,7 +4501,7 @@ Content-Length: 324
 <h4 id="_http_요청_23"><a class="link" href="#_http_요청_23">HTTP 요청</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/general/country/KR HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/general/category/FOOD_SNACK HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -4465,10 +4525,10 @@ Host: localhost:8080</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">categoryName</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">조회할 국가 코드 (예: KR, JP)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">조회할 카테고리 이름 (Ex. FOOD_SNACK)</p></td>
 </tr>
 </tbody>
 </table>
@@ -4479,19 +4539,59 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 321
+Content-Length: 1418
 
 {
   "data" : [ {
+    "id" : 1,
+    "name" : "기념품 1",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb1.jpg"
+  }, {
+    "id" : 2,
+    "name" : "기념품 2",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb2.jpg"
+  }, {
     "id" : 3,
-    "name" : "서울 기념품",
+    "name" : "기념품 3",
     "category" : "SOUVENIR_BASIC",
     "thumbnailUrl" : "https://example.com/thumb3.jpg"
   }, {
     "id" : 4,
-    "name" : "부산 기념품",
+    "name" : "기념품 4",
     "category" : "SOUVENIR_BASIC",
     "thumbnailUrl" : "https://example.com/thumb4.jpg"
+  }, {
+    "id" : 5,
+    "name" : "기념품 5",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb5.jpg"
+  }, {
+    "id" : 6,
+    "name" : "기념품 6",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb6.jpg"
+  }, {
+    "id" : 7,
+    "name" : "기념품 7",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb7.jpg"
+  }, {
+    "id" : 8,
+    "name" : "기념품 8",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb8.jpg"
+  }, {
+    "id" : 9,
+    "name" : "기념품 9",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb9.jpg"
+  }, {
+    "id" : 10,
+    "name" : "기념품 10",
+    "category" : "SOUVENIR_BASIC",
+    "thumbnailUrl" : "https://example.com/thumb10.jpg"
   } ],
   "message" : ""
 }</code></pre>
@@ -4553,20 +4653,11 @@ Content-Length: 321
 </div>
 </div>
 <div class="sect2">
-<h3 id="discovery-top-countries"><a class="link" href="#discovery-top-countries">이번 달 기념품 등록이 가장 많은 나라 TOP 3</a></h3>
-<div class="paragraph">
-<p>이번 달 등록된 기념품 수 기준으로 상위 3개 나라를 조회하는 API입니다.</p>
-</div>
+<h3 id="discovery-top-countries"><a class="link" href="#discovery-top-countries">이번 달 가장 많은 기념품이 등록된 나라 Top 3</a></h3>
 <div class="ulist">
 <ul>
 <li>
 <p>인증 불필요</p>
-</li>
-<li>
-<p>삭제된 기념품은 count 되지 않습니다</p>
-</li>
-<li>
-<p>Fun 콘텐츠용 통계 API</p>
 </li>
 </ul>
 </div>

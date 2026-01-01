@@ -1,10 +1,11 @@
 ==== Response Fields
 |===
-|Path|Type|Description
+|Path|Type|Required|Description
 
 {{#fields}}
 |{{#tableCellContent}}{{path}}{{/tableCellContent}}
 |{{#tableCellContent}}{{type}}{{/tableCellContent}}
+|{{#tableCellContent}}{{#optional}}false{{/optional}}{{^optional}}true{{/optional}}{{/tableCellContent}}
 |{{#tableCellContent}}{{description}}{{/tableCellContent}}
 
 {{/fields}}

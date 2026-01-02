@@ -20,4 +20,9 @@ public class AiRecommendationController {
     public SuccessResponse<AiRecommendationResponse> getAiCategoryRecommendations(@CurrentUserId Long userId) {
         return SuccessResponse.of(aiRecommendationService.getCategoryRecommendationsForUser(userId));
     }
+
+    @GetMapping("/preference-upload")
+    public SuccessResponse<AiRecommendationResponse> getAiRecentSouvenirRecommendations(@CurrentUserId Long userId) {
+        return SuccessResponse.of(aiRecommendationService.getRecentSouvenirRecommendations(userId));
+    }
 }

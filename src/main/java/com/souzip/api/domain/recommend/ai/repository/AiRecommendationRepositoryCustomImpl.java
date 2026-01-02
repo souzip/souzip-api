@@ -26,6 +26,30 @@ public class AiRecommendationRepositoryCustomImpl implements AiRecommendationRep
     }
 
     @Override
+    public Optional<Souvenir> findLatestByUserId(Long userId) {
+        QSouvenir s = QSouvenir.souvenir;
+
+        return Optional.ofNullable(
+                queryFactory.selectFrom(s)
+                        .where(s.user.id.eq(userId)
+                                .and(s.deleted.eq(false)))
+                        .orderBy(s.createdAt.desc())
+                        .fetchFirst()
+        );
+    }
+
+    @Override
+    public List<Souvenir> findAllByCountryCode(String countryCode) {
+        QSouvenir s = QSouvenir.souvenir;
+
+        return queryFactory.selectFrom(s)
+                .where(s.countryCode.eq(countryCode)
+                        .and(s.deleted.eq(false)))
+                .limit(30)
+                .fetch();
+    }
+
+    @Override
     public Optional<Souvenir> findByName(String name) {
         QSouvenir s = QSouvenir.souvenir;
 

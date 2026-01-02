@@ -9,6 +9,8 @@ import com.souzip.api.domain.recommend.ai.repository.AiRecommendationRepositoryC
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.global.clova.ClovaStudioClient;
 import com.souzip.api.global.clova.PromptLoader;
+import com.souzip.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,17 +37,63 @@ public class AiRecommendationService {
                 String.class,
                 userId
         );
-
         List<Category> preferredCategories = categoryNames.stream()
                 .map(Category::valueOf)
                 .toList();
 
         Map<String, List<Souvenir>> souvenirsByCategory = loadSouvenirsByPreferredCategory(preferredCategories);
-        String prompt = buildPrompt(souvenirsByCategory);
+
+        String prompt = buildPromptForCategories(souvenirsByCategory);
         String clovaResponse = callClova(prompt);
+
         Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
+
+        return new AiRecommendationResponse(
+                mapToRecommendedSouvenirs(recommendedNamesByCategory)
+        );
+    }
+
+    public AiRecommendationResponse getRecentSouvenirRecommendations(Long userId) {
+        var latestOpt = aiRecommendationRepository.findLatestByUserId(userId);
+        if (latestOpt.isEmpty()) {
+            throw new BusinessException(ErrorCode.AI_RECOMMENDATION_NOT_READY);
+        }
+        var latest = latestOpt.get();
+
+        String countryCode = latest.getCountryCode();
+        List<String> recentNames = List.of(latest.getName());
+
+        List<Souvenir> candidateSouvenirs = aiRecommendationRepository.findAllByCountryCode(countryCode);
+        if (candidateSouvenirs.isEmpty()) {
+            return new AiRecommendationResponse(Collections.emptyList());
+        }
+
+        List<String> categoryNames = jdbcTemplate.queryForList(
+                "SELECT category FROM user_category WHERE user_id = ?",
+                String.class,
+                userId
+        );
+
+        String prompt = buildPromptForRecentSouvenir(candidateSouvenirs, recentNames, categoryNames, countryCode);
+
+        String clovaResponse = callClova(prompt);
+
+        Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
+
         List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs =
-                mapToRecommendedSouvenirs(recommendedNamesByCategory);
+                recommendedNamesByCategory.values().stream()
+                        .flatMap(List::stream)
+                        .map(aiRecommendationRepository::findByName)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
+                                s.getId(),
+                                s.getName(),
+                                s.getCategory().name(),
+                                s.getCountryCode(),
+                                getThumbnailUrl(s.getId())
+                        ))
+                        .collect(Collectors.toList());
 
         return new AiRecommendationResponse(finalSouvenirs);
     }
@@ -58,15 +106,28 @@ public class AiRecommendationService {
                 ));
     }
 
-    private String buildPrompt(Map<String, List<Souvenir>> souvenirsByCategory) {
+    private String buildPromptForCategories(Map<String, List<Souvenir>> souvenirsByCategory) {
         StringBuilder sb = new StringBuilder();
         souvenirsByCategory.forEach((categoryName, list) -> {
             sb.append(categoryName).append(":\n");
             list.forEach(s -> sb.append(" - ").append(s.getName()).append("\n"));
         });
-
-        return promptLoader.loadPrompt("souvenir-recommendation.txt")
+        return promptLoader.loadPrompt("souvenir-recommendation-category.txt")
                 .replace("{souvenirList}", sb.toString());
+    }
+
+    private String buildPromptForRecentSouvenir(List<Souvenir> candidateSouvenirs,
+                               List<String> recentNames,
+                               List<String> userCategories,
+                               String countryCode) {
+        StringBuilder sb = new StringBuilder();
+        candidateSouvenirs.forEach(s -> sb.append(" - ").append(s.getName()).append("\n"));
+
+        return promptLoader.loadPrompt("souvenir-recommendation-upload.txt")
+                .replace("{souvenirList}", sb.toString())
+                .replace("{recentSouvenirNames}", recentNames.toString())
+                .replace("{userCategories}", userCategories.toString())
+                .replace("{countryCode}", countryCode);
     }
 
     private String callClova(String prompt) {
@@ -81,12 +142,10 @@ public class AiRecommendationService {
             return objectMapper.readValue(
                             clovaResponse,
                             new TypeReference<Map<String, List<Map<String, String>>>>() {}
-                    ).entrySet()
-                    .stream()
+                    ).entrySet().stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
-                            entry -> entry.getValue()
-                                    .stream()
+                            e -> e.getValue().stream()
                                     .map(m -> m.get("name"))
                                     .collect(Collectors.toList())
                     ));
@@ -96,9 +155,9 @@ public class AiRecommendationService {
     }
 
     private List<AiRecommendationResponse.RecommendedSouvenir> mapToRecommendedSouvenirs(
-            Map<String, List<String>> recommendedNamesByCategory
+            Map<String, List<String>> recommendedNames
     ) {
-        return recommendedNamesByCategory.values().stream()
+        return recommendedNames.values().stream()
                 .flatMap(List::stream)
                 .map(aiRecommendationRepository::findByName)
                 .filter(Optional::isPresent)

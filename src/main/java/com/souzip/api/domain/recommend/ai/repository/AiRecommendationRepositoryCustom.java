@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface AiRecommendationRepositoryCustom {
     List<Souvenir> findAllByCategory(Category category);
-
+    List<Souvenir> findAllByCountryCode(String countryCode);
+    Optional<Souvenir> findLatestByUserId(Long userId);
     Optional<Souvenir> findByName(String name);
 }

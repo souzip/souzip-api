@@ -1351,7 +1351,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "카카오 API 호출에 실패했습니다."
 }</code></pre>
 </div>
@@ -1817,7 +1817,7 @@ Content-Type: application/json
 Content-Length: 98
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "지원하지 않는 로그인 방식입니다: naver"
 }</code></pre>
 </div>
@@ -1940,7 +1940,7 @@ Content-Type: application/json
 Content-Length: 103
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "지원하지 않는 로그인 방식입니다: invalid123"
 }</code></pre>
 </div>
@@ -2292,7 +2292,7 @@ Content-Type: application/json
 Content-Length: 79
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "만료된 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -2393,7 +2393,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "유효하지 않은 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -3235,7 +3235,7 @@ Content-Type: application/json
 Content-Length: 93
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "필수 약관에 모두 동의해야 합니다."
 }</code></pre>
 </div>
@@ -3386,7 +3386,7 @@ Content-Type: application/json
 Content-Length: 86
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "이미 사용 중인 닉네임입니다."
 }</code></pre>
 </div>
@@ -3537,7 +3537,7 @@ Content-Type: application/json
 Content-Length: 95
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "이미 온보딩을 완료한 사용자입니다."
 }</code></pre>
 </div>
@@ -3688,7 +3688,7 @@ Content-Type: application/json
 Content-Length: 88
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "유효하지 않은 카테고리입니다."
 }</code></pre>
 </div>
@@ -3839,7 +3839,7 @@ Content-Type: application/json
 Content-Length: 102
 
 {
-  "traceId" : "e9f0a833",
+  "traceId" : "496d3425",
   "message" : "유효하지 않은 프로필 이미지 색상입니다."
 }</code></pre>
 </div>
@@ -4902,7 +4902,7 @@ Host: localhost:8080
 Content-Disposition: form-data; name=souvenir; filename=souvenir.json
 Content-Type: application/json
 
-{"name":"테스트 기념품","localPrice":10000,"currencySymbol":"$","krwPrice":95000,"description":"테스트 설명","address":"617 N MAIN FALLBROOK CA 92028-1934 USA","locationDetail":"2층 빨간색 간판이 있는 장소","latitude":35.689487,"longitude":139.691706,"category":"SOUVENIR_BASIC","purpose":"GIFT","countryCode":"US","files":[]}
+{"name":"테스트 기념품","localPrice":10000,"currencySymbol":"$","krwPrice":95000,"description":"테스트 설명","address":"617 N MAIN FALLBROOK CA 92028-1934 USA","locationDetail":"2층 빨간색 간판이 있는 장소","latitude":35.689487,"longitude":139.691706,"category":"SOUVENIR_BASIC","purpose":"GIFT","countryCode":"US"}
 --6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm
 Content-Disposition: form-data; name=files; filename=file1.jpg
 Content-Type: image/jpeg
@@ -4975,8 +4975,7 @@ dummy content
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-이미지 파일 업로드 시 각 파일 최대 50MB까지 허용됩니다.
-      업로드 가능한 확장자는 jpg, jpeg, png, gif, webp입니다.
+파일 하나당 최대 50MB까지 업로드할 수 있으며, 여러 파일을 한 번에 업로드하는 경우, 요청 전체 기준으로 최대 100MB까지만 허용됩니다. 업로드 가능한 확장자는 jpg, jpeg, png, gif, webp 입니다.
 </td>
 </tr>
 </table>

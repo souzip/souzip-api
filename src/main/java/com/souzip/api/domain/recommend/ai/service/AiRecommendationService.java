@@ -11,6 +11,7 @@ import com.souzip.api.global.clova.ClovaStudioClient;
 import com.souzip.api.global.clova.PromptLoader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,25 +22,36 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AiRecommendationService {
 
+    private final JdbcTemplate jdbcTemplate;
     private final AiRecommendationRepositoryCustom aiRecommendationRepository;
     private final ClovaStudioClient clovaStudioClient;
     private final PromptLoader promptLoader;
     private final ObjectMapper objectMapper;
     private final FileService fileService;
 
-    public AiRecommendationResponse getCategoryRecommendations() {
-        Map<String, List<Souvenir>> souvenirsByCategory = loadSouvenirsByCategory();
+    public AiRecommendationResponse getCategoryRecommendationsForUser(Long userId) {
+        List<String> categoryNames = jdbcTemplate.queryForList(
+                "SELECT category FROM user_category WHERE user_id = ?",
+                String.class,
+                userId
+        );
+
+        List<Category> preferredCategories = categoryNames.stream()
+                .map(Category::valueOf)
+                .toList();
+
+        Map<String, List<Souvenir>> souvenirsByCategory = loadSouvenirsByPreferredCategory(preferredCategories);
         String prompt = buildPrompt(souvenirsByCategory);
         String clovaResponse = callClova(prompt);
         Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
-
-        List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs = mapToRecommendedSouvenirs(recommendedNamesByCategory);
+        List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs =
+                mapToRecommendedSouvenirs(recommendedNamesByCategory);
 
         return new AiRecommendationResponse(finalSouvenirs);
     }
 
-    private Map<String, List<Souvenir>> loadSouvenirsByCategory() {
-        return Arrays.stream(Category.values())
+    private Map<String, List<Souvenir>> loadSouvenirsByPreferredCategory(List<Category> preferredCategories) {
+        return preferredCategories.stream()
                 .collect(Collectors.toMap(
                         Category::name,
                         aiRecommendationRepository::findAllByCategory
@@ -69,10 +81,12 @@ public class AiRecommendationService {
             return objectMapper.readValue(
                             clovaResponse,
                             new TypeReference<Map<String, List<Map<String, String>>>>() {}
-                    ).entrySet().stream()
+                    ).entrySet()
+                    .stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
-                            e -> e.getValue().stream()
+                            entry -> entry.getValue()
+                                    .stream()
                                     .map(m -> m.get("name"))
                                     .collect(Collectors.toList())
                     ));
@@ -93,6 +107,7 @@ public class AiRecommendationService {
                         s.getId(),
                         s.getName(),
                         s.getCategory().name(),
+                        s.getCountryCode(),
                         getThumbnailUrl(s.getId())
                 ))
                 .collect(Collectors.toList());

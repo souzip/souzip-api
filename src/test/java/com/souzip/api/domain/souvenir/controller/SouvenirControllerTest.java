@@ -316,7 +316,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                                 fieldWithPath("category").description("카테고리 ENUM name"),
                                 fieldWithPath("purpose").description("구매 목적 ENUM name"),
                                 fieldWithPath("countryCode").description("국가 코드"),
-                                fieldWithPath("files").ignored()
+                                fieldWithPath("files").description("빈 리스트로 전송 (파일은 multipart로 전송됨)")
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),

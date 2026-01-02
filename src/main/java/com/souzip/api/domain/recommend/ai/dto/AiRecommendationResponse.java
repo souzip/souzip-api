@@ -9,10 +9,11 @@ public record AiRecommendationResponse(
             Long id,
             String name,
             String category,
+            String countryCode,
             String thumbnailUrl
     ) {
-        public static RecommendedSouvenir from(Long id, String name, String category, String thumbnailUrl) {
-            return new RecommendedSouvenir(id, name, category, thumbnailUrl);
+        public static RecommendedSouvenir from(Long id, String name, String category, String countryCode, String thumbnailUrl) {
+            return new RecommendedSouvenir(id, name, category, countryCode, thumbnailUrl);
         }
     }
 }

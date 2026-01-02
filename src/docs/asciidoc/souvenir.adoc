@@ -58,9 +58,9 @@ include::{snippets}/souvenirs/create-souvenir/http-request.adoc[]
 |===
 
 |files
-|JSON
+|File[]
 |O
-|수정할 기념품 정보
+|업로드할 이미지 파일 목록
 |===
 
 NOTE: 파일 하나당 최대 50MB까지 업로드할 수 있으며, 여러 파일을 한 번에 업로드하는 경우, 요청 전체 기준으로 최대 100MB까지만 허용됩니다. 업로드 가능한 확장자는 jpg, jpeg, png, gif, webp 입니다.

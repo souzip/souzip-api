@@ -16,7 +16,7 @@ public class AiRecommendationController {
 
     private final AiRecommendationService aiRecommendationService;
 
-    @GetMapping("/category")
+    @GetMapping("/preference-category")
     public SuccessResponse<AiRecommendationResponse> getAiCategoryRecommendations(@CurrentUserId Long userId) {
         return SuccessResponse.of(aiRecommendationService.getCategoryRecommendationsForUser(userId));
     }

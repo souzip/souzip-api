@@ -109,9 +109,9 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
     @DisplayName("이번 달 나라별 Top3 통계 조회")
     void getTopCountriesThisMonth() throws Exception {
         // given
-        GeneralRecommendationStatsDto stat1 = new GeneralRecommendationStatsDto("대한민국", 15L);
-        GeneralRecommendationStatsDto stat2 = new GeneralRecommendationStatsDto("일본", 10L);
-        GeneralRecommendationStatsDto stat3 = new GeneralRecommendationStatsDto("미국", 7L);
+        GeneralRecommendationStatsDto stat1 = new GeneralRecommendationStatsDto("KR", "대한민국", 15L);
+        GeneralRecommendationStatsDto stat2 = new GeneralRecommendationStatsDto("JP", "일본", 10L);
+        GeneralRecommendationStatsDto stat3 = new GeneralRecommendationStatsDto("US", "미국", 7L);
         List<GeneralRecommendationStatsDto> statsList = List.of(stat1, stat2, stat3);
 
         given(generalRecommendationService.getTop3CountriesByCurrentMonth())
@@ -122,6 +122,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].countryNameKr").value("대한민국"))
+                .andExpect(jsonPath("$.data[0].countryCode").value("KR"))
                 .andExpect(jsonPath("$.data[0].souvenirCount").value(15))
                 .andDo(document("recommend/general/stats-top3",
                         getDocumentRequest(),
@@ -129,6 +130,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라별 기념품 등록 통계"),
                                 fieldWithPath("data[].countryNameKr").type(JsonFieldType.STRING).description("나라명 (한글)"),
+                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("나라 코드"),
                                 fieldWithPath("data[].souvenirCount").type(JsonFieldType.NUMBER).description("등록된 기념품 개수 (integer)"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )

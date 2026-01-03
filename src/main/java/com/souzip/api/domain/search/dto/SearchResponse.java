@@ -1,6 +1,8 @@
 package com.souzip.api.domain.search.dto;
 
 import com.souzip.api.domain.search.document.LocationDocument;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,8 @@ public record SearchResponse(
     String countryName,
     String countryNameEn,
     String countryNameKr,
+    BigDecimal latitude,
+    BigDecimal longitude,
     Float score,
     Map<String, List<String>> highlight
 ) {
@@ -26,6 +30,8 @@ public record SearchResponse(
             document.getCountryNameKr(),
             document.getCountryNameEn(),
             document.getCountryNameKr(),
+            document.getLatitude(),
+            document.getLongitude(),
             score,
             highlight
         );

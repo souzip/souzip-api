@@ -8,6 +8,8 @@ import com.souzip.api.global.common.dto.pagination.PaginationRequest;
 import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -21,11 +23,9 @@ import static com.souzip.api.docs.CommonDocumentation.errorResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -74,7 +74,7 @@ class SearchControllerTest extends RestDocsSupport {
         SearchResponse seoul = new SearchResponse(
             1L, "city", "서울", "Seoul", "서울",
             "대한민국", "South Korea", "대한민국",
-            1005.5f,
+            BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), 1005.5f,
             Map.of("nameKr", List.of("<em>서울</em>"))
         );
 
@@ -97,6 +97,8 @@ class SearchControllerTest extends RestDocsSupport {
             .andExpect(jsonPath("$.data.content[0].nameKr").value("서울"))
             .andExpect(jsonPath("$.data.content[0].nameEn").value("Seoul"))
             .andExpect(jsonPath("$.data.content[0].score").value(1005.5))
+            .andExpect(jsonPath("$.data.content[0].latitude").value(37.56))
+            .andExpect(jsonPath("$.data.content[0].longitude").value(126.97))
             .andDo(document("search/locations-korean-city",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -126,6 +128,10 @@ class SearchControllerTest extends RestDocsSupport {
                         .description("국가 영문 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING)
                         .description("국가 한글 이름 (도시인 경우)").optional(),
+                    fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER)
+                        .description("위도 (double)"),
+                    fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER)
+                        .description("경도 (double)"),
                     fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER)
                         .description("검색 점수 (높을수록 관련도 높음)"),
                     subsectionWithPath("data.content[].highlight").type(JsonFieldType.OBJECT)
@@ -161,7 +167,7 @@ class SearchControllerTest extends RestDocsSupport {
         SearchResponse seoul = new SearchResponse(
                 1L, "city", "서울", "Seoul", "서울",
                 "대한민국", "South Korea", "대한민국",
-                1005.5f,
+                BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), 1005.5f,
                 Map.of("nameEn", List.of("<em>Seoul</em>"))
         );
 
@@ -184,6 +190,8 @@ class SearchControllerTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.content[0].nameEn").value("Seoul"))
                 .andExpect(jsonPath("$.data.content[0].nameKr").value("서울"))
                 .andExpect(jsonPath("$.data.content[0].score").value(1005.5))
+                .andExpect(jsonPath("$.data.content[0].latitude").value(37.56))
+                .andExpect(jsonPath("$.data.content[0].longitude").value(126.97))
                 .andDo(document("search/locations-english-city",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -213,6 +221,10 @@ class SearchControllerTest extends RestDocsSupport {
                                         .description("국가 영문 이름 (도시인 경우)").optional(),
                                 fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING)
                                         .description("국가 한글 이름 (도시인 경우)").optional(),
+                                fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER)
+                                        .description("위도 (double)"),
+                                fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER)
+                                        .description("경도 (double)"),
                                 fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER)
                                         .description("검색 점수 (높을수록 관련도 높음)"),
                                 subsectionWithPath("data.content[].highlight").type(JsonFieldType.OBJECT)
@@ -247,17 +259,20 @@ class SearchControllerTest extends RestDocsSupport {
         // given
         SearchResponse japan = new SearchResponse(
             1L, "country", "일본", "Japan", "일본",
-            null, null, null, 1000.0f,
+            null, null, null,
+            BigDecimal.valueOf(36.2048), BigDecimal.valueOf(138.2529), 1000.0f,
             Map.of("nameKr", List.of("<em>일본</em>"))
         );
         SearchResponse tokyo = new SearchResponse(
             2L, "city", "도쿄", "Tokyo", "도쿄",
-            "일본", "Japan", "일본", 500.0f,
+            "일본", "Japan", "일본",
+            BigDecimal.valueOf(35.6762), BigDecimal.valueOf(139.6503), 500.0f,
             Map.of("countryNameKr", List.of("<em>일본</em>"))
         );
         SearchResponse osaka = new SearchResponse(
             3L, "city", "오사카", "Osaka", "오사카",
-            "일본", "Japan", "일본", 500.0f,
+            "일본", "Japan", "일본",
+            BigDecimal.valueOf(34.6937), BigDecimal.valueOf(135.5023), 500.0f,
             Map.of("countryNameKr", List.of("<em>일본</em>"))
         );
 
@@ -307,6 +322,10 @@ class SearchControllerTest extends RestDocsSupport {
                         .description("국가 영문 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING)
                         .description("국가 한글 이름 (도시인 경우)").optional(),
+                    fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER)
+                        .description("위도 (double)"),
+                    fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER)
+                        .description("경도 (double)"),
                     fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER)
                         .description("검색 점수 (높을수록 관련도 높음)"),
                     subsectionWithPath("data.content[].highlight").type(JsonFieldType.OBJECT)
@@ -341,7 +360,8 @@ class SearchControllerTest extends RestDocsSupport {
         // given
         SearchResponse osaka = new SearchResponse(
             3L, "city", "오사카", "Osaka", "오사카",
-            "일본", "Japan", "일본", 150.0f,
+            "일본", "Japan", "일본",
+            BigDecimal.valueOf(34.69), BigDecimal.valueOf(135.50), 150.0f,
             Map.of(
                 "nameKr", List.of("<em>오사카</em>"),
                 "countryNameKr", List.of("<em>일본</em>")
@@ -364,6 +384,8 @@ class SearchControllerTest extends RestDocsSupport {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.content[0].nameKr").value("오사카"))
             .andExpect(jsonPath("$.data.content[0].countryNameKr").value("일본"))
+            .andExpect(jsonPath("$.data.content[0].latitude").value(34.69))
+            .andExpect(jsonPath("$.data.content[0].longitude").value(135.50))
             .andDo(document("search/locations-multiple-keywords",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -393,6 +415,10 @@ class SearchControllerTest extends RestDocsSupport {
                         .description("국가 영문 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING)
                         .description("국가 한글 이름 (도시인 경우)").optional(),
+                    fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER)
+                        .description("위도 (double)"),
+                    fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER)
+                        .description("경도 (double)"),
                     fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER)
                         .description("검색 점수 (높을수록 관련도 높음)"),
                     subsectionWithPath("data.content[].highlight").type(JsonFieldType.OBJECT)

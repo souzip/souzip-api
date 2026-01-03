@@ -56,7 +56,7 @@ public class AiRecommendationService {
     public AiRecommendationResponse getRecentSouvenirRecommendations(Long userId) {
         var latestOpt = aiRecommendationRepository.findLatestByUserId(userId);
         if (latestOpt.isEmpty()) {
-            throw new BusinessException(ErrorCode.AI_RECOMMENDATION_NOT_READY);
+            return new AiRecommendationResponse(Collections.emptyList());
         }
         var latest = latestOpt.get();
 

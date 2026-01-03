@@ -43,6 +43,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                         (long) i,
                         "기념품 " + i,
                         Category.SOUVENIR_BASIC,
+                        "JP",
                         "https://example.com/thumb" + i + ".jpg"
                 ))
                 .collect(Collectors.toList());
@@ -78,6 +79,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                         (long) i,
                         "기념품 " + i,
                         Category.SOUVENIR_BASIC,
+                        "JP",
                         "https://example.com/thumb" + i + ".jpg"
                 ))
                 .collect(Collectors.toList());

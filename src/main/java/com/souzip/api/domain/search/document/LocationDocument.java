@@ -15,6 +15,8 @@ import org.springframework.data.elasticsearch.annotations.InnerField;
 import org.springframework.data.elasticsearch.annotations.MultiField;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
+import java.math.BigDecimal;
+
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -80,6 +82,12 @@ public class LocationDocument {
     )
     private String countryNameKr;
 
+    @Field(type = FieldType.Double)
+    private BigDecimal latitude;
+
+    @Field(type = FieldType.Double)
+    private BigDecimal longitude;
+
     public static LocationDocument from(Country country) {
         return LocationDocument.builder()
             .id("country_" + country.getId())
@@ -87,6 +95,8 @@ public class LocationDocument {
             .type("country")
             .nameEn(country.getNameEn())
             .nameKr(country.getNameKr())
+            .latitude(country.getLatitude())
+            .longitude(country.getLongitude())
             .countryNameEn(null)
             .countryNameKr(null)
             .build();
@@ -101,6 +111,8 @@ public class LocationDocument {
             .nameKr(city.getNameKr())
             .countryNameEn(city.getCountry().getNameEn())
             .countryNameKr(city.getCountry().getNameKr())
+            .latitude(city.getLatitude())
+            .longitude(city.getLongitude())
             .build();
     }
 }

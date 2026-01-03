@@ -21,11 +21,12 @@ import static com.souzip.api.docs.CommonDocumentation.errorResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
@@ -195,52 +196,52 @@ class SearchControllerTest extends RestDocsSupport {
                 getDocumentResponse(),
                 queryParameters(
                     parameterWithName("keyword").description("검색 키워드 (국가명)"),
-                    parameterWithName("pageNo").description("페이지 번호").optional(),
-                    parameterWithName("pageSize").description("페이지 크기").optional()
+                    parameterWithName("pageNo").description("페이지 번호 (0부터 시작)").optional(),
+                    parameterWithName("pageSize").description("페이지 크기 (기본값: 20)").optional()
                 ),
-                responseFields(
+                apiResponseFields(  // ✅ responseFields → apiResponseFields 변경!
                     fieldWithPath("data").type(JsonFieldType.OBJECT)
                         .description("검색 결과 데이터"),
                     fieldWithPath("data.content").type(JsonFieldType.ARRAY)
-                        .description("국가 및 도시 목록"),
+                        .description("검색된 위치 목록 (국가 및 도시)"),
                     fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER)
-                        .description("위치 ID"),
+                        .description("위치 엔티티 ID"),
                     fieldWithPath("data.content[].type").type(JsonFieldType.STRING)
-                        .description("타입 (country/city)"),
+                        .description("위치 타입 (country 또는 city)"),
                     fieldWithPath("data.content[].name").type(JsonFieldType.STRING)
-                        .description("이름"),
+                        .description("위치 이름"),
                     fieldWithPath("data.content[].nameEn").type(JsonFieldType.STRING)
-                        .description("영문 이름"),
+                        .description("위치 영문 이름"),
                     fieldWithPath("data.content[].nameKr").type(JsonFieldType.STRING)
-                        .description("한글 이름"),
+                        .description("위치 한글 이름"),
                     fieldWithPath("data.content[].countryName").type(JsonFieldType.STRING)
-                        .description("국가 이름").optional(),
+                        .description("국가 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].countryNameEn").type(JsonFieldType.STRING)
-                        .description("국가 영문").optional(),
+                        .description("국가 영문 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING)
-                        .description("국가 한글").optional(),
+                        .description("국가 한글 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER)
-                        .description("검색 점수"),
+                        .description("검색 점수 (높을수록 관련도 높음)"),
                     subsectionWithPath("data.content[].highlight").type(JsonFieldType.OBJECT)
-                        .description("하이라이트 정보"),
+                        .description("검색어 하이라이트 정보"),
                     fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
                         .description("페이지네이션 정보"),
                     fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
-                        .description("현재 페이지"),
+                        .description("현재 페이지 번호"),
                     fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
-                        .description("전체 페이지"),
+                        .description("전체 페이지 수"),
                     fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
-                        .description("전체 개수"),
+                        .description("전체 결과 개수"),
                     fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
                         .description("페이지 크기"),
                     fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
-                        .description("첫 페이지"),
+                        .description("첫 번째 페이지 여부"),
                     fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
-                        .description("마지막 페이지"),
+                        .description("마지막 페이지 여부"),
                     fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
-                        .description("다음 페이지"),
+                        .description("다음 페이지 존재 여부"),
                     fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
-                        .description("이전 페이지"),
+                        .description("이전 페이지 존재 여부"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지")
                 )
@@ -281,52 +282,52 @@ class SearchControllerTest extends RestDocsSupport {
                 getDocumentResponse(),
                 queryParameters(
                     parameterWithName("keyword").description("검색 키워드 (공백으로 구분된 복수 키워드)"),
-                    parameterWithName("pageNo").description("페이지 번호").optional(),
-                    parameterWithName("pageSize").description("페이지 크기").optional()
+                    parameterWithName("pageNo").description("페이지 번호 (0부터 시작)").optional(),
+                    parameterWithName("pageSize").description("페이지 크기 (기본값: 20)").optional()
                 ),
-                responseFields(
+                apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT)
                         .description("검색 결과 데이터"),
                     fieldWithPath("data.content").type(JsonFieldType.ARRAY)
-                        .description("검색 결과 목록"),
+                        .description("검색된 위치 목록"),
                     fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER)
-                        .description("위치 ID"),
+                        .description("위치 엔티티 ID"),
                     fieldWithPath("data.content[].type").type(JsonFieldType.STRING)
-                        .description("타입"),
+                        .description("위치 타입 (country 또는 city)"),
                     fieldWithPath("data.content[].name").type(JsonFieldType.STRING)
-                        .description("이름"),
+                        .description("위치 이름"),
                     fieldWithPath("data.content[].nameEn").type(JsonFieldType.STRING)
-                        .description("영문 이름"),
+                        .description("위치 영문 이름"),
                     fieldWithPath("data.content[].nameKr").type(JsonFieldType.STRING)
-                        .description("한글 이름"),
+                        .description("위치 한글 이름"),
                     fieldWithPath("data.content[].countryName").type(JsonFieldType.STRING)
-                        .description("국가 이름"),
+                        .description("국가 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].countryNameEn").type(JsonFieldType.STRING)
-                        .description("국가 영문"),
+                        .description("국가 영문 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING)
-                        .description("국가 한글"),
+                        .description("국가 한글 이름 (도시인 경우)").optional(),
                     fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER)
-                        .description("검색 점수"),
+                        .description("검색 점수 (높을수록 관련도 높음)"),
                     subsectionWithPath("data.content[].highlight").type(JsonFieldType.OBJECT)
-                        .description("하이라이트 정보"),
+                        .description("검색어 하이라이트 정보"),
                     fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
                         .description("페이지네이션 정보"),
                     fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
-                        .description("현재 페이지"),
+                        .description("현재 페이지 번호"),
                     fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
-                        .description("전체 페이지"),
+                        .description("전체 페이지 수"),
                     fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
-                        .description("전체 개수"),
+                        .description("전체 결과 개수"),
                     fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
                         .description("페이지 크기"),
                     fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
-                        .description("첫 페이지"),
+                        .description("첫 번째 페이지 여부"),
                     fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
-                        .description("마지막 페이지"),
+                        .description("마지막 페이지 여부"),
                     fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
-                        .description("다음 페이지"),
+                        .description("다음 페이지 존재 여부"),
                     fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
-                        .description("이전 페이지"),
+                        .description("이전 페이지 존재 여부"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지")
                 )
@@ -353,10 +354,10 @@ class SearchControllerTest extends RestDocsSupport {
                 getDocumentResponse(),
                 queryParameters(
                     parameterWithName("keyword").description("빈 검색 키워드"),
-                    parameterWithName("pageNo").description("페이지 번호").optional(),
-                    parameterWithName("pageSize").description("페이지 크기").optional()
+                    parameterWithName("pageNo").description("페이지 번호 (0부터 시작)").optional(),
+                    parameterWithName("pageSize").description("페이지 크기 (기본값: 20)").optional()
                 ),
-                responseFields(errorResponseFields())
+                apiResponseFields(errorResponseFields())
             ));
     }
 
@@ -385,10 +386,10 @@ class SearchControllerTest extends RestDocsSupport {
                 getDocumentResponse(),
                 queryParameters(
                     parameterWithName("keyword").description("존재하지 않는 검색 키워드"),
-                    parameterWithName("pageNo").description("페이지 번호").optional(),
-                    parameterWithName("pageSize").description("페이지 크기").optional()
+                    parameterWithName("pageNo").description("페이지 번호 (0부터 시작)").optional(),
+                    parameterWithName("pageSize").description("페이지 크기 (기본값: 20)").optional()
                 ),
-                responseFields(
+                apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT)
                         .description("검색 결과 데이터"),
                     fieldWithPath("data.content").type(JsonFieldType.ARRAY)
@@ -396,21 +397,21 @@ class SearchControllerTest extends RestDocsSupport {
                     fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
                         .description("페이지네이션 정보"),
                     fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
-                        .description("현재 페이지"),
+                        .description("현재 페이지 번호"),
                     fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
-                        .description("전체 페이지 (0)"),
+                        .description("전체 페이지 수 (0)"),
                     fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
-                        .description("전체 개수 (0)"),
+                        .description("전체 결과 개수 (0)"),
                     fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
                         .description("페이지 크기"),
                     fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
-                        .description("첫 페이지"),
+                        .description("첫 번째 페이지 여부"),
                     fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
-                        .description("마지막 페이지"),
+                        .description("마지막 페이지 여부"),
                     fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
-                        .description("다음 페이지 (false)"),
+                        .description("다음 페이지 존재 여부 (false)"),
                     fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
-                        .description("이전 페이지 (false)"),
+                        .description("이전 페이지 존재 여부 (false)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지")
                 )

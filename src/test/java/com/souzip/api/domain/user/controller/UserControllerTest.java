@@ -55,14 +55,14 @@ class UserControllerTest extends RestDocsSupport {
 
     // Mock 헬퍼 메서드
     private MySouvenirListResponse createMockMySouvenirListResponse(
-        List<MySouvenirResponse> souvenirs,
+        List<MySouvenirResponse> content,
         int currentPage, int totalPages, long totalItems, int pageSize,
         boolean first, boolean last, boolean hasNext, boolean hasPrevious
     ) {
         MySouvenirListResponse response = mock(MySouvenirListResponse.class);
         PaginationResponse.PageInfo pageInfo = mock(PaginationResponse.PageInfo.class);
 
-        given(response.souvenirs()).willReturn(souvenirs);
+        given(response.content()).willReturn(content);
         given(response.pagination()).willReturn(pageInfo);
         given(pageInfo.getCurrentPage()).willReturn(currentPage);
         given(pageInfo.getTotalPages()).willReturn(totalPages);
@@ -565,7 +565,7 @@ class UserControllerTest extends RestDocsSupport {
     @DisplayName("내가 등록한 기념품 목록을 조회한다.")
     void getMySouvenirs_success() throws Exception {
         // given
-        List<MySouvenirResponse> souvenirs = List.of(
+        List<MySouvenirResponse> content = List.of(
             new MySouvenirResponse(
                 1L,
                 "https://example.com/image1.jpg",
@@ -583,7 +583,7 @@ class UserControllerTest extends RestDocsSupport {
         );
 
         MySouvenirListResponse response = createMockMySouvenirListResponse(
-            souvenirs, 1, 1, 2L, 12, true, true, false, false
+            content, 1, 1, 2L, 12, true, true, false, false
         );
 
         given(userService.getMySouvenirs(any(), eq(1), eq(12))).willReturn(response);
@@ -595,13 +595,13 @@ class UserControllerTest extends RestDocsSupport {
                 .param("size", "12"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.souvenirs").isArray())
-            .andExpect(jsonPath("$.data.souvenirs.length()").value(2))
-            .andExpect(jsonPath("$.data.souvenirs[0].id").value(1))
-            .andExpect(jsonPath("$.data.souvenirs[0].thumbnailUrl").value("https://example.com/image1.jpg"))
-            .andExpect(jsonPath("$.data.souvenirs[0].countryCode").value("KR"))
-            .andExpect(jsonPath("$.data.souvenirs[0].createdAt").exists())
-            .andExpect(jsonPath("$.data.souvenirs[0].updatedAt").exists())
+            .andExpect(jsonPath("$.data.content").isArray())
+            .andExpect(jsonPath("$.data.content.length()").value(2))
+            .andExpect(jsonPath("$.data.content[0].id").value(1))
+            .andExpect(jsonPath("$.data.content[0].thumbnailUrl").value("https://example.com/image1.jpg"))
+            .andExpect(jsonPath("$.data.content[0].countryCode").value("KR"))
+            .andExpect(jsonPath("$.data.content[0].createdAt").exists())
+            .andExpect(jsonPath("$.data.content[0].updatedAt").exists())
             .andExpect(jsonPath("$.data.pagination.currentPage").value(1))
             .andExpect(jsonPath("$.data.pagination.pageSize").value(12))
             .andExpect(jsonPath("$.data.pagination.totalItems").value(2))
@@ -617,17 +617,17 @@ class UserControllerTest extends RestDocsSupport {
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT)
                         .description("기념품 목록 응답"),
-                    fieldWithPath("data.souvenirs").type(JsonFieldType.ARRAY)
+                    fieldWithPath("data.content").type(JsonFieldType.ARRAY)
                         .description("기념품 목록"),
-                    fieldWithPath("data.souvenirs[].id").type(JsonFieldType.NUMBER)
+                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER)
                         .description("기념품 ID"),
-                    fieldWithPath("data.souvenirs[].thumbnailUrl").type(JsonFieldType.STRING)
+                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.STRING)
                         .description("썸네일 이미지 URL"),
-                    fieldWithPath("data.souvenirs[].countryCode").type(JsonFieldType.STRING)
+                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING)
                         .description("기념품 국가 코드"),
-                    fieldWithPath("data.souvenirs[].createdAt").type(JsonFieldType.STRING)
+                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING)
                         .description("생성일시"),
-                    fieldWithPath("data.souvenirs[].updatedAt").type(JsonFieldType.STRING)
+                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING)
                         .description("수정일시"),
                     fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
                         .description("페이지네이션 정보"),
@@ -657,7 +657,7 @@ class UserControllerTest extends RestDocsSupport {
     @DisplayName("기념품 목록 조회 시 페이지 번호를 지정할 수 있다.")
     void getMySouvenirs_withPage() throws Exception {
         // given
-        List<MySouvenirResponse> souvenirs = List.of(
+        List<MySouvenirResponse> content = List.of(
             new MySouvenirResponse(
                 3L,
                 null,
@@ -668,7 +668,7 @@ class UserControllerTest extends RestDocsSupport {
         );
 
         MySouvenirListResponse response = createMockMySouvenirListResponse(
-            souvenirs, 2, 3, 25L, 12, false, false, true, true
+                content, 2, 3, 25L, 12, false, false, true, true
         );
 
         given(userService.getMySouvenirs(any(), eq(2), eq(12))).willReturn(response);
@@ -693,17 +693,17 @@ class UserControllerTest extends RestDocsSupport {
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT)
                         .description("기념품 목록 응답"),
-                    fieldWithPath("data.souvenirs").type(JsonFieldType.ARRAY)
+                    fieldWithPath("data.content").type(JsonFieldType.ARRAY)
                         .description("기념품 목록"),
-                    fieldWithPath("data.souvenirs[].id").type(JsonFieldType.NUMBER)
+                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER)
                         .description("기념품 ID"),
-                    fieldWithPath("data.souvenirs[].thumbnailUrl").type(JsonFieldType.NULL)
+                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.NULL)
                         .description("썸네일 이미지 URL"),
-                    fieldWithPath("data.souvenirs[].countryCode").type(JsonFieldType.STRING)
+                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING)
                         .description("기념품 국가 코드"),
-                    fieldWithPath("data.souvenirs[].createdAt").type(JsonFieldType.STRING)
+                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING)
                         .description("생성일시"),
-                    fieldWithPath("data.souvenirs[].updatedAt").type(JsonFieldType.STRING)
+                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING)
                         .description("수정일시"),
                     fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
                         .description("페이지네이션 정보"),
@@ -746,7 +746,7 @@ class UserControllerTest extends RestDocsSupport {
                 .param("size", "12"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.souvenirs").isEmpty())
+            .andExpect(jsonPath("$.data.content").isEmpty())
             .andExpect(jsonPath("$.data.pagination.totalItems").value(0))
             .andDo(document("user/my-souvenirs-empty",
                 getDocumentRequest(),
@@ -758,7 +758,7 @@ class UserControllerTest extends RestDocsSupport {
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT)
                         .description("기념품 목록 응답"),
-                    fieldWithPath("data.souvenirs").type(JsonFieldType.ARRAY)
+                    fieldWithPath("data.content").type(JsonFieldType.ARRAY)
                         .description("빈 기념품 목록"),
                     fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
                         .description("페이지네이션 정보"),

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public record MySouvenirListResponse(
-    List<MySouvenirResponse> souvenirs,
+    List<MySouvenirResponse> content,
     PageInfo pagination
 ) {
     public static MySouvenirListResponse from(Page<MySouvenirResponse> page) {

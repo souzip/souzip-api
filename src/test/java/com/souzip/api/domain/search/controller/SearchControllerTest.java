@@ -155,6 +155,93 @@ class SearchControllerTest extends RestDocsSupport {
     }
 
     @Test
+    @DisplayName("영문 도시명으로 위치를 검색한다.")
+    void searchLocations_englishCityName() throws Exception {
+        // given
+        SearchResponse seoul = new SearchResponse(
+                1L, "city", "서울", "Seoul", "서울",
+                "대한민국", "South Korea", "대한민국",
+                1005.5f,
+                Map.of("nameEn", List.of("<em>Seoul</em>"))
+        );
+
+        PaginationResponse<SearchResponse> response = createMockPaginationResponse(
+                List.of(seoul), 1, 1, 1L, 10, true, true, false, false
+        );
+
+        given(searchService.search(eq("Seoul"), any(PaginationRequest.class)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/search/locations")
+                        .param("keyword", "Seoul")
+                        .param("pageNo", "0")
+                        .param("pageSize", "10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content[0].id").value(1))
+                .andExpect(jsonPath("$.data.content[0].type").value("city"))
+                .andExpect(jsonPath("$.data.content[0].nameEn").value("Seoul"))
+                .andExpect(jsonPath("$.data.content[0].nameKr").value("서울"))
+                .andExpect(jsonPath("$.data.content[0].score").value(1005.5))
+                .andDo(document("search/locations-english-city",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        queryParameters(
+                                parameterWithName("keyword").description("검색 키워드 (영문 도시명)"),
+                                parameterWithName("pageNo").description("페이지 번호 (0부터 시작)").optional(),
+                                parameterWithName("pageSize").description("페이지 크기 (기본값: 20)").optional()
+                        ),
+                        apiResponseFields(
+                                fieldWithPath("data").type(JsonFieldType.OBJECT)
+                                        .description("검색 결과 데이터"),
+                                fieldWithPath("data.content").type(JsonFieldType.ARRAY)
+                                        .description("검색된 위치 목록"),
+                                fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER)
+                                        .description("위치 엔티티 ID"),
+                                fieldWithPath("data.content[].type").type(JsonFieldType.STRING)
+                                        .description("위치 타입 (country 또는 city)"),
+                                fieldWithPath("data.content[].name").type(JsonFieldType.STRING)
+                                        .description("위치 이름"),
+                                fieldWithPath("data.content[].nameEn").type(JsonFieldType.STRING)
+                                        .description("위치 영문 이름"),
+                                fieldWithPath("data.content[].nameKr").type(JsonFieldType.STRING)
+                                        .description("위치 한글 이름"),
+                                fieldWithPath("data.content[].countryName").type(JsonFieldType.STRING)
+                                        .description("국가 이름 (도시인 경우)").optional(),
+                                fieldWithPath("data.content[].countryNameEn").type(JsonFieldType.STRING)
+                                        .description("국가 영문 이름 (도시인 경우)").optional(),
+                                fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING)
+                                        .description("국가 한글 이름 (도시인 경우)").optional(),
+                                fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER)
+                                        .description("검색 점수 (높을수록 관련도 높음)"),
+                                subsectionWithPath("data.content[].highlight").type(JsonFieldType.OBJECT)
+                                        .description("검색어 하이라이트 정보"),
+                                fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
+                                        .description("페이지네이션 정보"),
+                                fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
+                                        .description("현재 페이지 번호"),
+                                fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
+                                        .description("전체 페이지 수"),
+                                fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
+                                        .description("전체 결과 개수"),
+                                fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
+                                        .description("페이지 크기"),
+                                fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
+                                        .description("첫 번째 페이지 여부"),
+                                fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
+                                        .description("마지막 페이지 여부"),
+                                fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
+                                        .description("다음 페이지 존재 여부"),
+                                fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
+                                        .description("이전 페이지 존재 여부"),
+                                fieldWithPath("message").type(JsonFieldType.STRING)
+                                        .description("응답 메시지")
+                        )
+                ));
+    }
+
+    @Test
     @DisplayName("국가명으로 검색하면 국가와 해당 국가의 도시들이 함께 반환된다.")
     void searchLocations_countryName() throws Exception {
         // given

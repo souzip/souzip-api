@@ -11,6 +11,7 @@ import com.souzip.api.domain.user.dto.OnboardingResponse;
 import com.souzip.api.domain.user.dto.UserAgreementInfo;
 import com.souzip.api.domain.user.dto.UserProfileResponse;
 import com.souzip.api.domain.user.service.UserService;
+import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -50,6 +51,29 @@ class UserControllerTest extends RestDocsSupport {
     @Override
     protected Object initController() {
         return new UserController(userService);
+    }
+
+    // Mock 헬퍼 메서드
+    private MySouvenirListResponse createMockMySouvenirListResponse(
+        List<MySouvenirResponse> souvenirs,
+        int currentPage, int totalPages, long totalItems, int pageSize,
+        boolean first, boolean last, boolean hasNext, boolean hasPrevious
+    ) {
+        MySouvenirListResponse response = mock(MySouvenirListResponse.class);
+        PaginationResponse.PageInfo pageInfo = mock(PaginationResponse.PageInfo.class);
+
+        given(response.souvenirs()).willReturn(souvenirs);
+        given(response.pagination()).willReturn(pageInfo);
+        given(pageInfo.getCurrentPage()).willReturn(currentPage);
+        given(pageInfo.getTotalPages()).willReturn(totalPages);
+        given(pageInfo.getTotalItems()).willReturn(totalItems);
+        given(pageInfo.getPageSize()).willReturn(pageSize);
+        given(pageInfo.isFirst()).willReturn(first);
+        given(pageInfo.isLast()).willReturn(last);
+        given(pageInfo.isHasNext()).willReturn(hasNext);
+        given(pageInfo.isHasPrevious()).willReturn(hasPrevious);
+
+        return response;
     }
 
     @Test
@@ -551,17 +575,16 @@ class UserControllerTest extends RestDocsSupport {
             ),
             new MySouvenirResponse(
                 2L,
-                "KR",
                 "https://example.com/image2.jpg",
+                "FR",
                 LocalDateTime.of(2024, 1, 10, 9, 0),
                 LocalDateTime.of(2024, 1, 10, 9, 0)
             )
         );
 
-        MySouvenirListResponse.PaginationInfo pagination =
-            new MySouvenirListResponse.PaginationInfo(1, 12, 2, 1, false);
-
-        MySouvenirListResponse response = new MySouvenirListResponse(souvenirs, pagination);
+        MySouvenirListResponse response = createMockMySouvenirListResponse(
+            souvenirs, 1, 1, 2L, 12, true, true, false, false
+        );
 
         given(userService.getMySouvenirs(any(), eq(1), eq(12))).willReturn(response);
 
@@ -581,7 +604,7 @@ class UserControllerTest extends RestDocsSupport {
             .andExpect(jsonPath("$.data.souvenirs[0].updatedAt").exists())
             .andExpect(jsonPath("$.data.pagination.currentPage").value(1))
             .andExpect(jsonPath("$.data.pagination.pageSize").value(12))
-            .andExpect(jsonPath("$.data.pagination.totalElements").value(2))
+            .andExpect(jsonPath("$.data.pagination.totalItems").value(2))
             .andExpect(jsonPath("$.data.pagination.totalPages").value(1))
             .andExpect(jsonPath("$.data.pagination.hasNext").value(false))
             .andDo(document("user/my-souvenirs",
@@ -610,14 +633,20 @@ class UserControllerTest extends RestDocsSupport {
                         .description("페이지네이션 정보"),
                     fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
                         .description("현재 페이지 번호"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
-                        .description("페이지 크기"),
-                    fieldWithPath("data.pagination.totalElements").type(JsonFieldType.NUMBER)
-                        .description("전체 기념품 개수"),
                     fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
                         .description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
+                        .description("전체 기념품 개수"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
+                        .description("페이지 크기"),
+                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
+                        .description("첫 번째 페이지 여부"),
+                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
+                        .description("마지막 페이지 여부"),
                     fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
                         .description("다음 페이지 존재 여부"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
+                        .description("이전 페이지 존재 여부"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지")
                 )
@@ -638,10 +667,9 @@ class UserControllerTest extends RestDocsSupport {
             )
         );
 
-        MySouvenirListResponse.PaginationInfo pagination =
-            new MySouvenirListResponse.PaginationInfo(2, 12, 25, 3, false);
-
-        MySouvenirListResponse response = new MySouvenirListResponse(souvenirs, pagination);
+        MySouvenirListResponse response = createMockMySouvenirListResponse(
+            souvenirs, 2, 3, 25L, 12, false, false, true, true
+        );
 
         given(userService.getMySouvenirs(any(), eq(2), eq(12))).willReturn(response);
 
@@ -654,7 +682,7 @@ class UserControllerTest extends RestDocsSupport {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.pagination.currentPage").value(2))
             .andExpect(jsonPath("$.data.pagination.totalPages").value(3))
-            .andExpect(jsonPath("$.data.pagination.hasNext").value(false))
+            .andExpect(jsonPath("$.data.pagination.hasNext").value(true))
             .andDo(document("user/my-souvenirs-page-2",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -681,14 +709,20 @@ class UserControllerTest extends RestDocsSupport {
                         .description("페이지네이션 정보"),
                     fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
                         .description("현재 페이지 번호 (2)"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
-                        .description("페이지 크기"),
-                    fieldWithPath("data.pagination.totalElements").type(JsonFieldType.NUMBER)
-                        .description("전체 기념품 개수"),
                     fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
                         .description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
+                        .description("전체 기념품 개수"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
+                        .description("페이지 크기"),
+                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
+                        .description("첫 번째 페이지 여부"),
+                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
+                        .description("마지막 페이지 여부"),
                     fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
-                        .description("다음 페이지 존재 여부 (false)"),
+                        .description("다음 페이지 존재 여부"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
+                        .description("이전 페이지 존재 여부"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지")
                 )
@@ -699,10 +733,9 @@ class UserControllerTest extends RestDocsSupport {
     @DisplayName("등록한 기념품이 없으면 빈 목록을 반환한다.")
     void getMySouvenirs_empty() throws Exception {
         // given
-        MySouvenirListResponse.PaginationInfo pagination =
-            new MySouvenirListResponse.PaginationInfo(1, 12, 0, 0, false);
-
-        MySouvenirListResponse response = new MySouvenirListResponse(List.of(), pagination);
+        MySouvenirListResponse response = createMockMySouvenirListResponse(
+            List.of(), 1, 0, 0L, 12, true, true, false, false
+        );
 
         given(userService.getMySouvenirs(any(), eq(1), eq(12))).willReturn(response);
 
@@ -714,7 +747,7 @@ class UserControllerTest extends RestDocsSupport {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.souvenirs").isEmpty())
-            .andExpect(jsonPath("$.data.pagination.totalElements").value(0))
+            .andExpect(jsonPath("$.data.pagination.totalItems").value(0))
             .andDo(document("user/my-souvenirs-empty",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -731,14 +764,20 @@ class UserControllerTest extends RestDocsSupport {
                         .description("페이지네이션 정보"),
                     fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
                         .description("현재 페이지 번호"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
-                        .description("페이지 크기"),
-                    fieldWithPath("data.pagination.totalElements").type(JsonFieldType.NUMBER)
-                        .description("전체 기념품 개수 (0)"),
                     fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
                         .description("전체 페이지 수 (0)"),
+                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
+                        .description("전체 기념품 개수 (0)"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
+                        .description("페이지 크기"),
+                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
+                        .description("첫 번째 페이지 여부"),
+                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
+                        .description("마지막 페이지 여부"),
                     fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
                         .description("다음 페이지 존재 여부 (false)"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
+                        .description("이전 페이지 존재 여부 (false)"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("응답 메시지")
                 )

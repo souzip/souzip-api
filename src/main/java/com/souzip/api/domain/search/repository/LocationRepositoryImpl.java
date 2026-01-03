@@ -19,8 +19,8 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-    // 최소 점수 임계값 (이 점수 미만은 결과에서 제외)
-    private static final float MIN_SCORE_THRESHOLD = 100.0f;
+    // 최소 점수 임계값 - 낮춤
+    private static final float MIN_SCORE_THRESHOLD = 10.0f;
 
     @Override
     public List<SearchHit<LocationDocument>> searchByKeywordWithFuzzy(String keyword) {
@@ -55,42 +55,42 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 // 1. 완전 일치 - 최고 점수
                 FunctionScore.of(f -> f
                     .filter(buildExactMatchFilter(keyword, includeCountry))
-                    .weight(100000.0)
+                    .weight(1000.0)  // 100000 -> 1000으로 감소
                 ),
                 // 2. Prefix 매칭
                 FunctionScore.of(f -> f
                     .filter(buildPrefixFilter(keyword, includeCountry))
-                    .weight(50000.0)
+                    .weight(500.0)  // 50000 -> 500으로 감소
                 ),
                 // 3. 자소 기반 Fuzzy (한글 오타 교정)
                 FunctionScore.of(f -> f
                     .filter(buildJasoBasedFuzzyFilter(keyword, includeCountry))
-                    .weight(40000.0)
+                    .weight(300.0)  // 40000 -> 300으로 감소
                 ),
                 // 4. 일반 Fuzzy (영문)
                 FunctionScore.of(f -> f
                     .filter(buildFuzzyFilter(keyword, includeCountry))
-                    .weight(30000.0)
+                    .weight(200.0)  // 30000 -> 200으로 감소
                 ),
                 // 5. 자소 부분 매칭
                 FunctionScore.of(f -> f
                     .filter(buildJasoFilter(keyword, includeCountry))
-                    .weight(5000.0)
+                    .weight(100.0)  // 5000 -> 100으로 감소
                 ),
                 // 6. Ngram (띄어쓰기 없는 검색 지원)
                 FunctionScore.of(f -> f
                     .filter(buildNgramFilter(keyword, includeCountry))
-                    .weight(1000.0)  // 500 -> 1000으로 증가
+                    .weight(50.0)  // 1000 -> 50으로 감소
                 ),
                 // 7. Autocomplete
                 FunctionScore.of(f -> f
                     .filter(buildAutocompleteFilter(keyword, includeCountry))
-                    .weight(800.0)
+                    .weight(30.0)  // 800 -> 30으로 감소
                 ),
-                // 8. Wildcard
+                // 8. Wildcard - 가장 낮은 우선순위
                 FunctionScore.of(f -> f
                     .filter(buildWildcardFilter(keyword, includeCountry))
-                    .weight(100.0)
+                    .weight(10.0)  // 100 -> 10으로 감소
                 )
             )
             .scoreMode(FunctionScoreMode.Sum)
@@ -100,29 +100,27 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private Query buildBaseQuery(String keyword, boolean includeCountry) {
         BoolQuery.Builder builder = new BoolQuery.Builder()
-            .should(buildMatch("nameEn", keyword, 50.0f))
-            .should(buildMatch("nameKr", keyword, 50.0f))
-            .should(buildConditionalFuzzy("nameEn", keyword, 200.0f))
-            .should(buildConditionalFuzzy("nameKr", keyword, 200.0f))
-            .should(buildMatch("nameEn.jaso", keyword, 100.0f))
-            .should(buildMatch("nameKr.jaso", keyword, 100.0f))
-            .should(buildMatch("nameEn.autocomplete", keyword, 30.0f))
-            .should(buildMatch("nameKr.autocomplete", keyword, 30.0f))
-            .should(buildMatch("nameEn.ngram", keyword, 80.0f))
-            .should(buildMatch("nameKr.ngram", keyword, 80.0f))
-            .should(buildWildcard("nameKr", keyword, 20.0f))
-            .should(buildWildcard("nameEn", keyword, 20.0f));
+            .should(buildMatch("nameEn", keyword, 5.0f))
+            .should(buildMatch("nameKr", keyword, 5.0f))
+            .should(buildConditionalFuzzy("nameEn", keyword, 3.0f))
+            .should(buildConditionalFuzzy("nameKr", keyword, 3.0f))
+            .should(buildMatch("nameEn.jaso", keyword, 2.0f))
+            .should(buildMatch("nameKr.jaso", keyword, 2.0f))
+            .should(buildMatch("nameEn.autocomplete", keyword, 1.0f))
+            .should(buildMatch("nameKr.autocomplete", keyword, 1.0f))
+            .should(buildMatch("nameEn.ngram", keyword, 1.5f))
+            .should(buildMatch("nameKr.ngram", keyword, 1.5f));
 
         if (includeCountry) {
             builder
-                .should(buildMatch("countryNameEn", keyword, 25.0f))
-                .should(buildMatch("countryNameKr", keyword, 25.0f))
-                .should(buildMatch("countryNameEn.jaso", keyword, 50.0f))
-                .should(buildMatch("countryNameKr.jaso", keyword, 50.0f))
-                .should(buildMatch("countryNameEn.ngram", keyword, 40.0f))
-                .should(buildMatch("countryNameKr.ngram", keyword, 40.0f))
-                .should(buildConditionalFuzzy("countryNameEn", keyword, 50.0f))
-                .should(buildConditionalFuzzy("countryNameKr", keyword, 50.0f));
+                .should(buildMatch("countryNameEn", keyword, 2.0f))
+                .should(buildMatch("countryNameKr", keyword, 2.0f))
+                .should(buildMatch("countryNameEn.jaso", keyword, 1.0f))
+                .should(buildMatch("countryNameKr.jaso", keyword, 1.0f))
+                .should(buildMatch("countryNameEn.ngram", keyword, 0.5f))
+                .should(buildMatch("countryNameKr.ngram", keyword, 0.5f))
+                .should(buildConditionalFuzzy("countryNameEn", keyword, 1.0f))
+                .should(buildConditionalFuzzy("countryNameKr", keyword, 1.0f));
         }
 
         return builder.build()._toQuery();
@@ -160,7 +158,6 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         return builder.build()._toQuery();
     }
 
-    // 새로 추가: 자소 기반 Fuzzy 필터 (한글 오타 교정용)
     private Query buildJasoBasedFuzzyFilter(String keyword, boolean includeCountry) {
         if (keyword.length() <= 1) {
             return buildTerm("_id", "never_match");
@@ -175,7 +172,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 .fuzziness(fuzziness)
                 .prefixLength(0)
                 .maxExpansions(50)
-                .boost(20.0f)
+                .boost(2.0f)
             )._toQuery())
             .should(MatchQuery.of(m -> m
                 .field("nameEn.jaso")
@@ -183,7 +180,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 .fuzziness(fuzziness)
                 .prefixLength(0)
                 .maxExpansions(50)
-                .boost(10.0f)
+                .boost(1.5f)
             )._toQuery());
 
         if (includeCountry) {
@@ -194,7 +191,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                     .fuzziness(fuzziness)
                     .prefixLength(0)
                     .maxExpansions(50)
-                    .boost(5.0f)
+                    .boost(1.0f)
                 )._toQuery())
                 .should(MatchQuery.of(m -> m
                     .field("countryNameEn.jaso")
@@ -202,7 +199,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                     .fuzziness(fuzziness)
                     .prefixLength(0)
                     .maxExpansions(50)
-                    .boost(3.0f)
+                    .boost(0.5f)
                 )._toQuery());
         }
 
@@ -211,13 +208,13 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private Query buildJasoFilter(String keyword, boolean includeCountry) {
         BoolQuery.Builder builder = new BoolQuery.Builder()
-            .should(buildMatch("nameEn.jaso", keyword, 5.0f))
-            .should(buildMatch("nameKr.jaso", keyword, 5.0f));
+            .should(buildMatch("nameEn.jaso", keyword, 1.0f))
+            .should(buildMatch("nameKr.jaso", keyword, 1.0f));
 
         if (includeCountry) {
             builder
-                .should(buildMatch("countryNameEn.jaso", keyword, 2.0f))
-                .should(buildMatch("countryNameKr.jaso", keyword, 2.0f));
+                .should(buildMatch("countryNameEn.jaso", keyword, 0.5f))
+                .should(buildMatch("countryNameKr.jaso", keyword, 0.5f));
         }
 
         return builder.build()._toQuery();
@@ -229,13 +226,13 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         }
 
         BoolQuery.Builder builder = new BoolQuery.Builder()
-            .should(buildFuzzyQuery("nameEn", keyword, 10.0f))
-            .should(buildFuzzyQuery("nameKr", keyword, 10.0f));
+            .should(buildFuzzyQuery("nameEn", keyword, 2.0f))
+            .should(buildFuzzyQuery("nameKr", keyword, 2.0f));
 
         if (includeCountry) {
             builder
-                .should(buildFuzzyQuery("countryNameEn", keyword, 5.0f))
-                .should(buildFuzzyQuery("countryNameKr", keyword, 5.0f));
+                .should(buildFuzzyQuery("countryNameEn", keyword, 1.0f))
+                .should(buildFuzzyQuery("countryNameKr", keyword, 1.0f));
         }
 
         return builder.build()._toQuery();
@@ -248,14 +245,15 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
         if (includeCountry) {
             builder
-                .should(buildMatch("countryNameEn.autocomplete", keyword, 1.0f))
-                .should(buildMatch("countryNameKr.autocomplete", keyword, 1.0f));
+                .should(buildMatch("countryNameEn.autocomplete", keyword, 0.5f))
+                .should(buildMatch("countryNameKr.autocomplete", keyword, 0.5f));
         }
 
         return builder.build()._toQuery();
     }
 
     private Query buildWildcardFilter(String keyword, boolean includeCountry) {
+        // Wildcard는 가장 낮은 우선순위, 정확한 매칭이 없을 때만 사용
         BoolQuery.Builder builder = new BoolQuery.Builder()
             .should(buildWildcardQuery("nameKr.keyword", keyword + "*"))
             .should(buildWildcardQuery("nameEn.keyword", keyword + "*"));
@@ -295,19 +293,19 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
             .functions(
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordExactFilter(keywords))
-                    .weight(10000.0)
+                    .weight(100.0)  // 10000 -> 100으로 감소
                 ),
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordPrefixFilter(keywords))
-                    .weight(5000.0)
+                    .weight(50.0)  // 5000 -> 50으로 감소
                 ),
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordJasoFilter(keywords))
-                    .weight(3000.0)
+                    .weight(30.0)  // 3000 -> 30으로 감소
                 ),
                 FunctionScore.of(f -> f
                     .filter(buildMultiKeywordWildcardFilter(keywords))
-                    .weight(1000.0)
+                    .weight(10.0)  // 1000 -> 10으로 감소
                 )
             )
             .scoreMode(FunctionScoreMode.Sum)
@@ -317,16 +315,16 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private Query buildSingleKeywordQuery(String keyword) {
         return BoolQuery.of(b -> b
-            .should(buildMatch("nameEn", keyword, 5.0f))
-            .should(buildMatch("nameKr", keyword, 5.0f))
-            .should(buildMatch("countryNameEn", keyword, 10.0f))
-            .should(buildMatch("countryNameKr", keyword, 10.0f))
-            .should(buildMatch("nameEn.jaso", keyword, 50.0f))
-            .should(buildMatch("nameKr.jaso", keyword, 50.0f))
-            .should(buildMatch("countryNameEn.jaso", keyword, 70.0f))
-            .should(buildMatch("countryNameKr.jaso", keyword, 70.0f))
-            .should(buildConditionalFuzzy("nameEn", keyword, 20.0f))
-            .should(buildConditionalFuzzy("nameKr", keyword, 20.0f))
+            .should(buildMatch("nameEn", keyword, 1.0f))
+            .should(buildMatch("nameKr", keyword, 1.0f))
+            .should(buildMatch("countryNameEn", keyword, 2.0f))
+            .should(buildMatch("countryNameKr", keyword, 2.0f))
+            .should(buildMatch("nameEn.jaso", keyword, 1.5f))
+            .should(buildMatch("nameKr.jaso", keyword, 1.5f))
+            .should(buildMatch("countryNameEn.jaso", keyword, 2.5f))
+            .should(buildMatch("countryNameKr.jaso", keyword, 2.5f))
+            .should(buildConditionalFuzzy("nameEn", keyword, 0.5f))
+            .should(buildConditionalFuzzy("nameKr", keyword, 0.5f))
         )._toQuery();
     }
 
@@ -424,16 +422,6 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         )._toQuery();
     }
 
-    private Query buildWildcard(String field, String keyword, float boost) {
-        String pattern = "*" + (field.contains("En") ? keyword.toLowerCase() : keyword) + "*";
-        return WildcardQuery.of(w -> w
-            .field(field)
-            .value(pattern)
-            .boost(boost)
-            .caseInsensitive(true)
-        )._toQuery();
-    }
-
     private Query buildWildcardQuery(String field, String pattern) {
         return WildcardQuery.of(w -> w
             .field(field)
@@ -446,7 +434,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         return MatchQuery.of(m -> m
             .field(field)
             .query(keyword)
-            .minimumShouldMatch("70%")
+            .minimumShouldMatch("80%")  // 70% -> 80%로 증가하여 정확도 향상
         )._toQuery();
     }
 

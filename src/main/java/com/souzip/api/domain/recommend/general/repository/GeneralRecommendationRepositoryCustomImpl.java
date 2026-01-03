@@ -54,7 +54,7 @@ public class GeneralRecommendationRepositoryCustomImpl implements GeneralRecomme
         LocalDate now = LocalDate.now();
 
         return queryFactory
-                .select(c.nameKr, s.id.count())
+                .select(c.code, c.nameKr, s.id.count())
                 .from(s)
                 .join(c).on(s.countryCode.eq(c.code))
                 .where(
@@ -62,12 +62,13 @@ public class GeneralRecommendationRepositoryCustomImpl implements GeneralRecomme
                         s.createdAt.year().eq(now.getYear()),
                         s.createdAt.month().eq(now.getMonthValue())
                 )
-                .groupBy(c.nameKr)
+                .groupBy(c.code, c.nameKr)
                 .orderBy(s.id.count().desc())
                 .limit(3)
                 .fetch()
                 .stream()
                 .map(tuple -> new GeneralRecommendationStatsDto(
+                        tuple.get(c.code),
                         tuple.get(c.nameKr),
                         tuple.get(s.id.count())
                 ))

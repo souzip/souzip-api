@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record MySouvenirResponse(
     Long id,
     String thumbnailUrl,
+    String countryCode,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {
@@ -14,6 +15,7 @@ public record MySouvenirResponse(
         return new MySouvenirResponse(
             souvenir.getId(),
             thumbnailUrl,
+            souvenir.getCountryCode(),
             souvenir.getCreatedAt(),
             souvenir.getUpdatedAt()
         );

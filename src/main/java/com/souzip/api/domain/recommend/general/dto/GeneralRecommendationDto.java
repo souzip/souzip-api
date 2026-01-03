@@ -7,6 +7,7 @@ public record GeneralRecommendationDto(
         Long id,
         String name,
         Category category,
+        String countryCode,
         String thumbnailUrl
 ) {
     public static GeneralRecommendationDto of(Souvenir souvenir, String thumbnailUrl) {
@@ -14,6 +15,7 @@ public record GeneralRecommendationDto(
                 souvenir.getId(),
                 souvenir.getName(),
                 souvenir.getCategory(),
+                souvenir.getCountryCode(),
                 thumbnailUrl
         );
     }

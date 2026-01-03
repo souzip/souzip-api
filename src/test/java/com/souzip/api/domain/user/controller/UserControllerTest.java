@@ -545,11 +545,13 @@ class UserControllerTest extends RestDocsSupport {
             new MySouvenirResponse(
                 1L,
                 "https://example.com/image1.jpg",
+                "KR",
                 LocalDateTime.of(2024, 1, 15, 10, 30),
                 LocalDateTime.of(2024, 1, 20, 15, 0)
             ),
             new MySouvenirResponse(
                 2L,
+                "KR",
                 "https://example.com/image2.jpg",
                 LocalDateTime.of(2024, 1, 10, 9, 0),
                 LocalDateTime.of(2024, 1, 10, 9, 0)
@@ -574,6 +576,7 @@ class UserControllerTest extends RestDocsSupport {
             .andExpect(jsonPath("$.data.souvenirs.length()").value(2))
             .andExpect(jsonPath("$.data.souvenirs[0].id").value(1))
             .andExpect(jsonPath("$.data.souvenirs[0].thumbnailUrl").value("https://example.com/image1.jpg"))
+            .andExpect(jsonPath("$.data.souvenirs[0].countryCode").value("KR"))
             .andExpect(jsonPath("$.data.souvenirs[0].createdAt").exists())
             .andExpect(jsonPath("$.data.souvenirs[0].updatedAt").exists())
             .andExpect(jsonPath("$.data.pagination.currentPage").value(1))
@@ -597,6 +600,8 @@ class UserControllerTest extends RestDocsSupport {
                         .description("기념품 ID"),
                     fieldWithPath("data.souvenirs[].thumbnailUrl").type(JsonFieldType.STRING)
                         .description("썸네일 이미지 URL"),
+                    fieldWithPath("data.souvenirs[].countryCode").type(JsonFieldType.STRING)
+                        .description("기념품 국가 코드"),
                     fieldWithPath("data.souvenirs[].createdAt").type(JsonFieldType.STRING)
                         .description("생성일시"),
                     fieldWithPath("data.souvenirs[].updatedAt").type(JsonFieldType.STRING)
@@ -627,6 +632,7 @@ class UserControllerTest extends RestDocsSupport {
             new MySouvenirResponse(
                 3L,
                 null,
+                "KR",
                 LocalDateTime.of(2024, 1, 5, 10, 0),
                 LocalDateTime.of(2024, 1, 5, 10, 0)
             )
@@ -665,6 +671,8 @@ class UserControllerTest extends RestDocsSupport {
                         .description("기념품 ID"),
                     fieldWithPath("data.souvenirs[].thumbnailUrl").type(JsonFieldType.NULL)
                         .description("썸네일 이미지 URL"),
+                    fieldWithPath("data.souvenirs[].countryCode").type(JsonFieldType.STRING)
+                        .description("기념품 국가 코드"),
                     fieldWithPath("data.souvenirs[].createdAt").type(JsonFieldType.STRING)
                         .description("생성일시"),
                     fieldWithPath("data.souvenirs[].updatedAt").type(JsonFieldType.STRING)

@@ -11,12 +11,9 @@ public record MySouvenirListResponse(
     public record PaginationInfo(
         int currentPage,
         int pageSize,
-        long totalItems,
+        long totalElements,
         int totalPages,
-        boolean first,
-        boolean last,
-        boolean hasNext,
-        boolean hasPrevious
+        boolean hasNext
     ) {}
 
     public static MySouvenirListResponse from(Page<MySouvenirResponse> page) {
@@ -25,10 +22,7 @@ public record MySouvenirListResponse(
             page.getSize(),
             page.getTotalElements(),
             page.getTotalPages(),
-            page.isFirst(),
-            page.isLast(),
-            page.hasNext(),
-            page.hasPrevious()
+            page.hasNext()
         );
         return new MySouvenirListResponse(page.getContent(), pagination);
     }

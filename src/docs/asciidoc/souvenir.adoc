@@ -55,7 +55,6 @@ include::{snippets}/souvenirs/create-souvenir/http-request.adoc[]
 |JSON
 |O
 |수정할 기념품 정보
-|===
 
 |files
 |File[]

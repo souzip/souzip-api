@@ -6,16 +6,16 @@ import java.time.LocalDateTime;
 
 public record MySouvenirResponse(
     Long id,
-    String countryCode,
     String thumbnailUrl,
+    String countryCode,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {
     public static MySouvenirResponse of(Souvenir souvenir, String thumbnailUrl) {
         return new MySouvenirResponse(
             souvenir.getId(),
-            souvenir.getCountryCode(),
             thumbnailUrl,
+            souvenir.getCountryCode(),
             souvenir.getCreatedAt(),
             souvenir.getUpdatedAt()
         );

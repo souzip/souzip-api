@@ -1351,7 +1351,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "카카오 API 호출에 실패했습니다."
 }</code></pre>
 </div>
@@ -1817,7 +1817,7 @@ Content-Type: application/json
 Content-Length: 98
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "지원하지 않는 로그인 방식입니다: naver"
 }</code></pre>
 </div>
@@ -1940,7 +1940,7 @@ Content-Type: application/json
 Content-Length: 103
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "지원하지 않는 로그인 방식입니다: invalid123"
 }</code></pre>
 </div>
@@ -2292,7 +2292,7 @@ Content-Type: application/json
 Content-Length: 79
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "만료된 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -2393,7 +2393,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "유효하지 않은 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -3235,7 +3235,7 @@ Content-Type: application/json
 Content-Length: 93
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "필수 약관에 모두 동의해야 합니다."
 }</code></pre>
 </div>
@@ -3386,7 +3386,7 @@ Content-Type: application/json
 Content-Length: 86
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "이미 사용 중인 닉네임입니다."
 }</code></pre>
 </div>
@@ -3537,7 +3537,7 @@ Content-Type: application/json
 Content-Length: 95
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "이미 온보딩을 완료한 사용자입니다."
 }</code></pre>
 </div>
@@ -3688,7 +3688,7 @@ Content-Type: application/json
 Content-Length: 88
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "유효하지 않은 카테고리입니다."
 }</code></pre>
 </div>
@@ -3839,7 +3839,7 @@ Content-Type: application/json
 Content-Length: 102
 
 {
-  "traceId" : "496d3425",
+  "traceId" : "6dd08c7f",
   "message" : "유효하지 않은 프로필 이미지 색상입니다."
 }</code></pre>
 </div>
@@ -4183,18 +4183,20 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 544
+Content-Length: 600
 
 {
   "data" : {
     "souvenirs" : [ {
       "id" : 1,
       "thumbnailUrl" : "https://example.com/image1.jpg",
+      "countryCode" : "KR",
       "createdAt" : "2024-01-15T10:30:00",
       "updatedAt" : "2024-01-20T15:00:00"
     }, {
       "id" : 2,
-      "thumbnailUrl" : "https://example.com/image2.jpg",
+      "thumbnailUrl" : "KR",
+      "countryCode" : "https://example.com/image2.jpg",
       "createdAt" : "2024-01-10T09:00:00",
       "updatedAt" : "2024-01-10T09:00:00"
     } ],
@@ -4257,6 +4259,12 @@ Content-Length: 544
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">썸네일 이미지 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.souvenirs[].countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 국가 코드</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.souvenirs[].createdAt</p></td>
@@ -4360,13 +4368,14 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 350
+Content-Length: 378
 
 {
   "data" : {
     "souvenirs" : [ {
       "id" : 3,
       "thumbnailUrl" : null,
+      "countryCode" : "KR",
       "createdAt" : "2024-01-05T10:00:00",
       "updatedAt" : "2024-01-05T10:00:00"
     } ],
@@ -4430,6 +4439,12 @@ Content-Length: 350
 <td class="tableblock halign-left valign-top"><p class="tableblock">Null</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">썸네일 이미지 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data.souvenirs[].countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 국가 코드</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data.souvenirs[].createdAt</p></td>
@@ -4902,7 +4917,7 @@ Host: localhost:8080
 Content-Disposition: form-data; name=souvenir; filename=souvenir.json
 Content-Type: application/json
 
-{"name":"테스트 기념품","localPrice":10000,"currencySymbol":"$","krwPrice":95000,"description":"테스트 설명","address":"617 N MAIN FALLBROOK CA 92028-1934 USA","locationDetail":"2층 빨간색 간판이 있는 장소","latitude":35.689487,"longitude":139.691706,"category":"SOUVENIR_BASIC","purpose":"GIFT","countryCode":"US"}
+{"name":"테스트 기념품","localPrice":10000,"currencySymbol":"$","krwPrice":95000,"description":"테스트 설명","address":"617 N MAIN FALLBROOK CA 92028-1934 USA","locationDetail":"2층 빨간색 간판이 있는 장소","latitude":35.689487,"longitude":139.691706,"category":"SOUVENIR_BASIC","purpose":"GIFT","countryCode":"US","files":[]}
 --6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm
 Content-Disposition: form-data; name=files; filename=file1.jpg
 Content-Type: image/jpeg
@@ -4948,23 +4963,31 @@ dummy content
 <h4 id="_part_multipartform_data에서_전달되는_파트"><a class="link" href="#_part_multipartform_data에서_전달되는_파트">Part (multipart/form-data에서 전달되는 파트)</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 16.6666%;">
+<col style="width: 50.0002%;">
 </colgroup>
 <thead>
 <tr>
-<th class="tableblock halign-left valign-top">Part</th>
-<th class="tableblock halign-left valign-top">Description</th>
+<th class="tableblock halign-left valign-top">파트명</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">필수</th>
+<th class="tableblock halign-left valign-top">설명</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>souvenir</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 정보(JSON) (필수)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">souvenir</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">JSON</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정할 기념품 정보</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>files</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">업로드 이미지 파일 리스트 (필수)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">files</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">File[]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">업로드할 이미지 파일 목록</p></td>
 </tr>
 </tbody>
 </table>
@@ -5074,6 +5097,12 @@ dummy content
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">files</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">빈 리스트로 전송 (파일은 multipart로 전송됨)</p></td>
 </tr>
 </tbody>
 </table>
@@ -6099,58 +6128,68 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 1418
+Content-Length: 1678
 
 {
   "data" : [ {
     "id" : 1,
     "name" : "기념품 1",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb1.jpg"
   }, {
     "id" : 2,
     "name" : "기념품 2",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb2.jpg"
   }, {
     "id" : 3,
     "name" : "기념품 3",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb3.jpg"
   }, {
     "id" : 4,
     "name" : "기념품 4",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb4.jpg"
   }, {
     "id" : 5,
     "name" : "기념품 5",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb5.jpg"
   }, {
     "id" : 6,
     "name" : "기념품 6",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb6.jpg"
   }, {
     "id" : 7,
     "name" : "기념품 7",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb7.jpg"
   }, {
     "id" : 8,
     "name" : "기념품 8",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb8.jpg"
   }, {
     "id" : 9,
     "name" : "기념품 9",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb9.jpg"
   }, {
     "id" : 10,
     "name" : "기념품 10",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb10.jpg"
   } ],
   "message" : ""
@@ -6203,6 +6242,12 @@ Content-Length: 1418
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">기념품 카테고리</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 국가 코드</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].thumbnailUrl</p></td>
@@ -6287,58 +6332,68 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 1418
+Content-Length: 1678
 
 {
   "data" : [ {
     "id" : 1,
     "name" : "기념품 1",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb1.jpg"
   }, {
     "id" : 2,
     "name" : "기념품 2",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb2.jpg"
   }, {
     "id" : 3,
     "name" : "기념품 3",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb3.jpg"
   }, {
     "id" : 4,
     "name" : "기념품 4",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb4.jpg"
   }, {
     "id" : 5,
     "name" : "기념품 5",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb5.jpg"
   }, {
     "id" : 6,
     "name" : "기념품 6",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb6.jpg"
   }, {
     "id" : 7,
     "name" : "기념품 7",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb7.jpg"
   }, {
     "id" : 8,
     "name" : "기념품 8",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb8.jpg"
   }, {
     "id" : 9,
     "name" : "기념품 9",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb9.jpg"
   }, {
     "id" : 10,
     "name" : "기념품 10",
     "category" : "SOUVENIR_BASIC",
+    "countryCode" : "JP",
     "thumbnailUrl" : "https://example.com/thumb10.jpg"
   } ],
   "message" : ""
@@ -6393,6 +6448,12 @@ Content-Length: 1418
 <td class="tableblock halign-left valign-top"><p class="tableblock">기념품 카테고리</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 국가 코드</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].thumbnailUrl</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
@@ -6432,16 +6493,19 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 232
+Content-Length: 310
 
 {
   "data" : [ {
+    "countryCode" : "KR",
     "countryNameKr" : "대한민국",
     "souvenirCount" : 15
   }, {
+    "countryCode" : "JP",
     "countryNameKr" : "일본",
     "souvenirCount" : 10
   }, {
+    "countryCode" : "US",
     "countryNameKr" : "미국",
     "souvenirCount" : 7
   } ],
@@ -6483,6 +6547,12 @@ Content-Length: 232
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">나라명 (한글)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">나라 코드</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirCount</p></td>

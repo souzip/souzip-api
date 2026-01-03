@@ -64,6 +64,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("기념품 이름"),
                                 fieldWithPath("data[].category").type(JsonFieldType.STRING).description("기념품 카테고리"),
+                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
                                 fieldWithPath("data[].thumbnailUrl").type(JsonFieldType.STRING).description("대표 이미지 URL"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )
@@ -101,6 +102,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("기념품 이름"),
                                 fieldWithPath("data[].category").type(JsonFieldType.STRING).description("기념품 카테고리"),
+                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
                                 fieldWithPath("data[].thumbnailUrl").type(JsonFieldType.STRING).description("대표 이미지 URL"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )

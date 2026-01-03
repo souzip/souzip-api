@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public record SearchResponse(
+    Long id,
     String type,
     String name,
     String nameEn,
@@ -17,6 +18,7 @@ public record SearchResponse(
 ) {
     public static SearchResponse from(LocationDocument document, Float score, Map<String, List<String>> highlight) {
         return new SearchResponse(
+            document.getEntityId(),
             document.getType(),
             document.getNameKr(),
             document.getNameEn(),

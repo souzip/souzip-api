@@ -1,0 +1,33 @@
+[[search]]
+== 검색 API
+
+=== 위치 검색
+
+==== 한글 도시명으로 검색
+operation::search/locations-korean-city[snippets='http-request,request-parameters,http-response,response-fields']
+
+==== 영문 도시명으로 검색
+operation::search/locations-english-city[snippets='http-request,request-parameters,http-response,response-fields']
+
+==== 국가명으로 검색
+국가명으로 검색하면 해당 국가와 국가 내 도시들이 함께 반환됩니다.
+
+operation::search/locations-country[snippets='http-request,request-parameters,http-response,response-fields']
+
+==== 복수 키워드로 검색
+공백으로 구분된 여러 키워드를 사용하여 검색할 수 있습니다.
+
+operation::search/locations-multiple-keywords[snippets='http-request,request-parameters,http-response,response-fields']
+
+==== 검색 결과가 없는 경우
+operation::search/locations-no-results[snippets='http-request,request-parameters,http-response,response-fields']
+
+==== 빈 검색어 에러
+operation::search/locations-empty-keyword[snippets='http-request,request-parameters,http-response,response-fields']
+
+=== 검색 인덱스 관리
+
+==== 전체 재인덱싱
+모든 국가 및 도시 데이터를 Elasticsearch에 다시 색인합니다.
+
+operation::search/reindex[snippets='http-request,http-response,response-fields']

@@ -1,29 +1,16 @@
 package com.souzip.api.domain.souvenir.dto;
 
+import com.souzip.api.global.common.dto.pagination.PaginationResponse.PageInfo;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public record MySouvenirListResponse(
     List<MySouvenirResponse> souvenirs,
-    PaginationInfo pagination
+    PageInfo pagination
 ) {
-    public record PaginationInfo(
-        int currentPage,
-        int pageSize,
-        long totalElements,
-        int totalPages,
-        boolean hasNext
-    ) {}
-
     public static MySouvenirListResponse from(Page<MySouvenirResponse> page) {
-        PaginationInfo pagination = new PaginationInfo(
-            page.getNumber(),
-            page.getSize(),
-            page.getTotalElements(),
-            page.getTotalPages(),
-            page.hasNext()
-        );
+        PageInfo pagination = PageInfo.of(page);
         return new MySouvenirListResponse(page.getContent(), pagination);
     }
 }

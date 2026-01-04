@@ -32,21 +32,34 @@ public class AiRecommendationService {
     private final FileService fileService;
 
     public AiRecommendationResponse getCategoryRecommendationsForUser(Long userId) {
+        log.info("getCategoryRecommendationsForUser 시작, userId={}", userId);
+
         List<String> categoryNames = jdbcTemplate.queryForList(
                 "SELECT category FROM user_category WHERE user_id = ?",
                 String.class,
                 userId
         );
+        log.info("사용자 카테고리 조회: {}", categoryNames);
+
         List<Category> preferredCategories = categoryNames.stream()
                 .map(Category::valueOf)
                 .toList();
+        log.info("Category enum 변환: {}", preferredCategories);
 
         Map<String, List<Souvenir>> souvenirsByCategory = loadSouvenirsByPreferredCategory(preferredCategories);
+        log.info("선호 카테고리별 souvenirs 개수: {}",
+                souvenirsByCategory.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size()))
+        );
 
         String prompt = buildPromptForCategories(souvenirsByCategory);
+        log.info("Clova Prompt: {}", prompt);
+
         String clovaResponse = callClova(prompt);
+        log.info("Clova Response: {}", clovaResponse);
 
         Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
+        log.info("추천 이름 파싱: {}", recommendedNamesByCategory);
 
         return new AiRecommendationResponse(
                 mapToRecommendedSouvenirs(recommendedNamesByCategory)
@@ -54,16 +67,23 @@ public class AiRecommendationService {
     }
 
     public AiRecommendationResponse getRecentSouvenirRecommendations(Long userId) {
+        log.info("getRecentSouvenirRecommendations 시작, userId={}", userId);
+
         var latestOpt = aiRecommendationRepository.findLatestByUserId(userId);
+        log.info("사용자 최근 souvenir 조회: present={}", latestOpt.isPresent());
+
         if (latestOpt.isEmpty()) {
             return new AiRecommendationResponse(Collections.emptyList());
         }
         var latest = latestOpt.get();
+        log.info("최근 souvenir: id={}, name={}", latest.getId(), latest.getName());
 
         String countryCode = latest.getCountryCode();
         List<String> recentNames = List.of(latest.getName());
 
         List<Souvenir> candidateSouvenirs = aiRecommendationRepository.findAllByCountryCode(countryCode);
+        log.info("국가({})에 해당하는 후보 souvenirs 개수: {}", countryCode, candidateSouvenirs.size());
+
         if (candidateSouvenirs.isEmpty()) {
             return new AiRecommendationResponse(Collections.emptyList());
         }
@@ -73,12 +93,16 @@ public class AiRecommendationService {
                 String.class,
                 userId
         );
+        log.info("사용자 카테고리 조회: {}", categoryNames);
 
         String prompt = buildPromptForRecentSouvenir(candidateSouvenirs, recentNames, categoryNames, countryCode);
+        log.info("Clova Prompt: {}", prompt);
 
         String clovaResponse = callClova(prompt);
+        log.info("Clova Response: {}", clovaResponse);
 
         Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
+        log.info("추천 이름 파싱: {}", recommendedNamesByCategory);
 
         List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs =
                 recommendedNamesByCategory.values().stream()
@@ -95,6 +119,7 @@ public class AiRecommendationService {
                         ))
                         .collect(Collectors.toList());
 
+        log.info("최종 추천 souvenirs 개수: {}", finalSouvenirs.size());
         return new AiRecommendationResponse(finalSouvenirs);
     }
 

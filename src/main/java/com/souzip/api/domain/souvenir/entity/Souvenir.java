@@ -1,12 +1,15 @@
 package com.souzip.api.domain.souvenir.entity;
 
 import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.file.entity.File;
 import com.souzip.api.global.entity.BaseEntity;
 import com.souzip.api.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
@@ -64,6 +67,9 @@ public class Souvenir extends BaseEntity {
     @Builder.Default
     @Column(nullable = false)
     private Boolean isOwned = false;
+
+    @OneToMany(mappedBy = "souvenir", fetch = FetchType.LAZY)
+    private List<File> files = new ArrayList<>();
 
     public static Souvenir of(
             String name,

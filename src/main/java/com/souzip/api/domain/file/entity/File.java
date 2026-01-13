@@ -1,5 +1,6 @@
 package com.souzip.api.domain.file.entity;
 
+import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -47,6 +48,10 @@ public class File extends BaseEntity {
     @Column(nullable = false)
     @Builder.Default
     private Integer displayOrder = 1;
+
+    @ManyToOne
+    @JoinColumn(name = "souvenir_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Souvenir souvenir;
 
     public static File of(
         String entityType,

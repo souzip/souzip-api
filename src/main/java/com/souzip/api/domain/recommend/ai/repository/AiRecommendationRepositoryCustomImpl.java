@@ -2,6 +2,7 @@ package com.souzip.api.domain.recommend.ai.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.file.entity.QFile;
 import com.souzip.api.domain.souvenir.entity.QSouvenir;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,10 @@ public class AiRecommendationRepositoryCustomImpl implements AiRecommendationRep
     @Override
     public List<Souvenir> findAllByCategory(Category category) {
         QSouvenir s = QSouvenir.souvenir;
+        QFile f = QFile.file;
 
         return queryFactory.selectFrom(s)
+                .leftJoin(s.files, f).fetchJoin()
                 .where(s.category.eq(category).and(s.deleted.eq(false)))
                 .fetch();
     }
@@ -28,32 +31,36 @@ public class AiRecommendationRepositoryCustomImpl implements AiRecommendationRep
     @Override
     public Optional<Souvenir> findLatestByUserId(Long userId) {
         QSouvenir s = QSouvenir.souvenir;
+        QFile f = QFile.file;
 
-        return Optional.ofNullable(
-                queryFactory.selectFrom(s)
-                        .where(s.user.id.eq(userId)
-                                .and(s.deleted.eq(false)))
-                        .orderBy(s.createdAt.desc())
-                        .fetchFirst()
-        );
+        Souvenir latest = queryFactory.selectFrom(s)
+                .leftJoin(s.files, f).fetchJoin()
+                .where(s.user.id.eq(userId).and(s.deleted.eq(false)))
+                .orderBy(s.createdAt.desc())
+                .fetchFirst();
+
+        return Optional.ofNullable(latest);
     }
 
     @Override
     public List<Souvenir> findAllByCountryCode(String countryCode) {
         QSouvenir s = QSouvenir.souvenir;
+        QFile f = QFile.file;
 
         return queryFactory.selectFrom(s)
-                .where(s.countryCode.eq(countryCode)
-                        .and(s.deleted.eq(false)))
-                .limit(30)
+                .leftJoin(s.files, f).fetchJoin()
+                .where(s.countryCode.eq(countryCode).and(s.deleted.eq(false)))
+                .limit(10)
                 .fetch();
     }
 
     @Override
     public Optional<Souvenir> findByName(String name) {
         QSouvenir s = QSouvenir.souvenir;
+        QFile f = QFile.file;
 
         Souvenir souvenir = queryFactory.selectFrom(s)
+                .leftJoin(s.files, f).fetchJoin()
                 .where(s.name.eq(name).and(s.deleted.eq(false)))
                 .fetchFirst();
 

@@ -60,4 +60,6 @@ jobs:
               -e NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }} \
               -e NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }} \
               -e GEOCODING_API_KEY=${{ secrets.GEOCODING_API_KEY }} \
+              -e CLOVA_STUDIO_API_KEY=${{ secrets.CLOVA_STUDIO_API_KEY }} \
+              -e CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }} \
               souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest

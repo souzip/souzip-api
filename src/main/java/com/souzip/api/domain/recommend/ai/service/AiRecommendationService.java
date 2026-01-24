@@ -3,6 +3,7 @@ package com.souzip.api.domain.recommend.ai.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.file.dto.FileResponse;
 import com.souzip.api.domain.file.service.FileService;
 import com.souzip.api.domain.recommend.ai.dto.AiRecommendationResponse;
 import com.souzip.api.domain.recommend.ai.repository.AiRecommendationRepositoryCustom;
@@ -180,21 +181,33 @@ public class AiRecommendationService {
     }
 
     private List<AiRecommendationResponse.RecommendedSouvenir> mapToRecommendedSouvenirs(
-            Map<String, List<String>> recommendedNames
+        Map<String, List<String>> recommendedNamesByCategory
     ) {
-        return recommendedNames.values().stream()
-                .flatMap(List::stream)
-                .map(aiRecommendationRepository::findByName)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
-                        s.getId(),
-                        s.getName(),
-                        s.getCategory().name(),
-                        s.getCountryCode(),
-                        getThumbnailUrl(s.getId())
-                ))
-                .collect(Collectors.toList());
+        List<Souvenir> souvenirs = recommendedNamesByCategory.values().stream()
+            .flatMap(List::stream)
+            .map(aiRecommendationRepository::findByName)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .toList();
+
+        List<Long> souvenirIds = souvenirs.stream()
+            .map(Souvenir::getId)
+            .toList();
+
+        Map<Long, FileResponse> thumbnailMap = fileService
+            .getThumbnailsByEntityIds("Souvenir", souvenirIds);
+
+        return souvenirs.stream()
+            .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
+                s.getId(),
+                s.getName(),
+                s.getCategory().name(),
+                s.getCountryCode(),
+                Optional.ofNullable(thumbnailMap.get(s.getId()))
+                    .map(FileResponse::url)
+                    .orElse(null)
+            ))
+            .collect(Collectors.toList());
     }
 
     private String getThumbnailUrl(Long souvenirId) {

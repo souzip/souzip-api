@@ -8,45 +8,69 @@ import com.souzip.api.domain.recommend.general.repository.GeneralRecommendationR
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class GeneralRecommendationService {
 
-    private final GeneralRecommendationRepositoryCustom generalRecommendationRepositoryCustom;
+    private final GeneralRecommendationRepositoryCustom generalRecommendationRepository;
     private final FileService fileService;
 
     public List<GeneralRecommendationDto> getTop10ByCategory(String categoryName) {
-        List<Souvenir> souvenirs = generalRecommendationRepositoryCustom.findTop10ByCategoryRecent(categoryName);
+        List<Souvenir> souvenirs = generalRecommendationRepository
+            .findTop10ByCategoryRecent(categoryName);
+
+        List<Long> souvenirIds = souvenirs.stream()
+            .map(Souvenir::getId)
+            .toList();
+
+        Map<Long, FileResponse> thumbnailMap = fileService
+            .getThumbnailsByEntityIds("Souvenir", souvenirIds);
 
         return souvenirs.stream()
-                .map(souvenir -> {
-                    String thumbnailUrl = getThumbnailUrl(souvenir.getId());
-                    return GeneralRecommendationDto.of(souvenir, thumbnailUrl);
-                })
-                .collect(Collectors.toList());
+            .map(s -> new GeneralRecommendationDto(
+                s.getId(),
+                s.getName(),
+                s.getCategory(),
+                s.getCountryCode(),
+                Optional.ofNullable(thumbnailMap.get(s.getId()))
+                    .map(FileResponse::url)
+                    .orElse(null)
+            ))
+            .toList();
     }
 
     public List<GeneralRecommendationDto> getTop10ByCountry(String countryCode) {
-        List<Souvenir> souvenirs = generalRecommendationRepositoryCustom.findTop10ByCountry(countryCode);
+        List<Souvenir> souvenirs = generalRecommendationRepository
+            .findTop10ByCountry(countryCode);
+
+        List<Long> souvenirIds = souvenirs.stream()
+            .map(Souvenir::getId)
+            .toList();
+
+        Map<Long, FileResponse> thumbnailMap = fileService
+            .getThumbnailsByEntityIds("Souvenir", souvenirIds);
 
         return souvenirs.stream()
-                .map(souvenir -> {
-                    String thumbnailUrl = getThumbnailUrl(souvenir.getId());
-                    return GeneralRecommendationDto.of(souvenir, thumbnailUrl);
-                })
-                .collect(Collectors.toList());
-    }
-
-    private String getThumbnailUrl(Long souvenirId) {
-        FileResponse firstFile = fileService.getFirstFile("Souvenir", souvenirId);
-        return firstFile.url();
+            .map(s -> new GeneralRecommendationDto(
+                s.getId(),
+                s.getName(),
+                s.getCategory(),
+                s.getCountryCode(),
+                Optional.ofNullable(thumbnailMap.get(s.getId()))
+                    .map(FileResponse::url)
+                    .orElse(null)
+            ))
+            .toList();
     }
 
     public List<GeneralRecommendationStatsDto> getTop3CountriesByCurrentMonth() {
-        return generalRecommendationRepositoryCustom.findTop3CountriesByCurrentMonth();
+        return generalRecommendationRepository.findTop3CountriesByCurrentMonth();
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,7 +32,6 @@ public class FileService {
         MultipartFile file,
         Integer displayOrder
     ) {
-
         String storageKey = fileStorageService.uploadFile(userId, file);
         Integer order = getDisplayOrder(entityType, entityId, displayOrder);
 
@@ -59,6 +60,25 @@ public class FileService {
             .orElseThrow(() -> new BusinessException(ErrorCode.FILE_NOT_FOUND));
 
         return toFileResponse(file);
+    }
+
+    // ✅ 추가: 여러 엔티티의 썸네일을 한 번에 조회 (Map 반환)
+    public Map<Long, FileResponse> getThumbnailsByEntityIds(
+        String entityType,
+        List<Long> entityIds
+    ) {
+        if (entityIds == null || entityIds.isEmpty()) {
+            return Map.of();
+        }
+
+        List<File> files = fileRepository.findThumbnailsByEntityIds(entityType, entityIds);
+
+        return files.stream()
+            .collect(Collectors.toMap(
+                File::getEntityId,
+                this::toFileResponse,
+                (existing, replacement) -> existing  // 중복 시 기존 값 유지
+            ));
     }
 
     @Transactional

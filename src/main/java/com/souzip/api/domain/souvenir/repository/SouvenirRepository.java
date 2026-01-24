@@ -10,10 +10,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
+public interface SouvenirRepository extends JpaRepository<Souvenir, Long>, SouvenirRepositoryCustom {
+
     Optional<Souvenir> findByIdAndDeletedFalse(Long id);
+    Page<Souvenir> findByUserAndDeletedFalse(User user, Pageable pageable);
 
     @Query(value = """
     SELECT s.id,
@@ -45,9 +46,7 @@ public interface SouvenirRepository extends JpaRepository<Souvenir, Long> {
     LIMIT 10
     """, nativeQuery = true)
     List<Object[]> findNearbySouvenirs(
-            @Param("latitude") double latitude,
-            @Param("longitude") double longitude,
-            @Param("radiusMeter") double radiusMeter);
-
-    Page<Souvenir> findByUserAndDeletedFalse(User user, Pageable pageable);
+        @Param("latitude") double latitude,
+        @Param("longitude") double longitude,
+        @Param("radiusMeter") double radiusMeter);
 }

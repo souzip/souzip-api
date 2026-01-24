@@ -20,6 +20,8 @@ import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -88,20 +90,27 @@ public class UserService {
 
     public MySouvenirListResponse getMySouvenirs(Long userId, int page, int size) {
         User user = findUserById(userId);
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Souvenir> souvenirPage = souvenirRepository.findByUserAndDeletedFalse(user, pageable);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // ⚡ 개선: Custom Repository 사용 (User Fetch Join)
+        Page<Souvenir> souvenirPage = souvenirRepository.findByUserWithUser(user, pageable);
+
+        // ⚡ 개선: 모든 기념품 ID를 한 번에 조회
+        List<Long> souvenirIds = souvenirPage.getContent().stream()
+            .map(Souvenir::getId)
+            .toList();
+
+        Map<Long, FileResponse> thumbnailMap = fileService
+            .getThumbnailsByEntityIds("Souvenir", souvenirIds);
 
         Page<MySouvenirResponse> responsePage = souvenirPage.map(souvenir -> {
-            String thumbnailUrl = getThumbnailUrl(souvenir.getId());
+            String thumbnailUrl = Optional.ofNullable(thumbnailMap.get(souvenir.getId()))
+                .map(FileResponse::url)
+                .orElse(null);
             return MySouvenirResponse.of(souvenir, thumbnailUrl);
         });
 
         return MySouvenirListResponse.from(responsePage);
-    }
-
-    private String getThumbnailUrl(Long souvenirId) {
-        FileResponse firstFile = fileService.getFirstFile("Souvenir", souvenirId);
-        return firstFile.url();
     }
 
     private User findUserById(Long userId) {

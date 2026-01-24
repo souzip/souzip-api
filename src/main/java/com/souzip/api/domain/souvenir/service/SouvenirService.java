@@ -81,8 +81,8 @@ public class SouvenirService {
 
         String userId = extractUserId(authorizationHeader);
 
-        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(souvenirId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
+        Souvenir souvenir = souvenirRepository.findByIdWithUser(souvenirId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
         List<FileResponse> files = fileService.getFilesByEntity("Souvenir", souvenirId);
 
@@ -156,8 +156,8 @@ public class SouvenirService {
     ) {
         requireUserId(userId);
 
-        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
+        Souvenir souvenir = souvenirRepository.findByIdWithUser(id)
+            .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
         if (!souvenir.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
@@ -192,8 +192,9 @@ public class SouvenirService {
     @Transactional
     public void deleteSouvenir(Long id, Long userId) {
         requireUserId(userId);
-        Souvenir souvenir = souvenirRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
+
+        Souvenir souvenir = souvenirRepository.findByIdWithUser(id)
+            .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
 
         if (!souvenir.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);

@@ -90,12 +90,10 @@ public class UserService {
 
     public MySouvenirListResponse getMySouvenirs(Long userId, int page, int size) {
         User user = findUserById(userId);
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // ⚡ 개선: Custom Repository 사용 (User Fetch Join)
         Page<Souvenir> souvenirPage = souvenirRepository.findByUserWithUser(user, pageable);
 
-        // ⚡ 개선: 모든 기념품 ID를 한 번에 조회
         List<Long> souvenirIds = souvenirPage.getContent().stream()
             .map(Souvenir::getId)
             .toList();

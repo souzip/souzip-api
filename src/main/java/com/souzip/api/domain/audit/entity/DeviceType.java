@@ -1,4 +1,4 @@
-package com.souzip.api.domain.audit;
+package com.souzip.api.domain.audit.entity;
 
 import java.util.Arrays;
 

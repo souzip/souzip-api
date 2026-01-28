@@ -1,5 +1,7 @@
 package com.souzip.api.domain.auth.service;
 
+import com.souzip.api.domain.audit.entity.AuditAction;
+import com.souzip.api.global.audit.annotation.Audit;
 import com.souzip.api.domain.auth.client.OAuthClient;
 import com.souzip.api.domain.auth.client.OAuthClientFactory;
 import com.souzip.api.domain.auth.dto.LoginResponse;
@@ -35,6 +37,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Audit(action = AuditAction.LOGIN)
     @Transactional
     public LoginResponse login(Provider provider, String oauthAccessToken) {
         OAuthClient oauthClient = oauthClientFactory.getClient(provider);
@@ -53,6 +56,7 @@ public class AuthService {
         return LoginResponse.of(accessToken, refreshToken, userInfo, needsOnboarding);
     }
 
+    @Audit(action = AuditAction.TOKEN_REFRESH)
     @Transactional
     public RefreshResponse refresh(String refreshTokenValue) {
         RefreshToken refreshToken = findRefreshToken(refreshTokenValue);
@@ -75,6 +79,7 @@ public class AuthService {
         return RefreshResponse.of(newAccessToken, refreshToken.getToken());
     }
 
+    @Audit(action = AuditAction.LOGOUT, userIdParam = "currentUserId")
     @Transactional
     public void logout(Long currentUserId) {
         User user = userRepository.findById(currentUserId)

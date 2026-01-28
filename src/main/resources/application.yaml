@@ -7,10 +7,14 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 100MB
+
   jpa:
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         default_batch_fetch_size: 100
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 server:
   port: 8080
@@ -19,9 +23,14 @@ server:
       charset: UTF-8
       enabled: true
       force: true
-      force-request: true
-      force-response: true
 
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 logging:
   pattern:

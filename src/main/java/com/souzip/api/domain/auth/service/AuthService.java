@@ -56,7 +56,6 @@ public class AuthService {
         return LoginResponse.of(accessToken, refreshToken, userInfo, needsOnboarding);
     }
 
-    @Audit(action = AuditAction.TOKEN_REFRESH)
     @Transactional
     public RefreshResponse refresh(String refreshTokenValue) {
         RefreshToken refreshToken = findRefreshToken(refreshTokenValue);

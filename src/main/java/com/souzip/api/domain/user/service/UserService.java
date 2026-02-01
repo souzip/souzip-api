@@ -76,7 +76,7 @@ public class UserService {
         return OnboardingResponse.of(user, categoryDto, agreement);
     }
 
-    @Audit(action = AuditAction.WITHDRAW, userIdParam = "CurrentUserId")
+    @Audit(action = AuditAction.WITHDRAW, userIdParam = "currentUserId")
     @Transactional
     public void withdraw(Long userId) {
         User user = findUserById(userId);

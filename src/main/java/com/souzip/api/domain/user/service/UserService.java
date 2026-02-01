@@ -1,5 +1,6 @@
 package com.souzip.api.domain.user.service;
 
+import com.souzip.api.domain.audit.entity.AuditAction;
 import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.entity.Category;
@@ -17,6 +18,7 @@ import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.entity.UserAgreement;
 import com.souzip.api.domain.user.repository.UserAgreementRepository;
 import com.souzip.api.domain.user.repository.UserRepository;
+import com.souzip.api.global.audit.annotation.Audit;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import java.util.List;
@@ -74,6 +76,7 @@ public class UserService {
         return OnboardingResponse.of(user, categoryDto, agreement);
     }
 
+    @Audit(action = AuditAction.WITHDRAW)
     @Transactional
     public void withdraw(Long userId) {
         User user = findUserById(userId);

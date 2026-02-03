@@ -15,7 +15,7 @@ public class ProfileImageService {
     private final ObjectStorageProperties storageProperties;
 
     private static final String PROFILE_FOLDER = "profile";
-    private static final String IMAGE_EXTENSION = ".svg";
+    private static final String IMAGE_EXTENSION = ".png";
     private static final String DEFAULT_COLOR = "red";
     private static final String URL_FORMAT = "%s/%s/%s/%s%s";
 

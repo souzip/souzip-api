@@ -74,13 +74,13 @@ public class AuditAspect {
     private AuditContext buildSuccessContext(HttpServletRequest request, AuditAction action,
                                              Object result, ProceedingJoinPoint joinPoint) {
         return AuditContext.builder()
-            .userId(extractUserId(result))
-            .action(action)
-            .ipAddress(HttpRequestUtils.extractClientIp(request))
-            .userAgent(HttpRequestUtils.extractUserAgent(request))
-            .appVersion(HttpRequestUtils.extractAppVersion(request))
-            .oauthProvider(extractOAuthProvider(joinPoint))
-            .build();
+                .userId(extractUserId(result, joinPoint))
+                .action(action)
+                .ipAddress(HttpRequestUtils.extractClientIp(request))
+                .userAgent(HttpRequestUtils.extractUserAgent(request))
+                .appVersion(HttpRequestUtils.extractAppVersion(request))
+                .oauthProvider(extractOAuthProvider(joinPoint))
+                .build();
     }
 
     private HttpServletRequest getCurrentRequest() {
@@ -90,7 +90,7 @@ public class AuditAspect {
 
     private ServletRequestAttributes getRequestAttributes() {
         ServletRequestAttributes attributes =
-            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         validateAttributes(attributes);
 
@@ -107,12 +107,25 @@ public class AuditAspect {
         return object == null;
     }
 
-    private String extractUserId(Object result) {
+    private String extractUserId(Object result, ProceedingJoinPoint joinPoint) {
+        String userIdFromArgs = extractUserIdFromArgs(joinPoint);
+        if (userIdFromArgs != null) {
+            return userIdFromArgs;
+        }
+
         if (isLoginResponse(result)) {
             return extractUserIdFromLoginResponse((LoginResponse) result);
         }
 
         return extractUserIdFromSecurity();
+    }
+
+    private String extractUserIdFromArgs(ProceedingJoinPoint joinPoint) {
+        return Arrays.stream(joinPoint.getArgs())
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .findFirst()
+                .orElse(null);
     }
 
     private boolean isLoginResponse(Object result) {
@@ -121,18 +134,18 @@ public class AuditAspect {
 
     private String extractUserIdFromLoginResponse(LoginResponse loginResponse) {
         return Optional.ofNullable(loginResponse.getUser())
-            .map(LoginUserInfo::userId)
-            .orElse(null);
+                .map(LoginUserInfo::userId)
+                .orElse(null);
     }
 
     private String extractUserIdFromSecurity() {
         return Optional.ofNullable(getAuthentication())
-            .filter(this::hasValidPrincipal)
-            .map(Authentication::getPrincipal)
-            .filter(User.class::isInstance)
-            .map(User.class::cast)
-            .map(User::getUserId)
-            .orElse(null);
+                .filter(this::hasValidPrincipal)
+                .map(Authentication::getPrincipal)
+                .filter(User.class::isInstance)
+                .map(User.class::cast)
+                .map(User::getUserId)
+                .orElse(null);
     }
 
     private Authentication getAuthentication() {
@@ -149,9 +162,9 @@ public class AuditAspect {
 
     private Provider extractOAuthProvider(ProceedingJoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
-            .filter(Provider.class::isInstance)
-            .map(Provider.class::cast)
-            .findFirst()
-            .orElse(null);
+                .filter(Provider.class::isInstance)
+                .map(Provider.class::cast)
+                .findFirst()
+                .orElse(null);
     }
 }

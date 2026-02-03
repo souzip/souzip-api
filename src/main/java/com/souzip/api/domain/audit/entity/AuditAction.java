@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 public enum AuditAction {
 
     LOGIN("로그인", AuditCategory.USER),
-    LOGOUT("로그아웃", AuditCategory.USER), ;
+    LOGOUT("로그아웃", AuditCategory.USER),
+    WITHDRAW("회원탈퇴", AuditCategory.USER),
+    ;
 
     private final String description;
     private final AuditCategory category;

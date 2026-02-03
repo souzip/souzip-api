@@ -37,7 +37,7 @@ class ProfileImageServiceTest {
         String url = profileImageService.resolveProfileImageUrl("red");
 
         // then
-        assertThat(url).isEqualTo("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg");
+        assertThat(url).isEqualTo("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.png");
     }
 
     @ParameterizedTest
@@ -50,7 +50,7 @@ class ProfileImageServiceTest {
         // then
         assertThat(url)
             .startsWith("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/")
-            .endsWith(color + ".svg");
+            .endsWith(color + ".png");
     }
 
     @ParameterizedTest
@@ -61,7 +61,7 @@ class ProfileImageServiceTest {
         String url = profileImageService.resolveProfileImageUrl(color);
 
         // then
-        assertThat(url).contains("/" + color.toLowerCase() + ".svg");
+        assertThat(url).contains("/" + color.toLowerCase() + ".png");
     }
 
     @ParameterizedTest
@@ -73,7 +73,7 @@ class ProfileImageServiceTest {
         String url = profileImageService.resolveProfileImageUrl(input);
 
         // then
-        assertThat(url).isEqualTo("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg");
+        assertThat(url).isEqualTo("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.png");
     }
 
     @ParameterizedTest
@@ -95,7 +95,7 @@ class ProfileImageServiceTest {
 
         // then
         assertThat(url)
-            .matches("https://.*\\.ncloudstorage\\.com/.*/profile/[a-z]+\\.svg");
+            .matches("https://.*\\.ncloudstorage\\.com/.*/profile/[a-z]+\\.png");
     }
 
     @Test

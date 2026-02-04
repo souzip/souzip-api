@@ -4,6 +4,7 @@ import com.souzip.api.domain.audit.entity.AuditAction;
 import com.souzip.api.domain.audit.service.AuditService;
 import com.souzip.api.domain.auth.dto.LoginResponse;
 import com.souzip.api.domain.auth.dto.LoginUserInfo;
+import com.souzip.api.domain.user.dto.OnboardingRequest;
 import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.global.audit.annotation.Audit;
@@ -73,6 +74,9 @@ public class AuditAspect {
 
     private AuditContext buildSuccessContext(HttpServletRequest request, AuditAction action,
                                              Object result, ProceedingJoinPoint joinPoint) {
+
+        String metadata = buildMetadata(joinPoint);
+
         return AuditContext.builder()
                 .userId(extractUserId(result, joinPoint))
                 .action(action)
@@ -80,7 +84,22 @@ public class AuditAspect {
                 .userAgent(HttpRequestUtils.extractUserAgent(request))
                 .appVersion(HttpRequestUtils.extractAppVersion(request))
                 .oauthProvider(extractOAuthProvider(joinPoint))
+                .metadata(metadata)
                 .build();
+    }
+
+    private String buildMetadata(ProceedingJoinPoint joinPoint) {
+        return Arrays.stream(joinPoint.getArgs())
+                .filter(OnboardingRequest.class::isInstance)
+                .map(OnboardingRequest.class::cast)
+                .findFirst()
+                .map(req -> String.format(
+                        "{\"serviceTerms\": %s, \"privacyRequired\": %s, \"marketingConsent\": %s}",
+                        req.serviceTerms(),
+                        req.privacyRequired(),
+                        req.marketingConsent()
+                ))
+                .orElse(null);
     }
 
     private HttpServletRequest getCurrentRequest() {

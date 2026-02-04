@@ -1,5 +1,6 @@
 package com.souzip.api.domain.souvenir.service;
 
+import com.souzip.api.domain.audit.entity.AuditAction;
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
@@ -12,6 +13,7 @@ import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
+import com.souzip.api.global.audit.annotation.Audit;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import com.souzip.api.global.security.jwt.JwtTokenProvider;
@@ -109,6 +111,7 @@ public class SouvenirService {
         }
     }
 
+    @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
     public SouvenirResponse createSouvenir(
             SouvenirCreateRequest request,
@@ -148,6 +151,7 @@ public class SouvenirService {
         return SouvenirResponse.of(souvenir, uploadedFiles, true);
     }
 
+    @Audit(action = AuditAction.SOUVENIR_UPDATED)
     @Transactional
     public SouvenirResponse updateSouvenir(
             Long id,
@@ -189,6 +193,7 @@ public class SouvenirService {
         return SouvenirResponse.of(souvenir, uploadedFiles, true);
     }
 
+    @Audit(action = AuditAction.SOUVENIR_DELETED)
     @Transactional
     public void deleteSouvenir(Long id, Long userId) {
         requireUserId(userId);

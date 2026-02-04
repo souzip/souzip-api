@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum AuditCategory {
 
-    USER("사용자"), ;
+    USER("사용자"),
+    SOUVENIR("기념품")
+    ;
 
     private final String description;
 }

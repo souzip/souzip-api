@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum AuditCategory {
 
     USER("사용자"),
+    USER_AGREEMENT("사용자 동의항목"),
     SOUVENIR("기념품")
     ;
 

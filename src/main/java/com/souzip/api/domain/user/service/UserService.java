@@ -56,6 +56,7 @@ public class UserService {
         return NicknameCheckResponse.available();
     }
 
+    @Audit(action = AuditAction.ONBOARDING_AGREEMENTS)
     @Transactional
     public OnboardingResponse completeOnboarding(Long userId, OnboardingRequest request) {
         User user = findUserById(userId);

@@ -50,7 +50,7 @@ jobs:
               --network souzip-network \
               -p 8080:8080 \
               -e SPRING_PROFILES_ACTIVE=dev \
-              -e DB_URL=${{ secrets.DEV_DB_URL }} \
+              -e DEV_DB_URL=${{ secrets.DEV_DB_URL }} \
               -e POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }} \
               -e POSTGRES_PASSWORD=${{ secrets.DEV_DB_PASSWORD }} \
               -e JWT_SECRET=${{ secrets.JWT_SECRET }} \

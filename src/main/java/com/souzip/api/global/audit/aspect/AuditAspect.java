@@ -97,7 +97,8 @@ public class AuditAspect {
                         "{\"serviceTerms\": %s, \"privacyRequired\": %s, \"marketingConsent\": %s, \"locationService\": %s}",
                         req.serviceTerms(),
                         req.privacyRequired(),
-                        req.marketingConsent()
+                        req.marketingConsent(),
+                        req.locationService()
                 ))
                 .orElse(null);
     }

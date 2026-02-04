@@ -94,7 +94,7 @@ public class AuditAspect {
                 .map(OnboardingRequest.class::cast)
                 .findFirst()
                 .map(req -> String.format(
-                        "{\"serviceTerms\": %s, \"privacyRequired\": %s, \"marketingConsent\": %s}",
+                        "{\"serviceTerms\": %s, \"privacyRequired\": %s, \"marketingConsent\": %s, \"locationService\": %s}",
                         req.serviceTerms(),
                         req.privacyRequired(),
                         req.marketingConsent()

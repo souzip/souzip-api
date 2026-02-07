@@ -56,6 +56,12 @@ oauth:
     user-info-url: https://kapi.kakao.com/v2/user/me
   google:
     user-info-url: https://www.googleapis.com/oauth2/v2/userinfo
+  apple:
+    team-id: ${APPLE_TEAM_ID}
+    old-team-id: ${APPLE_OLD_TEAM_ID}
+    client-id: ${APPLE_CLIENT_ID}
+    key-id: ${APPLE_KEY_ID}
+    private-key: ${APPLE_PRIVATE_KEY}
 
 ncp:
   object-storage:

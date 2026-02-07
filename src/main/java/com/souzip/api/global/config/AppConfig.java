@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Configuration;
     JwtProperties.class,
     OAuthProperties.class,
     ObjectStorageProperties.class,
-    ClovaStudioProperties.class
+    ClovaStudioProperties.class,
+    AppleMigrationConfig.class
 })
 public class AppConfig {
 }

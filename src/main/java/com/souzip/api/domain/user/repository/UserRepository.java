@@ -2,6 +2,7 @@ package com.souzip.api.domain.user.repository;
 
 import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.domain.user.entity.User;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,4 +13,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserId(String userId);
 
     boolean existsByNickname(String nickname);
+
+    Optional<User> findByTransferIdentifier(String transferIdentifier);
+
+    List<User> findByProvider(Provider provider);
 }

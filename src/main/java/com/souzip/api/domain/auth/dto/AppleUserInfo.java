@@ -14,6 +14,9 @@ public class AppleUserInfo implements OAuthUserInfo {
     @JsonProperty("email_verified")
     private Boolean emailVerified;
 
+    @JsonProperty("transfer_sub")
+    private String transferSub;
+
     @Override
     public String getProviderId() {
         return sub;
@@ -30,6 +33,10 @@ public class AppleUserInfo implements OAuthUserInfo {
     @Override
     public String getEmail() {
         return email;
+    }
+
+    public String getTransferSub() {
+        return transferSub;
     }
 
     private boolean isValidEmail(String email) {

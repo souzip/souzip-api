@@ -53,6 +53,8 @@ public class User extends BaseEntity {
 
     private String profileImageUrl;
 
+    private String transferIdentifier;
+
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean onboardingCompleted;
 
@@ -146,5 +148,13 @@ public class User extends BaseEntity {
 
     public boolean isDeleted() {
         return Boolean.TRUE.equals(this.deleted);
+    }
+
+    public void updateTransferIdentifier(String transferIdentifier) {
+        this.transferIdentifier = transferIdentifier;
+    }
+
+    public void updateProviderId(String providerId) {
+        this.providerId = providerId;
     }
 }

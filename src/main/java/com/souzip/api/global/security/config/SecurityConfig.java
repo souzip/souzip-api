@@ -41,7 +41,8 @@ public class SecurityConfig {
                     "/api/search/**",
                     "/api/souvenirs/nearby",
                     "/api/discovery/**",
-                    "/actuator/**"
+                    "/actuator/**",
+                    "/api/migration/apple/prepare"
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/souvenirs/*").permitAll()
                 .anyRequest().authenticated()

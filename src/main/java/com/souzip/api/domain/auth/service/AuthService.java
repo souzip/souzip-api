@@ -1,6 +1,7 @@
 package com.souzip.api.domain.auth.service;
 
 import com.souzip.api.domain.audit.entity.AuditAction;
+import com.souzip.api.domain.auth.dto.AppleUserInfo;
 import com.souzip.api.global.audit.annotation.Audit;
 import com.souzip.api.domain.auth.client.OAuthClient;
 import com.souzip.api.domain.auth.client.OAuthClientFactory;
@@ -62,17 +63,10 @@ public class AuthService {
         validateRefreshToken(refreshToken);
 
         User user = refreshToken.getUser();
-
         String newAccessToken = jwtTokenProvider.generateToken(user.getUserId());
 
         if (isRefreshTokenExpiringSoon(refreshToken)) {
-            String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
-
-            updateRefreshToken(refreshToken, newRefreshToken);
-            log.info("Refresh Token 갱신: userId={}, remainingDays={}",
-                user.getUserId(), getRemainingDays(refreshToken));
-
-            return RefreshResponse.of(newAccessToken, newRefreshToken);
+            return renewRefreshToken(refreshToken, user, newAccessToken);
         }
 
         return RefreshResponse.of(newAccessToken, refreshToken.getToken());
@@ -89,26 +83,117 @@ public class AuthService {
     }
 
     private User findOrCreateUser(Provider provider, OAuthUserInfo oauthUserInfo) {
+        if (isAppleProvider(provider)) {
+            return findOrCreateAppleUser(oauthUserInfo);
+        }
+
+        return findOrCreateGeneralUser(provider, oauthUserInfo);
+    }
+
+    private User findOrCreateGeneralUser(Provider provider, OAuthUserInfo oauthUserInfo) {
         Optional<User> existingUser = userRepository
             .findByProviderAndProviderId(provider, oauthUserInfo.getProviderId());
 
-        if (existingUser.isEmpty()) {
-            return createUser(provider, oauthUserInfo);
+        return existingUser.map(user -> restoreIfDeleted(user, oauthUserInfo))
+            .orElseGet(() -> createUser(provider, oauthUserInfo));
+    }
+
+    private User findOrCreateAppleUser(OAuthUserInfo oauthUserInfo) {
+        String newProviderId = oauthUserInfo.getProviderId();
+        String transferSub = extractTransferSub(oauthUserInfo);
+
+        Optional<User> existingUser = findByProviderId(newProviderId);
+        if (existingUser.isPresent()) {
+            return handleExistingUser(existingUser.get(), oauthUserInfo, newProviderId);
         }
 
-        User user = existingUser.get();
+        if (hasTransferSub(transferSub)) {
+            Optional<User> migratedUser = attemptMigration(transferSub, newProviderId, oauthUserInfo);
 
+            if (migratedUser.isEmpty()) {
+                return createNewAppleUser(newProviderId, oauthUserInfo);
+            }
+
+            return migratedUser.get();
+        }
+
+        return createNewAppleUser(newProviderId, oauthUserInfo);
+    }
+
+    private Optional<User> findByProviderId(String providerId) {
+        return userRepository.findByProviderAndProviderId(Provider.APPLE, providerId);
+    }
+
+    private String extractTransferSub(OAuthUserInfo oauthUserInfo) {
+        if (oauthUserInfo instanceof AppleUserInfo appleUserInfo) {
+            return appleUserInfo.getTransferSub();
+        }
+        return null;
+    }
+
+    private boolean hasTransferSub(String transferSub) {
+        return transferSub != null;
+    }
+
+    private User handleExistingUser(User user, OAuthUserInfo oauthUserInfo, String providerId) {
+        log.info("Apple 사용자 로그인 - providerId로 찾음: {}", providerId);
+        return restoreIfDeleted(user, oauthUserInfo);
+    }
+
+    private Optional<User> attemptMigration(String transferSub, String newProviderId, OAuthUserInfo oauthUserInfo) {
+        Optional<User> existingUser = userRepository.findByTransferIdentifier(transferSub);
+
+        return existingUser.map(user -> migrateUser(user, transferSub, newProviderId, oauthUserInfo));
+    }
+
+    private User migrateUser(User user, String transferSub, String newProviderId, OAuthUserInfo oauthUserInfo) {
+        logMigrationDetected(user.getProviderId(), transferSub, newProviderId);
+
+        user.updateProviderId(newProviderId);
+        userRepository.save(user);
+
+        User restoredUser = restoreIfDeleted(user, oauthUserInfo);
+
+        log.info("Apple 사용자 마이그레이션 완료: userId={}", user.getId());
+        return restoredUser;
+    }
+
+    private void logMigrationDetected(String oldProviderId, String transferSub, String newProviderId) {
+        log.info("Apple 앱 이전 감지 - transfer_sub로 기존 사용자 발견");
+        log.info("기존 providerId: {}, transfer_sub: {}, 새 providerId: {}",
+            oldProviderId, transferSub, newProviderId);
+    }
+
+    private User createNewAppleUser(String providerId, OAuthUserInfo oauthUserInfo) {
+        log.info("새로운 Apple 사용자 생성: providerId={}", providerId);
+        return createUser(Provider.APPLE, oauthUserInfo);
+    }
+
+    private User restoreIfDeleted(User user, OAuthUserInfo oauthUserInfo) {
         if (user.isDeleted()) {
             String name = oauthUserInfo.getName();
             user.restore(name, name);
         }
-
         return user;
     }
 
     private User createUser(Provider provider, OAuthUserInfo oauthUserInfo) {
         User user = User.of(provider, oauthUserInfo);
         return userRepository.save(user);
+    }
+
+    private boolean isAppleProvider(Provider provider) {
+        return provider == Provider.APPLE;
+    }
+
+    private RefreshResponse renewRefreshToken(RefreshToken refreshToken, User user, String newAccessToken) {
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getUserId());
+        updateRefreshToken(refreshToken, newRefreshToken);
+
+        log.info("Refresh Token 갱신: userId={}, remainingDays={}",
+            user.getUserId(), getRemainingDays(refreshToken));
+
+        return RefreshResponse.of(newAccessToken, newRefreshToken);
     }
 
     private void saveRefreshToken(User user, String tokenValue) {
@@ -137,11 +222,14 @@ public class AuthService {
 
     private void validateRefreshToken(RefreshToken refreshToken) {
         if (refreshToken.isExpired()) {
-            refreshTokenRepository.delete(refreshToken);
-            log.info("만료된 Refresh Token 삭제: token={}", refreshToken.getId());
-
+            deleteExpiredToken(refreshToken);
             throw new BusinessException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
+    }
+
+    private void deleteExpiredToken(RefreshToken refreshToken) {
+        refreshTokenRepository.delete(refreshToken);
+        log.info("만료된 Refresh Token 삭제: token={}", refreshToken.getId());
     }
 
     private boolean isRefreshTokenExpiringSoon(RefreshToken refreshToken) {

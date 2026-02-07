@@ -1,5 +1,6 @@
 package com.souzip.api.domain.user.entity;
 
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -38,5 +39,21 @@ class UserTest {
         assertThat(user.getDeletedAt()).isNull();
         assertThat(user.isOnboardingCompleted()).isFalse();
         assertThat(user.getCategories()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("updateLastLoginAt 호출 시 lastLoginAt이 현재 시간으로 설정된다.")
+    void updateLastLoginAt_success() {
+        // given
+        User user = User.of(Provider.KAKAO, "kakao123", "테스트", "테스트", "test@kakao.com", null);
+        LocalDateTime before = LocalDateTime.now();
+
+        // when
+        user.updateLastLoginAt();
+
+        // then
+        assertThat(user.getLastLoginAt()).isNotNull();
+        assertThat(user.getLastLoginAt()).isAfterOrEqualTo(before);
+        assertThat(user.getLastLoginAt()).isBeforeOrEqualTo(LocalDateTime.now());
     }
 }

@@ -97,6 +97,8 @@ class AuthServiceTest {
         assertThat(response.getUser().nickname()).isNull();
         assertThat(response.isNeedsOnboarding()).isTrue();
 
+        verify(spyUser).updateLastLoginAt();
+
         verify(userRepository).save(any(User.class));
         verify(refreshTokenRepository).save(any(RefreshToken.class));
     }

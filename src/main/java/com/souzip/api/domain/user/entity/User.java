@@ -54,6 +54,8 @@ public class User extends BaseEntity {
 
     private String transferIdentifier;
 
+    private LocalDateTime lastLoginAt;
+
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean onboardingCompleted;
 
@@ -154,5 +156,9 @@ public class User extends BaseEntity {
 
     public void updateProviderId(String providerId) {
         this.providerId = providerId;
+    }
+
+    public void updateLastLoginAt() {
+        this.lastLoginAt = LocalDateTime.now();
     }
 }

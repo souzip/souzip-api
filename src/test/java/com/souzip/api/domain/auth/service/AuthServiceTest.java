@@ -94,7 +94,7 @@ class AuthServiceTest {
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
-        assertThat(response.getUser().nickname()).isEqualTo("수집");
+        assertThat(response.getUser().nickname()).isNull();
         assertThat(response.isNeedsOnboarding()).isTrue();
 
         verify(userRepository).save(any(User.class));
@@ -135,7 +135,7 @@ class AuthServiceTest {
         assertThat(response.isNeedsOnboarding()).isFalse();  // ← 온보딩 완료!
 
         verify(userRepository, never()).save(any(User.class));
-        verify(spyUser, never()).restore(anyString(), anyString());
+        verify(spyUser, never()).restore(anyString());
     }
 
     @Test
@@ -169,10 +169,10 @@ class AuthServiceTest {
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
-        assertThat(response.isNeedsOnboarding()).isTrue();  // ← 온보딩 필요!
+        assertThat(response.isNeedsOnboarding()).isTrue();
 
         verify(userRepository, never()).save(any(User.class));
-        verify(spyUser, never()).restore(anyString(), anyString());
+        verify(spyUser, never()).restore(anyString());
     }
 
     @Test
@@ -187,7 +187,7 @@ class AuthServiceTest {
         given(spyUser.getUserId()).willReturn("550e8400");
         given(spyUser.needsOnboarding()).willReturn(true);
 
-        doCallRealMethod().when(spyUser).restore(anyString(), anyString());
+        doCallRealMethod().when(spyUser).restore(anyString());
 
         given(oauthClientFactory.getClient(Provider.KAKAO)).willReturn(oauthClient);
         given(oauthClient.getUserInfo("kakao_token")).willReturn(oauthUserInfo);
@@ -201,7 +201,7 @@ class AuthServiceTest {
         LoginResponse response = authService.login(Provider.KAKAO, "kakao_token");
 
         // then
-        verify(spyUser).restore("수집", "수집");
+        verify(spyUser).restore("수집");
         assertThat(response.isNeedsOnboarding()).isTrue();
         verify(userRepository, never()).save(any(User.class));
     }

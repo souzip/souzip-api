@@ -110,11 +110,7 @@ public class AuthService {
         if (hasTransferSub(transferSub)) {
             Optional<User> migratedUser = attemptMigration(transferSub, newProviderId, oauthUserInfo);
 
-            if (migratedUser.isEmpty()) {
-                return createNewAppleUser(newProviderId, oauthUserInfo);
-            }
-
-            return migratedUser.get();
+            return migratedUser.orElseGet(() -> createNewAppleUser(newProviderId, oauthUserInfo));
         }
 
         return createNewAppleUser(newProviderId, oauthUserInfo);
@@ -172,7 +168,7 @@ public class AuthService {
     private User restoreIfDeleted(User user, OAuthUserInfo oauthUserInfo) {
         if (user.isDeleted()) {
             String name = oauthUserInfo.getName();
-            user.restore(name, name);
+            user.restore(name);
         }
         return user;
     }

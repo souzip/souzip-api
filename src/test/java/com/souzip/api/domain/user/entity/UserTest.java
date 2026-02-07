@@ -22,19 +22,21 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("restore 호출 시 개인정보가 복구되고 restoredAt이 설정된다.")
+    @DisplayName("restore 호출 시 name이 복구되고 nickname은 null로 초기화된다.")
     void restore_success() {
         // given
         User user = User.of(Provider.KAKAO, "kakao123", "탈퇴한사용자", "탈퇴한사용자", "test@kakao.com", null);
 
         // when
-        user.restore("테스트유저", "테스트");
+        user.restore("테스트유저");
 
         // then
         assertThat(user.getName()).isEqualTo("테스트유저");
-        assertThat(user.getNickname()).isEqualTo("테스트");
+        assertThat(user.getNickname()).isNull();
         assertThat(user.getDeleted()).isFalse();
         assertThat(user.getRestoredAt()).isNotNull();
         assertThat(user.getDeletedAt()).isNull();
+        assertThat(user.isOnboardingCompleted()).isFalse();
+        assertThat(user.getCategories()).isEmpty();
     }
 }

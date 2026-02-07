@@ -46,7 +46,6 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, length = 100)
     private String nickname;
 
     private String email;
@@ -103,14 +102,17 @@ public class User extends BaseEntity {
     }
 
     public static User of(Provider provider, OAuthUserInfo oauthUserInfo) {
-        return User.of(
-            provider,
-            oauthUserInfo.getProviderId(),
-            oauthUserInfo.getName(),
-            null,
-            oauthUserInfo.getEmail(),
-            oauthUserInfo.getProfileImageUrl()
-        );
+        return User.builder()
+            .userId(UUID.randomUUID().toString())
+            .provider(provider)
+            .providerId(oauthUserInfo.getProviderId())
+            .name(oauthUserInfo.getName())
+            .email(oauthUserInfo.getEmail())
+            .profileImageUrl(oauthUserInfo.getProfileImageUrl())
+            .onboardingCompleted(false)
+            .categories(new HashSet<>())
+            .deleted(false)
+            .build();
     }
 
     private void ensureUserId() {

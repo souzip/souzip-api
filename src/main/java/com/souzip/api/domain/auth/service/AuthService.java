@@ -110,11 +110,7 @@ public class AuthService {
         if (hasTransferSub(transferSub)) {
             Optional<User> migratedUser = attemptMigration(transferSub, newProviderId, oauthUserInfo);
 
-            if (migratedUser.isEmpty()) {
-                return createNewAppleUser(newProviderId, oauthUserInfo);
-            }
-
-            return migratedUser.get();
+            return migratedUser.orElseGet(() -> createNewAppleUser(newProviderId, oauthUserInfo));
         }
 
         return createNewAppleUser(newProviderId, oauthUserInfo);

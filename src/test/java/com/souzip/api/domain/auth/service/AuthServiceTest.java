@@ -94,7 +94,7 @@ class AuthServiceTest {
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
-        assertThat(response.getUser().nickname()).isEqualTo("수집");
+        assertThat(response.getUser().nickname()).isNull();
         assertThat(response.isNeedsOnboarding()).isTrue();
 
         verify(userRepository).save(any(User.class));
@@ -169,7 +169,7 @@ class AuthServiceTest {
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
-        assertThat(response.isNeedsOnboarding()).isTrue();  // ← 온보딩 필요!
+        assertThat(response.isNeedsOnboarding()).isTrue();
 
         verify(userRepository, never()).save(any(User.class));
         verify(spyUser, never()).restore(anyString());

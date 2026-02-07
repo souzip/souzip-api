@@ -33,7 +33,7 @@ class UserTest {
 
         // then
         assertThat(user.getName()).isEqualTo("테스트유저");
-        assertThat(user.getNickname()).isNull();
+        assertThat(user.getNickname()).isEmpty();
         assertThat(user.getDeleted()).isFalse();
         assertThat(user.getRestoredAt()).isNotNull();
         assertThat(user.getDeletedAt()).isNull();

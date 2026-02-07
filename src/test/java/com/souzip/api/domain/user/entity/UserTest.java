@@ -23,7 +23,7 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("restore 호출 시 name이 복구되고 nickname은 null로 초기화된다.")
+    @DisplayName("restore 호출 시 name이 복구되고 nickname은 빈값으로 초기화된다.")
     void restore_success() {
         // given
         User user = User.of(Provider.KAKAO, "kakao123", "탈퇴한사용자", "탈퇴한사용자", "test@kakao.com", null);

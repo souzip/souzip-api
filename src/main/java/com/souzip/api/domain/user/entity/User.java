@@ -108,7 +108,7 @@ public class User extends BaseEntity {
             provider,
             oauthUserInfo.getProviderId(),
             oauthUserInfo.getName(),
-            null,
+            "",
             oauthUserInfo.getEmail(),
             oauthUserInfo.getProfileImageUrl()
         );
@@ -127,7 +127,7 @@ public class User extends BaseEntity {
 
     public void restore(String originalName) {
         this.name = originalName;
-        this.nickname = null;
+        this.nickname = "";
         this.deleted = false;
         this.deletedAt = null;
         this.restoredAt = LocalDateTime.now();

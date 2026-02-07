@@ -94,7 +94,7 @@ class AuthServiceTest {
         // then
         assertThat(response.getAccessToken()).isEqualTo("access_token");
         assertThat(response.getRefreshToken()).isEqualTo("refresh_token");
-        assertThat(response.getUser().nickname()).isNull();
+        assertThat(response.getUser().nickname()).isEmpty();
         assertThat(response.isNeedsOnboarding()).isTrue();
 
         verify(spyUser).updateLastLoginAt();

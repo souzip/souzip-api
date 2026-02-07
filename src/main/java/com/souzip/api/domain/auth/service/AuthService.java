@@ -172,7 +172,7 @@ public class AuthService {
     private User restoreIfDeleted(User user, OAuthUserInfo oauthUserInfo) {
         if (user.isDeleted()) {
             String name = oauthUserInfo.getName();
-            user.restore(name, name);
+            user.restore(name);
         }
         return user;
     }

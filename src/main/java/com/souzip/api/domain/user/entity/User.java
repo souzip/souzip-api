@@ -103,12 +103,11 @@ public class User extends BaseEntity {
     }
 
     public static User of(Provider provider, OAuthUserInfo oauthUserInfo) {
-        String name = oauthUserInfo.getName();
         return User.of(
             provider,
             oauthUserInfo.getProviderId(),
-            name,
-            name,
+            oauthUserInfo.getName(),
+            null,
             oauthUserInfo.getEmail(),
             oauthUserInfo.getProfileImageUrl()
         );
@@ -125,9 +124,9 @@ public class User extends BaseEntity {
         this.nickname = ANONYMIZED_VALUE;
     }
 
-    public void restore(String originalName, String originalNickname) {
+    public void restore(String originalName) {
         this.name = originalName;
-        this.nickname = originalNickname;
+        this.nickname = null;
         this.deleted = false;
         this.deletedAt = null;
         this.restoredAt = LocalDateTime.now();

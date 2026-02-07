@@ -102,17 +102,14 @@ public class User extends BaseEntity {
     }
 
     public static User of(Provider provider, OAuthUserInfo oauthUserInfo) {
-        return User.builder()
-            .userId(UUID.randomUUID().toString())
-            .provider(provider)
-            .providerId(oauthUserInfo.getProviderId())
-            .name(oauthUserInfo.getName())
-            .email(oauthUserInfo.getEmail())
-            .profileImageUrl(oauthUserInfo.getProfileImageUrl())
-            .onboardingCompleted(false)
-            .categories(new HashSet<>())
-            .deleted(false)
-            .build();
+        return User.of(
+            provider,
+            oauthUserInfo.getProviderId(),
+            oauthUserInfo.getName(),
+            null,
+            oauthUserInfo.getEmail(),
+            oauthUserInfo.getProfileImageUrl()
+        );
     }
 
     private void ensureUserId() {

@@ -12,8 +12,8 @@ if [ -f "$WORK_DIR/deploy/.env" ]; then
     export $(grep DISCORD_WEBHOOK_URL "$WORK_DIR/deploy/.env" | xargs)
 fi
 
-if [ -f "$WORK_DIR/deploy/lib/discord-notify.sh" ]; then
-    source "$WORK_DIR/deploy/lib/discord-notify.sh"
+if [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
+    source "$WORK_DIR/deploy/notification/discord-notify.sh"
 fi
 
 if [ -f "$STATUS_FILE" ]; then

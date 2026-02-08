@@ -11,9 +11,8 @@ HEALTH_CHECK_URL="http://localhost:8080/actuator/health"
 MAX_RETRY=6
 RETRY_INTERVAL=10
 
-if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/lib/discord-notify.sh" ]; then
-    source "$WORK_DIR/deploy/lib/discord-notify.sh"
-    notify_rollback
+if [ -f "$WORK_DIR/deploy/.env" ]; then
+    export $(grep DISCORD_WEBHOOK_URL "$WORK_DIR/deploy/.env" | xargs)
 fi
 
 cd $WORK_DIR || exit 1

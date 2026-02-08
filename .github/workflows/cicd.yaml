@@ -38,6 +38,14 @@ jobs:
         with:
           arguments: clean build -Dspring.profiles.active=test --no-build-cache
 
+      - name: Upload JAR
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: build/libs/*.jar
+          retention-days: 1
+
   docker-build:
     needs: build
     if: github.event_name == 'push'
@@ -46,6 +54,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Download JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: .
 
       - name: NCP Container Registry Login
         run: |

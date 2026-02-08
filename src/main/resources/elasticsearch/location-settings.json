@@ -23,7 +23,7 @@
       },
       "ngram_tokenizer": {
         "type": "ngram",
-        "min_gram": 1,
+        "min_gram": 2,
         "max_gram": 3,
         "token_chars": ["letter", "digit"]
       }
@@ -37,15 +37,15 @@
       },
       "autocomplete_filter": {
         "type": "edge_ngram",
-        "min_gram": 1,
+        "min_gram": 2,
         "max_gram": 20
       }
     },
     "analyzer": {
       "korean_analyzer": {
         "type": "custom",
-        "tokenizer": "nori_tokenizer",
-        "filter": ["lowercase", "nori_readingform", "korean_synonym"]
+        "tokenizer": "standard",
+        "filter": ["lowercase", "korean_synonym", "nori_readingform"]
       },
       "jaso_index_analyzer": {
         "type": "custom",

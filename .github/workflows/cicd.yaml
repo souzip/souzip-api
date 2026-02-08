@@ -59,16 +59,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-jar
-          path: build/libs
-
-      - name: List files
-        run: |
-          echo "Current directory"
-          pwd
-          echo "All files"
-          ls -R
-          echo "build/libs directory"
-          ls -la build/libs/ || echo "build/libs not found"
+          path: .
 
       - name: NCP Container Registry Login
         run: |
@@ -92,6 +83,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Copy deploy scripts to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.NCP_SERVER_HOST }}
+          username: ${{ secrets.NCP_SERVER_USER }}
+          key: ${{ secrets.NCP_SERVER_SSH_KEY }}
+          source: "deploy/scripts/*"
+          target: "/home/ubuntu/souzip"
+
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -99,32 +99,27 @@ jobs:
           username: ${{ secrets.NCP_SERVER_USER }}
           key: ${{ secrets.NCP_SERVER_SSH_KEY }}
           script: |
+            cd /home/ubuntu/souzip
+            
+            chmod +x deploy/scripts/*.sh
+            
             docker login souzip.kr.ncr.ntruss.com \
               -u ${{ secrets.NCP_ACCESS_KEY }} \
               -p ${{ secrets.NCP_SECRET_KEY }}
             
-            docker pull ${{ env.IMAGE_NAME }}
+            # 환경변수 export
+            export SPRING_PROFILES_ACTIVE=dev
+            export DEV_DB_URL="${{ secrets.DEV_DB_URL }}"
+            export POSTGRES_USER="${{ secrets.DEV_DB_USERNAME }}"
+            export POSTGRES_PASSWORD="${{ secrets.DEV_DB_PASSWORD }}"
+            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            export NCP_ENDPOINT="${{ secrets.NCP_ENDPOINT }}"
+            export NCP_REGION="${{ secrets.NCP_REGION }}"
+            export NCP_BUCKET="${{ secrets.NCP_BUCKET }}"
+            export NCP_ACCESS_KEY="${{ secrets.NCP_ACCESS_KEY }}"
+            export NCP_SECRET_KEY="${{ secrets.NCP_SECRET_KEY }}"
+            export GEOCODING_API_KEY="${{ secrets.GEOCODING_API_KEY }}"
+            export CLOVA_STUDIO_API_KEY="${{ secrets.CLOVA_STUDIO_API_KEY }}"
+            export CLOVA_STUDIO_API_URL="${{ secrets.CLOVA_STUDIO_API_URL }}"
             
-            docker rm -f souzip-api || true
-            
-            docker run -d \
-              --name souzip-api \
-              --restart always \
-              --network souzip-network \
-              -p 8080:8080 \
-              -e SPRING_PROFILES_ACTIVE=dev \
-              -e DEV_DB_URL=${{ secrets.DEV_DB_URL }} \
-              -e POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }} \
-              -e POSTGRES_PASSWORD=${{ secrets.DEV_DB_PASSWORD }} \
-              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              -e NCP_ENDPOINT=${{ secrets.NCP_ENDPOINT }} \
-              -e NCP_REGION=${{ secrets.NCP_REGION }} \
-              -e NCP_BUCKET=${{ secrets.NCP_BUCKET }} \
-              -e NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }} \
-              -e NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }} \
-              -e GEOCODING_API_KEY=${{ secrets.GEOCODING_API_KEY }} \
-              -e CLOVA_STUDIO_API_KEY=${{ secrets.CLOVA_STUDIO_API_KEY }} \
-              -e CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }} \
-              ${{ env.IMAGE_NAME }}
-            
-            docker ps | grep souzip-api
+            ./deploy/scripts/deploy.sh

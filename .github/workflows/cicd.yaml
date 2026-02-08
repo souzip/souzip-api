@@ -1,19 +1,30 @@
 name: souzip CI/CD
+
 on:
   pull_request:
     branches:
       - develop
+  push:
+    branches:
+      - develop
+
+env:
+  IMAGE_NAME: souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+
       - name: Cache Gradle
         uses: actions/cache@v3
         with:
@@ -21,19 +32,43 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v3
         with:
           arguments: clean build -Dspring.profiles.active=test --no-build-cache
+
+  docker-build:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: NCP Container Registry Login
         run: |
-          echo ${{ secrets.NCP_SECRET_KEY }} | docker login souzip.kr.ncr.ntruss.com -u ${{ secrets.NCP_ACCESS_KEY }} --password-stdin
+          echo ${{ secrets.NCP_SECRET_KEY }} | docker login souzip.kr.ncr.ntruss.com \
+            -u ${{ secrets.NCP_ACCESS_KEY }} --password-stdin
+
       - name: Build Docker Image
         run: |
-          docker build -t souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest .
+          docker build -t ${{ env.IMAGE_NAME }} .
+
       - name: Push Docker Image
         run: |
-          docker push souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
+          docker push ${{ env.IMAGE_NAME }}
+
+  deploy:
+    needs: docker-build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Deploy to Server
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -41,9 +76,14 @@ jobs:
           username: ${{ secrets.NCP_SERVER_USER }}
           key: ${{ secrets.NCP_SERVER_SSH_KEY }}
           script: |
-            docker login souzip.kr.ncr.ntruss.com -u ${{ secrets.NCP_ACCESS_KEY }} -p ${{ secrets.NCP_SECRET_KEY }}
-            docker pull souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
+            docker login souzip.kr.ncr.ntruss.com \
+              -u ${{ secrets.NCP_ACCESS_KEY }} \
+              -p ${{ secrets.NCP_SECRET_KEY }}
+            
+            docker pull ${{ env.IMAGE_NAME }}
+            
             docker rm -f souzip-api || true
+            
             docker run -d \
               --name souzip-api \
               --restart always \
@@ -62,4 +102,6 @@ jobs:
               -e GEOCODING_API_KEY=${{ secrets.GEOCODING_API_KEY }} \
               -e CLOVA_STUDIO_API_KEY=${{ secrets.CLOVA_STUDIO_API_KEY }} \
               -e CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }} \
-              souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
+              ${{ env.IMAGE_NAME }}
+            
+            docker ps | grep souzip-api

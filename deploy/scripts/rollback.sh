@@ -38,7 +38,6 @@ echo -e "${GREEN}[SUCCESS] 태그 변경 완료${NC}"
 echo -e "${YELLOW}[4/5] 이전 버전 컨테이너 시작${NC}"
 cd $WORK_DIR/deploy
 
-# .env 파일 확인
 if [ ! -f .env ]; then
     echo -e "${RED}[ERROR] .env 파일이 없습니다${NC}"
     exit 1

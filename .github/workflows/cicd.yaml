@@ -103,6 +103,7 @@ jobs:
             cd /home/ubuntu/souzip
             
             chmod +x deploy/scripts/*.sh
+            chmod +x deploy/notification/*.sh
             
             cat > deploy/.env << 'EOF'
             SPRING_PROFILES_ACTIVE=dev
@@ -126,4 +127,5 @@ jobs:
               -u ${{ secrets.NCP_ACCESS_KEY }} \
               -p ${{ secrets.NCP_SECRET_KEY }}
             
+            export DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}"
             ./deploy/scripts/deploy.sh

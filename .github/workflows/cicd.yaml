@@ -59,7 +59,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-jar
-          path: build/libs/
+          path: .
 
       - name: NCP Container Registry Login
         run: |

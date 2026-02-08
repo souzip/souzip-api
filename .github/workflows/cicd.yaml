@@ -33,10 +33,11 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          arguments: clean build -Dspring.profiles.active=test --no-build-cache
+        run: ./gradlew clean build -Dspring.profiles.active=test --no-build-cache
 
       - name: Upload JAR
         if: github.event_name == 'push'
@@ -59,7 +60,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-jar
-          path: .
+          path: build/libs/
 
       - name: NCP Container Registry Login
         run: |

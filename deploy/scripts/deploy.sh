@@ -11,9 +11,10 @@ HEALTH_CHECK_URL="http://localhost:8080/actuator/health"
 MAX_RETRY=6
 RETRY_INTERVAL=10
 
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  Souzip API 배포 시작${NC}"
-echo -e "${GREEN}========================================${NC}"
+if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/lib/discord-notify.sh" ]; then
+    source "$WORK_DIR/deploy/lib/discord-notify.sh"
+    notify_rollback
+fi
 
 cd $WORK_DIR || exit 1
 
@@ -112,8 +113,7 @@ docker ps | grep souzip-api
 echo -e "${YELLOW}[9/9] 정리${NC}"
 docker image prune -f
 
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  배포 완료${NC}"
-echo -e "${GREEN}  새 이미지: ${NEW_IMAGE}${NC}"
-echo -e "${GREEN}  롤백 가능: ${CURRENT_IMAGE:-없음}${NC}"
-echo -e "${GREEN}========================================${NC}"
+if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/lib/discord-notify.sh" ]; then
+    source "$WORK_DIR/deploy/lib/discord-notify.sh"
+    notify_deploy_success "$NEW_IMAGE"
+fi

@@ -128,4 +128,4 @@ jobs:
               -u ${{ secrets.NCP_ACCESS_KEY }} \
               -p ${{ secrets.NCP_SECRET_KEY }}
             
-            ./deploy/scripts/deploy.shname: souzip CI/CD
+            ./deploy/scripts/deploy.sh

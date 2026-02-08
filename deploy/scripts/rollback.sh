@@ -27,7 +27,8 @@ fi
 echo -e "${GREEN}[SUCCESS] 롤백 이미지 발견: ${PREVIOUS_IMAGE}${NC}"
 
 echo -e "${YELLOW}[2/5] 현재 컨테이너 중지${NC}"
-docker rm -f souzip-api 2>/dev/null || true
+cd $WORK_DIR/deploy
+docker-compose down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
 echo -e "${GREEN}[SUCCESS] 컨테이너 중지 완료${NC}"
 
 echo -e "${YELLOW}[3/5] 이전 버전으로 태그 변경${NC}"
@@ -35,25 +36,15 @@ docker tag ${REGISTRY}:previous ${REGISTRY}:latest
 echo -e "${GREEN}[SUCCESS] 태그 변경 완료${NC}"
 
 echo -e "${YELLOW}[4/5] 이전 버전 컨테이너 시작${NC}"
-docker run -d \
-  --name souzip-api \
-  --restart always \
-  --network souzip-network \
-  -p 8080:8080 \
-  -e SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
-  -e DEV_DB_URL=${DEV_DB_URL} \
-  -e POSTGRES_USER=${POSTGRES_USER} \
-  -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-  -e JWT_SECRET=${JWT_SECRET} \
-  -e NCP_ENDPOINT=${NCP_ENDPOINT} \
-  -e NCP_REGION=${NCP_REGION} \
-  -e NCP_BUCKET=${NCP_BUCKET} \
-  -e NCP_ACCESS_KEY=${NCP_ACCESS_KEY} \
-  -e NCP_SECRET_KEY=${NCP_SECRET_KEY} \
-  -e GEOCODING_API_KEY=${GEOCODING_API_KEY} \
-  -e CLOVA_STUDIO_API_KEY=${CLOVA_STUDIO_API_KEY} \
-  -e CLOVA_STUDIO_API_URL=${CLOVA_STUDIO_API_URL} \
-  ${REGISTRY}:latest
+cd $WORK_DIR/deploy
+
+# .env 파일 확인
+if [ ! -f .env ]; then
+    echo -e "${RED}[ERROR] .env 파일이 없습니다${NC}"
+    exit 1
+fi
+
+docker-compose up -d
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}[ERROR] 컨테이너 시작 실패${NC}"

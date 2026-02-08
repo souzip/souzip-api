@@ -90,7 +90,7 @@ jobs:
           host: ${{ secrets.NCP_SERVER_HOST }}
           username: ${{ secrets.NCP_SERVER_USER }}
           key: ${{ secrets.NCP_SERVER_SSH_KEY }}
-          source: "deploy/scripts/*"
+          source: "deploy/*"
           target: "/home/ubuntu/souzip"
 
       - name: Deploy to Server
@@ -104,22 +104,26 @@ jobs:
             
             chmod +x deploy/scripts/*.sh
             
+            cat > deploy/.env << 'EOF'
+            SPRING_PROFILES_ACTIVE=dev
+            DEV_DB_URL=${{ secrets.DEV_DB_URL }}
+            POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }}
+            POSTGRES_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            NCP_ENDPOINT=${{ secrets.NCP_ENDPOINT }}
+            NCP_REGION=${{ secrets.NCP_REGION }}
+            NCP_BUCKET=${{ secrets.NCP_BUCKET }}
+            NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }}
+            NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }}
+            GEOCODING_API_KEY=${{ secrets.GEOCODING_API_KEY }}
+            CLOVA_STUDIO_API_KEY=${{ secrets.CLOVA_STUDIO_API_KEY }}
+            CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }}
+            EOF
+            
+            chmod 600 deploy/.env
+            
             docker login souzip.kr.ncr.ntruss.com \
               -u ${{ secrets.NCP_ACCESS_KEY }} \
               -p ${{ secrets.NCP_SECRET_KEY }}
-            
-            export SPRING_PROFILES_ACTIVE=dev
-            export DEV_DB_URL="${{ secrets.DEV_DB_URL }}"
-            export POSTGRES_USER="${{ secrets.DEV_DB_USERNAME }}"
-            export POSTGRES_PASSWORD="${{ secrets.DEV_DB_PASSWORD }}"
-            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
-            export NCP_ENDPOINT="${{ secrets.NCP_ENDPOINT }}"
-            export NCP_REGION="${{ secrets.NCP_REGION }}"
-            export NCP_BUCKET="${{ secrets.NCP_BUCKET }}"
-            export NCP_ACCESS_KEY="${{ secrets.NCP_ACCESS_KEY }}"
-            export NCP_SECRET_KEY="${{ secrets.NCP_SECRET_KEY }}"
-            export GEOCODING_API_KEY="${{ secrets.GEOCODING_API_KEY }}"
-            export CLOVA_STUDIO_API_KEY="${{ secrets.CLOVA_STUDIO_API_KEY }}"
-            export CLOVA_STUDIO_API_URL="${{ secrets.CLOVA_STUDIO_API_URL }}"
             
             ./deploy/scripts/deploy.sh

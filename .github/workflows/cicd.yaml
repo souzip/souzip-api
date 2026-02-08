@@ -59,7 +59,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app-jar
-          path: .
+          path: build/libs
+
+      - name: List files
+        run: |
+          echo "Current directory"
+          pwd
+          echo "All files"
+          ls -R
+          echo "build/libs directory"
+          ls -la build/libs/ || echo "build/libs not found"
 
       - name: NCP Container Registry Login
         run: |

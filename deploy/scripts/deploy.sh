@@ -97,7 +97,7 @@ done
 
 if [ "$HEALTH_OK" = false ]; then
     echo -e "${RED}[ERROR] 헬스체크 최종 실패${NC}"
-    echo -e "${RED}[ERROR] 배포 실패 - 자동 롤백 시작${NC}"
+    echo -e "${RED}[ERROR] 배포 실패 - 롤백 시작${NC}"
 
     echo -e "${YELLOW}=== 실패한 컨테이너 로그 ===${NC}"
     docker logs --tail 100 souzip-api
@@ -112,7 +112,7 @@ docker ps | grep souzip-api
 echo -e "${YELLOW}[9/9] 정리${NC}"
 docker image prune -f
 
-if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/lib/discord-notify.sh" ]; then
-    source "$WORK_DIR/deploy/lib/discord-notify.sh"
+if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
+    source "$WORK_DIR/deploy/notification/discord-notify.sh"
     notify_deploy_success "$NEW_IMAGE"
 fi

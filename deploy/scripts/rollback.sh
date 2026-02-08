@@ -9,9 +9,9 @@ REGISTRY="souzip.kr.ncr.ntruss.com/souzip/souzip-api"
 WORK_DIR="/home/ubuntu/souzip"
 HEALTH_CHECK_URL="http://localhost:8080/actuator/health"
 
-echo -e "${RED}========================================${NC}"
-echo -e "${RED}  롤백 시작${NC}"
-echo -e "${RED}========================================${NC}"
+if [ -f "$WORK_DIR/deploy/.env" ]; then
+    export $(grep DISCORD_WEBHOOK_URL "$WORK_DIR/deploy/.env" | xargs)
+fi
 
 cd $WORK_DIR || exit 1
 
@@ -59,11 +59,23 @@ if curl -f -s --max-time 5 $HEALTH_CHECK_URL > /dev/null 2>&1; then
     echo -e "${GREEN}  롤백 성공${NC}"
     echo -e "${GREEN}========================================${NC}"
     docker ps | grep souzip-api
+
+    if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
+            source "$WORK_DIR/deploy/notification/discord-notify.sh"
+            notify_rollback_success
+    fi
+
     exit 0
 else
     echo -e "${RED}========================================${NC}"
     echo -e "${RED}  롤백 실패${NC}"
     echo -e "${RED}========================================${NC}"
     docker logs --tail 50 souzip-api
+
+     if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
+            source "$WORK_DIR/deploy/notification/discord-notify.sh"
+            notify_rollback_failed
+     fi
+
     exit 1
 fi

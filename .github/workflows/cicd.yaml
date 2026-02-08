@@ -119,7 +119,7 @@ jobs:
             GEOCODING_API_KEY=${{ secrets.GEOCODING_API_KEY }}
             CLOVA_STUDIO_API_KEY=${{ secrets.CLOVA_STUDIO_API_KEY }}
             CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }}
-            DISCORD_WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}"
+            DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
             EOF
             
             chmod 600 deploy/.env

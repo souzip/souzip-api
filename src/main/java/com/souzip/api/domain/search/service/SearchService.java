@@ -27,7 +27,6 @@ public class SearchService {
 
     private static final int MAX_CITIES_PER_COUNTRY = 1000;
     private static final float COUNTRY_CITY_SCORE = 0.5f;
-    private static final int MIN_KEYWORD_LENGTH_FOR_SPLIT = 4; // 최소 4글자부터 분리 시도
 
     private final LocationRepository locationRepository;
     private static final ThreadLocal<String> CURRENT_KEYWORD = new ThreadLocal<>();
@@ -59,87 +58,14 @@ public class SearchService {
      * 3. 그 외에는 단일 키워드로 처리
      */
     private String[] splitKeywords(String keyword) {
-        // 1. 공백으로 분리
+
         String[] spaceSplit = keyword.split("\\s+");
         if (spaceSplit.length > 1) {
             return spaceSplit;
         }
 
-        // 2. 공백이 없고 길이가 충분하면 분리 시도
-        if (keyword.length() >= MIN_KEYWORD_LENGTH_FOR_SPLIT) {
-            String[] autoSplit = tryAutoSplit(keyword);
-            if (autoSplit.length > 1) {
-                log.debug("키워드 자동 분리: {} -> {}", keyword, Arrays.toString(autoSplit));
-                return autoSplit;
-            }
-        }
-
-        // 3. 단일 키워드
+        log.debug("단일 키워드로 처리: {}", keyword);
         return new String[]{keyword};
-    }
-
-    /**
-     * 띄어쓰기 없는 키워드를 자동으로 분리합니다.
-     * 예: "일본오사카" -> ["일본", "오사카"]
-     */
-    private String[] tryAutoSplit(String keyword) {
-        // 가능한 모든 분리 조합 시도
-        List<String[]> possibleSplits = generatePossibleSplits(keyword);
-
-        // 각 조합을 실제로 검색해보고 결과가 있는지 확인
-        for (String[] split : possibleSplits) {
-            if (isValidSplit(split)) {
-                return split;
-            }
-        }
-
-        // 분리 실패시 원본 반환
-        return new String[]{keyword};
-    }
-
-    /**
-     * 가능한 2-way 분리 조합 생성
-     * 예: "일본오사카" -> [["일", "본오사카"], ["일본", "오사카"], ["일본오", "사카"], ["일본오사", "카"]]
-     */
-    private List<String[]> generatePossibleSplits(String keyword) {
-        List<String[]> splits = new ArrayList<>();
-
-        // 최소 2글자씩 분리 (너무 짧은 단어 방지)
-        for (int i = 2; i <= keyword.length() - 2; i++) {
-            String first = keyword.substring(0, i);
-            String second = keyword.substring(i);
-            splits.add(new String[]{first, second});
-        }
-
-        return splits;
-    }
-
-    /**
-     * 분리된 키워드 조합이 유효한지 검증
-     * 각 키워드가 실제로 검색 결과를 반환하는지 확인
-     */
-    private boolean isValidSplit(String[] keywords) {
-        // 각 키워드가 모두 2글자 이상이어야 함
-        if (Arrays.stream(keywords).anyMatch(k -> k.length() < 2)) {
-            return false;
-        }
-
-        // 각 키워드로 검색했을 때 결과가 있어야 함
-        for (String keyword : keywords) {
-            try {
-                List<SearchHit<LocationDocument>> results =
-                    locationRepository.searchByKeywordWithFuzzy(keyword);
-
-                if (results.isEmpty()) {
-                    return false;
-                }
-            } catch (Exception e) {
-                log.debug("키워드 검증 중 오류: {}", keyword, e);
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private void setCurrentKeyword(String[] keywords, String trimmedKeyword) {

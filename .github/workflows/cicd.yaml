@@ -107,7 +107,6 @@ jobs:
               -u ${{ secrets.NCP_ACCESS_KEY }} \
               -p ${{ secrets.NCP_SECRET_KEY }}
             
-            # 환경변수 export
             export SPRING_PROFILES_ACTIVE=dev
             export DEV_DB_URL="${{ secrets.DEV_DB_URL }}"
             export POSTGRES_USER="${{ secrets.DEV_DB_USERNAME }}"

@@ -28,6 +28,7 @@ public class AppleTransferService {
     private final AppleMigrationConfig appleConfig;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    private static final String APPLE_AUTH_URL = "https://appleid.apple.com/auth/token";
     private static final String APPLE_MIGRATION_URL = "https://appleid.apple.com/auth/usermigrationinfo";
     private static final long JWT_EXPIRATION_MILLIS = 3600000L;
 
@@ -43,7 +44,13 @@ public class AppleTransferService {
 
     private TransferResponse callAppleMigrationApi(String userId) {
         String clientSecret = generateClientSecret();
-        HttpEntity<MultiValueMap<String, String>> request = buildRequest(userId, clientSecret);
+        String accessToken = getAccessToken(clientSecret);
+
+        HttpHeaders headers = createHeaders();
+        headers.setBearerAuth(accessToken);
+
+        MultiValueMap<String, String> params = createParams(userId, clientSecret);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
         ResponseEntity<TransferResponse> response = restTemplate.postForEntity(
             APPLE_MIGRATION_URL,
@@ -54,10 +61,24 @@ public class AppleTransferService {
         return response.getBody();
     }
 
-    private HttpEntity<MultiValueMap<String, String>> buildRequest(String userId, String clientSecret) {
-        HttpHeaders headers = createHeaders();
-        MultiValueMap<String, String> params = createParams(userId, clientSecret);
-        return new HttpEntity<>(params, headers);
+    private String getAccessToken(String clientSecret) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "client_credentials");
+        params.add("scope", "user.migration");
+        params.add("client_id", appleConfig.getClientId());
+        params.add("client_secret", clientSecret);
+
+        ResponseEntity<AccessTokenResponse> response = restTemplate.postForEntity(
+            APPLE_AUTH_URL,
+            new HttpEntity<>(params, headers),
+            AccessTokenResponse.class
+        );
+
+        log.info("Apple access token 발급 성공");
+        return response.getBody().getAccessToken();
     }
 
     private HttpHeaders createHeaders() {
@@ -117,10 +138,10 @@ public class AppleTransferService {
 
         return Jwts.builder()
             .header()
-            .add("kid", appleConfig.getKeyId())
+            .add("kid", appleConfig.getOldKeyId())
             .add("alg", "ES256")
             .and()
-            .issuer(appleConfig.getTeamId())
+            .issuer(appleConfig.getOldTeamId())
             .issuedAt(now)
             .expiration(expiryDate)
             .audience()
@@ -133,14 +154,14 @@ public class AppleTransferService {
 
     private void logJwtGeneration(String jwt) {
         log.info("Generated JWT: {}", jwt);
-        log.info("Team ID: {}", appleConfig.getTeamId());
-        log.info("Key ID: {}", appleConfig.getKeyId());
+        log.info("Old Team ID: {}", appleConfig.getOldTeamId());
+        log.info("Old Key ID: {}", appleConfig.getOldKeyId());
         log.info("Client ID: {}", appleConfig.getClientId());
     }
 
     private PrivateKey getPrivateKey() {
         try {
-            String cleanedKey = cleanPrivateKey(appleConfig.getPrivateKey());
+            String cleanedKey = cleanPrivateKey(appleConfig.getOldPrivateKey()); // 이전 팀 Private Key
             byte[] keyBytes = Base64.getDecoder().decode(cleanedKey);
             return generatePrivateKey(keyBytes);
         } catch (Exception e) {
@@ -161,6 +182,12 @@ public class AppleTransferService {
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         return keyFactory.generatePrivate(keySpec);
+    }
+
+    @Getter
+    public static class AccessTokenResponse {
+        @JsonProperty("access_token")
+        private String accessToken;
     }
 
     @Getter

@@ -8,24 +8,30 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
 @ConfigurationProperties(prefix = "oauth.apple")
 public class AppleMigrationConfig {
 
-    private final String teamId;
-    private final String oldTeamId;
     private final String clientId;
+    private final String teamId;
     private final String keyId;
     private final String privateKey;
+    private final String oldTeamId;
+    private final String oldKeyId;
+    private final String oldPrivateKey;
 
     @ConstructorBinding
     public AppleMigrationConfig(
-        String teamId,
-        String oldTeamId,
         String clientId,
+        String teamId,
         String keyId,
-        String privateKey
+        String privateKey,
+        String oldTeamId,
+        String oldKeyId,
+        String oldPrivateKey
     ) {
-        this.teamId = teamId;
-        this.oldTeamId = oldTeamId;
         this.clientId = clientId;
+        this.teamId = teamId;
         this.keyId = keyId;
         this.privateKey = privateKey;
+        this.oldTeamId = oldTeamId;
+        this.oldKeyId = oldKeyId;
+        this.oldPrivateKey = oldPrivateKey;
     }
 }

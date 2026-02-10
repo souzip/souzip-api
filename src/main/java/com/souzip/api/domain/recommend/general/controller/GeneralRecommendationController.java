@@ -29,6 +29,7 @@ public class GeneralRecommendationController {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode));
     }
 
+
     @GetMapping("/stats")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop3() {
         return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());

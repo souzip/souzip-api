@@ -12,7 +12,13 @@ MAX_RETRY=6
 RETRY_INTERVAL=10
 
 if [ -f "$WORK_DIR/deploy/.env" ]; then
-    export $(grep -E "DISCORD_WEBHOOK_URL|DEVELOP_DISCORD_WEBHOOK_URL|API_DOCS_URL|COMMIT_MESSAGE|DEPLOYER" "$WORK_DIR/deploy/.env" | xargs)
+    while IFS='=' read -r key value; do
+        case "$key" in
+            DISCORD_WEBHOOK_URL|DEVELOP_DISCORD_WEBHOOK_URL|API_DOCS_URL|COMMIT_MESSAGE|DEPLOYER)
+                export "$key=$value"
+                ;;
+        esac
+    done < "$WORK_DIR/deploy/.env"
 fi
 
 cd $WORK_DIR || exit 1

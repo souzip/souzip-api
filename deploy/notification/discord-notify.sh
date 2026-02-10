@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DISCORD_WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
+DEVELOP_DISCORD_WEBHOOK_URL="${DEVELOP_DISCORD_WEBHOOK_URL:-}"
 
 COLOR_RED=15158332
 COLOR_GREEN=3066993
@@ -9,27 +10,39 @@ COLOR_YELLOW=16776960
 
 notify_deploy_success() {
     local image_id=$1
+    local api_docs_url=${2:-""}
+    local commit_message=${3:-""}
+    local deployer=${4:-""}
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
-    if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+    if [ -z "$DEVELOP_DISCORD_WEBHOOK_URL" ]; then
         return
     fi
 
-    curl -s -H "Content-Type: application/json" \
-         -X POST \
-         -d "{
-           \"username\": \"Souzip Bot\",
-           \"embeds\": [{
-             \"title\": \"배포 완료\",
-             \"description\": \"성공적으로 배포되었습니다.\",
-             \"color\": ${COLOR_GREEN},
-             \"fields\": [
-               {\"name\": \"시간\", \"value\": \"${timestamp}\", \"inline\": true},
-               {\"name\": \"상태\", \"value\": \"헬스체크 통과\", \"inline\": false}
-             ]
-           }]
-         }" \
-         "${DISCORD_WEBHOOK_URL}" > /dev/null
+    PAYLOAD=$(jq -n \
+      --arg image_id "$image_id" \
+      --arg msg "$commit_message" \
+      --arg url "$api_docs_url" \
+      --arg ts "$timestamp" \
+      --arg deployer "$deployer" \
+      --argjson color "$COLOR_GREEN" \
+      '{
+        username: "Souzip Bot",
+        embeds: [{
+          title: "배포 완료",
+          description: $msg,
+          color: $color,
+          fields: [
+            {name: "이미지 ID", value: $image_id, inline: false},
+            {name: "시간", value: $ts, inline: true},
+            {name: "담당자", value: $deployer, inline: true},
+            {name: "API 문서", value: ("[\($url)](\($url))"), inline: false},
+            {name: "상태", value: "헬스체크 통과", inline: false}
+          ]
+        }]
+      }')
+
+    curl -s -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "${DEVELOP_DISCORD_WEBHOOK_URL}" > /dev/null
 }
 
 notify_rollback_success() {

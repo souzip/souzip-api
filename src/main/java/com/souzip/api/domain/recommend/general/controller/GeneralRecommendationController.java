@@ -24,7 +24,7 @@ public class GeneralRecommendationController {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCategory(categoryName));
     }
 
-    @GetMapping("/top-10/countries")
+    @GetMapping("/countries")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop10() {
         return SuccessResponse.of(
                 generalRecommendationService.getTop10CountriesBySouvenirCount()

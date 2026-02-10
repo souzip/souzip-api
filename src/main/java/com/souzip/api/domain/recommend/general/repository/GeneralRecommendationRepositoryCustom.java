@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface GeneralRecommendationRepositoryCustom {
     List<Souvenir> findTop10ByCountry(String countryCode);
+    List<GeneralRecommendationStatsDto> findTop10CountriesBySouvenirCount();
     List<Souvenir> findTop10ByCategoryRecent(String categoryName);
     List<GeneralRecommendationStatsDto> findTop3CountriesBySouvenirCount();
 }

@@ -52,7 +52,9 @@ include::{snippets}/recommend/general/category-top10/http-response.adoc[]
 include::{snippets}/recommend/general/category-top10/response-fields.adoc[]
 
 [[discovery-top-countries]]
-=== 이번 달 가장 많은 기념품이 등록된 나라 Top 3
+=== 누적 기준 기념품 등록 수 Top 3 국가
+
+전체 기간 동안 등록된 기념품 수를 기준으로 가장 많은 기념품이 등록된 국가 Top 3를 조회합니다.
 
 * 인증 불필요 (Public API)
 

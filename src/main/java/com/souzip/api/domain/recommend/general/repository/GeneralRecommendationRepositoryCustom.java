@@ -10,3 +10,4 @@ public interface GeneralRecommendationRepositoryCustom {
     List<Souvenir> findTop10ByCategoryRecent(String categoryName);
     List<GeneralRecommendationStatsDto> findTop3CountriesBySouvenirCount();
 }
+

@@ -647,7 +647,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_response_fields_32">Response Fields</a></li>
 </ul>
 </li>
-<li><a href="#discovery-top-countries">이번 달 가장 많은 기념품이 등록된 나라 Top 3</a>
+<li><a href="#discovery-top-countries">누적 기준 기념품 등록 수 Top 3 국가</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_33">HTTP 요청</a></li>
 <li><a href="#_http_응답_33">HTTP 응답</a></li>
@@ -687,26 +687,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_http_응답_36">HTTP 응답</a></li>
 <li><a href="#_응답_필드_37">응답 필드</a></li>
 <li><a href="#_response_fields_36">Response Fields</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#search-api">검색 API</a>
-<ul class="sectlevel2">
-<li><a href="#search-locations">위치 검색</a>
-<ul class="sectlevel3">
-<li><a href="#_엔드포인트_2">엔드포인트</a></li>
-<li><a href="#_요청_파라미터_6">요청 파라미터</a></li>
-<li><a href="#search-korean-city">한글 도시명으로 검색</a></li>
-<li><a href="#_response_fields_37">Response Fields</a></li>
-<li><a href="#search-english-city">영문 도시명으로 검색</a></li>
-<li><a href="#search-country">국가명으로 검색</a></li>
-<li><a href="#_response_fields_38">Response Fields</a></li>
-<li><a href="#search-multiple-keywords">복수 키워드로 검색</a></li>
-<li><a href="#_response_fields_39">Response Fields</a></li>
-<li><a href="#search-errors">검색 에러 케이스</a></li>
-<li><a href="#_response_fields_40">Response Fields</a></li>
-<li><a href="#_response_fields_41">Response Fields</a></li>
 </ul>
 </li>
 </ul>
@@ -1414,7 +1394,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "카카오 API 호출에 실패했습니다."
 }</code></pre>
 </div>
@@ -1880,7 +1860,7 @@ Content-Type: application/json
 Content-Length: 98
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "지원하지 않는 로그인 방식입니다: naver"
 }</code></pre>
 </div>
@@ -2003,7 +1983,7 @@ Content-Type: application/json
 Content-Length: 103
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "지원하지 않는 로그인 방식입니다: invalid123"
 }</code></pre>
 </div>
@@ -2355,7 +2335,7 @@ Content-Type: application/json
 Content-Length: 79
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "만료된 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -2456,7 +2436,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "유효하지 않은 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -3298,7 +3278,7 @@ Content-Type: application/json
 Content-Length: 93
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "필수 약관에 모두 동의해야 합니다."
 }</code></pre>
 </div>
@@ -3449,7 +3429,7 @@ Content-Type: application/json
 Content-Length: 86
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "이미 사용 중인 닉네임입니다."
 }</code></pre>
 </div>
@@ -3600,7 +3580,7 @@ Content-Type: application/json
 Content-Length: 95
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "이미 온보딩을 완료한 사용자입니다."
 }</code></pre>
 </div>
@@ -3751,7 +3731,7 @@ Content-Type: application/json
 Content-Length: 88
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "유효하지 않은 카테고리입니다."
 }</code></pre>
 </div>
@@ -3902,7 +3882,7 @@ Content-Type: application/json
 Content-Length: 102
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "유효하지 않은 프로필 이미지 색상입니다."
 }</code></pre>
 </div>
@@ -6596,7 +6576,10 @@ Content-Length: 1678
 </div>
 </div>
 <div class="sect2">
-<h3 id="discovery-top-countries"><a class="link" href="#discovery-top-countries">이번 달 가장 많은 기념품이 등록된 나라 Top 3</a></h3>
+<h3 id="discovery-top-countries"><a class="link" href="#discovery-top-countries">누적 기준 기념품 등록 수 Top 3 국가</a></h3>
+<div class="paragraph">
+<p>전체 기간 동안 등록된 기념품 수를 기준으로 가장 많은 기념품이 등록된 국가 Top 3를 조회합니다.</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
@@ -6619,21 +6602,21 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 310
+Content-Length: 305
 
 {
   "data" : [ {
-    "countryCode" : "KR",
-    "countryNameKr" : "대한민국",
-    "souvenirCount" : 15
-  }, {
     "countryCode" : "JP",
     "countryNameKr" : "일본",
-    "souvenirCount" : 10
+    "souvenirCount" : 20
   }, {
     "countryCode" : "US",
     "countryNameKr" : "미국",
-    "souvenirCount" : 7
+    "souvenirCount" : 15
+  }, {
+    "countryCode" : "TW",
+    "countryNameKr" : "대만",
+    "souvenirCount" : 10
   } ],
   "message" : ""
 }</code></pre>
@@ -6666,7 +6649,7 @@ Content-Length: 310
 <td class="tableblock halign-left valign-top"><p class="tableblock">data</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">나라별 기념품 등록 통계</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">나라별 기념품 등록 통계(누적 Top3)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryNameKr</p></td>
@@ -6678,7 +6661,7 @@ Content-Length: 310
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">나라 코드</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirCount</p></td>
@@ -8753,7 +8736,7 @@ Content-Type: application/json
 Content-Length: 78
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "a9d3e0b5",
   "message" : "검색어를 입력해주세요."
 }</code></pre>
 </div>

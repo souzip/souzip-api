@@ -46,14 +46,7 @@ public class GeneralRecommendationService {
             .toList();
     }
 
-    /**
-     * ✅ 신규 요구사항:
-     * - countryCode 입력 없이 호출
-     * - 기념품 등록 수 기준 상위 국가 최대 10개(누적)
-     * - 각 국가별 기념품 10개씩 반환
-     */
     public List<CountryRecommendationDto> getTopCountriesWithTop10Souvenirs() {
-        // 1) Top(최대10) 국가 선정(누적 count desc)
         List<GeneralRecommendationStatsDto> topCountries =
                 generalRecommendationRepository.findTop10CountriesBySouvenirCount();
 
@@ -61,15 +54,12 @@ public class GeneralRecommendationService {
             return List.of();
         }
 
-        // 2) 각 국가별 기념품 10개씩 조회 (최대 10번 호출, 정확성 우선)
-        //    ※ 성능 최적화 필요하면 "IN + window function" 방식으로 한 번에 가져오는 쿼리로 바꾸면 됨.
         Map<String, List<Souvenir>> souvenirsByCountry = new LinkedHashMap<>();
         for (GeneralRecommendationStatsDto country : topCountries) {
             List<Souvenir> souvenirs = generalRecommendationRepository.findTop10ByCountry(country.countryCode());
             souvenirsByCountry.put(country.countryCode(), souvenirs);
         }
 
-        // 3) 썸네일은 한 번에 조회
         List<Long> allSouvenirIds = souvenirsByCountry.values().stream()
                 .flatMap(List::stream)
                 .map(Souvenir::getId)
@@ -80,7 +70,6 @@ public class GeneralRecommendationService {
                 ? Map.of()
                 : fileService.getThumbnailsByEntityIds("Souvenir", allSouvenirIds);
 
-        // 4) 국가별 응답 DTO 구성 (topCountries 순서 유지)
         Map<String, GeneralRecommendationStatsDto> statsMap = topCountries.stream()
                 .collect(Collectors.toMap(
                         GeneralRecommendationStatsDto::countryCode,

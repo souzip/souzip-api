@@ -30,8 +30,10 @@ public class GeneralRecommendationController {
         return SuccessResponse.of(generalRecommendationService.getTopCountriesWithTop10Souvenirs());
     }
 
+
     @GetMapping("/stats")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop3() {
         return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());
     }
 }
+

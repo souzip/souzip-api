@@ -106,15 +106,7 @@ public class AuthService {
 
         Optional<User> existingUser = findByProviderId(newProviderId);
         if (existingUser.isPresent()) {
-            User user = existingUser.get();
-
-            if (transferSub != null && user.getTransferIdentifier() == null) {
-                user.updateTransferIdentifier(transferSub);
-                userRepository.save(user);
-                log.info("transfer_sub 저장 - userId: {}, transferSub: {}", user.getId(), transferSub);
-            }
-
-            return handleExistingUser(user, oauthUserInfo, newProviderId);
+            return handleExistingUser(existingUser.get(), oauthUserInfo, newProviderId);
         }
 
         if (hasTransferSub(transferSub)) {
@@ -132,7 +124,6 @@ public class AuthService {
 
     private String extractTransferSub(OAuthUserInfo oauthUserInfo) {
         if (oauthUserInfo instanceof AppleUserInfo appleUserInfo) {
-            log.info(appleUserInfo.getTransferSub());
             return appleUserInfo.getTransferSub();
         }
         return null;
@@ -154,7 +145,8 @@ public class AuthService {
     }
 
     private User migrateUser(User user, String transferSub, String newProviderId, OAuthUserInfo oauthUserInfo) {
-        logMigrationDetected(user.getProviderId(), transferSub, newProviderId);
+        log.info("Apple 앱 이전 감지 - 기존 providerId: {}, transfer_sub: {}, 새 providerId: {}",
+            user.getProviderId(), transferSub, newProviderId);
 
         user.updateProviderId(newProviderId);
         userRepository.save(user);
@@ -163,12 +155,6 @@ public class AuthService {
 
         log.info("Apple 사용자 마이그레이션 완료: userId={}", user.getId());
         return restoredUser;
-    }
-
-    private void logMigrationDetected(String oldProviderId, String transferSub, String newProviderId) {
-        log.info("Apple 앱 이전 감지 - transfer_sub로 기존 사용자 발견");
-        log.info("기존 providerId: {}, transfer_sub: {}, 새 providerId: {}",
-            oldProviderId, transferSub, newProviderId);
     }
 
     private User createNewAppleUser(String providerId, OAuthUserInfo oauthUserInfo) {

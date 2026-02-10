@@ -30,7 +30,7 @@ public class GeneralRecommendationController {
     }
 
     @GetMapping("/stats")
-    public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesThisMonth() {
-        return SuccessResponse.of(generalRecommendationService.getTop3CountriesByCurrentMonth());
+    public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop3() {
+        return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());
     }
 }

@@ -70,7 +70,7 @@ public class GeneralRecommendationService {
             .toList();
     }
 
-    public List<GeneralRecommendationStatsDto> getTop3CountriesByCurrentMonth() {
-        return generalRecommendationRepository.findTop3CountriesByCurrentMonth();
+    public List<GeneralRecommendationStatsDto> getTop3CountriesBySouvenirCount() {
+        return generalRecommendationRepository.findTop3CountriesBySouvenirCount();
     }
 }

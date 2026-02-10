@@ -79,6 +79,8 @@ jobs:
     needs: docker-build
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    env:
+      COMMIT_MSG: ${{ github.event.head_commit.message }}
 
     steps:
       - name: Checkout
@@ -121,11 +123,11 @@ jobs:
             CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }}
             DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
             DEVELOP_DISCORD_WEBHOOK_URL=${{ secrets.DEVELOP_DISCORD_WEBHOOK_URL }}
-            API_DOCS_URL=https:${{ secrets.API_DOCS_URL }}
+            API_DOCS_URL=${{ secrets.API_DOCS_URL }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/.env
-            echo "COMMIT_MESSAGE=$(echo '${{ github.event.head_commit.message }}' | head -1 | sed 's/"/\\"/g')" >> deploy/.env
+            printf 'COMMIT_MESSAGE=%s\n' "$(echo "${{ env.COMMIT_MSG }}" | head -1)" >> deploy/.env
 
             chmod 600 deploy/.env
 

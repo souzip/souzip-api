@@ -629,10 +629,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#discovery-api">Discovery API</a>
 <ul class="sectlevel2">
-<li><a href="#discovery-country-top10">나라별 추천 기념품 TOP 10</a>
+<li><a href="#discovery-country-top10">나라별 추천 기념품 TOP 10 (상위 국가 기준)</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_31">HTTP 요청</a></li>
-<li><a href="#_path_variables">Path Variables</a></li>
 <li><a href="#_http_응답_31">HTTP 응답</a></li>
 <li><a href="#_응답_필드_32">응답 필드</a></li>
 <li><a href="#_response_fields_31">Response Fields</a></li>
@@ -641,7 +640,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#discovery-category-top10">카테고리별 기념품 추천</a>
 <ul class="sectlevel3">
 <li><a href="#_http_요청_32">HTTP 요청</a></li>
-<li><a href="#_path_variables_2">Path Variables</a></li>
+<li><a href="#_path_variables">Path Variables</a></li>
 <li><a href="#_http_응답_32">HTTP 응답</a></li>
 <li><a href="#_응답_필드_33">응답 필드</a></li>
 <li><a href="#_response_fields_32">Response Fields</a></li>
@@ -687,26 +686,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_http_응답_36">HTTP 응답</a></li>
 <li><a href="#_응답_필드_37">응답 필드</a></li>
 <li><a href="#_response_fields_36">Response Fields</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#search-api">검색 API</a>
-<ul class="sectlevel2">
-<li><a href="#search-locations">위치 검색</a>
-<ul class="sectlevel3">
-<li><a href="#_엔드포인트_2">엔드포인트</a></li>
-<li><a href="#_요청_파라미터_6">요청 파라미터</a></li>
-<li><a href="#search-korean-city">한글 도시명으로 검색</a></li>
-<li><a href="#_response_fields_37">Response Fields</a></li>
-<li><a href="#search-english-city">영문 도시명으로 검색</a></li>
-<li><a href="#search-country">국가명으로 검색</a></li>
-<li><a href="#_response_fields_38">Response Fields</a></li>
-<li><a href="#search-multiple-keywords">복수 키워드로 검색</a></li>
-<li><a href="#_response_fields_39">Response Fields</a></li>
-<li><a href="#search-errors">검색 에러 케이스</a></li>
-<li><a href="#_response_fields_40">Response Fields</a></li>
-<li><a href="#_response_fields_41">Response Fields</a></li>
 </ul>
 </li>
 </ul>
@@ -1414,7 +1393,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "카카오 API 호출에 실패했습니다."
 }</code></pre>
 </div>
@@ -1880,7 +1859,7 @@ Content-Type: application/json
 Content-Length: 98
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "지원하지 않는 로그인 방식입니다: naver"
 }</code></pre>
 </div>
@@ -2003,7 +1982,7 @@ Content-Type: application/json
 Content-Length: 103
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "지원하지 않는 로그인 방식입니다: invalid123"
 }</code></pre>
 </div>
@@ -2355,7 +2334,7 @@ Content-Type: application/json
 Content-Length: 79
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "만료된 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -2456,7 +2435,7 @@ Content-Type: application/json
 Content-Length: 89
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "유효하지 않은 Refresh Token입니다."
 }</code></pre>
 </div>
@@ -3298,7 +3277,7 @@ Content-Type: application/json
 Content-Length: 93
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "필수 약관에 모두 동의해야 합니다."
 }</code></pre>
 </div>
@@ -3449,7 +3428,7 @@ Content-Type: application/json
 Content-Length: 86
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "이미 사용 중인 닉네임입니다."
 }</code></pre>
 </div>
@@ -3600,7 +3579,7 @@ Content-Type: application/json
 Content-Length: 95
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "이미 온보딩을 완료한 사용자입니다."
 }</code></pre>
 </div>
@@ -3751,7 +3730,7 @@ Content-Type: application/json
 Content-Length: 88
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "유효하지 않은 카테고리입니다."
 }</code></pre>
 </div>
@@ -3902,7 +3881,7 @@ Content-Type: application/json
 Content-Length: 102
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "유효하지 않은 프로필 이미지 색상입니다."
 }</code></pre>
 </div>
@@ -6188,9 +6167,10 @@ Content-Length: 915
 <h2 id="discovery-api"><a class="link" href="#discovery-api">Discovery API</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="discovery-country-top10"><a class="link" href="#discovery-country-top10">나라별 추천 기념품 TOP 10</a></h3>
+<h3 id="discovery-country-top10"><a class="link" href="#discovery-country-top10">나라별 추천 기념품 TOP 10 (상위 국가 기준)</a></h3>
 <div class="paragraph">
-<p>특정 나라에서 등록된 추천 기념품을 조회하는 API입니다.</p>
+<p>기념품이 많이 등록된 상위 국가(최대 10개)를 조회하고,
+각 국가별로 최근 생성된 추천 기념품을 최대 10개까지 제공합니다.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -6199,8 +6179,8 @@ Content-Length: 915
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-조회 결과는 최근 생성된 기념품 10개까지 제공됩니다.
-      (1차 개발 기간에서는 찜, 조회수 등의 기능이 없어 생성일을 기준으로 추천합니다.)
+상위 국가는 "기념품 등록 수(누적)" 기준으로 선정됩니다.
+      각 국가의 기념품 목록은 최근 생성된 기념품 최대 10개까지 제공됩니다.
 </td>
 </tr>
 </table>
@@ -6216,37 +6196,10 @@ Content-Length: 915
 <h4 id="_http_요청_31"><a class="link" href="#_http_요청_31">HTTP 요청</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/general/country/KR HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/general/country HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
-</div>
-<div class="sect3">
-<h4 id="_path_variables"><a class="link" href="#_path_variables">Path Variables</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 16.6666%;">
-<col style="width: 16.6666%;">
-<col style="width: 16.6666%;">
-<col style="width: 50.0002%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">변수명</th>
-<th class="tableblock halign-left valign-top">타입</th>
-<th class="tableblock halign-left valign-top">필수</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">countryCode</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">조회할 국가 코드 (Ex. KR, JP)</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="sect3">
 <h4 id="_http_응답_31"><a class="link" href="#_http_응답_31">HTTP 응답</a></h4>
@@ -6254,69 +6207,139 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 1678
+Content-Length: 3931
 
 {
   "data" : [ {
-    "id" : 1,
-    "name" : "기념품 1",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb1.jpg"
+    "countryCode" : "KR",
+    "countryNameKr" : "대한민국",
+    "souvenirCount" : 123,
+    "souvenirs" : [ {
+      "id" : 1,
+      "name" : "KR 기념품 1",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb1.jpg"
+    }, {
+      "id" : 2,
+      "name" : "KR 기념품 2",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb2.jpg"
+    }, {
+      "id" : 3,
+      "name" : "KR 기념품 3",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb3.jpg"
+    }, {
+      "id" : 4,
+      "name" : "KR 기념품 4",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb4.jpg"
+    }, {
+      "id" : 5,
+      "name" : "KR 기념품 5",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb5.jpg"
+    }, {
+      "id" : 6,
+      "name" : "KR 기념품 6",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb6.jpg"
+    }, {
+      "id" : 7,
+      "name" : "KR 기념품 7",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb7.jpg"
+    }, {
+      "id" : 8,
+      "name" : "KR 기념품 8",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb8.jpg"
+    }, {
+      "id" : 9,
+      "name" : "KR 기념품 9",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb9.jpg"
+    }, {
+      "id" : 10,
+      "name" : "KR 기념품 10",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "KR",
+      "thumbnailUrl" : "https://example.com/kr/thumb10.jpg"
+    } ]
   }, {
-    "id" : 2,
-    "name" : "기념품 2",
-    "category" : "SOUVENIR_BASIC",
     "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb2.jpg"
-  }, {
-    "id" : 3,
-    "name" : "기념품 3",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb3.jpg"
-  }, {
-    "id" : 4,
-    "name" : "기념품 4",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb4.jpg"
-  }, {
-    "id" : 5,
-    "name" : "기념품 5",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb5.jpg"
-  }, {
-    "id" : 6,
-    "name" : "기념품 6",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb6.jpg"
-  }, {
-    "id" : 7,
-    "name" : "기념품 7",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb7.jpg"
-  }, {
-    "id" : 8,
-    "name" : "기념품 8",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb8.jpg"
-  }, {
-    "id" : 9,
-    "name" : "기념품 9",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb9.jpg"
-  }, {
-    "id" : 10,
-    "name" : "기념품 10",
-    "category" : "SOUVENIR_BASIC",
-    "countryCode" : "JP",
-    "thumbnailUrl" : "https://example.com/thumb10.jpg"
+    "countryNameKr" : "일본",
+    "souvenirCount" : 45,
+    "souvenirs" : [ {
+      "id" : 101,
+      "name" : "JP 기념품 1",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb1.jpg"
+    }, {
+      "id" : 102,
+      "name" : "JP 기념품 2",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb2.jpg"
+    }, {
+      "id" : 103,
+      "name" : "JP 기념품 3",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb3.jpg"
+    }, {
+      "id" : 104,
+      "name" : "JP 기념품 4",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb4.jpg"
+    }, {
+      "id" : 105,
+      "name" : "JP 기념품 5",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb5.jpg"
+    }, {
+      "id" : 106,
+      "name" : "JP 기념품 6",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb6.jpg"
+    }, {
+      "id" : 107,
+      "name" : "JP 기념품 7",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb7.jpg"
+    }, {
+      "id" : 108,
+      "name" : "JP 기념품 8",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb8.jpg"
+    }, {
+      "id" : 109,
+      "name" : "JP 기념품 9",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb9.jpg"
+    }, {
+      "id" : 110,
+      "name" : "JP 기념품 10",
+      "category" : "SOUVENIR_BASIC",
+      "countryCode" : "JP",
+      "thumbnailUrl" : "https://example.com/jp/thumb10.jpg"
+    } ]
   } ],
   "message" : ""
 }</code></pre>
@@ -6349,34 +6372,58 @@ Content-Length: 1678
 <td class="tableblock halign-left valign-top"><p class="tableblock">data</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 리스트</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data[].id</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID (integer)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data[].name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 이름</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data[].category</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 카테고리</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">국가별 추천 결과 리스트 (최대 10개 국가)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryNameKr</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">국가명(한글)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirCount</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">해당 국가 기념품 등록 수(누적)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">해당 국가 추천 기념품 Top10 리스트</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirs[].id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirs[].name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 이름</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirs[].category</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기념품 카테고리</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirs[].countryCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">기념품 국가 코드</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">data[].thumbnailUrl</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].souvenirs[].thumbnailUrl</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">대표 이미지 URL</p></td>
@@ -6426,7 +6473,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_path_variables_2"><a class="link" href="#_path_variables_2">Path Variables</a></h4>
+<h4 id="_path_variables"><a class="link" href="#_path_variables">Path Variables</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 16.6666%;">
@@ -8405,8 +8452,8 @@ Content-Length: 707
       "longitude" : 135.5,
       "score" : 150.0,
       "highlight" : {
-        "nameKr" : [ "&lt;em&gt;오사카&lt;/em&gt;" ],
-        "countryNameKr" : [ "&lt;em&gt;일본&lt;/em&gt;" ]
+        "countryNameKr" : [ "&lt;em&gt;일본&lt;/em&gt;" ],
+        "nameKr" : [ "&lt;em&gt;오사카&lt;/em&gt;" ]
       }
     } ],
     "pagination" : {
@@ -8753,7 +8800,7 @@ Content-Type: application/json
 Content-Length: 78
 
 {
-  "traceId" : "3707e59d",
+  "traceId" : "0d4ec6d9",
   "message" : "검색어를 입력해주세요."
 }</code></pre>
 </div>

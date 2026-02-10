@@ -141,6 +141,11 @@ public class AuthService {
     private Optional<User> attemptMigration(String transferSub, String newProviderId, OAuthUserInfo oauthUserInfo) {
         Optional<User> existingUser = userRepository.findByTransferIdentifier(transferSub);
 
+        if (existingUser.isEmpty()) {
+            existingUser = userRepository.findByProviderAndProviderId(Provider.APPLE, transferSub);
+            log.info("transfer_sub로 기존 유저 조회 시도 - transferSub: {}", transferSub);
+        }
+
         return existingUser.map(user -> migrateUser(user, transferSub, newProviderId, oauthUserInfo));
     }
 

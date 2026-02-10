@@ -106,7 +106,15 @@ public class AuthService {
 
         Optional<User> existingUser = findByProviderId(newProviderId);
         if (existingUser.isPresent()) {
-            return handleExistingUser(existingUser.get(), oauthUserInfo, newProviderId);
+            User user = existingUser.get();
+
+            if (transferSub != null && user.getTransferIdentifier() == null) {
+                user.updateTransferIdentifier(transferSub);
+                userRepository.save(user);
+                log.info("transfer_sub 저장 - userId: {}, transferSub: {}", user.getId(), transferSub);
+            }
+
+            return handleExistingUser(user, oauthUserInfo, newProviderId);
         }
 
         if (hasTransferSub(transferSub)) {
@@ -124,6 +132,7 @@ public class AuthService {
 
     private String extractTransferSub(OAuthUserInfo oauthUserInfo) {
         if (oauthUserInfo instanceof AppleUserInfo appleUserInfo) {
+            log.info(appleUserInfo.getTransferSub());
             return appleUserInfo.getTransferSub();
         }
         return null;
@@ -140,11 +149,6 @@ public class AuthService {
 
     private Optional<User> attemptMigration(String transferSub, String newProviderId, OAuthUserInfo oauthUserInfo) {
         Optional<User> existingUser = userRepository.findByTransferIdentifier(transferSub);
-
-        if (existingUser.isEmpty()) {
-            existingUser = userRepository.findByProviderAndProviderId(Provider.APPLE, transferSub);
-            log.info("transfer_sub로 기존 유저 조회 시도 - transferSub: {}", transferSub);
-        }
 
         return existingUser.map(user -> migrateUser(user, transferSub, newProviderId, oauthUserInfo));
     }

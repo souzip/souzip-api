@@ -138,31 +138,34 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("이번 달 나라별 Top3 통계 조회")
+    @DisplayName("기념품 최다등록 국가 Top3 통계 조회")
     void getTopCountriesThisMonth() throws Exception {
         // given
-        GeneralRecommendationStatsDto stat1 = new GeneralRecommendationStatsDto("KR", "대한민국", 15L);
-        GeneralRecommendationStatsDto stat2 = new GeneralRecommendationStatsDto("JP", "일본", 10L);
-        GeneralRecommendationStatsDto stat3 = new GeneralRecommendationStatsDto("US", "미국", 7L);
-        List<GeneralRecommendationStatsDto> statsList = List.of(stat1, stat2, stat3);
+        GeneralRecommendationStatsDto stat1 = new GeneralRecommendationStatsDto("JP", "일본", 20L);
+        GeneralRecommendationStatsDto stat2 = new GeneralRecommendationStatsDto("US", "미국", 15L);
+        GeneralRecommendationStatsDto stat3 = new GeneralRecommendationStatsDto("TW", "대만", 10L);
 
-        given(generalRecommendationService.getTop3CountriesByCurrentMonth())
+        List<GeneralRecommendationStatsDto> statsList =
+                List.of(stat1, stat2, stat3);
+
+        given(generalRecommendationService.getTop3CountriesBySouvenirCount())
                 .willReturn(statsList);
 
         // when & then
         mockMvc.perform(get("/api/discovery/general/stats"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].countryNameKr").value("대한민국"))
-                .andExpect(jsonPath("$.data[0].countryCode").value("KR"))
-                .andExpect(jsonPath("$.data[0].souvenirCount").value(15))
+                .andExpect(jsonPath("$.data[0].countryNameKr").value("일본"))
+                .andExpect(jsonPath("$.data[0].countryCode").value("JP"))
+                .andExpect(jsonPath("$.data[1].countryCode").value("US"))
+                .andExpect(jsonPath("$.data[2].countryCode").value("TW"))
                 .andDo(document("recommend/general/stats-top3",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
-                                fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라별 기념품 등록 통계"),
+                                fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라별 기념품 등록 통계(누적 Top3)"),
                                 fieldWithPath("data[].countryNameKr").type(JsonFieldType.STRING).description("나라명 (한글)"),
-                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("나라 코드"),
+                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("data[].souvenirCount").type(JsonFieldType.NUMBER).description("등록된 기념품 개수 (integer)"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )

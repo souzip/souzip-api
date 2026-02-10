@@ -30,12 +30,7 @@ public class AppleApiClient implements OAuthClient {
     private AppleUserInfo parseIdentityToken(String identityToken) {
         String[] parts = splitToken(identityToken);
         String payload = decodePayload(parts[1]);
-        AppleUserInfo userInfo = parseJson(payload);
-
-        log.info("Apple 로그인 - sub: {}, transferSub: {}",
-            userInfo.getProviderId(), userInfo.getTransferSub());
-
-        return userInfo;
+        return parseJson(payload);
     }
 
     private String[] splitToken(String identityToken) {

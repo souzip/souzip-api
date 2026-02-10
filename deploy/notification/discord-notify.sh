@@ -30,13 +30,12 @@ notify_deploy_success() {
         username: "Souzip Bot",
         embeds: [{
           title: "배포 완료",
-          description: $msg,
+          description: ("\($msg)\n\n[API 문서 바로가기](\($url))"),
           color: $color,
           fields: [
             {name: "이미지 ID", value: $image_id, inline: false},
             {name: "시간", value: $ts, inline: true},
             {name: "담당자", value: $deployer, inline: true},
-            {name: "API 문서", value: ("[\($url)](\($url))"), inline: false},
             {name: "상태", value: "헬스체크 통과", inline: false}
           ]
         }]

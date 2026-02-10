@@ -12,7 +12,7 @@ MAX_RETRY=6
 RETRY_INTERVAL=10
 
 if [ -f "$WORK_DIR/deploy/.env" ]; then
-    export $(grep DISCORD_WEBHOOK_URL "$WORK_DIR/deploy/.env" | xargs)
+    export $(grep -E "DISCORD_WEBHOOK_URL|DEVELOP_DISCORD_WEBHOOK_URL|API_DOCS_URL|COMMIT_MESSAGE|DEPLOYER" "$WORK_DIR/deploy/.env" | xargs)
 fi
 
 cd $WORK_DIR || exit 1
@@ -21,7 +21,6 @@ echo -e "${YELLOW}[1/9] 현재 이미지를 롤백용으로 보관${NC}"
 CURRENT_IMAGE=$(docker images ${REGISTRY}:latest -q)
 if [ ! -z "$CURRENT_IMAGE" ]; then
     docker rmi ${REGISTRY}:previous 2>/dev/null || true
-
     docker tag ${REGISTRY}:latest ${REGISTRY}:previous
     echo -e "${GREEN}[SUCCESS] 롤백용 이미지 준비 완료: ${CURRENT_IMAGE}${NC}"
 else
@@ -112,7 +111,7 @@ docker ps | grep souzip-api
 echo -e "${YELLOW}[9/9] 정리${NC}"
 docker image prune -f
 
-if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
+if [ ! -z "$DEVELOP_DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
     source "$WORK_DIR/deploy/notification/discord-notify.sh"
-    notify_deploy_success "$NEW_IMAGE"
+    notify_deploy_success "$NEW_IMAGE" "$API_DOCS_URL" "$COMMIT_MESSAGE" "$DEPLOYER"
 fi

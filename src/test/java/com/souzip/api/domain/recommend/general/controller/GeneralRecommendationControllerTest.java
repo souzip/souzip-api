@@ -2,6 +2,7 @@ package com.souzip.api.domain.recommend.general.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.entity.Category;
+import com.souzip.api.domain.recommend.general.dto.CountryRecommendationDto;
 import com.souzip.api.domain.recommend.general.dto.GeneralRecommendationDto;
 import com.souzip.api.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.api.domain.recommend.general.service.GeneralRecommendationService;
@@ -72,38 +73,65 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
     }
 
     @Test
-    @DisplayName("나라별 추천 기념품 Top10 조회")
-    void getCountryTop10() throws Exception {
+    @DisplayName("기념품 최다 등록 국가 Top(최대10) + 국가별 기념품 Top10 조회")
+    void getTopCountriesWithTop10Souvenirs() throws Exception {
         // given
-        List<GeneralRecommendationDto> responseList = IntStream.rangeClosed(1, 10)
-                .mapToObj(i -> new GeneralRecommendationDto(
-                        (long) i,
-                        "기념품 " + i,
-                        Category.SOUVENIR_BASIC,
+        List<CountryRecommendationDto> responseList = List.of(
+                new CountryRecommendationDto(
+                        "KR",
+                        "대한민국",
+                        123L,
+                        IntStream.rangeClosed(1, 10)
+                                .mapToObj(i -> new GeneralRecommendationDto(
+                                        (long) i,
+                                        "KR 기념품 " + i,
+                                        Category.SOUVENIR_BASIC,
+                                        "KR",
+                                        "https://example.com/kr/thumb" + i + ".jpg"
+                                ))
+                                .toList()
+                ),
+                new CountryRecommendationDto(
                         "JP",
-                        "https://example.com/thumb" + i + ".jpg"
-                ))
-                .collect(Collectors.toList());
+                        "일본",
+                        45L,
+                        IntStream.rangeClosed(1, 10)
+                                .mapToObj(i -> new GeneralRecommendationDto(
+                                        (long) (100 + i),
+                                        "JP 기념품 " + i,
+                                        Category.SOUVENIR_BASIC,
+                                        "JP",
+                                        "https://example.com/jp/thumb" + i + ".jpg"
+                                ))
+                                .toList()
+                )
+        );
 
-        given(generalRecommendationService.getTop10ByCountry("KR"))
+        given(generalRecommendationService.getTopCountriesWithTop10Souvenirs())
                 .willReturn(responseList);
 
         // when & then
-        mockMvc.perform(get("/api/discovery/general/country/KR"))
+        mockMvc.perform(get("/api/discovery/general/country"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].id").value(1))
-                .andExpect(jsonPath("$.data[0].name").value("기념품 1"))
+                .andExpect(jsonPath("$.data[0].countryCode").value("KR"))
+                .andExpect(jsonPath("$.data[0].souvenirs").isArray())
+                .andExpect(jsonPath("$.data[0].souvenirs[0].id").value(1))
+                .andExpect(jsonPath("$.data[1].countryCode").value("JP"))
                 .andDo(document("recommend/general/country-top10",
                         getDocumentRequest(),
                         getDocumentResponse(),
                         apiResponseFields(
-                                fieldWithPath("data").type(JsonFieldType.ARRAY).description("기념품 리스트"),
-                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("기념품 ID (integer)"),
-                                fieldWithPath("data[].name").type(JsonFieldType.STRING).description("기념품 이름"),
-                                fieldWithPath("data[].category").type(JsonFieldType.STRING).description("기념품 카테고리"),
-                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
-                                fieldWithPath("data[].thumbnailUrl").type(JsonFieldType.STRING).description("대표 이미지 URL"),
+                                fieldWithPath("data").type(JsonFieldType.ARRAY).description("국가별 추천 결과 리스트 (최대 10개 국가)"),
+                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("국가 코드"),
+                                fieldWithPath("data[].countryNameKr").type(JsonFieldType.STRING).description("국가명(한글)"),
+                                fieldWithPath("data[].souvenirCount").type(JsonFieldType.NUMBER).description("해당 국가 기념품 등록 수(누적)"),
+                                fieldWithPath("data[].souvenirs").type(JsonFieldType.ARRAY).description("해당 국가 추천 기념품 Top10 리스트"),
+                                fieldWithPath("data[].souvenirs[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data[].souvenirs[].name").type(JsonFieldType.STRING).description("기념품 이름"),
+                                fieldWithPath("data[].souvenirs[].category").type(JsonFieldType.STRING).description("기념품 카테고리"),
+                                fieldWithPath("data[].souvenirs[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
+                                fieldWithPath("data[].souvenirs[].thumbnailUrl").type(JsonFieldType.STRING).description("대표 이미지 URL"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )
                 ));

@@ -34,3 +34,4 @@ public class GeneralRecommendationController {
         return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());
     }
 }
+

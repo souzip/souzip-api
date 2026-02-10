@@ -52,6 +52,29 @@ public class GeneralRecommendationRepositoryCustomImpl implements GeneralRecomme
     }
 
     @Override
+    public List<GeneralRecommendationStatsDto> findTop10CountriesBySouvenirCount() {
+        QSouvenir s = QSouvenir.souvenir;
+        QCountry c = QCountry.country;
+
+        return queryFactory
+                .select(c.code, c.nameKr, s.id.count())
+                .from(s)
+                .join(c).on(s.countryCode.eq(c.code))
+                .where(s.deleted.eq(false))
+                .groupBy(c.code, c.nameKr)
+                .orderBy(s.id.count().desc())
+                .limit(10)
+                .fetch()
+                .stream()
+                .map(tuple -> new GeneralRecommendationStatsDto(
+                        tuple.get(c.code),
+                        tuple.get(c.nameKr),
+                        tuple.get(s.id.count())
+                ))
+                .toList();
+    }
+
+    @Override
     public List<GeneralRecommendationStatsDto> findTop3CountriesBySouvenirCount() {
         QSouvenir s = QSouvenir.souvenir;
         QCountry c = QCountry.country;

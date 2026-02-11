@@ -109,7 +109,7 @@ public class AuditAspect {
     private String extractUserIdFromArgs(ProceedingJoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
             .filter(this::isUserIdArg)
-            .map(String.class::cast)
+            .map(Object::toString)
             .findFirst()
             .orElse(null);
     }

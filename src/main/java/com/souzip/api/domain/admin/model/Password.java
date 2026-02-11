@@ -11,4 +11,12 @@ public class Password {
     public static Password encode(String rawPassword, AdminPasswordEncoder encoder) {
         return new Password(encoder.encode(rawPassword));
     }
+
+    public static Password of(String encodedValue) {
+        return new Password(encodedValue);
+    }
+
+    public String getEncodedValue() {
+        return encodedValue;
+    }
 }

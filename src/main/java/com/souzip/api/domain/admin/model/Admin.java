@@ -20,10 +20,11 @@ public class Admin {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public static Admin create(String username,
-                               String rawPassword,
-                               AdminRole role,
-                               AdminPasswordEncoder encoder
+    public static Admin create(
+        String username,
+        String rawPassword,
+        AdminRole role,
+        AdminPasswordEncoder encoder
     ) {
         return new Admin(
             UUID.randomUUID(),
@@ -33,6 +34,29 @@ public class Admin {
             0, null, null,
             LocalDateTime.now(),
             LocalDateTime.now()
+        );
+    }
+
+    public static Admin restore(
+        UUID id,
+        Username username,
+        Password password,
+        AdminRole role,
+        int loginFailCount,
+        LocalDateTime lockedAt,
+        LocalDateTime lastLoginAt,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+    ) {
+        return new Admin(id,
+            username,
+            password,
+            role,
+            loginFailCount,
+            lockedAt,
+            lastLoginAt,
+            createdAt,
+            updatedAt
         );
     }
 }

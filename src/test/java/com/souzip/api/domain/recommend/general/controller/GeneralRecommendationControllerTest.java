@@ -110,6 +110,48 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
     }
 
     @Test
+    @DisplayName("기념품 최다등록 국가 Top10 조회")
+    void getTopCountriesTop10() throws Exception {
+        // given
+        List<GeneralRecommendationStatsDto> statsList = List.of(
+                new GeneralRecommendationStatsDto("JP", "일본", 20L),
+                new GeneralRecommendationStatsDto("US", "미국", 15L),
+                new GeneralRecommendationStatsDto("TW", "대만", 10L),
+                new GeneralRecommendationStatsDto("HK", "홍콩", 8L),
+                new GeneralRecommendationStatsDto("VN", "베트남", 4L),
+                new GeneralRecommendationStatsDto("KR", "한국", 4L),
+                new GeneralRecommendationStatsDto("DE", "독일", 4L),
+                new GeneralRecommendationStatsDto("FR", "프랑스", 4L),
+                new GeneralRecommendationStatsDto("CN", "중국", 3L),
+                new GeneralRecommendationStatsDto("PH", "필리핀", 3L)
+        );
+
+        given(generalRecommendationService.getTop10CountriesBySouvenirCount())
+                .willReturn(statsList);
+
+        // when & then
+        mockMvc.perform(get("/api/discovery/general/countries"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(10))
+                .andExpect(jsonPath("$.data[0].countryCode").value("JP"))
+                .andExpect(jsonPath("$.data[1].countryCode").value("US"))
+                .andExpect(jsonPath("$.data[2].countryCode").value("TW"))
+                .andDo(document("recommend/general/stats-top10",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        apiResponseFields(
+                                fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라별 기념품 등록 통계(누적 Top10)"),
+                                fieldWithPath("data[].countryNameKr").type(JsonFieldType.STRING).description("나라명 (한글)"),
+                                fieldWithPath("data[].countryCode").type(JsonFieldType.STRING).description("국가 코드"),
+                                fieldWithPath("data[].souvenirCount").type(JsonFieldType.NUMBER).description("등록된 기념품 개수 (integer)"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                        )
+                ));
+    }
+
+    @Test
     @DisplayName("기념품 최다등록 국가 Top3 통계 조회")
     void getTopCountriesThisMonth() throws Exception {
         // given

@@ -44,7 +44,6 @@ class SearchControllerTest extends RestDocsSupport {
         return new SearchController(searchService, searchIndexService);
     }
 
-    // Mock 헬퍼 메서드
     private PaginationResponse<SearchResponse> createMockPaginationResponse(
         List<SearchResponse> content,
         int currentPage, int totalPages, long totalItems, int pageSize,
@@ -301,7 +300,7 @@ class SearchControllerTest extends RestDocsSupport {
                     parameterWithName("pageNo").description("페이지 번호 (0부터 시작)").optional(),
                     parameterWithName("pageSize").description("페이지 크기 (기본값: 20)").optional()
                 ),
-                apiResponseFields(  // ✅ responseFields → apiResponseFields 변경!
+                apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT)
                         .description("검색 결과 데이터"),
                     fieldWithPath("data.content").type(JsonFieldType.ARRAY)

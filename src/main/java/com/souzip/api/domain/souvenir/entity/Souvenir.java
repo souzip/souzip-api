@@ -2,14 +2,24 @@ package com.souzip.api.domain.souvenir.entity;
 
 import com.souzip.api.domain.category.entity.Category;
 import com.souzip.api.domain.file.entity.File;
-import com.souzip.api.global.entity.BaseEntity;
 import com.souzip.api.domain.user.entity.User;
-import jakarta.persistence.*;
-import lombok.*;
-
+import com.souzip.api.global.entity.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
@@ -68,6 +78,7 @@ public class Souvenir extends BaseEntity {
     @Column(nullable = false)
     private Boolean isOwned = false;
 
+    @Builder.Default
     @OneToMany(mappedBy = "souvenir", fetch = FetchType.LAZY)
     private List<File> files = new ArrayList<>();
 

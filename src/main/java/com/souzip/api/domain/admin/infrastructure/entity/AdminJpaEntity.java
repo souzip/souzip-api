@@ -13,6 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Table(name = "admin")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class AdminJpaEntity {

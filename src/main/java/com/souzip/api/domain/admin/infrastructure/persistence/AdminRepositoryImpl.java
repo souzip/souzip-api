@@ -4,7 +4,6 @@ import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.Username;
 import com.souzip.api.domain.admin.repository.AdminRepository;
 import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -22,18 +21,7 @@ public class AdminRepositoryImpl implements AdminRepository {
     }
 
     @Override
-    public Optional<Admin> findById(UUID id) {
-        return jpaRepository.findById(id)
-            .map(mapper::toDomain);
-    }
-
-    @Override
     public Admin save(Admin admin) {
         return mapper.toDomain(jpaRepository.save(mapper.toEntity(admin)));
-    }
-
-    @Override
-    public boolean existsByUsername(Username username) {
-        return jpaRepository.existsByUsername(username.value());
     }
 }

@@ -13,7 +13,6 @@ public record Username(String value) {
         validateLengthInRange(value);
     }
 
-
     private static void validateNotBlank(String value) {
         if (value == null || value.isBlank()) {
             throw new InvalidUsernameException(AdminErrorCode.INVALID_USERNAME);

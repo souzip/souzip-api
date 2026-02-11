@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 public enum AdminErrorCode implements BaseErrorCode {
 
-    INVALID_USERNAME(HttpStatus.BAD_REQUEST, "아이디는 4자 이상 10자 이하여야 합니다."),
+    INVALID_USERNAME(HttpStatus.BAD_REQUEST, "아이디는 4자 이상 20자 이하여야 합니다."),
     ;
 
     private final HttpStatus status;

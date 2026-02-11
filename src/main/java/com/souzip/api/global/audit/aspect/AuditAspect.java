@@ -108,7 +108,7 @@ public class AuditAspect {
 
     private String extractUserIdFromArgs(ProceedingJoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
-            .filter(String.class::isInstance)
+            .filter(this::isUserIdArg)
             .map(String.class::cast)
             .findFirst()
             .orElse(null);
@@ -175,6 +175,10 @@ public class AuditAspect {
         if (isMissingAttributes(attributes)) {
             throw new BusinessException(ErrorCode.HTTP_REQUEST_CONTEXT_NOT_FOUND);
         }
+    }
+
+    private boolean isUserIdArg(Object arg) {
+        return arg instanceof String || arg instanceof Long;
     }
 
     private boolean isMissingAttributes(ServletRequestAttributes attributes) {

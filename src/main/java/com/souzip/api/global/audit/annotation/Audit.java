@@ -12,5 +12,5 @@ public @interface Audit {
 
     AuditAction action();
 
-    String userIdParam() default "userId";
+    String userIdParam() default "";
 }

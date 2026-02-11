@@ -5,8 +5,10 @@ import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -32,27 +34,30 @@ public class ClovaStudioClient {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String chatAsCurator(String userMessage) {
-        return chat(CURATOR_SYSTEM_PROMPT, userMessage);
+        return chat(userMessage);
     }
 
-    private String chat(String systemPrompt, String userMessage) {
+    private String chat(String userMessage) {
         try {
-            HttpEntity<Map<String, Object>> request = createRequest(systemPrompt, userMessage);
-            ResponseEntity<Map> response = restTemplate.postForEntity(
+            HttpEntity<Map<String, Object>> request = createRequest(userMessage);
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 properties.getApiUrl(),
+                HttpMethod.POST,
                 request,
-                Map.class
+                new ParameterizedTypeReference<Map<String, Object>>() {}
             );
 
             return parseResponse(response.getBody());
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
-    private HttpEntity<Map<String, Object>> createRequest(String systemPrompt, String userMessage) {
+    private HttpEntity<Map<String, Object>> createRequest(String userMessage) {
         HttpHeaders headers = createHeaders();
-        Map<String, Object> body = createRequestBody(systemPrompt, userMessage);
+        Map<String, Object> body = createRequestBody(userMessage);
         return new HttpEntity<>(body, headers);
     }
 
@@ -64,9 +69,9 @@ public class ClovaStudioClient {
         return headers;
     }
 
-    private Map<String, Object> createRequestBody(String systemPrompt, String userMessage) {
+    private Map<String, Object> createRequestBody(String userMessage) {
         return Map.of(
-            "messages", createMessages(systemPrompt, userMessage),
+            "messages", createMessages(userMessage),
             "topP", TOP_P,
             "topK", TOP_K,
             "maxTokens", MAX_TOKENS,
@@ -76,9 +81,9 @@ public class ClovaStudioClient {
         );
     }
 
-    private List<Map<String, Object>> createMessages(String systemPrompt, String userMessage) {
+    private List<Map<String, Object>> createMessages(String userMessage) {
         return List.of(
-            createMessage("system", systemPrompt),
+            createMessage("system", CURATOR_SYSTEM_PROMPT),
             createMessage("user", userMessage)
         );
     }
@@ -90,13 +95,13 @@ public class ClovaStudioClient {
         );
     }
 
-    private String parseResponse(Map responseBody) {
-        Map result = (Map) responseBody.get("result");
-        Map message = (Map) result.get("message");
+    private String parseResponse(Map<String, Object> responseBody) {
+        Map<String, Object> result = (Map<String, Object>) responseBody.get("result");
+        Map<String, Object> message = (Map<String, Object>) result.get("message");
         Object content = message.get("content");
 
         if (content instanceof List) {
-            return parseListContent((List<Map>) content);
+            return parseListContent((List<Map<String, Object>>) content);
         }
 
         if (content instanceof String) {
@@ -106,7 +111,7 @@ public class ClovaStudioClient {
         throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
-    private String parseListContent(List<Map> contentList) {
+    private String parseListContent(List<Map<String, Object>> contentList) {
         return contentList.stream()
             .map(item -> (String) item.get("text"))
             .reduce("", String::concat);

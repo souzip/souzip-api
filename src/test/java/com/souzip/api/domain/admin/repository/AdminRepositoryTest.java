@@ -1,24 +1,25 @@
-package com.souzip.api.domain.admin.infrastructure.persistence;
+package com.souzip.api.domain.admin.repository;
 
 import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
+import com.souzip.api.domain.admin.infrastructure.persistence.AdminMapper;
+import com.souzip.api.domain.admin.infrastructure.persistence.AdminRepositoryImpl;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.model.Username;
-import com.souzip.api.domain.admin.repository.AdminRepository;
+import com.souzip.api.global.config.QuerydslConfig;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Transactional
+@DataJpaTest
+@Import({AdminRepositoryImpl.class, AdminMapper.class, QuerydslConfig.class})
 class AdminRepositoryTest {
 
     @Autowired

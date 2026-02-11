@@ -10,7 +10,10 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 public interface ApiDocumentUtils {
 
     static OperationRequestPreprocessor getDocumentRequest() {
-        return preprocessRequest(prettyPrint());
+        return preprocessRequest(
+            new UriDecodingPreprocessor(),
+            prettyPrint()
+        );
     }
 
     static OperationResponsePreprocessor getDocumentResponse() {

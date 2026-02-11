@@ -74,7 +74,7 @@ public class AuthService {
         return RefreshResponse.of(newAccessToken, refreshToken.getToken());
     }
 
-    @Audit(action = AuditAction.LOGOUT, userIdParam = "currentUserId")
+    @Audit(action = AuditAction.LOGOUT)
     @Transactional
     public void logout(Long currentUserId) {
         User user = userRepository.findById(currentUserId)

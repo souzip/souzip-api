@@ -9,6 +9,8 @@ import com.souzip.api.domain.user.entity.Provider;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.global.audit.annotation.Audit;
 import com.souzip.api.global.audit.dto.AuditContext;
+import com.souzip.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.ErrorCode;
 import com.souzip.api.global.util.HttpRequestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,9 @@ import java.util.Optional;
 @Component
 public class AuditAspect {
 
+    private static final String ONBOARDING_METADATA_FORMAT =
+        "{\"serviceTerms\": %s, \"privacyRequired\": %s, \"marketingConsent\": %s, \"locationService\": %s}";
+
     private final AuditService auditService;
 
     @Around("@annotation(audit)")
@@ -39,98 +44,55 @@ public class AuditAspect {
         AuditAction action = audit.action();
 
         try {
-            Object result = executeMethod(joinPoint);
-            logSuccess(request, action, result, joinPoint);
+            Object result = joinPoint.proceed();
+            logSuccess(request, action, result, joinPoint, audit);
             return result;
-
         } catch (Exception e) {
             logFailure(request, action, e);
             throw e;
         }
     }
 
-    private Object executeMethod(ProceedingJoinPoint joinPoint) throws Throwable {
-        return joinPoint.proceed();
-    }
-
-    private void logSuccess(HttpServletRequest request, AuditAction action,
-                            Object result, ProceedingJoinPoint joinPoint) {
-        AuditContext context = buildSuccessContext(request, action, result, joinPoint);
+    private void logSuccess(HttpServletRequest request,
+                            AuditAction action,
+                            Object result,
+                            ProceedingJoinPoint joinPoint,
+                            Audit audit
+    ) {
+        AuditContext context = buildSuccessContext(request, action, result, joinPoint, audit);
         auditService.logSuccess(context);
     }
 
     private void logFailure(HttpServletRequest request, AuditAction action, Exception e) {
-        String ipAddress = HttpRequestUtils.extractClientIp(request);
-        String userAgent = HttpRequestUtils.extractUserAgent(request);
-        String appVersion = HttpRequestUtils.extractAppVersion(request);
-        String failureReason = extractFailureReason(e);
-
-        auditService.logFailure(action, failureReason, ipAddress, userAgent, appVersion);
+        auditService.logFailure(
+            action,
+            e.getClass().getSimpleName(),
+            HttpRequestUtils.extractClientIp(request),
+            HttpRequestUtils.extractUserAgent(request),
+            HttpRequestUtils.extractAppVersion(request)
+        );
     }
 
-    private String extractFailureReason(Exception e) {
-        return e.getClass().getSimpleName();
-    }
-
-    private AuditContext buildSuccessContext(HttpServletRequest request, AuditAction action,
-                                             Object result, ProceedingJoinPoint joinPoint) {
-
-        String metadata = buildMetadata(joinPoint);
-
+    private AuditContext buildSuccessContext(HttpServletRequest request,
+                                             AuditAction action,
+                                             Object result,
+                                             ProceedingJoinPoint joinPoint,
+                                             Audit audit
+    ) {
         return AuditContext.builder()
-                .userId(extractUserId(result, joinPoint))
-                .action(action)
-                .ipAddress(HttpRequestUtils.extractClientIp(request))
-                .userAgent(HttpRequestUtils.extractUserAgent(request))
-                .appVersion(HttpRequestUtils.extractAppVersion(request))
-                .oauthProvider(extractOAuthProvider(joinPoint))
-                .metadata(metadata)
-                .build();
+            .userId(extractUserId(result, joinPoint, audit))
+            .action(action)
+            .ipAddress(HttpRequestUtils.extractClientIp(request))
+            .userAgent(HttpRequestUtils.extractUserAgent(request))
+            .appVersion(HttpRequestUtils.extractAppVersion(request))
+            .oauthProvider(extractOAuthProvider(joinPoint))
+            .metadata(buildMetadata(joinPoint))
+            .build();
     }
 
-    private String buildMetadata(ProceedingJoinPoint joinPoint) {
-        return Arrays.stream(joinPoint.getArgs())
-                .filter(OnboardingRequest.class::isInstance)
-                .map(OnboardingRequest.class::cast)
-                .findFirst()
-                .map(req -> String.format(
-                        "{\"serviceTerms\": %s, \"privacyRequired\": %s, \"marketingConsent\": %s, \"locationService\": %s}",
-                        req.serviceTerms(),
-                        req.privacyRequired(),
-                        req.marketingConsent(),
-                        req.locationService()
-                ))
-                .orElse(null);
-    }
-
-    private HttpServletRequest getCurrentRequest() {
-        ServletRequestAttributes attributes = getRequestAttributes();
-        return attributes.getRequest();
-    }
-
-    private ServletRequestAttributes getRequestAttributes() {
-        ServletRequestAttributes attributes =
-                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        validateAttributes(attributes);
-
-        return attributes;
-    }
-
-    private void validateAttributes(ServletRequestAttributes attributes) {
-        if (isNull(attributes)) {
-            throw new IllegalStateException("No request found");
-        }
-    }
-
-    private boolean isNull(Object object) {
-        return object == null;
-    }
-
-    private String extractUserId(Object result, ProceedingJoinPoint joinPoint) {
-        String userIdFromArgs = extractUserIdFromArgs(joinPoint);
-        if (userIdFromArgs != null) {
-            return userIdFromArgs;
+    private String extractUserId(Object result, ProceedingJoinPoint joinPoint, Audit audit) {
+        if (hasUserIdParam(audit)) {
+            return extractUserIdFromArgs(joinPoint);
         }
 
         if (isLoginResponse(result)) {
@@ -140,12 +102,16 @@ public class AuditAspect {
         return extractUserIdFromSecurity();
     }
 
+    private boolean hasUserIdParam(Audit audit) {
+        return !audit.userIdParam().isEmpty();
+    }
+
     private String extractUserIdFromArgs(ProceedingJoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .findFirst()
-                .orElse(null);
+            .filter(String.class::isInstance)
+            .map(String.class::cast)
+            .findFirst()
+            .orElse(null);
     }
 
     private boolean isLoginResponse(Object result) {
@@ -154,37 +120,64 @@ public class AuditAspect {
 
     private String extractUserIdFromLoginResponse(LoginResponse loginResponse) {
         return Optional.ofNullable(loginResponse.getUser())
-                .map(LoginUserInfo::userId)
-                .orElse(null);
+            .map(LoginUserInfo::userId)
+            .orElse(null);
     }
 
     private String extractUserIdFromSecurity() {
-        return Optional.ofNullable(getAuthentication())
-                .filter(this::hasValidPrincipal)
-                .map(Authentication::getPrincipal)
-                .filter(User.class::isInstance)
-                .map(User.class::cast)
-                .map(User::getUserId)
-                .orElse(null);
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+            .filter(this::isAuthenticatedUser)
+            .map(Authentication::getPrincipal)
+            .map(User.class::cast)
+            .map(User::getUserId)
+            .orElse(null);
     }
 
-    private Authentication getAuthentication() {
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
-
-    private boolean hasValidPrincipal(Authentication authentication) {
-        return isNotNull(authentication.getPrincipal());
-    }
-
-    private boolean isNotNull(Object object) {
-        return object != null;
+    private boolean isAuthenticatedUser(Authentication authentication) {
+        return authentication.getPrincipal() instanceof User;
     }
 
     private Provider extractOAuthProvider(ProceedingJoinPoint joinPoint) {
         return Arrays.stream(joinPoint.getArgs())
-                .filter(Provider.class::isInstance)
-                .map(Provider.class::cast)
-                .findFirst()
-                .orElse(null);
+            .filter(Provider.class::isInstance)
+            .map(Provider.class::cast)
+            .findFirst()
+            .orElse(null);
+    }
+
+    private String buildMetadata(ProceedingJoinPoint joinPoint) {
+        return Arrays.stream(joinPoint.getArgs())
+            .filter(OnboardingRequest.class::isInstance)
+            .map(OnboardingRequest.class::cast)
+            .findFirst()
+            .map(this::formatOnboardingMetadata)
+            .orElse(null);
+    }
+
+    private String formatOnboardingMetadata(OnboardingRequest req) {
+        return String.format(
+            ONBOARDING_METADATA_FORMAT,
+            req.serviceTerms(),
+            req.privacyRequired(),
+            req.marketingConsent(),
+            req.locationService()
+        );
+    }
+
+    private HttpServletRequest getCurrentRequest() {
+        ServletRequestAttributes attributes =
+            (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        validateRequestAttributes(attributes);
+        return attributes.getRequest();
+    }
+
+    private void validateRequestAttributes(ServletRequestAttributes attributes) {
+        if (isMissingAttributes(attributes)) {
+            throw new BusinessException(ErrorCode.HTTP_REQUEST_CONTEXT_NOT_FOUND);
+        }
+    }
+
+    private boolean isMissingAttributes(ServletRequestAttributes attributes) {
+        return attributes == null;
     }
 }

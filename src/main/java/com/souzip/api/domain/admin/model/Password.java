@@ -16,6 +16,10 @@ public class Password {
         return new Password(encodedValue);
     }
 
+    public boolean matches(String rawPassword, AdminPasswordEncoder encoder) {
+        return encoder.matches(rawPassword, this.encodedValue);
+    }
+
     public String getEncodedValue() {
         return encodedValue;
     }

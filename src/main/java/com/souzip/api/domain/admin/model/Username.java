@@ -15,21 +15,21 @@ public record Username(String value) {
 
     private static void validateNotBlank(String value) {
         if (value == null || value.isBlank()) {
-            throw new InvalidUsernameException(AdminErrorCode.INVALID_USERNAME);
+            throw new InvalidUsernameException(AdminErrorCode.INVALID_USERNAME_EMPTY);
         }
     }
 
     private static void validateLengthInRange(String value) {
-        if (isTooShort(value) || isTooLong(value)) {
-            throw new InvalidUsernameException(AdminErrorCode.INVALID_USERNAME);
+        if (isBelowMinLength(value) || isAboveMaxLength(value)) {
+            throw new InvalidUsernameException(AdminErrorCode.INVALID_USERNAME_LENGTH);
         }
     }
 
-    private static boolean isTooShort(String value) {
+    private static boolean isBelowMinLength(String value) {
         return value.length() < MIN_LENGTH;
     }
 
-    private static boolean isTooLong(String value) {
+    private static boolean isAboveMaxLength(String value) {
         return value.length() > MAX_LENGTH;
     }
 }

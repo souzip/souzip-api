@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
+@Component
 public class AdminPasswordEncoderImpl implements AdminPasswordEncoder {
 
     private final PasswordEncoder passwordEncoder;
@@ -14,5 +14,10 @@ public class AdminPasswordEncoderImpl implements AdminPasswordEncoder {
     @Override
     public String encode(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
+    }
+
+    @Override
+    public boolean matches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }

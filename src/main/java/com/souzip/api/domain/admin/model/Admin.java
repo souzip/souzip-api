@@ -10,6 +10,8 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Admin {
 
+    private static final int MAX_LOGIN_FAIL_COUNT = 5;
+
     private final UUID id;
     private final Username username;
     private final Password password;
@@ -58,5 +60,33 @@ public class Admin {
             createdAt,
             updatedAt
         );
+    }
+
+    public void recordLoginSuccess() {
+        this.loginFailCount = 0;
+        this.lastLoginAt = LocalDateTime.now();
+    }
+
+    public void recordLoginFailure() {
+        this.loginFailCount++;
+        if (shouldLock()) {
+            lock();
+        }
+    }
+
+    public boolean isLocked() {
+        return this.lockedAt != null;
+    }
+
+    public boolean matchesPassword(String rawPassword, AdminPasswordEncoder encoder) {
+        return this.password.matches(rawPassword, encoder);
+    }
+
+    private boolean shouldLock() {
+        return this.loginFailCount >= MAX_LOGIN_FAIL_COUNT;
+    }
+
+    private void lock() {
+        this.lockedAt = LocalDateTime.now();
     }
 }

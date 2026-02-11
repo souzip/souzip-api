@@ -1,29 +1,35 @@
-package com.souzip.api.domain.admin.repository;
+package com.souzip.api.domain.admin.infrastructure.persistence;
 
-import com.souzip.api.domain.admin.infrastructure.persistence.AdminMapper;
-import com.souzip.api.domain.admin.infrastructure.persistence.AdminRepositoryImpl;
+import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.model.Username;
-import com.souzip.api.global.config.QuerydslConfig;
-import java.util.Optional;
+import com.souzip.api.domain.admin.repository.AdminRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
-@Import({AdminRepositoryImpl.class, AdminMapper.class, QuerydslConfig.class})
+@SpringBootTest
+@Transactional
 class AdminRepositoryTest {
 
     @Autowired
     private AdminRepository adminRepository;
 
-    private final AdminPasswordEncoder passwordEncoder = rawPassword -> "encoded_" + rawPassword;
+    private AdminPasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void setUp() {
+        passwordEncoder = new TestAdminPasswordEncoder();
+    }
 
     @Test
     @DisplayName("Admin 저장에 성공한다.")

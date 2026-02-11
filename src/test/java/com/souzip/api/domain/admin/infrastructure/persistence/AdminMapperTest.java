@@ -1,5 +1,6 @@
 package com.souzip.api.domain.admin.infrastructure.persistence;
 
+import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.infrastructure.entity.AdminJpaEntity;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
@@ -20,7 +21,7 @@ class AdminMapperTest {
     @BeforeEach
     void setUp() {
         mapper = new AdminMapper();
-        passwordEncoder = rawPassword -> "encoded_" + rawPassword;
+        passwordEncoder = new TestAdminPasswordEncoder();
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.souzip.api.domain.admin.model;
 
+import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -10,10 +11,13 @@ class PasswordTest {
     @Test
     @DisplayName("비밀번호 인코딩에 성공한다.")
     void encode_success() {
-        AdminPasswordEncoder encoder = rawPassword -> "encoded_" + rawPassword;
+        // given
+        AdminPasswordEncoder encoder = new TestAdminPasswordEncoder();
 
+        // when
         Password password = Password.encode("password123", encoder);
 
+        // then
         assertThat(password).isNotNull();
     }
 }

@@ -14,14 +14,17 @@ class UsernameTest {
     @Test
     @DisplayName("유효한 아이디로 Username 생성에 성공한다.")
     void create_success() {
+        // given & when
         Username username = new Username("admin123");
 
+        // then
         assertThat(username.value()).isEqualTo("admin123");
     }
 
     @Test
     @DisplayName("아이디가 null이면 예외가 발생한다.")
     void create_fail_null() {
+        // when & then
         assertThatThrownBy(() -> new Username(null))
             .isInstanceOf(InvalidUsernameException.class);
     }
@@ -29,14 +32,16 @@ class UsernameTest {
     @Test
     @DisplayName("아이디가 공백이면 예외가 발생한다.")
     void create_fail_blank() {
+        // when & then
         assertThatThrownBy(() -> new Username("   "))
             .isInstanceOf(InvalidUsernameException.class);
     }
 
     @ParameterizedTest
     @DisplayName("아이디가 길이 범위를 벗어나면 예외가 발생한다.")
-    @ValueSource(strings = {"a", "ab", "abc", "12345678901231231", "123456712312389012"})
+    @ValueSource(strings = {"a", "ab", "abc", "12345678123123901231231", "12312123456712312389012"})
     void create_fail_invalid_length(String value) {
+        // when & then
         assertThatThrownBy(() -> new Username(value))
             .isInstanceOf(InvalidUsernameException.class);
     }

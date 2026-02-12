@@ -1,5 +1,6 @@
 package com.souzip.api.domain.recommend.general.controller;
 
+import com.souzip.api.domain.recommend.general.dto.CountryRecommendationDto;
 import com.souzip.api.domain.recommend.general.dto.GeneralRecommendationDto;
 import com.souzip.api.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.api.domain.recommend.general.service.GeneralRecommendationService;
@@ -14,32 +15,35 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/discovery/general")
+@RequestMapping("api/discovery")
 public class GeneralRecommendationController {
 
     private final GeneralRecommendationService generalRecommendationService;
 
-    @GetMapping("/category/{categoryName}")
+    @GetMapping("/countries/{countryCode}/souvenirs")
+    public SuccessResponse<List<GeneralRecommendationDto>> getCountryTop10(@PathVariable String countryCode) {
+        return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode));
+    }
+
+    @GetMapping("/categories/{categoryName}/souvenirs")
     public SuccessResponse<List<GeneralRecommendationDto>> getCategoryTop10(@PathVariable String categoryName) {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCategory(categoryName));
     }
 
-    @GetMapping("/countries")
+    @GetMapping("/countries/top10/souvenirs")
+    public SuccessResponse<List<CountryRecommendationDto>> getTopCountriesWithTop10Souvenirs() {
+        return SuccessResponse.of(generalRecommendationService.getTopCountriesWithTop10Souvenirs());
+    }
+
+    @GetMapping("/countries/top10")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop10() {
         return SuccessResponse.of(
                 generalRecommendationService.getTop10CountriesBySouvenirCount()
         );
     }
 
-    @GetMapping("/country/{countryCode}")
-    public SuccessResponse<List<GeneralRecommendationDto>> getCountryTop10(@PathVariable String countryCode) {
-        return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode));
-    }
-
-
-    @GetMapping("/stats")
+    @GetMapping("/countries/top3")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop3() {
         return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());
     }
 }
-

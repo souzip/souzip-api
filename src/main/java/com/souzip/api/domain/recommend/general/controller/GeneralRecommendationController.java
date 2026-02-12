@@ -25,9 +25,14 @@ public class GeneralRecommendationController {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode));
     }
 
-    @GetMapping("/discovery/general/categories/{categoryName}")
+    @GetMapping("/discovery/general/category/{categoryName}")
     public SuccessResponse<List<GeneralRecommendationDto>> getCategoryTop10(@PathVariable String categoryName) {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCategory(categoryName));
+    }
+
+    @GetMapping("/discovery/general/stats")
+    public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop3() {
+        return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());
     }
 
     @GetMapping("/countries/souvenirs")
@@ -42,8 +47,4 @@ public class GeneralRecommendationController {
         );
     }
 
-    @GetMapping("/discovery/general/stats")
-    public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop3() {
-        return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());
-    }
 }

@@ -6357,6 +6357,7 @@ Content-Length: 4023
   "data" : [ {
     "countryCode" : "JP",
     "countryNameKr" : "일본",
+    "souvenirCount" : 20
     "souvenirCount" : 20,
     "souvenirs" : [ {
       "id" : 201,
@@ -6422,6 +6423,39 @@ Content-Length: 4023
   }, {
     "countryCode" : "US",
     "countryNameKr" : "미국",
+    "souvenirCount" : 15
+  }, {
+    "countryCode" : "TW",
+    "countryNameKr" : "대만",
+    "souvenirCount" : 10
+  }, {
+    "countryCode" : "HK",
+    "countryNameKr" : "홍콩",
+    "souvenirCount" : 8
+  }, {
+    "countryCode" : "VN",
+    "countryNameKr" : "베트남",
+    "souvenirCount" : 4
+  }, {
+    "countryCode" : "KR",
+    "countryNameKr" : "한국",
+    "souvenirCount" : 4
+  }, {
+    "countryCode" : "DE",
+    "countryNameKr" : "독일",
+    "souvenirCount" : 4
+  }, {
+    "countryCode" : "FR",
+    "countryNameKr" : "프랑스",
+    "souvenirCount" : 4
+  }, {
+    "countryCode" : "CN",
+    "countryNameKr" : "중국",
+    "souvenirCount" : 3
+  }, {
+    "countryCode" : "PH",
+    "countryNameKr" : "필리핀",
+    "souvenirCount" : 3
     "souvenirCount" : 15,
     "souvenirs" : [ {
       "id" : 301,
@@ -6512,18 +6546,23 @@ Content-Length: 4023
 <td class="tableblock halign-left valign-top"><p class="tableblock">data</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Array</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">나라별 기념품 등록 통계(누적 Top10)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">기념품 최다등록 국가 Top10 및 국가별 기념품 Top10</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryNameKr</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">나라명 (한글)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">data[].countryNameKr</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">국가 코드</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">나라명 (한글)</p></td>
 </tr>
 <tr>
@@ -6579,6 +6618,7 @@ Content-Length: 4023
 </div>
 </div>
 <div class="sect2">
+<h3 id="discovery-top-countries"><a class="link" href="#discovery-top-countries">누적 기준 기념품 등록 수 Top 3 국가</a></h3>
 <h3 id="discovery-top-countries-top10"><a class="link" href="#discovery-top-countries-top10">기념품 최다등록 국가 TOP 10 (Deprecated)</a></h3>
 <div class="admonitionblock warning">
 <table>
@@ -6588,8 +6628,15 @@ Content-Length: 4023
 </td>
 <td class="content">
 <div class="paragraph">
+<p>전체 기간 동안 등록된 기념품 수를 기준으로 가장 많은 기념품이 등록된 국가 Top 3를 조회합니다.</p>
 <p>이 API는 곧 제거될 예정입니다. 신규 API로 전환해주세요.</p>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p>인증 불필요 (Public API)</p>
+</li>
+</ul>
 </td>
 </tr>
 </table>
@@ -6601,6 +6648,7 @@ Content-Length: 4023
 <h4 id="_http_요청_34"><a class="link" href="#_http_요청_34">HTTP 요청</a></h4>
 <div class="listingblock">
 <div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/general/stats HTTP/1.1
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/discovery/countries/top10 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
@@ -6612,6 +6660,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
+Content-Length: 305
 Content-Length: 937
 
 {

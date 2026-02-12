@@ -1,47 +1,17 @@
 [[discovery-api]]
 == Discovery API
 
-[[discovery-country-top10]]
-=== 나라별 추천 기념품 TOP 10
-
-특정 나라에서 등록된 추천 기념품을 조회하는 API입니다.
-
-NOTE: 조회 결과는 최근 생성된 기념품 10개까지 제공됩니다.
-
 * 인증 불필요 (Public API)
 
-==== HTTP 요청
-include::{snippets}/recommend/general/country-top10/http-request.adoc[]
-
-==== Path Variables
-[cols="1,1,1,3"]
-|===
-|변수명 |타입 |필수 |설명
-
-|countryCode
-|String
-|O
-|조회할 국가 코드 (Ex. KR, JP)
-|===
-
-==== HTTP 응답
-include::{snippets}/recommend/general/country-top10/http-response.adoc[]
-
-==== 응답 필드
-include::{snippets}/recommend/general/country-top10/response-fields.adoc[]
-
 [[discovery-category-top10]]
-=== 카테고리별 기념품 추천
+=== 카테고리별 추천 기념품 TOP 10 (New)
 
 특정 카테고리에 속하는 추천 기념품을 조회하는 API입니다.
 
 NOTE: 조회 결과는 최근 생성된 기념품 10개까지 제공됩니다.
-      (1차 개발 기간에서는 찜, 조회수 등의 기능이 없어 생성일을 기준으로 추천합니다.)
-
-* 인증 불필요 (Public API)
 
 ==== HTTP 요청
-include::{snippets}/recommend/general/category-top10/http-request.adoc[]
+include::{snippets}/recommend/category-top10/http-request.adoc[]
 
 ==== Path Variables
 [cols="1,1,1,3"]
@@ -55,39 +25,99 @@ include::{snippets}/recommend/general/category-top10/http-request.adoc[]
 |===
 
 ==== HTTP 응답
-include::{snippets}/recommend/general/category-top10/http-response.adoc[]
+include::{snippets}/recommend/category-top10/http-response.adoc[]
 
 ==== 응답 필드
-include::{snippets}/recommend/general/category-top10/response-fields.adoc[]
+include::{snippets}/recommend/category-top10/response-fields.adoc[]
 
-[[discovery-top-countries-top10]]
-=== 누적 기준 기념품 등록 수 Top 10 국가
 
-전체 기간 동안 등록된 기념품 수를 기준으로 가장 많은 기념품이 등록된 국가 Top 10를 조회합니다.
+[[discovery-country-top10]]
+=== 나라별 추천 기념품 TOP 10 (Deprecated)
 
-* 인증 불필요 (Public API)
+[WARNING]
+====
+이 API는 곧 제거될 예정입니다. 신규 API로 전환해주세요.
+(해당 API는 기존 클라이언트 호환을 위해 유지 중입니다.)
+====
+
+특정 나라에서 등록된 추천 기념품을 조회하는 API입니다.
+
+NOTE: 조회 결과는 최근 생성된 기념품 10개까지 제공됩니다.
 
 ==== HTTP 요청
-include::{snippets}/recommend/general/stats-top10/http-request.adoc[]
+include::{snippets}/recommend/country-top10/http-request.adoc[]
+
+==== Path Variables
+[cols="1,1,1,3"]
+|===
+|변수명 |타입 |필수 |설명
+
+|countryCode
+|String
+|O
+|조회할 국가 코드 (Ex. KR, JP)
+|===
 
 ==== HTTP 응답
-include::{snippets}/recommend/general/stats-top10/http-response.adoc[]
+include::{snippets}/recommend/country-top10/http-response.adoc[]
 
 ==== 응답 필드
-include::{snippets}/recommend/general/stats-top10/response-fields.adoc[]
+include::{snippets}/recommend/country-top10/response-fields.adoc[]
 
-[[discovery-top-countries]]
-=== 누적 기준 기념품 등록 수 Top 3 국가
+
+[[discovery-top-countries-with-souvenirs]]
+=== 기념품 최다등록 국가 TOP 10 + 국가별 추천 기념품 TOP 10 (New)
+
+기념품 등록 수 기준 상위 10개 국가를 조회하고, 각 국가별 추천 기념품을 최대 10개까지 함께 제공합니다.
+
+NOTE: 국가 목록은 기념품 등록 수(souvenirCount) 내림차순이며,
+      국가별 기념품 목록은 최근 생성된 기념품 최대 10개를 제공합니다.
+
+==== HTTP 요청
+include::{snippets}/recommend/countries-top10-souvenirs-top10/http-request.adoc[]
+
+==== HTTP 응답
+include::{snippets}/recommend/countries-top10-souvenirs-top10/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/recommend/countries-top10-souvenirs-top10/response-fields.adoc[]
+
+
+[[discovery-top-countries-top10]]
+=== 기념품 최다등록 국가 TOP 10 (Deprecated)
+
+[WARNING]
+====
+이 API는 곧 제거될 예정입니다. 신규 API로 전환해주세요.
+====
+
+전체 기간 동안 등록된 기념품 수를 기준으로 가장 많은 기념품이 등록된 국가 Top 10을 조회합니다.
+
+==== HTTP 요청
+include::{snippets}/recommend/stats-top10/http-request.adoc[]
+
+==== HTTP 응답
+include::{snippets}/recommend/stats-top10/http-response.adoc[]
+
+==== 응답 필드
+include::{snippets}/recommend/stats-top10/response-fields.adoc[]
+
+
+[[discovery-top-countries-top3]]
+=== 기념품 최다등록 국가 TOP 3 (Deprecated)
+
+[WARNING]
+====
+이 API는 곧 제거될 예정입니다. 신규 API로 전환해주세요.
+====
 
 전체 기간 동안 등록된 기념품 수를 기준으로 가장 많은 기념품이 등록된 국가 Top 3를 조회합니다.
 
-* 인증 불필요 (Public API)
-
 ==== HTTP 요청
-include::{snippets}/recommend/general/stats-top3/http-request.adoc[]
+include::{snippets}/recommend/stats-top3/http-request.adoc[]
 
 ==== HTTP 응답
-include::{snippets}/recommend/general/stats-top3/http-response.adoc[]
+include::{snippets}/recommend/stats-top3/http-response.adoc[]
 
 ==== 응답 필드
-include::{snippets}/recommend/general/stats-top3/response-fields.adoc[]
+include::{snippets}/recommend/stats-top3/response-fields.adoc[]

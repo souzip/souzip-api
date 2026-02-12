@@ -4,7 +4,7 @@
 * 인증 불필요 (Public API)
 
 [[discovery-category-top10]]
-=== 카테고리별 추천 기념품 TOP 10
+=== 카테고리별 추천 기념품 TOP 10 (New)
 
 특정 카테고리에 속하는 추천 기념품을 조회하는 API입니다.
 
@@ -66,7 +66,7 @@ include::{snippets}/recommend/country-top10/response-fields.adoc[]
 
 
 [[discovery-top-countries-with-souvenirs]]
-=== 기념품 최다등록 국가 TOP 10 + 국가별 추천 기념품 TOP 10
+=== 기념품 최다등록 국가 TOP 10 + 국가별 추천 기념품 TOP 10 (New)
 
 기념품 등록 수 기준 상위 10개 국가를 조회하고, 각 국가별 추천 기념품을 최대 10개까지 함께 제공합니다.
 

@@ -53,7 +53,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .willReturn(responseList);
 
         // when & then
-        mockMvc.perform(get("/api/discovery/categories/FOOD_SNACK/souvenirs"))
+        mockMvc.perform(get("/api/discovery/general/categories/FOOD_SNACK"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id").value(1))
@@ -91,7 +91,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .willReturn(responseList);
 
         // when & then
-        mockMvc.perform(get("/api/discovery/countries/KR/souvenirs"))
+        mockMvc.perform(get("/api/discovery/general/countries/KR"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id").value(1))
@@ -133,7 +133,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .willReturn(statsList);
 
         // when & then
-        mockMvc.perform(get("/api/discovery/countries/top10"))
+        mockMvc.perform(get("/api/discovery/general/countries/top10"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
@@ -169,7 +169,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .willReturn(statsList);
 
         // when & then
-        mockMvc.perform(get("/api/discovery/countries/top3"))
+        mockMvc.perform(get("/api/discovery/general/stats"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
@@ -223,7 +223,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .willReturn(response);
 
         // when & then
-        mockMvc.perform(get("/api/discovery/countries/top10/souvenirs"))
+        mockMvc.perform(get("/api/countries/souvenirs"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())

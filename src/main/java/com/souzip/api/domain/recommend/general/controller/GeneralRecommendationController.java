@@ -15,34 +15,34 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/discovery")
+@RequestMapping("api")
 public class GeneralRecommendationController {
 
     private final GeneralRecommendationService generalRecommendationService;
 
-    @GetMapping("/countries/{countryCode}/souvenirs")
+    @GetMapping("/discovery/general/countries/{countryCode}")
     public SuccessResponse<List<GeneralRecommendationDto>> getCountryTop10(@PathVariable String countryCode) {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode));
     }
 
-    @GetMapping("/categories/{categoryName}/souvenirs")
+    @GetMapping("/discovery/general/categories/{categoryName}")
     public SuccessResponse<List<GeneralRecommendationDto>> getCategoryTop10(@PathVariable String categoryName) {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCategory(categoryName));
     }
 
-    @GetMapping("/countries/top10/souvenirs")
+    @GetMapping("/countries/souvenirs")
     public SuccessResponse<List<CountryRecommendationDto>> getTopCountriesWithTop10Souvenirs() {
         return SuccessResponse.of(generalRecommendationService.getTopCountriesWithTop10Souvenirs());
     }
 
-    @GetMapping("/countries/top10")
+    @GetMapping("/discovery/general/countries/top10")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop10() {
         return SuccessResponse.of(
                 generalRecommendationService.getTop10CountriesBySouvenirCount()
         );
     }
 
-    @GetMapping("/countries/top3")
+    @GetMapping("/discovery/general/stats")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop3() {
         return SuccessResponse.of(generalRecommendationService.getTop3CountriesBySouvenirCount());
     }

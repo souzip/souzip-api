@@ -15,12 +15,12 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api")
+@RequestMapping("/api")
 public class GeneralRecommendationController {
 
     private final GeneralRecommendationService generalRecommendationService;
 
-    @GetMapping("/discovery/general/countries/{countryCode}")
+    @GetMapping("/discovery/general/country/{countryCode}")
     public SuccessResponse<List<GeneralRecommendationDto>> getCountryTop10(@PathVariable String countryCode) {
         return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode));
     }

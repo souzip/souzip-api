@@ -91,7 +91,7 @@ class GeneralRecommendationControllerTest extends RestDocsSupport {
                 .willReturn(responseList);
 
         // when & then
-        mockMvc.perform(get("/api/discovery/general/countries/KR"))
+        mockMvc.perform(get("/api/discovery/general/country/KR"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id").value(1))

@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminAuthController {
 
     private final AdminAuthService adminAuthService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
     public SuccessResponse<AdminLoginResponse> login(@Valid @RequestBody AdminLoginRequest request) {

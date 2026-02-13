@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 public enum AdminErrorCode implements BaseErrorCode {
 
     INVALID_USERNAME_EMPTY(HttpStatus.BAD_REQUEST, "아이디는 비어있을 수 없습니다."),
-    INVALID_USERNAME_LENGTH(HttpStatus.BAD_REQUEST, "아이디는 4자 이상 10자 이하여야 합니다."),
+    INVALID_USERNAME_LENGTH(HttpStatus.BAD_REQUEST, "아이디는 4자 이상 20자 이하여야 합니다."),
     ADMIN_NOT_FOUND(HttpStatus.NOT_FOUND, "관리자를 찾을 수 없습니다."),
     ADMIN_LOCKED(HttpStatus.UNAUTHORIZED, "잠긴 계정입니다. 관리자에게 문의하세요."),
     ADMIN_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),

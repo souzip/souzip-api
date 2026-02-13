@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(name = "admin")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class AdminJpaEntity {
+public class AdminEntity {
 
     @Id
     @Column(columnDefinition = "uuid", updatable = false, nullable = false)

@@ -2,16 +2,15 @@ package com.souzip.api.domain.admin.infrastructure.persistence;
 
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.Username;
-import com.souzip.api.domain.admin.repository.AdminRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class AdminRepositoryImpl implements AdminRepository {
+public class AdminRepositoryImpl implements com.souzip.api.domain.admin.repository.AdminRepository {
 
-    private final AdminJpaRepository jpaRepository;
+    private final AdminRepository jpaRepository;
     private final AdminMapper mapper;
 
     @Override

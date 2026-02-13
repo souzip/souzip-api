@@ -1,0 +1,11 @@
+[[admin-api]]
+== Admin API
+
+=== 어드민 로그인
+
+어드민 계정으로 로그인합니다.
+
+- 5회 연속 실패 시 계정이 잠깁니다.
+- 로그인 성공 시 실패 횟수가 초기화됩니다.
+
+operation::admin-login[snippets='http-request,request-fields,http-response,response-fields']

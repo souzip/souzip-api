@@ -77,3 +77,8 @@ ncp:
   clova-studio:
     api-key: ${CLOVA_STUDIO_API_KEY}
     api-url: ${CLOVA_STUDIO_API_URL}
+
+admin:
+  initial:
+    username: ${ADMIN_INITIAL_USERNAME}
+    password: ${ADMIN_INITIAL_PASSWORD}

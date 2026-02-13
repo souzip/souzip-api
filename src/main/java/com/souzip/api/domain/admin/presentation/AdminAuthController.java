@@ -1,7 +1,7 @@
 package com.souzip.api.domain.admin.presentation;
 
 import com.souzip.api.domain.admin.application.AdminAuthService;
-import com.souzip.api.domain.admin.model.Admin;
+import com.souzip.api.domain.admin.application.AdminAuthService.AdminLoginResult;
 import com.souzip.api.domain.admin.presentation.request.AdminLoginRequest;
 import com.souzip.api.domain.admin.presentation.response.AdminLoginResponse;
 import com.souzip.api.global.common.dto.SuccessResponse;
@@ -21,7 +21,7 @@ public class AdminAuthController {
 
     @PostMapping("/login")
     public SuccessResponse<AdminLoginResponse> login(@Valid @RequestBody AdminLoginRequest request) {
-        Admin admin = adminAuthService.login(request.toCommand());
-        return SuccessResponse.of(AdminLoginResponse.from(admin));
+        AdminLoginResult result = adminAuthService.login(request.toCommand());
+        return SuccessResponse.of(AdminLoginResponse.from(result));
     }
 }

@@ -2,6 +2,7 @@ package com.souzip.api.domain.admin.presentation;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.admin.application.AdminAuthService;
+import com.souzip.api.domain.admin.application.AdminAuthService.AdminLoginResult;
 import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
@@ -40,13 +41,17 @@ class AdminAuthControllerTest extends RestDocsSupport {
         Admin mockAdmin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN,
             new TestAdminPasswordEncoder());
 
-        given(adminAuthService.login(any())).willReturn(mockAdmin);
+        AdminLoginResult result = new AdminLoginResult(mockAdmin, "access-token", "refresh-token");
+
+        given(adminAuthService.login(any())).willReturn(result);
 
         // when & then
         mockMvc.perform(post("/api/admin/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.accessToken").value("access-token"))
+            .andExpect(jsonPath("$.data.refreshToken").value("refresh-token"))
             .andExpect(jsonPath("$.data.username").value("admin123"))
             .andExpect(jsonPath("$.data.role").value("SUPER_ADMIN"))
             .andDo(document("admin-login",
@@ -58,10 +63,11 @@ class AdminAuthControllerTest extends RestDocsSupport {
                 ),
                 responseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰"),
                     fieldWithPath("data.id").type(JsonFieldType.STRING).description("어드민 ID"),
                     fieldWithPath("data.username").type(JsonFieldType.STRING).description("어드민 아이디"),
                     fieldWithPath("data.role").type(JsonFieldType.STRING).description("권한"),
-                    fieldWithPath("data.lastLoginAt").type(JsonFieldType.STRING).description("마지막 로그인 시간").optional(),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));

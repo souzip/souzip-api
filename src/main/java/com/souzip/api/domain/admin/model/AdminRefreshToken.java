@@ -36,4 +36,13 @@ public class AdminRefreshToken {
     ) {
         return new AdminRefreshToken(id, adminId, token, expiresAt, createdAt);
     }
+
+    public void updateToken(String token, LocalDateTime expiresAt) {
+        this.token = token;
+        this.expiresAt = expiresAt;
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(this.expiresAt);
+    }
 }

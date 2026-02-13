@@ -8,6 +8,7 @@ import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.Username;
 import com.souzip.api.domain.admin.repository.AdminRepository;
+import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +20,10 @@ public class AdminAuthService {
 
     private final AdminRepository adminRepository;
     private final AdminPasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public Admin login(AdminLoginCommand command) {
+    public AdminLoginResult login(AdminLoginCommand command) {  
         Admin admin = adminRepository.findByUsername(new Username(command.username()))
             .orElseThrow(AdminNotFoundException::new);
 
@@ -29,7 +31,13 @@ public class AdminAuthService {
         validatePassword(admin, command.password());
 
         admin.recordLoginSuccess();
-        return adminRepository.save(admin);
+        Admin savedAdmin = adminRepository.save(admin);
+
+        // JWT 생성
+        String accessToken = jwtTokenProvider.generateToken(savedAdmin.getId().toString());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(savedAdmin.getId().toString());
+
+        return new AdminLoginResult(savedAdmin, accessToken, refreshToken);
     }
 
     private void validateNotLocked(Admin admin) {
@@ -53,4 +61,10 @@ public class AdminAuthService {
         adminRepository.save(admin);
         throw new AdminLoginFailedException();
     }
+
+    public record AdminLoginResult(
+        Admin admin,
+        String accessToken,
+        String refreshToken
+    ) {}
 }

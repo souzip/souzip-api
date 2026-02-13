@@ -1,6 +1,7 @@
 package com.souzip.api.global.security.config;
 
 import com.souzip.api.global.config.CorsProperties;
+import com.souzip.api.global.security.jwt.AdminJwtAuthenticationFilter;
 import com.souzip.api.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AdminJwtAuthenticationFilter adminJwtAuthenticationFilter;
     private final CorsProperties corsProperties;
 
     @Bean
@@ -44,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/login/**",
                     "/api/admin/auth/login",
+                    "/api/admin/auth/refresh",
                     "/api/auth/refresh",
                     "/docs/**",
                     "/api/test/**",
@@ -58,6 +61,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/souvenirs/*").permitAll()
                 .anyRequest().authenticated()
             )
+            .addFilterBefore(adminJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }
@@ -75,4 +79,3 @@ public class SecurityConfig {
         return source;
     }
 }
-

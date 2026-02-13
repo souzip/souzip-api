@@ -1,0 +1,9 @@
+[[geocoding-api]]
+== Address API
+
+[[geocoding-get-address]]
+=== 위도/경도 기준 주소 조회 (기념품 업로드 시 사용)
+
+* 인증 필요
+
+operation::geocoding/get-address[snippets='http-request,query-parameters,http-response,response-fields']

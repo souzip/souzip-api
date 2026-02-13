@@ -1,0 +1,39 @@
+[[search-api]]
+== Search API
+
+* 인증 불필요 (Public API)
+
+[[search-locations]]
+=== 위치 검색
+
+위치(국가/도시) 검색 API입니다. Elasticsearch를 사용하여 한글/영문 이름으로 검색할 수 있습니다.
+
+[[search-korean-city]]
+==== 한글 도시명으로 검색
+operation::search/locations-korean-city[snippets='http-request,query-parameters,http-response,response-fields']
+
+[[search-english-city]]
+==== 영문 도시명으로 검색
+operation::search/locations-english-city[snippets='http-request,query-parameters,http-response,response-fields']
+
+[[search-country]]
+==== 국가명으로 검색
+국가명으로 검색하면 해당 국가와 국가 내 도시들이 함께 반환됩니다.
+
+operation::search/locations-country[snippets='http-request,query-parameters,http-response,response-fields']
+
+[[search-multiple-keywords]]
+==== 복수 키워드로 검색
+공백으로 구분된 여러 키워드를 사용하여 검색할 수 있습니다.
+
+operation::search/locations-multiple-keywords[snippets='http-request,query-parameters,http-response,response-fields']
+
+
+[[search-errors]]
+==== 검색 에러 케이스
+
+===== 검색 결과가 없는 경우
+operation::search/locations-no-results[snippets='http-request,query-parameters,http-response,response-fields']
+
+===== 빈 검색어 에러
+operation::search/locations-empty-keyword[snippets='http-request,query-parameters,http-response,response-fields']

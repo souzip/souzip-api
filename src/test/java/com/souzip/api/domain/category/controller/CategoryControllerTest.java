@@ -62,16 +62,13 @@ class CategoryControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("응답 데이터"),
-                    fieldWithPath("data.categories").type(JsonFieldType.ARRAY)
-                        .description("카테고리 목록"),
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                    fieldWithPath("data.categories").type(JsonFieldType.ARRAY).description("카테고리 목록"),
                     fieldWithPath("data.categories[].name").type(JsonFieldType.STRING)
                         .description("카테고리 ENUM name (예: FOOD_SNACK)"),
                     fieldWithPath("data.categories[].label").type(JsonFieldType.STRING)
                         .description("카테고리 한글 라벨 (예: 먹거리·간식)"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }

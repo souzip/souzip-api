@@ -1,22 +1,16 @@
 [[category-api]]
 == Category API
 
+* 인증 불필요 (Public API)
+
 [[category-list]]
 === 카테고리 목록 조회
 
 온보딩 시 선택 가능한 카테고리 목록을 조회하는 API입니다.
 
-* 인증 불필요 (Public API)
 * 전체 카테고리 목록 반환
 * 카테고리 코드(name)와 한글 라벨(label) 제공
 
-==== HTTP 요청
-include::{snippets}/category/get-all-categories/http-request.adoc[]
-
-==== HTTP 응답
-include::{snippets}/category/get-all-categories/http-response.adoc[]
-
-==== 응답 필드
-include::{snippets}/category/get-all-categories/response-fields.adoc[]
+operation::category/get-all-categories[snippets='http-request,http-response,response-fields']
 
 NOTE: 온보딩 시 카테고리 `name` 값을 배열로 전송해야 합니다. (예: `["FOOD_SNACK", "BEAUTY_HEALTH"]`)

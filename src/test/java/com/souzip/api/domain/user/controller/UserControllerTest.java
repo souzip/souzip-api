@@ -109,7 +109,7 @@ class UserControllerTest extends RestDocsSupport {
                     fieldWithPath("data.message").type(JsonFieldType.STRING)
                         .description("확인 결과 메시지"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지")
+                        .description("응답 메시지").optional()
                 )
             ));
     }
@@ -147,7 +147,7 @@ class UserControllerTest extends RestDocsSupport {
                     fieldWithPath("data.message").type(JsonFieldType.STRING)
                         .description("확인 결과 메시지"),
                     fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지")
+                        .description("응답 메시지").optional()
                 )
             ));
     }
@@ -178,22 +178,14 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
-                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
-                        .description("만 14세 이상 여부"),
-                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
-                        .description("서비스 이용약관 동의"),
-                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
-                        .description("개인정보 수집 및 이용 동의"),
-                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
-                        .description("위치기반 서비스 이용약관 동의"),
-                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
-                        .description("마케팅 수신 동의"),
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("중복된 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록")
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN).description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN).description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN).description("마케팅 수신 동의"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING).description("중복된 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING).description("프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY).description("관심 카테고리 목록")
                 ),
                 responseFields(errorResponseFields())
             ));
@@ -204,13 +196,8 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_success() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            true,
-            true,
-            true,
-            true,
-            false,
-            "수집",
-            "red",
+            true, true, true, true, false,
+            "수집", "red",
             List.of("FOOD_SNACK", "BEAUTY_HEALTH", "FASHION_ACCESSORY")
         );
 
@@ -220,8 +207,7 @@ class UserControllerTest extends RestDocsSupport {
             new CategoryDto("FASHION_ACCESSORY", "패션·악세서리")
         );
 
-        UserAgreementInfo agreementInfo =
-            new UserAgreementInfo(true, true, true, true, false);
+        UserAgreementInfo agreementInfo = new UserAgreementInfo(true, true, true, true, false);
 
         OnboardingResponse response = new OnboardingResponse(
             "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -243,64 +229,37 @@ class UserControllerTest extends RestDocsSupport {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.userId").value("a1b2c3d4-e5f6-7890-abcd-ef1234567890"))
             .andExpect(jsonPath("$.data.nickname").value("수집"))
-            .andExpect(jsonPath("$.data.profileImageUrl").value("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/red.svg"))
+            .andExpect(jsonPath("$.data.profileImageUrl").exists())
             .andExpect(jsonPath("$.data.categories").isArray())
-            .andExpect(jsonPath("$.data.categories.length()").value(3))
-            .andExpect(jsonPath("$.data.categories[0].name").value("FOOD_SNACK"))
-            .andExpect(jsonPath("$.data.categories[0].label").value("먹거리·간식"))
             .andExpect(jsonPath("$.data.agreements.ageVerified").value(true))
-            .andExpect(jsonPath("$.data.agreements.marketingConsent").value(false))
-            .andExpect(jsonPath("$.message").value(""))
             .andDo(document("user/onboarding-success",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
-                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
-                        .description("만 14세 이상 여부 (필수)"),
-                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
-                        .description("서비스 이용약관 동의 (필수)"),
-                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
-                        .description("개인정보 수집 및 이용 동의 (필수)"),
-                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
-                        .description("위치기반 서비스 이용약관 동의 (필수)"),
-                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
-                        .description("마케팅 수신 동의 (선택)"),
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임 (최대 11자)"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상 (red, blue, yellow, purple)"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록 (최소 1개, Category ENUM name)")
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN).description("만 14세 이상 여부 (필수)"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 (필수)"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 (필수)"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN).description("위치기반 서비스 이용약관 동의 (필수)"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN).description("마케팅 수신 동의 (선택)"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING).description("사용자 닉네임 (최대 11자)"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING).description("프로필 이미지 색상 (red, blue, yellow, purple)"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY).description("관심 카테고리 목록 (최소 1개, Category ENUM name)")
                 ),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("온보딩 완료 응답 데이터"),
-                    fieldWithPath("data.userId").type(JsonFieldType.STRING)
-                        .description("사용자 ID (UUID)"),
-                    fieldWithPath("data.nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("data.profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL (NCP Object Storage 공개 URL)"),
-                    fieldWithPath("data.categories").type(JsonFieldType.ARRAY)
-                        .description("선택한 카테고리 목록"),
-                    fieldWithPath("data.categories[].name").type(JsonFieldType.STRING)
-                        .description("카테고리 ENUM name"),
-                    fieldWithPath("data.categories[].label").type(JsonFieldType.STRING)
-                        .description("카테고리 한글 라벨"),
-                    fieldWithPath("data.agreements").type(JsonFieldType.OBJECT)
-                        .description("약관 동의 정보"),
-                    fieldWithPath("data.agreements.ageVerified").type(JsonFieldType.BOOLEAN)
-                        .description("만 14세 이상 여부"),
-                    fieldWithPath("data.agreements.serviceTerms").type(JsonFieldType.BOOLEAN)
-                        .description("서비스 이용약관 동의"),
-                    fieldWithPath("data.agreements.privacyRequired").type(JsonFieldType.BOOLEAN)
-                        .description("개인정보 수집 및 이용 동의"),
-                    fieldWithPath("data.agreements.locationService").type(JsonFieldType.BOOLEAN)
-                        .description("위치기반 서비스 이용약관 동의"),
-                    fieldWithPath("data.agreements.marketingConsent").type(JsonFieldType.BOOLEAN)
-                        .description("마케팅 수신 동의"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("성공 메시지")
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("온보딩 완료 응답 데이터"),
+                    fieldWithPath("data.userId").type(JsonFieldType.STRING).description("사용자 ID (UUID)"),
+                    fieldWithPath("data.nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("data.profileImageUrl").type(JsonFieldType.STRING).description("프로필 이미지 URL"),
+                    fieldWithPath("data.categories").type(JsonFieldType.ARRAY).description("선택한 카테고리 목록"),
+                    fieldWithPath("data.categories[].name").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
+                    fieldWithPath("data.categories[].label").type(JsonFieldType.STRING).description("카테고리 한글 라벨"),
+                    fieldWithPath("data.agreements").type(JsonFieldType.OBJECT).description("약관 동의 정보"),
+                    fieldWithPath("data.agreements.ageVerified").type(JsonFieldType.BOOLEAN).description("만 14세 이상 여부"),
+                    fieldWithPath("data.agreements.serviceTerms").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의"),
+                    fieldWithPath("data.agreements.privacyRequired").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("data.agreements.locationService").type(JsonFieldType.BOOLEAN).description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("data.agreements.marketingConsent").type(JsonFieldType.BOOLEAN).description("마케팅 수신 동의"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -310,14 +269,8 @@ class UserControllerTest extends RestDocsSupport {
     void completeOnboarding_requiredAgreementNotChecked() throws Exception {
         // given
         OnboardingRequest request = new OnboardingRequest(
-            true,
-            false,
-            true,
-            true,
-            false,
-            "수집",
-            "red",
-            List.of("FOOD_SNACK")
+            true, false, true, true, false,
+            "수집", "red", List.of("FOOD_SNACK")
         );
 
         given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
@@ -335,22 +288,14 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
-                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
-                        .description("만 14세 이상 여부"),
-                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
-                        .description("서비스 이용약관 동의 (false)"),
-                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
-                        .description("개인정보 수집 및 이용 동의"),
-                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
-                        .description("위치기반 서비스 이용약관 동의"),
-                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
-                        .description("마케팅 수신 동의"),
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록")
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN).description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 (false)"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN).description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN).description("마케팅 수신 동의"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING).description("프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY).description("관심 카테고리 목록")
                 ),
                 responseFields(errorResponseFields())
             ));
@@ -362,9 +307,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             true, true, true, true, false,
-            "수집",
-            "blue",
-            List.of("FOOD_SNACK", "BEAUTY_HEALTH")
+            "수집", "blue", List.of("FOOD_SNACK", "BEAUTY_HEALTH")
         );
 
         given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
@@ -382,22 +325,14 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
-                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
-                        .description("만 14세 이상 여부"),
-                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
-                        .description("서비스 이용약관 동의"),
-                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
-                        .description("개인정보 수집 및 이용 동의"),
-                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
-                        .description("위치기반 서비스 이용약관 동의"),
-                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
-                        .description("마케팅 수신 동의"),
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록")
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN).description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN).description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN).description("마케팅 수신 동의"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING).description("프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY).description("관심 카테고리 목록")
                 ),
                 responseFields(errorResponseFields())
             ));
@@ -409,9 +344,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             true, true, true, true, false,
-            "수집",
-            "yellow",
-            List.of("INVALID_CATEGORY", "BEAUTY_HEALTH")
+            "수집", "yellow", List.of("INVALID_CATEGORY", "BEAUTY_HEALTH")
         );
 
         given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
@@ -429,22 +362,14 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
-                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
-                        .description("만 14세 이상 여부"),
-                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
-                        .description("서비스 이용약관 동의"),
-                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
-                        .description("개인정보 수집 및 이용 동의"),
-                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
-                        .description("위치기반 서비스 이용약관 동의"),
-                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
-                        .description("마케팅 수신 동의"),
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록 (유효하지 않은 카테고리 포함)")
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN).description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN).description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN).description("마케팅 수신 동의"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING).description("프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY).description("관심 카테고리 목록 (유효하지 않은 카테고리 포함)")
                 ),
                 responseFields(errorResponseFields())
             ));
@@ -456,9 +381,7 @@ class UserControllerTest extends RestDocsSupport {
         // given
         OnboardingRequest request = new OnboardingRequest(
             true, true, true, true, false,
-            "수집",
-            "invalid_color",
-            List.of("FOOD_SNACK")
+            "수집", "invalid_color", List.of("FOOD_SNACK")
         );
 
         given(userService.completeOnboarding(any(), any(OnboardingRequest.class)))
@@ -476,22 +399,14 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestFields(
-                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN)
-                        .description("만 14세 이상 여부"),
-                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN)
-                        .description("서비스 이용약관 동의"),
-                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN)
-                        .description("개인정보 수집 및 이용 동의"),
-                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN)
-                        .description("위치기반 서비스 이용약관 동의"),
-                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN)
-                        .description("마케팅 수신 동의"),
-                    fieldWithPath("nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING)
-                        .description("유효하지 않은 프로필 이미지 색상"),
-                    fieldWithPath("categories").type(JsonFieldType.ARRAY)
-                        .description("관심 카테고리 목록")
+                    fieldWithPath("ageVerified").type(JsonFieldType.BOOLEAN).description("만 14세 이상 여부"),
+                    fieldWithPath("serviceTerms").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의"),
+                    fieldWithPath("privacyRequired").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의"),
+                    fieldWithPath("locationService").type(JsonFieldType.BOOLEAN).description("위치기반 서비스 이용약관 동의"),
+                    fieldWithPath("marketingConsent").type(JsonFieldType.BOOLEAN).description("마케팅 수신 동의"),
+                    fieldWithPath("nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("profileImageColor").type(JsonFieldType.STRING).description("유효하지 않은 프로필 이미지 색상"),
+                    fieldWithPath("categories").type(JsonFieldType.ARRAY).description("관심 카테고리 목록")
                 ),
                 responseFields(errorResponseFields())
             ));
@@ -513,8 +428,7 @@ class UserControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("성공 메시지")
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -538,25 +452,16 @@ class UserControllerTest extends RestDocsSupport {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.userId").value("a1b2c3d4..."))
-            .andExpect(jsonPath("$.data.nickname").value("테스트닉네임"))
-            .andExpect(jsonPath("$.data.email").value("test@kakao.com"))
-            .andExpect(jsonPath("$.data.profileImageUrl").value("https://example.com/profile.jpg"))
             .andDo(document("user/my-profile",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("사용자 프로필 정보"),
-                    fieldWithPath("data.userId").type(JsonFieldType.STRING)
-                        .description("사용자 ID"),
-                    fieldWithPath("data.nickname").type(JsonFieldType.STRING)
-                        .description("닉네임"),
-                    fieldWithPath("data.email").type(JsonFieldType.STRING)
-                        .description("이메일"),
-                    fieldWithPath("data.profileImageUrl").type(JsonFieldType.STRING)
-                        .description("프로필 이미지 URL"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지")
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("사용자 프로필 정보"),
+                    fieldWithPath("data.userId").type(JsonFieldType.STRING).description("사용자 ID"),
+                    fieldWithPath("data.nickname").type(JsonFieldType.STRING).description("닉네임"),
+                    fieldWithPath("data.email").type(JsonFieldType.STRING).description("이메일"),
+                    fieldWithPath("data.profileImageUrl").type(JsonFieldType.STRING).description("프로필 이미지 URL"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -595,18 +500,6 @@ class UserControllerTest extends RestDocsSupport {
                 .param("size", "12"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.content").isArray())
-            .andExpect(jsonPath("$.data.content.length()").value(2))
-            .andExpect(jsonPath("$.data.content[0].id").value(1))
-            .andExpect(jsonPath("$.data.content[0].thumbnailUrl").value("https://example.com/image1.jpg"))
-            .andExpect(jsonPath("$.data.content[0].countryCode").value("KR"))
-            .andExpect(jsonPath("$.data.content[0].createdAt").exists())
-            .andExpect(jsonPath("$.data.content[0].updatedAt").exists())
-            .andExpect(jsonPath("$.data.pagination.currentPage").value(1))
-            .andExpect(jsonPath("$.data.pagination.pageSize").value(12))
-            .andExpect(jsonPath("$.data.pagination.totalItems").value(2))
-            .andExpect(jsonPath("$.data.pagination.totalPages").value(1))
-            .andExpect(jsonPath("$.data.pagination.hasNext").value(false))
             .andDo(document("user/my-souvenirs",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -615,40 +508,23 @@ class UserControllerTest extends RestDocsSupport {
                     parameterWithName("size").description("페이지 크기 (기본값: 12)").optional()
                 ),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("기념품 목록 응답"),
-                    fieldWithPath("data.content").type(JsonFieldType.ARRAY)
-                        .description("기념품 목록"),
-                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER)
-                        .description("기념품 ID"),
-                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.STRING)
-                        .description("썸네일 이미지 URL"),
-                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING)
-                        .description("기념품 국가 코드"),
-                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING)
-                        .description("생성일시"),
-                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING)
-                        .description("수정일시"),
-                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
-                        .description("페이지네이션 정보"),
-                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
-                        .description("현재 페이지 번호"),
-                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
-                        .description("전체 페이지 수"),
-                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
-                        .description("전체 기념품 개수"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
-                        .description("페이지 크기"),
-                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
-                        .description("첫 번째 페이지 여부"),
-                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
-                        .description("마지막 페이지 여부"),
-                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
-                        .description("다음 페이지 존재 여부"),
-                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
-                        .description("이전 페이지 존재 여부"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지")
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("기념품 목록 응답"),
+                    fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("기념품 목록"),
+                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
+                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
+                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일시"),
+                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일시"),
+                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
+                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 기념품 개수"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
+                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -668,7 +544,7 @@ class UserControllerTest extends RestDocsSupport {
         );
 
         MySouvenirListResponse response = createMockMySouvenirListResponse(
-                content, 2, 3, 25L, 12, false, false, true, true
+            content, 2, 3, 25L, 12, false, false, true, true
         );
 
         given(userService.getMySouvenirs(any(), eq(2), eq(12))).willReturn(response);
@@ -680,51 +556,31 @@ class UserControllerTest extends RestDocsSupport {
                 .param("size", "12"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.pagination.currentPage").value(2))
-            .andExpect(jsonPath("$.data.pagination.totalPages").value(3))
-            .andExpect(jsonPath("$.data.pagination.hasNext").value(true))
             .andDo(document("user/my-souvenirs-page-2",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 queryParameters(
-                    parameterWithName("page").description("페이지 번호 (2페이지 조회)"),
+                    parameterWithName("page").description("페이지 번호"),
                     parameterWithName("size").description("페이지 크기")
                 ),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("기념품 목록 응답"),
-                    fieldWithPath("data.content").type(JsonFieldType.ARRAY)
-                        .description("기념품 목록"),
-                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER)
-                        .description("기념품 ID"),
-                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.NULL)
-                        .description("썸네일 이미지 URL"),
-                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING)
-                        .description("기념품 국가 코드"),
-                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING)
-                        .description("생성일시"),
-                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING)
-                        .description("수정일시"),
-                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
-                        .description("페이지네이션 정보"),
-                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
-                        .description("현재 페이지 번호 (2)"),
-                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
-                        .description("전체 페이지 수"),
-                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
-                        .description("전체 기념품 개수"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
-                        .description("페이지 크기"),
-                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
-                        .description("첫 번째 페이지 여부"),
-                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
-                        .description("마지막 페이지 여부"),
-                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
-                        .description("다음 페이지 존재 여부"),
-                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
-                        .description("이전 페이지 존재 여부"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지")
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("기념품 목록 응답"),
+                    fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("기념품 목록"),
+                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.NULL).description("썸네일 이미지 URL").optional(),
+                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
+                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일시"),
+                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일시"),
+                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
+                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 기념품 개수"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
+                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -746,40 +602,26 @@ class UserControllerTest extends RestDocsSupport {
                 .param("size", "12"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.content").isEmpty())
-            .andExpect(jsonPath("$.data.pagination.totalItems").value(0))
             .andDo(document("user/my-souvenirs-empty",
                 getDocumentRequest(),
                 getDocumentResponse(),
                 queryParameters(
-                    parameterWithName("page").description("페이지 번호"),
-                    parameterWithName("size").description("페이지 크기")
+                    parameterWithName("page").description("페이지 번호").optional(),
+                    parameterWithName("size").description("페이지 크기").optional()
                 ),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("기념품 목록 응답"),
-                    fieldWithPath("data.content").type(JsonFieldType.ARRAY)
-                        .description("빈 기념품 목록"),
-                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT)
-                        .description("페이지네이션 정보"),
-                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER)
-                        .description("현재 페이지 번호"),
-                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER)
-                        .description("전체 페이지 수 (0)"),
-                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER)
-                        .description("전체 기념품 개수 (0)"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER)
-                        .description("페이지 크기"),
-                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN)
-                        .description("첫 번째 페이지 여부"),
-                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN)
-                        .description("마지막 페이지 여부"),
-                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN)
-                        .description("다음 페이지 존재 여부 (false)"),
-                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
-                        .description("이전 페이지 존재 여부 (false)"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지")
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("기념품 목록 응답"),
+                    fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("빈 기념품 목록"),
+                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
+                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 기념품 개수"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
+                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }

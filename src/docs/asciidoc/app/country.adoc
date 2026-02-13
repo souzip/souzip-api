@@ -1,0 +1,9 @@
+[[country-api]]
+== Country API
+
+* 인증 불필요 (Public API)
+
+[[country-get-all]]
+=== 전체 국가 목록 조회
+
+operation::country/get-all[snippets='http-request,http-response,response-fields']

@@ -15,6 +15,8 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,19 +37,22 @@ class CurrencyControllerTest extends RestDocsSupport {
         given(currencyService.getCurrencyByCountryCode("KR")).willReturn(currency);
 
         // when & then
-        mockMvc.perform(get("/api/currency/KR"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.code").value("KRW"))
-                .andExpect(jsonPath("$.data.symbol").value("₩"))
-                .andDo(document("currency/get-by-country",
-                        getDocumentRequest(),
-                        getDocumentResponse(),
-                        apiResponseFields(
-                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                fieldWithPath("data.code").type(JsonFieldType.STRING).description("통화 코드"),
-                                fieldWithPath("data.symbol").type(JsonFieldType.STRING).description("통화 기호"),
-                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
-                        )
-                ));
+        mockMvc.perform(get("/api/currency/{countryCode}", "KR"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.code").value("KRW"))
+            .andExpect(jsonPath("$.data.symbol").value("₩"))
+            .andDo(document("currency/get-by-country",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("countryCode").description("국가 코드 (예: KR, JP, US)")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                    fieldWithPath("data.code").type(JsonFieldType.STRING).description("통화 코드"),
+                    fieldWithPath("data.symbol").type(JsonFieldType.STRING).description("통화 기호"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
     }
 }

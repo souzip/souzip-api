@@ -23,7 +23,7 @@ public class AdminAuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
-    public AdminLoginResult login(AdminLoginCommand command) {  
+    public AdminLoginResult login(AdminLoginCommand command) {
         Admin admin = adminRepository.findByUsername(new Username(command.username()))
             .orElseThrow(AdminNotFoundException::new);
 
@@ -33,7 +33,6 @@ public class AdminAuthService {
         admin.recordLoginSuccess();
         Admin savedAdmin = adminRepository.save(admin);
 
-        // JWT 생성
         String accessToken = jwtTokenProvider.generateToken(savedAdmin.getId().toString());
         String refreshToken = jwtTokenProvider.generateRefreshToken(savedAdmin.getId().toString());
 

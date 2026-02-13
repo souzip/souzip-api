@@ -1,5 +1,6 @@
 package com.souzip.api.domain.admin.application;
 
+import com.souzip.api.domain.admin.application.AdminAuthService.AdminLoginResult;
 import com.souzip.api.domain.admin.application.command.AdminLoginCommand;
 import com.souzip.api.domain.admin.exception.AdminLockedException;
 import com.souzip.api.domain.admin.exception.AdminLoginFailedException;
@@ -10,6 +11,7 @@ import com.souzip.api.domain.admin.model.AdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.model.Username;
 import com.souzip.api.domain.admin.repository.AdminRepository;
+import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -28,12 +31,14 @@ class AdminAuthServiceTest {
     private AdminAuthService adminAuthService;
     private AdminRepository adminRepository;
     private AdminPasswordEncoder passwordEncoder;
+    private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach
     void setUp() {
         adminRepository = mock(AdminRepository.class);
         passwordEncoder = mock(AdminPasswordEncoder.class);
-        adminAuthService = new AdminAuthService(adminRepository, passwordEncoder);
+        jwtTokenProvider = mock(JwtTokenProvider.class);
+        adminAuthService = new AdminAuthService(adminRepository, passwordEncoder, jwtTokenProvider);
     }
 
     @Test
@@ -47,13 +52,17 @@ class AdminAuthServiceTest {
         given(adminRepository.findByUsername(any(Username.class))).willReturn(Optional.of(admin));
         given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
         given(adminRepository.save(any(Admin.class))).willReturn(admin);
+        given(jwtTokenProvider.generateToken(anyString())).willReturn("access-token");
+        given(jwtTokenProvider.generateRefreshToken(anyString())).willReturn("refresh-token");
 
         // when
-        Admin result = adminAuthService.login(command);
+        AdminLoginResult result = adminAuthService.login(command);
 
         // then
-        assertThat(result.getLoginFailCount()).isZero();
-        assertThat(result.getLastLoginAt()).isNotNull();
+        assertThat(result.admin().getLoginFailCount()).isZero();
+        assertThat(result.admin().getLastLoginAt()).isNotNull();
+        assertThat(result.accessToken()).isEqualTo("access-token");
+        assertThat(result.refreshToken()).isEqualTo("refresh-token");
         verify(adminRepository, times(1)).save(admin);
     }
 

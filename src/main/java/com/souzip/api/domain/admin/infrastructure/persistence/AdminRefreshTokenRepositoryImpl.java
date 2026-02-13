@@ -2,6 +2,7 @@ package com.souzip.api.domain.admin.infrastructure.persistence;
 
 import com.souzip.api.domain.admin.model.AdminRefreshToken;
 import com.souzip.api.domain.admin.repository.AdminRefreshTokenRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -35,5 +36,10 @@ public class AdminRefreshTokenRepositoryImpl implements AdminRefreshTokenReposit
     @Override
     public void delete(AdminRefreshToken refreshToken) {
         jpaRepository.delete(mapper.toEntity(refreshToken));
+    }
+
+    @Override
+    public int deleteAllByExpiresAtBefore(LocalDateTime dateTime) {
+        return jpaRepository.deleteAllByExpiresAtBefore(dateTime);
     }
 }

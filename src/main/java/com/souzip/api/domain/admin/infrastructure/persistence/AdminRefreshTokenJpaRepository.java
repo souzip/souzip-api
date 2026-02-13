@@ -1,6 +1,7 @@
 package com.souzip.api.domain.admin.infrastructure.persistence;
 
 import com.souzip.api.domain.admin.infrastructure.entity.AdminRefreshTokenEntity;
+import java.time.LocalDateTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -13,4 +14,6 @@ public interface AdminRefreshTokenJpaRepository extends JpaRepository<AdminRefre
     Optional<AdminRefreshTokenEntity> findByToken(String token);
 
     Optional<AdminRefreshTokenEntity> findByAdminId(UUID adminId);
+
+    int deleteAllByExpiresAtBefore(LocalDateTime dateTime);
 }

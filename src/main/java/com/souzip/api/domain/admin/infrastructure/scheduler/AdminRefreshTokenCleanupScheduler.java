@@ -16,7 +16,7 @@ public class AdminRefreshTokenCleanupScheduler {
     private final AdminRefreshTokenRepository adminRefreshTokenRepository;
 
     @Transactional
-    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul")
     public void cleanUpExpiredAdminRefreshTokens() {
         LocalDateTime now = LocalDateTime.now();
         int deletedCount = adminRefreshTokenRepository.deleteAllByExpiresAtBefore(now);

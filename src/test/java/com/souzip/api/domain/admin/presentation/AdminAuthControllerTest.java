@@ -32,8 +32,8 @@ class AdminAuthControllerTest extends RestDocsSupport {
         return new AdminAuthController(adminAuthService);
     }
 
-    @Test
     @DisplayName("어드민 로그인에 성공한다.")
+    @Test
     void login_success() throws Exception {
         // given
         AdminLoginRequest request = new AdminLoginRequest("admin123", "password123");

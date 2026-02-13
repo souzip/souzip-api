@@ -32,8 +32,8 @@ class AdminRepositoryTest {
         passwordEncoder = new TestAdminPasswordEncoder();
     }
 
-    @Test
     @DisplayName("Admin 저장에 성공한다.")
+    @Test
     void save_success() {
         // given
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN, passwordEncoder);
@@ -46,8 +46,8 @@ class AdminRepositoryTest {
         assertThat(saved.getUsername().value()).isEqualTo("admin123");
     }
 
-    @Test
     @DisplayName("username으로 Admin 조회에 성공한다.")
+    @Test
     void findByUsername_success() {
         // given
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN, passwordEncoder);
@@ -61,8 +61,8 @@ class AdminRepositoryTest {
         assertThat(found.get().getUsername().value()).isEqualTo("admin123");
     }
 
-    @Test
     @DisplayName("존재하지 않는 username 조회 시 빈 값을 반환한다.")
+    @Test
     void findByUsername_not_found() {
         // when
         Optional<Admin> found = adminRepository.findByUsername(new Username("admin123"));

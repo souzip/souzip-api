@@ -41,8 +41,8 @@ class AdminAuthServiceTest {
         adminAuthService = new AdminAuthService(adminRepository, passwordEncoder, jwtTokenProvider);
     }
 
-    @Test
     @DisplayName("로그인에 성공한다.")
+    @Test
     void login_success() {
         // given
         AdminLoginCommand command = new AdminLoginCommand("admin123", "password123");
@@ -66,8 +66,8 @@ class AdminAuthServiceTest {
         verify(adminRepository, times(1)).save(admin);
     }
 
-    @Test
     @DisplayName("존재하지 않는 계정으로 로그인 시 예외가 발생한다.")
+    @Test
     void login_fail_not_found() {
         // given
         AdminLoginCommand command = new AdminLoginCommand("admin123", "password123");
@@ -78,8 +78,8 @@ class AdminAuthServiceTest {
             .isInstanceOf(AdminNotFoundException.class);
     }
 
-    @Test
     @DisplayName("잠긴 계정으로 로그인 시 예외가 발생한다.")
+    @Test
     void login_fail_locked() {
         // given
         AdminLoginCommand command = new AdminLoginCommand("admin123", "password123");
@@ -95,8 +95,8 @@ class AdminAuthServiceTest {
             .isInstanceOf(AdminLockedException.class);
     }
 
-    @Test
     @DisplayName("비밀번호 불일치 시 예외가 발생하고 실패 횟수가 증가한다.")
+    @Test
     void login_fail_password_mismatch() {
         // given
         AdminLoginCommand command = new AdminLoginCommand("admin123", "wrongpassword");

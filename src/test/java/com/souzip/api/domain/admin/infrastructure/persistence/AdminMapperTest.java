@@ -24,8 +24,8 @@ class AdminMapperTest {
         passwordEncoder = new TestAdminPasswordEncoder();
     }
 
-    @Test
     @DisplayName("Admin 도메인을 AdminJpaEntity로 변환에 성공한다.")
+    @Test
     void toEntity_success() {
         // given
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN, passwordEncoder);
@@ -39,8 +39,8 @@ class AdminMapperTest {
         assertThat(entity.getLoginFailCount()).isZero();
     }
 
-    @Test
     @DisplayName("AdminJpaEntity를 Admin 도메인으로 변환에 성공한다.")
+    @Test
     void toDomain_success() {
         // given
         AdminEntity entity = AdminEntity.builder()

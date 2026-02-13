@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class AdminRepositoryImpl implements com.souzip.api.domain.admin.repository.AdminRepository {
 
-    private final AdminRepository jpaRepository;
+    private final AdminJpaRepository jpaRepository;
     private final AdminMapper mapper;
 
     @Override

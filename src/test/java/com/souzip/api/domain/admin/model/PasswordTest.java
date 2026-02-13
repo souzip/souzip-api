@@ -8,8 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PasswordTest {
 
-    @Test
     @DisplayName("비밀번호 인코딩에 성공한다.")
+    @Test
     void encode_success() {
         // given
         AdminPasswordEncoder encoder = new TestAdminPasswordEncoder();

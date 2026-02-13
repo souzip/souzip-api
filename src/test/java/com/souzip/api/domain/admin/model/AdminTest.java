@@ -16,8 +16,8 @@ class AdminTest {
         passwordEncoder = new TestAdminPasswordEncoder();
     }
 
-    @Test
     @DisplayName("Admin 생성에 성공한다.")
+    @Test
     void create_success() {
         // given & when
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN, passwordEncoder);

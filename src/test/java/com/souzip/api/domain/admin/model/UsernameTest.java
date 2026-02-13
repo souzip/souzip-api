@@ -11,8 +11,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UsernameTest {
 
-    @Test
     @DisplayName("유효한 아이디로 Username 생성에 성공한다.")
+    @Test
     void create_success() {
         // given & when
         Username username = new Username("admin123");
@@ -21,8 +21,8 @@ class UsernameTest {
         assertThat(username.value()).isEqualTo("admin123");
     }
 
-    @Test
     @DisplayName("아이디가 null이면 예외가 발생한다.")
+    @Test
     void create_fail_null() {
         // when & then
         assertThatThrownBy(() -> new Username(null))

@@ -152,7 +152,3 @@ tasks.register('copyDocsAdmin', Copy) {
 	from adminDocsOutDir
 	into file("src/main/resources/static/docs/admin")
 }
-
-tasks.named('build') {
-	dependsOn tasks.named('copyDocsApp'), tasks.named('copyDocsAdmin')
-}

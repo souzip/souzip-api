@@ -26,6 +26,10 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
 
+cors:
+  allowed-origins:
+    - https://admin-dev.souzip.com
+
 management:
   endpoints:
     web:

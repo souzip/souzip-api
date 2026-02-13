@@ -79,7 +79,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 sourceSets {
-	main.java.srcDirs += [ generatedDir ]
+	main.java.srcDirs += [generatedDir]
 }
 
 clean {
@@ -91,31 +91,68 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-tasks.named('asciidoctor') {
+def appDocsOutDir = file("$buildDir/docs/app")
+def adminDocsOutDir = file("$buildDir/docs/admin")
+
+tasks.register('asciidoctorApp', org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+	group = 'documentation'
+	description = 'Generate App API docs (Asciidoctor)'
+
 	inputs.dir snippetsDir
 	configurations 'asciidoctorExt'
-	dependsOn test
+	dependsOn tasks.named('test')
 
 	baseDirFollowsSourceFile()
 
-	sources {
-		include '**/index.adoc'
-	}
+	sourceDir = file('src/docs/asciidoc/app')
+	sources { include 'index.adoc' }
+
+	outputDir = appDocsOutDir
+}
+
+tasks.register('asciidoctorAdmin', org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+	group = 'documentation'
+	description = 'Generate Admin API docs (Asciidoctor)'
+
+	inputs.dir snippetsDir
+	configurations 'asciidoctorExt'
+	dependsOn tasks.named('test')
+
+	baseDirFollowsSourceFile()
+
+	sourceDir = file('src/docs/asciidoc/admin')
+	sources { include 'index.adoc' }
+
+	outputDir = adminDocsOutDir
 }
 
 tasks.named('bootJar') {
-	dependsOn asciidoctor
-	from("${asciidoctor.outputDir}") {
-		into 'static/docs'
+	dependsOn tasks.named('asciidoctorApp'), tasks.named('asciidoctorAdmin')
+
+	from(appDocsOutDir) {
+		into 'static/docs/app'
+	}
+	from(adminDocsOutDir) {
+		into 'static/docs/admin'
 	}
 }
 
-tasks.register('copyDocument', Copy) {
-	dependsOn asciidoctor
-	from file("${asciidoctor.outputDir}")
-	into file("src/main/resources/static/docs")
+tasks.register('copyDocsApp', Copy) {
+	group = 'documentation'
+	description = 'Copy App docs to src/main/resources/static/docs/app'
+	dependsOn tasks.named('asciidoctorApp')
+	from appDocsOutDir
+	into file("src/main/resources/static/docs/app")
+}
+
+tasks.register('copyDocsAdmin', Copy) {
+	group = 'documentation'
+	description = 'Copy Admin docs to src/main/resources/static/docs/admin'
+	dependsOn tasks.named('asciidoctorAdmin')
+	from adminDocsOutDir
+	into file("src/main/resources/static/docs/admin")
 }
 
 tasks.named('build') {
-	dependsOn copyDocument
+	dependsOn tasks.named('copyDocsApp'), tasks.named('copyDocsAdmin')
 }

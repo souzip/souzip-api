@@ -38,6 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class AuthControllerTest extends RestDocsSupport {
 
+    private static final String PROVIDER_DESC = "OAuth Provider (kakao, google, apple)";
+
     private final AuthService authService = mock(AuthService.class);
 
     @Override
@@ -77,7 +79,7 @@ class AuthControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("provider").description("OAuth Provider (kakao, google, apple)")
+                    parameterWithName("provider").description(PROVIDER_DESC)
                 ),
                 requestFields(
                     fieldWithPath("accessToken").type(JsonFieldType.STRING)
@@ -85,20 +87,14 @@ class AuthControllerTest extends RestDocsSupport {
                 ),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT).description("로그인 응답 데이터"),
-                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING)
-                        .description("JWT Access Token"),
-                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING)
-                        .description("JWT Refresh Token"),
-                    fieldWithPath("data.user").type(JsonFieldType.OBJECT)
-                        .description("사용자 정보"),
-                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING)
-                        .description("사용자 ID (UUID 앞 8자리)"),
-                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("JWT Access Token"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("JWT Refresh Token"),
+                    fieldWithPath("data.user").type(JsonFieldType.OBJECT).description("사용자 정보"),
+                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING).description("사용자 ID (UUID 앞 8자리)"),
+                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
                     fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
                         .description("온보딩 필요 여부 (true = 온보딩 필요, false = 완료)"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -131,7 +127,7 @@ class AuthControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("provider").description("OAuth Provider")
+                    parameterWithName("provider").description(PROVIDER_DESC)
                 ),
                 requestFields(
                     fieldWithPath("accessToken").type(JsonFieldType.STRING)
@@ -139,20 +135,14 @@ class AuthControllerTest extends RestDocsSupport {
                 ),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT).description("로그인 응답 데이터"),
-                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING)
-                        .description("JWT Access Token"),
-                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING)
-                        .description("JWT Refresh Token"),
-                    fieldWithPath("data.user").type(JsonFieldType.OBJECT)
-                        .description("사용자 정보"),
-                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING)
-                        .description("사용자 ID"),
-                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("JWT Access Token"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("JWT Refresh Token"),
+                    fieldWithPath("data.user").type(JsonFieldType.OBJECT).description("사용자 정보"),
+                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING).description("사용자 ID"),
+                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
                     fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
                         .description("온보딩 필요 여부 (false = 온보딩 완료, true = 필요)"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -177,7 +167,7 @@ class AuthControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("provider").description("OAuth Provider")
+                    parameterWithName("provider").description(PROVIDER_DESC)
                 ),
                 requestFields(
                     fieldWithPath("accessToken").type(JsonFieldType.STRING)
@@ -215,7 +205,7 @@ class AuthControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("provider").description("OAuth Provider (google)")
+                    parameterWithName("provider").description(PROVIDER_DESC)
                 ),
                 requestFields(
                     fieldWithPath("accessToken").type(JsonFieldType.STRING)
@@ -223,20 +213,13 @@ class AuthControllerTest extends RestDocsSupport {
                 ),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT).description("로그인 응답 데이터"),
-                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING)
-                        .description("JWT Access Token"),
-                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING)
-                        .description("JWT Refresh Token"),
-                    fieldWithPath("data.user").type(JsonFieldType.OBJECT)
-                        .description("사용자 정보"),
-                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING)
-                        .description("사용자 ID"),
-                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
-                        .description("온보딩 필요 여부"),  // ← 수정!
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("JWT Access Token"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("JWT Refresh Token"),
+                    fieldWithPath("data.user").type(JsonFieldType.OBJECT).description("사용자 정보"),
+                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING).description("사용자 ID"),
+                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN).description("온보딩 필요 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -264,7 +247,28 @@ class AuthControllerTest extends RestDocsSupport {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.needsOnboarding").value(false));
+            .andExpect(jsonPath("$.data.needsOnboarding").value(false))
+            .andDo(document("auth/login-google-existing-user",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("provider").description(PROVIDER_DESC)
+                ),
+                requestFields(
+                    fieldWithPath("accessToken").type(JsonFieldType.STRING)
+                        .description("구글 Access Token")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("로그인 응답 데이터"),
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("JWT Access Token"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("JWT Refresh Token"),
+                    fieldWithPath("data.user").type(JsonFieldType.OBJECT).description("사용자 정보"),
+                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING).description("사용자 ID"),
+                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN).description("온보딩 필요 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
     }
 
     @Test
@@ -295,7 +299,7 @@ class AuthControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("provider").description("OAuth Provider (apple)")
+                    parameterWithName("provider").description(PROVIDER_DESC)
                 ),
                 requestFields(
                     fieldWithPath("accessToken").type(JsonFieldType.STRING)
@@ -303,20 +307,13 @@ class AuthControllerTest extends RestDocsSupport {
                 ),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.OBJECT).description("로그인 응답 데이터"),
-                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING)
-                        .description("JWT Access Token"),
-                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING)
-                        .description("JWT Refresh Token"),
-                    fieldWithPath("data.user").type(JsonFieldType.OBJECT)
-                        .description("사용자 정보"),
-                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING)
-                        .description("사용자 ID"),
-                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING)
-                        .description("사용자 닉네임"),
-                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN)
-                        .description("온보딩 필요 여부"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("JWT Access Token"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("JWT Refresh Token"),
+                    fieldWithPath("data.user").type(JsonFieldType.OBJECT).description("사용자 정보"),
+                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING).description("사용자 ID"),
+                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN).description("온보딩 필요 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -344,7 +341,28 @@ class AuthControllerTest extends RestDocsSupport {
                 .content(objectMapper.writeValueAsString(request)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.needsOnboarding").value(false));
+            .andExpect(jsonPath("$.data.needsOnboarding").value(false))
+            .andDo(document("auth/login-apple-existing-user",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                pathParameters(
+                    parameterWithName("provider").description(PROVIDER_DESC)
+                ),
+                requestFields(
+                    fieldWithPath("accessToken").type(JsonFieldType.STRING)
+                        .description("애플 ID Token")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("로그인 응답 데이터"),
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("JWT Access Token"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("JWT Refresh Token"),
+                    fieldWithPath("data.user").type(JsonFieldType.OBJECT).description("사용자 정보"),
+                    fieldWithPath("data.user.userId").type(JsonFieldType.STRING).description("사용자 ID"),
+                    fieldWithPath("data.user.nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
+                    fieldWithPath("data.needsOnboarding").type(JsonFieldType.BOOLEAN).description("온보딩 필요 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
     }
 
     @Test
@@ -364,7 +382,7 @@ class AuthControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("provider").description("지원하지 않는 Provider (naver)")
+                    parameterWithName("provider").description(PROVIDER_DESC)
                 ),
                 requestFields(
                     fieldWithPath("accessToken").type(JsonFieldType.STRING)
@@ -390,7 +408,7 @@ class AuthControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 pathParameters(
-                    parameterWithName("provider").description("잘못된 형식의 Provider")
+                    parameterWithName("provider").description(PROVIDER_DESC)
                 ),
                 requestFields(
                     fieldWithPath("accessToken").type(JsonFieldType.STRING)
@@ -424,6 +442,7 @@ class AuthControllerTest extends RestDocsSupport {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.accessToken").exists());
+        // NOTE: 이 테스트는 “동작 검증”용으로 남기고 문서화는 생략(실무에서도 보통 이렇게 함)
     }
 
     @Test
@@ -454,14 +473,11 @@ class AuthControllerTest extends RestDocsSupport {
                         .description("Refresh Token")
                 ),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("토큰 재발급 응답 데이터"),
-                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING)
-                        .description("새로 발급된 JWT Access Token"),
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("토큰 재발급 응답 데이터"),
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("새로 발급된 JWT Access Token"),
                     fieldWithPath("data.refreshToken").type(JsonFieldType.STRING)
                         .description("Refresh Token (유효기간 10일 초과 시 그대로 유지)"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -493,14 +509,10 @@ class AuthControllerTest extends RestDocsSupport {
                         .description("Refresh Token (만료 10일 이하)")
                 ),
                 apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT)
-                        .description("토큰 재발급 응답 데이터"),
-                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING)
-                        .description("새로 발급된 JWT Access Token"),
-                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING)
-                        .description("새로 발급된 JWT Refresh Token"),
-                    fieldWithPath("message").type(JsonFieldType.STRING)
-                        .description("응답 메시지").optional()
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("토큰 재발급 응답 데이터"),
+                    fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("새로 발급된 JWT Access Token"),
+                    fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("새로 발급된 JWT Refresh Token"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
     }
@@ -570,6 +582,7 @@ class AuthControllerTest extends RestDocsSupport {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."))
             .andDo(document("auth/logout",
+                getDocumentRequest(),
                 getDocumentResponse(),
                 apiResponseFields(
                     fieldWithPath("message").type(JsonFieldType.STRING)

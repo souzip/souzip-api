@@ -1,0 +1,71 @@
+[[souvenir-api]]
+== Souvenir API
+
+[[souvenir-get]]
+=== 기념품 조회
+
+기념품 상세 정보를 조회하는 API입니다.
+
+* 인증 불필요 (Public API)
+* 삭제된(soft delete) 기념품은 조회할 수 없습니다.
+* 인증 불필요하지만, 로그인한 사용자가 조회하면 내 기념품 여부(isOwned) 함께 반환
+
+operation::souvenirs/get-souvenir[snippets='http-request,path-parameters,http-response,response-fields']
+
+NOTE: 기념품에는 위치 정보(위도/경도)와 업로드된 파일 목록이 함께 반환됩니다.
+
+[[souvenir-create]]
+=== 기념품 생성
+
+사용자가 새로운 기념품을 등록하는 API입니다.
+
+* 인증 필요
+* multipart/form-data 요청
+* 기념품 정보(JSON) + 이미지 파일 업로드 가능
+* 기념품 업로드 시 이미지 파일은 필수 입니다.
+
+operation::souvenirs/create-souvenir[snippets='http-request,request-parts,request-part-souvenir-fields,http-response,response-fields']
+
+NOTE: 파일 하나당 최대 50MB까지 업로드할 수 있으며, 여러 파일을 한 번에 업로드하는 경우, 요청 전체 기준으로 최대 100MB까지만 허용됩니다. 업로드 가능한 확장자는 jpg, jpeg, png, gif, webp 입니다.
+NOTE: 기념품 가격은 현지 통화 또는 원화 기준으로 입력할 수 있으며, 서버에서 환율이 자동 적용됩니다.
+NOTE: 기념품 가격을 모르는 경우(현지 가격과 원화 가격을 모두 전달하지 않은 경우), 서버에서 각각 0원으로 처리하여 응답합니다.
+
+[[souvenir-update]]
+=== 기념품 수정
+
+기존에 등록한 기념품 정보를 수정하는 API입니다.
+
+* 인증 필요
+* 본인이 등록한 기념품만 수정 가능
+* multipart/form-data 요청
+* 현재는 이미지 파일 수정이 불가하여 `files` 파트는 전달받지 않습니다.
+* 추후 이미지 수정 기능이 추가되면 해당 시점에 `files` 파트를 포함하는 방식으로 확장할 예정입니다.
+
+operation::souvenirs/update-souvenir[snippets='http-request,path-parameters,request-parts,request-part-souvenir-fields,http-response,response-fields']
+
+NOTE: 기념품 가격은 현지 통화 또는 원화 기준으로 입력할 수 있으며, 서버에서 환율이 자동 적용됩니다.
+NOTE: 기념품 가격을 모르는 경우(현지 가격과 원화 가격을 모두 전달하지 않은 경우), 서버에서 각각 0원으로 처리하여 응답합니다.
+
+[[souvenir-delete]]
+=== 기념품 삭제
+
+기념품을 삭제하는 API입니다.
+
+* 인증 필요
+* Soft delete 방식으로 처리됩니다.
+* 실제 데이터는 삭제되지 않으며, 조회 대상에서만 제외됩니다.
+
+operation::souvenirs/delete-souvenir[snippets='http-request,path-parameters,http-response,response-fields']
+
+NOTE: 삭제 성공 시 `data`는 반환되지 않으며, 메시지만 전달됩니다.
+
+[[souvenir-nearby]]
+=== 근처 기념품 조회
+
+위도/경도를 통해 특정 반경 내 근처 기념품을 조회하는 API입니다.
+
+* 인증 불필요 (Public API)
+* 삭제된(soft delete) 기념품은 조회할 수 없습니다.
+* 조회 반경 단위는 미터(m)
+
+operation::souvenirs/get-nearby-souvenirs[snippets='http-request,query-parameters,http-response,response-fields']

@@ -1,0 +1,2 @@
+ALTER TABLE admin DROP COLUMN IF EXISTS login_fail_count;
+ALTER TABLE admin DROP COLUMN IF EXISTS locked_at;

@@ -30,11 +30,10 @@ public class CurrentAdminIdArgumentResolver implements HandlerMethodArgumentReso
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !(authentication.getPrincipal() instanceof Admin)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof Admin admin)) {
             return null;
         }
 
-        Admin admin = (Admin) authentication.getPrincipal();
         return admin.getId();
     }
 }

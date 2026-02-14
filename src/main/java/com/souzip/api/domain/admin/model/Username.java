@@ -5,7 +5,7 @@ import com.souzip.api.domain.admin.exception.InvalidUsernameException;
 
 public record Username(String value) {
 
-    private static final int MIN_LENGTH = 4;
+    private static final int MIN_LENGTH = 2;
     private static final int MAX_LENGTH = 20;
 
     public Username {

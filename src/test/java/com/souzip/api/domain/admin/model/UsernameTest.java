@@ -39,7 +39,7 @@ class UsernameTest {
 
     @ParameterizedTest
     @DisplayName("아이디가 길이 범위를 벗어나면 예외가 발생한다.")
-    @ValueSource(strings = {"a", "ab", "abc", "12345678123123901231231", "12312123456712312389012"})
+    @ValueSource(strings = {"a", "12345678123123901231231", "12312123456712312389012"})
     void create_fail_invalid_length(String value) {
         // when & then
         assertThatThrownBy(() -> new Username(value))

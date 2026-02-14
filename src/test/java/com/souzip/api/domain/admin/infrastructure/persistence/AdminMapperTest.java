@@ -36,7 +36,6 @@ class AdminMapperTest {
         // then
         assertThat(entity.getUsername()).isEqualTo("admin123");
         assertThat(entity.getRole()).isEqualTo(AdminRole.SUPER_ADMIN);
-        assertThat(entity.getLoginFailCount()).isZero();
     }
 
     @DisplayName("AdminJpaEntity를 Admin 도메인으로 변환에 성공한다.")
@@ -48,7 +47,6 @@ class AdminMapperTest {
             .username("admin123")
             .password("encoded_password123")
             .role(AdminRole.SUPER_ADMIN)
-            .loginFailCount(0)
             .build();
 
         // when
@@ -57,6 +55,5 @@ class AdminMapperTest {
         // then
         assertThat(admin.getUsername().value()).isEqualTo("admin123");
         assertThat(admin.getRole()).isEqualTo(AdminRole.SUPER_ADMIN);
-        assertThat(admin.getLoginFailCount()).isZero();
     }
 }

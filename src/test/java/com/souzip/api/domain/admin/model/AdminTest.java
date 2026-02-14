@@ -26,8 +26,6 @@ class AdminTest {
         assertThat(admin.getId()).isNotNull();
         assertThat(admin.getUsername().value()).isEqualTo("admin123");
         assertThat(admin.getRole()).isEqualTo(AdminRole.SUPER_ADMIN);
-        assertThat(admin.getLoginFailCount()).isZero();
-        assertThat(admin.getLockedAt()).isNull();
         assertThat(admin.getCreatedAt()).isNotNull();
     }
 }

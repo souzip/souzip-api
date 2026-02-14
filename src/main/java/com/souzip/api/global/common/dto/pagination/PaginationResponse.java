@@ -27,6 +27,13 @@ public class PaginationResponse<T> {
             .build();
     }
 
+    public static <T> PaginationResponse<T> of(List<T> content, int pageNo, int pageSize, long total, int totalPages) {
+        return PaginationResponse.<T>builder()
+            .content(content)
+            .pagination(PageInfo.of(pageNo, pageSize, total, totalPages))
+            .build();
+    }
+
     @Getter
     public static class PageInfo {
 
@@ -65,6 +72,19 @@ public class PaginationResponse<T> {
                 .last(page.isLast())
                 .hasNext(page.hasNext())
                 .hasPrevious(page.hasPrevious())
+                .build();
+        }
+
+        public static PageInfo of(int pageNo, int pageSize, long total, int totalPages) {
+            return PageInfo.builder()
+                .currentPage(pageNo)
+                .totalPages(totalPages)
+                .totalItems(total)
+                .pageSize(pageSize)
+                .first(pageNo == 1)
+                .last(pageNo >= totalPages)
+                .hasNext(pageNo < totalPages)
+                .hasPrevious(pageNo > 1)
                 .build();
         }
 

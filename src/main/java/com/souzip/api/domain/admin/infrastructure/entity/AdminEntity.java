@@ -32,11 +32,6 @@ public class AdminEntity {
     @Column(nullable = false)
     private AdminRole role;
 
-    @Column(nullable = false, columnDefinition = "int default 0")
-    private int loginFailCount;
-
-    private LocalDateTime lockedAt;
-
     private LocalDateTime lastLoginAt;
 
     @CreatedDate

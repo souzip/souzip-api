@@ -3,10 +3,13 @@ package com.souzip.api.domain.admin.application;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
 import com.souzip.api.domain.admin.exception.AdminErrorCode;
 import com.souzip.api.domain.admin.exception.AdminException;
+import com.souzip.api.domain.admin.exception.AdminNotFoundException;
 import com.souzip.api.domain.admin.infrastructure.encoder.AdminPasswordEncoderImpl;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.repository.AdminRepository;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,23 @@ public class AdminManagementService {
 
         Admin admin = createAdmin(command);
         return adminRepository.save(admin);
+    }
+
+    public AdminPageResult getAdmins(int pageNo, int pageSize) {
+        int offset = (pageNo - 1) * pageSize;
+        List<Admin> admins = adminRepository.findAllExcludingSuperAdmin(offset, pageSize);
+        long total = adminRepository.countExcludingSuperAdmin();
+        int totalPages = (int) Math.ceil((double) total / pageSize);
+
+        return new AdminPageResult(admins, pageNo, pageSize, total, totalPages);
+    }
+
+    @Transactional
+    public void deleteAdmin(UUID adminId, UUID requesterId) {
+        Admin adminToDelete = adminRepository.findById(adminId)
+            .orElseThrow(AdminNotFoundException::new);
+
+        adminRepository.delete(adminToDelete);
     }
 
     private void validateNotSuperAdmin(AdminRole role) {
@@ -48,4 +68,13 @@ public class AdminManagementService {
             passwordEncoder
         );
     }
+
+    public record AdminPageResult(
+        List<Admin> admins,
+        int pageNo,
+        int pageSize,
+        long total,
+        int totalPages
+    ) {}
+
 }

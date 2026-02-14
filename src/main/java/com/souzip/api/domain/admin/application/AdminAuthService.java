@@ -36,7 +36,6 @@ public class AdminAuthService {
         Admin admin = adminRepository.findByUsername(new Username(command.username()))
             .orElseThrow(AdminNotFoundException::new);
 
-        validateNotLocked(admin);
         validatePassword(admin, command.password());
 
         admin.recordLoginSuccess();
@@ -73,26 +72,10 @@ public class AdminAuthService {
             .ifPresent(refreshTokenRepository::delete);
     }
 
-    private void validateNotLocked(Admin admin) {
-        if (admin.isLocked()) {
-            throw new AdminLockedException();
-        }
-    }
-
     private void validatePassword(Admin admin, String password) {
-        if (isPasswordMismatch(admin, password)) {
-            handleLoginFailure(admin);
+        if (!admin.matchesPassword(password, passwordEncoder)) {
+            throw new AdminLoginFailedException();
         }
-    }
-
-    private boolean isPasswordMismatch(Admin admin, String password) {
-        return !admin.matchesPassword(password, passwordEncoder);
-    }
-
-    private void handleLoginFailure(Admin admin) {
-        admin.recordLoginFailure();
-        adminRepository.save(admin);
-        throw new AdminLoginFailedException();
     }
 
     private void saveRefreshToken(Admin admin, String tokenValue) {

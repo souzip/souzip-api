@@ -12,9 +12,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Table(name = "admin_refresh_token")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(name = "admin_refresh_token")
 public class AdminRefreshTokenEntity {
 
     @Id

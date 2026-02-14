@@ -1,7 +1,8 @@
-package com.souzip.api.global.security.jwt;
+package com.souzip.api.domain.admin.infrastructure.security.jwt;
 
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.repository.AdminRepository;
+import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

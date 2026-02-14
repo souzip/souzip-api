@@ -1,4 +1,4 @@
-package com.souzip.api.global.security.annotation;
+package com.souzip.api.domain.admin.infrastructure.security.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

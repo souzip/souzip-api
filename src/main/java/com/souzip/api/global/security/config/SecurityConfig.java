@@ -1,7 +1,7 @@
 package com.souzip.api.global.security.config;
 
 import com.souzip.api.global.config.CorsProperties;
-import com.souzip.api.global.security.jwt.AdminJwtAuthenticationFilter;
+import com.souzip.api.domain.admin.infrastructure.security.jwt.AdminJwtAuthenticationFilter;
 import com.souzip.api.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

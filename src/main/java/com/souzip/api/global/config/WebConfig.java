@@ -1,6 +1,6 @@
 package com.souzip.api.global.config;
 
-import com.souzip.api.global.security.resolver.CurrentAdminIdArgumentResolver;
+import com.souzip.api.domain.admin.infrastructure.security.resolver.CurrentAdminIdArgumentResolver;
 import com.souzip.api.global.security.resolver.CurrentUserIdArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

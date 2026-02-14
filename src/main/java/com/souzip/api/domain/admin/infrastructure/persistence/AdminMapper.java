@@ -15,8 +15,6 @@ public class AdminMapper {
             new Username(entity.getUsername()),
             Password.of(entity.getPassword()),
             entity.getRole(),
-            entity.getLoginFailCount(),
-            entity.getLockedAt(),
             entity.getLastLoginAt(),
             entity.getCreatedAt(),
             entity.getUpdatedAt()
@@ -29,8 +27,6 @@ public class AdminMapper {
             .username(admin.getUsername().value())
             .password(admin.getPassword().getEncodedValue())
             .role(admin.getRole())
-            .loginFailCount(admin.getLoginFailCount())
-            .lockedAt(admin.getLockedAt())
             .lastLoginAt(admin.getLastLoginAt())
             .build();
     }

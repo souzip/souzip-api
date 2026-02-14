@@ -55,8 +55,6 @@ class AdminManagementServiceTest {
         // then
         assertThat(result.getUsername().value()).isEqualTo("newadmin");
         assertThat(result.getRole()).isEqualTo(AdminRole.ADMIN);
-        assertThat(result.getLoginFailCount()).isZero();
-        assertThat(result.getLockedAt()).isNull();
         assertThat(result.getLastLoginAt()).isNull();
 
         verify(adminRepository).existsByUsername("newadmin");
@@ -84,7 +82,6 @@ class AdminManagementServiceTest {
         // then
         assertThat(result.getUsername().value()).isEqualTo("viewer01");
         assertThat(result.getRole()).isEqualTo(AdminRole.VIEWER);
-        assertThat(result.getLoginFailCount()).isZero();
 
         verify(adminRepository).existsByUsername("viewer01");
         verify(adminRepository).save(any(Admin.class));

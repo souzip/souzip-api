@@ -14,7 +14,6 @@ import com.souzip.api.domain.admin.repository.AdminRefreshTokenRepository;
 import com.souzip.api.domain.admin.repository.AdminRepository;
 import com.souzip.api.global.security.jwt.JwtTokenProvider;
 import java.time.LocalDateTime;
-import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,7 +64,6 @@ class AdminAuthServiceTest {
         AdminLoginResult result = adminAuthService.login(command);
 
         // then
-        assertThat(result.admin().getLoginFailCount()).isZero();
         assertThat(result.admin().getLastLoginAt()).isNotNull();
         assertThat(result.accessToken()).isEqualTo("access-token");
         assertThat(result.refreshToken()).isEqualTo("refresh-token");
@@ -85,24 +83,7 @@ class AdminAuthServiceTest {
             .isInstanceOf(AdminNotFoundException.class);
     }
 
-    @DisplayName("잠긴 계정으로 로그인 시 예외가 발생한다.")
-    @Test
-    void login_fail_locked() {
-        // given
-        AdminLoginCommand command = new AdminLoginCommand("admin123", "password123");
-        Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN,
-            new TestAdminPasswordEncoder());
-
-        lockAdmin(admin);
-
-        given(adminRepository.findByUsername(any(Username.class))).willReturn(Optional.of(admin));
-
-        // when & then
-        assertThatThrownBy(() -> adminAuthService.login(command))
-            .isInstanceOf(AdminLockedException.class);
-    }
-
-    @DisplayName("비밀번호 불일치 시 예외가 발생하고 실패 횟수가 증가한다.")
+    @DisplayName("비밀번호 불일치 시 예외가 발생한다.")
     @Test
     void login_fail_password_mismatch() {
         // given
@@ -112,13 +93,10 @@ class AdminAuthServiceTest {
 
         given(adminRepository.findByUsername(any(Username.class))).willReturn(Optional.of(admin));
         given(passwordEncoder.matches(anyString(), anyString())).willReturn(false);
-        given(adminRepository.save(any(Admin.class))).willReturn(admin);
 
         // when & then
         assertThatThrownBy(() -> adminAuthService.login(command))
             .isInstanceOf(AdminLoginFailedException.class);
-
-        verify(adminRepository, times(1)).save(admin);
     }
 
     @DisplayName("리프레시 토큰 갱신에 성공한다.")
@@ -224,9 +202,5 @@ class AdminAuthServiceTest {
 
         // then
         verify(refreshTokenRepository, never()).delete(any());
-    }
-
-    private void lockAdmin(Admin admin) {
-        IntStream.range(0, 5).forEach(i -> admin.recordLoginFailure());
     }
 }

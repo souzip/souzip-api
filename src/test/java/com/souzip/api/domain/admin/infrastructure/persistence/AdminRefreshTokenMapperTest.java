@@ -45,7 +45,6 @@ class AdminRefreshTokenMapperTest {
         UUID id = UUID.randomUUID();
         UUID adminId = UUID.randomUUID();
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(30);
-        LocalDateTime createdAt = LocalDateTime.now();
 
         AdminRefreshTokenEntity entity = AdminRefreshTokenEntity.builder()
             .id(id)

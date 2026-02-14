@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -80,17 +79,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity
             .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
             .body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage()));
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
-        ensureTraceId();
-
-        log.error("[ACCESS-DENIED-ERROR] message={}", e.getMessage());
-
-        return ResponseEntity
-            .status(ErrorCode.FORBIDDEN.getStatus())
-            .body(ErrorResponse.of(ErrorCode.FORBIDDEN.getMessage()));
     }
 
     private void ensureTraceId() {

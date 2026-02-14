@@ -30,6 +30,7 @@ cors:
   allowed-origins:
     - http://localhost:5173
     - https://admin-dev.souzip.com
+    - https://admin.souzip.com
 
 management:
   endpoints:

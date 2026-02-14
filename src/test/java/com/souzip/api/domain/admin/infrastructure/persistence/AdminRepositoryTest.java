@@ -69,4 +69,28 @@ class AdminRepositoryTest {
         // then
         assertThat(found).isEmpty();
     }
+
+    @DisplayName("username 존재 여부 확인 - 존재함")
+    @Test
+    void existsByUsername_exists() {
+        // given
+        Admin admin = Admin.create("testadmin", "password123", AdminRole.ADMIN, passwordEncoder);
+        adminRepository.save(admin);
+
+        // when
+        boolean exists = adminRepository.existsByUsername("testadmin");
+
+        // then
+        assertThat(exists).isTrue();
+    }
+
+    @DisplayName("username 존재 여부 확인 - 존재하지 않음")
+    @Test
+    void existsByUsername_notExists() {
+        // when
+        boolean exists = adminRepository.existsByUsername("nonexistent");
+
+        // then
+        assertThat(exists).isFalse();
+    }
 }

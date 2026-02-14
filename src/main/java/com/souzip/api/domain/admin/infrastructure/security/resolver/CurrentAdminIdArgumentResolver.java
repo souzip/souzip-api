@@ -1,7 +1,7 @@
-package com.souzip.api.global.security.resolver;
+package com.souzip.api.domain.admin.infrastructure.security.resolver;
 
 import com.souzip.api.domain.admin.model.Admin;
-import com.souzip.api.global.security.annotation.CurrentAdminId;
+import com.souzip.api.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

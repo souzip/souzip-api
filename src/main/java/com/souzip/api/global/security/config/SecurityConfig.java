@@ -1,8 +1,12 @@
 package com.souzip.api.global.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.souzip.api.global.common.dto.ErrorResponse;
+import com.souzip.api.global.exception.ErrorCode;
 import com.souzip.api.global.config.CorsProperties;
-import com.souzip.api.global.security.jwt.AdminJwtAuthenticationFilter;
+import com.souzip.api.domain.admin.infrastructure.security.jwt.AdminJwtAuthenticationFilter;
 import com.souzip.api.global.security.jwt.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +35,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AdminJwtAuthenticationFilter adminJwtAuthenticationFilter;
     private final CorsProperties corsProperties;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -60,6 +65,15 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/souvenirs/*").permitAll()
                 .anyRequest().authenticated()
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json;charset=UTF-8");
+
+                    ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.FORBIDDEN.getMessage());
+                    response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+                })
             )
             .addFilterBefore(adminJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -31,4 +31,9 @@ public class AdminRepositoryImpl implements AdminRepository {
     public Admin save(Admin admin) {
         return mapper.toDomain(jpaRepository.save(mapper.toEntity(admin)));
     }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return jpaRepository.existsByUsername(username);
+    }
 }

@@ -12,4 +12,6 @@ public interface AdminRepository {
     Optional<Admin> findById(UUID id);
 
     Admin save(Admin admin);
+
+    boolean existsByUsername(String username);
 }

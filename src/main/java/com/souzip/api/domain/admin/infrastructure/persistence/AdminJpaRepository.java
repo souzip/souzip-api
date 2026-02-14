@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface AdminJpaRepository extends JpaRepository<AdminEntity, UUID> {
 
     Optional<AdminEntity> findByUsername(String username);
+
+    boolean existsByUsername(String username);
 }

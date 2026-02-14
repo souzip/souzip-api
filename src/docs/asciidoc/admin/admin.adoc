@@ -1,3 +1,5 @@
+// src/docs/asciidoc/admin.adoc
+
 [[admin-api]]
 == Admin API
 
@@ -44,3 +46,31 @@ operation::admin/refresh-invalid-token[snippets='http-request,request-fields,htt
 * Authorization 헤더에 Access Token이 필요합니다.
 
 operation::admin/logout[snippets='http-request,request-headers,http-response,response-fields']
+
+[[admin-management]]
+=== 관리자 관리
+
+[[admin-invite]]
+==== 관리자 초대
+
+새로운 관리자를 초대합니다.
+
+* SUPER_ADMIN 권한이 필요합니다.
+* ADMIN 또는 VIEWER 역할만 초대 가능합니다.
+* SUPER_ADMIN 역할은 초대할 수 없습니다.
+
+===== ADMIN 역할 초대
+
+operation::admin/invite-admin[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+===== VIEWER 역할 초대
+
+operation::admin/invite-viewer[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+===== SUPER_ADMIN 초대 시도 (실패)
+
+operation::admin/invite-super-admin-fails[snippets='http-request,request-fields,http-response,response-fields']
+
+===== 중복된 아이디로 초대 (실패)
+
+operation::admin/invite-duplicate-username[snippets='http-request,request-fields,http-response,response-fields']

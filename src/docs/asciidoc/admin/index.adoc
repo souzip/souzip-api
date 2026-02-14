@@ -12,5 +12,4 @@ endif::[]
 
 include::../shared/overview.adoc[]
 
-== Admin API
 include::admin.adoc[]

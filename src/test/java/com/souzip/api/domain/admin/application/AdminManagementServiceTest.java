@@ -1,13 +1,17 @@
-// src/test/java/com/souzip/api/domain/admin/application/AdminManagementServiceTest.java
 package com.souzip.api.domain.admin.application;
 
+import com.souzip.api.domain.admin.application.AdminManagementService.AdminPageResult;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
 import com.souzip.api.domain.admin.exception.AdminErrorCode;
 import com.souzip.api.domain.admin.exception.AdminException;
+import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.infrastructure.encoder.AdminPasswordEncoderImpl;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.repository.AdminRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -150,5 +154,72 @@ class AdminManagementServiceTest {
         // then
         verify(passwordEncoder).encode("rawPassword123");
         assertThat(result.getPassword().getEncodedValue()).isEqualTo("encoded_rawPassword123");
+    }
+
+    @DisplayName("SUPER_ADMIN을 제외한 관리자 목록 조회 성공")
+    @Test
+    void getAdmins_success() {
+        // given
+        List<Admin> admins = List.of(
+            Admin.create("admin1", "password123", AdminRole.ADMIN, new TestAdminPasswordEncoder()),
+            Admin.create("admin2", "password123", AdminRole.VIEWER, new TestAdminPasswordEncoder())
+        );
+
+        given(adminRepository.findAllExcludingSuperAdmin(0, 10)).willReturn(admins);
+        given(adminRepository.countExcludingSuperAdmin()).willReturn(2L);
+
+        // when
+        AdminPageResult result = adminManagementService.getAdmins(1, 10);
+
+        // then
+        assertThat(result.admins()).hasSize(2);
+        assertThat(result.pageNo()).isEqualTo(1);
+        assertThat(result.pageSize()).isEqualTo(10);
+        assertThat(result.total()).isEqualTo(2);
+        assertThat(result.totalPages()).isEqualTo(1);
+
+        verify(adminRepository).findAllExcludingSuperAdmin(0, 10);
+        verify(adminRepository).countExcludingSuperAdmin();
+    }
+
+    @DisplayName("관리자 목록 조회 - 2페이지")
+    @Test
+    void getAdmins_secondPage() {
+        // given
+        List<Admin> admins = List.of(
+            Admin.create("admin11", "password123", AdminRole.ADMIN, new TestAdminPasswordEncoder())
+        );
+
+        given(adminRepository.findAllExcludingSuperAdmin(10, 10)).willReturn(admins);
+        given(adminRepository.countExcludingSuperAdmin()).willReturn(11L);
+
+        // when
+        AdminPageResult result = adminManagementService.getAdmins(2, 10);
+
+        // then
+        assertThat(result.admins()).hasSize(1);
+        assertThat(result.pageNo()).isEqualTo(2);
+        assertThat(result.totalPages()).isEqualTo(2);
+
+        verify(adminRepository).findAllExcludingSuperAdmin(10, 10);
+    }
+
+    @DisplayName("관리자 삭제 성공")
+    @Test
+    void deleteAdmin_success() {
+        // given
+        UUID adminId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+
+        Admin adminToDelete = Admin.create("admin1", "password123", AdminRole.ADMIN, new TestAdminPasswordEncoder());
+
+        given(adminRepository.findById(adminId)).willReturn(Optional.of(adminToDelete));
+
+        // when
+        adminManagementService.deleteAdmin(adminId, requesterId);
+
+        // then
+        verify(adminRepository).findById(adminId);
+        verify(adminRepository).delete(adminToDelete);
     }
 }

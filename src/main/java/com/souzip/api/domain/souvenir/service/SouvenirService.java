@@ -44,8 +44,6 @@ public class SouvenirService {
     private final FileStorageService fileStorageService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // ==================== 공통 API ====================
-
     public SouvenirNearbyListResponse getNearbySouvenirs(double latitude, double longitude, double radiusMeter) {
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
 
@@ -257,18 +255,7 @@ public class SouvenirService {
             return null;
         }
 
-        String localCurrency = getLocalCurrency(souvenir.getCountryCode());
-        PriceInfo convertedPrice;
-
-        if ("KRW".equals(originalPrice.getCurrency())) {
-            Integer localAmount = exchangeRateService.convertFromKrw(
-                originalPrice.getAmount(),
-                localCurrency
-            );
-            convertedPrice = PriceInfo.of(localAmount, localCurrency);
-        } else {
-            convertedPrice = PriceInfo.of(souvenir.getExchangeAmount(), "KRW");
-        }
+        PriceInfo convertedPrice = souvenir.getConvertedPrice();
 
         String originalSymbol = getCurrencySymbol(originalPrice.getCurrency());
         String convertedSymbol = getCurrencySymbol(convertedPrice.getCurrency());
@@ -282,7 +269,7 @@ public class SouvenirService {
     }
 
     private String getLocalCurrency(String countryCode) {
-        return countryRepository.findByCode(countryCode)
+        return countryRepository.findByCodeWithCurrency(countryCode)
             .map(country -> country.getCurrency().getCode())
             .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
     }
@@ -296,8 +283,6 @@ public class SouvenirService {
             .map(Currency::getSymbol)
             .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
     }
-
-    // ==================== 기존 Helper Methods ====================
 
     @Nullable
     private String extractUserId(@Nullable String authorizationHeader) {

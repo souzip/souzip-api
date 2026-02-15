@@ -44,6 +44,8 @@ public class SouvenirService {
     private final FileStorageService fileStorageService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    // ==================== 공통 API ====================
+
     public SouvenirNearbyListResponse getNearbySouvenirs(double latitude, double longitude, double radiusMeter) {
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
 
@@ -78,6 +80,19 @@ public class SouvenirService {
         fileService.deleteFilesByEntity(ENTITY_TYPE_SOUVENIR, id);
         souvenir.delete();
     }
+
+    @Audit(action = AuditAction.SOUVENIR_DELETED)
+    @Transactional
+    public void deleteSouvenir(Long id, Long userId) {
+        requireUserId(userId);
+
+        Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
+
+        fileService.deleteFilesByEntity(ENTITY_TYPE_SOUVENIR, id);
+        souvenir.delete();
+    }
+
+    // ==================== v1 API ====================
 
     @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
@@ -233,6 +248,56 @@ public class SouvenirService {
             .map(Currency::getSymbol)
             .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
     }
+
+    // ==================== Private Helper Methods ====================
+
+    private PriceResponse createPriceResponse(Souvenir souvenir) {
+        PriceInfo originalPrice = souvenir.getOriginalPrice();
+        if (originalPrice == null) {
+            return null;
+        }
+
+        String localCurrency = getLocalCurrency(souvenir.getCountryCode());
+        PriceInfo convertedPrice;
+
+        if ("KRW".equals(originalPrice.getCurrency())) {
+            Integer localAmount = exchangeRateService.convertFromKrw(
+                originalPrice.getAmount(),
+                localCurrency
+            );
+            convertedPrice = PriceInfo.of(localAmount, localCurrency);
+        } else {
+            convertedPrice = PriceInfo.of(souvenir.getExchangeAmount(), "KRW");
+        }
+
+        String originalSymbol = getCurrencySymbol(originalPrice.getCurrency());
+        String convertedSymbol = getCurrencySymbol(convertedPrice.getCurrency());
+
+        return PriceResponse.of(
+            originalPrice.getAmount(),
+            originalSymbol,
+            convertedPrice.getAmount(),
+            convertedSymbol
+        );
+    }
+
+    private String getLocalCurrency(String countryCode) {
+        return countryRepository.findByCode(countryCode)
+            .map(country -> country.getCurrency().getCode())
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+    }
+
+    private String getCurrencySymbol(String currencyCode) {
+        if (currencyCode == null) {
+            return null;
+        }
+
+        return currencyRepository.findByCode(currencyCode)
+            .map(Currency::getSymbol)
+            .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
+    }
+
+    // ==================== 기존 Helper Methods ====================
 
     @Nullable
     private String extractUserId(@Nullable String authorizationHeader) {

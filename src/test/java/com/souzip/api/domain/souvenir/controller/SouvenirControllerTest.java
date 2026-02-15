@@ -67,10 +67,12 @@ class SouvenirControllerTest extends RestDocsSupport {
                 }
 
                 @Override
-                public Object resolveArgument(MethodParameter parameter,
-                                              ModelAndViewContainer mavContainer,
-                                              NativeWebRequest webRequest,
-                                              WebDataBinderFactory binderFactory) {
+                public Object resolveArgument(
+                    MethodParameter parameter,
+                    ModelAndViewContainer mavContainer,
+                    NativeWebRequest webRequest,
+                    WebDataBinderFactory binderFactory
+                ) {
                     return 1L;
                 }
             })
@@ -78,8 +80,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             .build();
     }
 
-    @Test
     @DisplayName("근처 기념품 조회")
+    @Test
     void getNearbySouvenirs() throws Exception {
         double userLatitude = 40.7128123;
         double userLongitude = -74.0060123;
@@ -140,8 +142,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("기념품 조회")
+    @Test
     void getSouvenir() throws Exception {
         Long souvenirId = 1L;
 
@@ -150,7 +152,7 @@ class SouvenirControllerTest extends RestDocsSupport {
             new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
         );
 
-        SouvenirResponse response = new SouvenirResponse(
+        SouvenirDetailResponse response = new SouvenirDetailResponse(
             souvenirId,
             "테스트 기념품",
             10000,
@@ -211,8 +213,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("기념품 생성")
+    @Test
     void createSouvenirWithFiles() throws Exception {
         SouvenirCreateRequest request = new SouvenirCreateRequest(
             "테스트 기념품",
@@ -252,7 +254,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             new BigDecimal("35.689487"),
             new BigDecimal("139.691706"),
             Category.SOUVENIR_BASIC, Purpose.GIFT, "US",
-            "닉네임", "https://example.com/profile.jpg", true, filesResponse
+            "닉네임", "https://example.com/profile.jpg",
+            filesResponse
         );
 
         given(souvenirService.createSouvenir(any(SouvenirCreateRequest.class), eq(1L), any(List.class)))
@@ -301,7 +304,6 @@ class SouvenirControllerTest extends RestDocsSupport {
                     fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
                     fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("목적 ENUM name"),
                     fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
-                    fieldWithPath("data.isOwned").type(JsonFieldType.BOOLEAN).description("조회자가 소유자인지 여부"),
                     fieldWithPath("data.userNickname").type(JsonFieldType.STRING).description("기념품 소유자 닉네임"),
                     fieldWithPath("data.userProfileImageUrl").type(JsonFieldType.STRING).description("기념품 소유자 프로필 이미지 URL"),
                     fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
@@ -314,8 +316,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("기념품 수정")
+    @Test
     void updateSouvenir() throws Exception {
         Long souvenirId = 1L;
 
@@ -348,7 +350,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             new BigDecimal("35.689487"),
             new BigDecimal("139.691706"),
             Category.SOUVENIR_BASIC, Purpose.GIFT, "US",
-            "닉네임", "https://example.com/profile.jpg", true, List.of()
+            "닉네임", "https://example.com/profile.jpg",
+            List.of()
         );
 
         given(souvenirService.updateSouvenir(eq(souvenirId), any(SouvenirUpdateRequest.class), eq(1L)))
@@ -397,7 +400,7 @@ class SouvenirControllerTest extends RestDocsSupport {
                     fieldWithPath("data.category").type(JsonFieldType.STRING).description("카테고리 ENUM name"),
                     fieldWithPath("data.purpose").type(JsonFieldType.STRING).description("목적 ENUM name"),
                     fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
-                    fieldWithPath("data.isOwned").type(JsonFieldType.BOOLEAN).description("조회자가 소유자인지 여부"),
+                    // ✅ isOwned 제거됨
                     fieldWithPath("data.userNickname").type(JsonFieldType.STRING).description("기념품 소유자 닉네임"),
                     fieldWithPath("data.userProfileImageUrl").type(JsonFieldType.STRING).description("기념품 소유자 프로필 이미지 URL"),
                     fieldWithPath("data.files").ignored(),
@@ -406,8 +409,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("기념품 삭제")
+    @Test
     void deleteSouvenir() throws Exception {
         Long souvenirId = 1L;
 

@@ -1,7 +1,8 @@
 package com.souzip.api.domain.souvenir.entity;
 
 import com.souzip.api.domain.category.entity.Category;
-import com.souzip.api.domain.file.entity.File;
+import com.souzip.api.domain.souvenir.dto.SouvenirCreateRequest;
+import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.global.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -11,10 +12,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -74,82 +72,54 @@ public class Souvenir extends BaseEntity {
     @Column
     private String countryCode;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Boolean isOwned = false;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "souvenir", fetch = FetchType.LAZY)
-    private List<File> files = new ArrayList<>();
-
     public static Souvenir of(
-            String name,
-            Integer localPrice,
-            String currencySymbol,
-            Integer krwPrice,
-            String description,
-            String address,
-            String locationDetail,
-            BigDecimal latitude,
-            BigDecimal longitude,
-            Category category,
-            Purpose purpose,
-            String countryCode,
-            User user,
-            Boolean isOwned
+        SouvenirCreateRequest request,
+        User user,
+        Integer calculatedLocalPrice,
+        Integer calculatedKrwPrice
     ) {
         return Souvenir.builder()
-                .name(name)
-                .localPrice(localPrice)
-                .currencySymbol(currencySymbol)
-                .krwPrice(krwPrice)
-                .description(description)
-                .address(address)
-                .locationDetail(locationDetail)
-                .latitude(latitude)
-                .longitude(longitude)
-                .category(category)
-                .purpose(purpose)
-                .countryCode(countryCode)
-                .user(user)
-                .isOwned(isOwned)
-                .deleted(false)
-                .build();
+            .name(request.name())
+            .localPrice(calculatedLocalPrice)
+            .currencySymbol(request.currencySymbol())
+            .krwPrice(calculatedKrwPrice)
+            .description(request.description())
+            .address(request.address())
+            .locationDetail(request.locationDetail())
+            .latitude(request.latitude())
+            .longitude(request.longitude())
+            .category(request.category())
+            .purpose(request.purpose())
+            .countryCode(request.countryCode())
+            .user(user)
+            .deleted(false)
+            .build();
     }
 
     public void update(
-            String name,
-            Integer localPrice,
-            String currencySymbol,
-            Integer krwPrice,
-            String description,
-            String address,
-            String locationDetail,
-            BigDecimal latitude,
-            BigDecimal longitude,
-            Category category,
-            Purpose purpose,
-            String countryCode
+        SouvenirUpdateRequest request,
+        Integer calculatedLocalPrice,
+        Integer calculatedKrwPrice
     ) {
-        this.name = name;
-        this.localPrice = localPrice;
-        this.currencySymbol = currencySymbol;
-        this.krwPrice = krwPrice;
-        this.description = description;
-        this.address = address;
-        this.locationDetail = locationDetail;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.category = category;
-        this.purpose = purpose;
-        this.countryCode = countryCode;
+        this.name = request.name();
+        this.localPrice = calculatedLocalPrice;
+        this.currencySymbol = request.currencySymbol();
+        this.krwPrice = calculatedKrwPrice;
+        this.description = request.description();
+        this.address = request.address();
+        this.locationDetail = request.locationDetail();
+        this.latitude = request.latitude();
+        this.longitude = request.longitude();
+        this.category = request.category();
+        this.purpose = request.purpose();
+        this.countryCode = request.countryCode();
     }
 
     public void delete() {
         this.deleted = true;
     }
 
-    public boolean isDeleted() {
-        return Boolean.TRUE.equals(this.deleted);
+    public boolean isOwnedBy(String userId) {
+        return this.user.getUserId().equals(userId);
     }
 }

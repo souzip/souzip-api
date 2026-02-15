@@ -21,29 +21,28 @@ public class SouvenirController {
 
     @GetMapping("/nearby")
     public SuccessResponse<SouvenirNearbyListResponse> getNearbySouvenirs(
-            @RequestParam double latitude,
-            @RequestParam double longitude,
-            @RequestParam(required = false, defaultValue = "5000") double radiusMeter
+        @RequestParam double latitude,
+        @RequestParam double longitude,
+        @RequestParam(required = false, defaultValue = "5000") double radiusMeter
     ) {
         return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude, radiusMeter));
     }
 
     @GetMapping("/{id}")
-    public SuccessResponse<SouvenirResponse> getSouvenir(
-            @PathVariable Long id,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
+    public SuccessResponse<SouvenirDetailResponse> getSouvenir(
+        @PathVariable Long id,
+        @RequestHeader(value = "Authorization", required = false) String authorizationHeader
     ) {
-        SouvenirResponse response = souvenirService.getSouvenir(id, authorizationHeader);
+        SouvenirDetailResponse response = souvenirService.getSouvenir(id, authorizationHeader);
         return SuccessResponse.of(response);
     }
 
     @RequireAuth
     @PostMapping
     public SuccessResponse<SouvenirResponse> createSouvenir(
-            @Valid
-            @RequestPart("souvenir") SouvenirCreateRequest request,
-            @RequestPart(value = "files") List<MultipartFile> files,
-            @CurrentUserId Long userId
+        @Valid @RequestPart("souvenir") SouvenirCreateRequest request,
+        @RequestPart(value = "files") List<MultipartFile> files,
+        @CurrentUserId Long userId
     ) {
         SouvenirResponse response = souvenirService.createSouvenir(request, userId, files);
         return SuccessResponse.of(response);
@@ -52,10 +51,9 @@ public class SouvenirController {
     @RequireAuth
     @PutMapping("/{id}")
     public SuccessResponse<SouvenirResponse> updateSouvenir(
-            @Valid
-            @PathVariable Long id,
-            @RequestPart("souvenir") SouvenirUpdateRequest request,
-            @CurrentUserId Long userId
+        @Valid @PathVariable Long id,
+        @RequestPart("souvenir") SouvenirUpdateRequest request,
+        @CurrentUserId Long userId
     ) {
         SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId);
         return SuccessResponse.of(response);
@@ -63,10 +61,7 @@ public class SouvenirController {
 
     @RequireAuth
     @DeleteMapping("/{id}")
-    public SuccessResponse<Void> deleteSouvenir(
-            @PathVariable Long id,
-            @CurrentUserId Long userId
-    ) {
+    public SuccessResponse<Void> deleteSouvenir(@PathVariable Long id, @CurrentUserId Long userId) {
         souvenirService.deleteSouvenir(id, userId);
         return SuccessResponse.of(null, "기념품이 성공적으로 삭제되었습니다.");
     }

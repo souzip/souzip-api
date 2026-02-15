@@ -8,7 +8,7 @@ import com.souzip.api.domain.souvenir.entity.Souvenir;
 import java.math.BigDecimal;
 import java.util.List;
 
-public record SouvenirResponse(
+public record SouvenirDetailResponse(
     Long id,
     String name,
     Integer localPrice,
@@ -24,10 +24,15 @@ public record SouvenirResponse(
     String countryCode,
     String userNickname,
     String userProfileImageUrl,
+    Boolean isOwned,
     List<FileResponse> files
 ) {
-    public static SouvenirResponse of(Souvenir souvenir, List<FileResponse> files) {
-        return new SouvenirResponse(
+    public static SouvenirDetailResponse of(
+        Souvenir souvenir,
+        List<FileResponse> files,
+        Boolean isOwned
+    ) {
+        return new SouvenirDetailResponse(
             souvenir.getId(),
             souvenir.getName(),
             souvenir.getLocalPrice(),
@@ -43,6 +48,7 @@ public record SouvenirResponse(
             souvenir.getCountryCode(),
             souvenir.getUser().getNickname(),
             souvenir.getUser().getProfileImageUrl(),
+            isOwned,
             files
         );
     }

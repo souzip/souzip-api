@@ -1,1 +1,0 @@
-ALTER TABLE file DROP COLUMN IF EXISTS souvenir_id;

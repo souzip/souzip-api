@@ -18,8 +18,6 @@ public class SouvenirController {
 
     private final SouvenirService souvenirService;
 
-    // ==================== 공통 API ====================
-
     @GetMapping("/api/souvenirs/nearby")
     public SuccessResponse<SouvenirNearbyListResponse> getNearbySouvenirs(
         @RequestParam double latitude,
@@ -45,8 +43,6 @@ public class SouvenirController {
         return SuccessResponse.of(null, "기념품이 성공적으로 삭제되었습니다.");
     }
 
-    // ==================== v1 API ====================
-
     @RequireAuth
     @PostMapping("/api/souvenirs")
     public SuccessResponse<SouvenirResponse> createSouvenir(
@@ -68,8 +64,6 @@ public class SouvenirController {
         SouvenirResponse response = souvenirService.updateSouvenir(id, request, userId);
         return SuccessResponse.of(response);
     }
-
-    // ==================== v2 API ====================
 
     @RequireAuth
     @PostMapping("/api/v2/souvenirs")

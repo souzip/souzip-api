@@ -44,8 +44,6 @@ public class SouvenirService {
     private final FileStorageService fileStorageService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    // ==================== 공통 API ====================
-
     public SouvenirNearbyListResponse getNearbySouvenirs(double latitude, double longitude, double radiusMeter) {
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
 
@@ -80,8 +78,6 @@ public class SouvenirService {
         fileService.deleteFilesByEntity(ENTITY_TYPE_SOUVENIR, id);
         souvenir.delete();
     }
-
-    // ==================== v1 API ====================
 
     @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
@@ -119,8 +115,6 @@ public class SouvenirService {
         return SouvenirResponse.of(souvenir, List.of());
     }
 
-    // ==================== v2 API ====================
-
     @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
     public SouvenirResponse createSouvenirV2(
@@ -131,17 +125,16 @@ public class SouvenirService {
         requireUserId(userId);
         User user = validateUser(userId);
 
-        PriceInfo originalPrice = null;
-        Integer exchangeAmount = null;
-        String currencySymbol = null;
+        PriceData priceData = calculatePriceData(request.price(), request.currency(), request.countryCode());
 
-        if (request.price() != null && request.currency() != null) {
-            originalPrice = PriceInfo.of(request.price(), request.currency());
-            exchangeAmount = exchangeRateService.convertToKrw(request.price(), request.currency());
-            currencySymbol = getCurrencySymbol(request.currency());
-        }
-
-        Souvenir souvenir = Souvenir.ofV2(request, user, originalPrice, exchangeAmount, currencySymbol);
+        Souvenir souvenir = Souvenir.ofV2(
+            request,
+            user,
+            priceData.originalPrice(),
+            priceData.exchangeAmount(),
+            priceData.currencySymbol(),
+            priceData.convertedPrice()
+        );
         souvenirRepository.save(souvenir);
 
         List<FileResponse> uploadedFiles = uploadFiles(souvenir.getId(), userId, files);
@@ -161,23 +154,50 @@ public class SouvenirService {
 
         Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
 
-        PriceInfo originalPrice = null;
-        Integer exchangeAmount = null;
-        String currencySymbol = null;
+        PriceData priceData = calculatePriceData(request.price(), request.currency(), request.countryCode());
 
-        if (request.price() != null && request.currency() != null) {
-            originalPrice = PriceInfo.of(request.price(), request.currency());
-            exchangeAmount = exchangeRateService.convertToKrw(request.price(), request.currency());
-            currencySymbol = getCurrencySymbol(request.currency());
-        }
-
-        souvenir.updateV2(request, originalPrice, exchangeAmount, currencySymbol);
+        souvenir.updateV2(
+            request,
+            priceData.originalPrice(),
+            priceData.exchangeAmount(),
+            priceData.currencySymbol(),
+            priceData.convertedPrice()
+        );
 
         PriceResponse priceResponse = createPriceResponse(souvenir);
         return SouvenirResponse.of(souvenir, List.of(), priceResponse);
     }
 
-    // ==================== Private Helper Methods ====================
+    private PriceData calculatePriceData(Integer price, String currency, String countryCode) {
+        if (price == null || currency == null) {
+            return new PriceData(null, null, null, null);
+        }
+
+        PriceInfo originalPrice = PriceInfo.of(price, currency);
+        Integer exchangeAmount = exchangeRateService.convertToKrw(price, currency);
+        String currencySymbol = getCurrencySymbol(currency);
+
+        String localCurrency = getLocalCurrency(countryCode);
+        PriceInfo convertedPrice = calculateConvertedPrice(originalPrice, localCurrency, exchangeAmount);
+
+        return new PriceData(originalPrice, exchangeAmount, currencySymbol, convertedPrice);
+    }
+
+    private PriceInfo calculateConvertedPrice(PriceInfo originalPrice, String localCurrency, Integer exchangeAmount) {
+        if (isKrwInput(originalPrice)) {
+            return convertKrwToLocal(originalPrice.getAmount(), localCurrency);
+        }
+        return PriceInfo.of(exchangeAmount, "KRW");
+    }
+
+    private boolean isKrwInput(PriceInfo priceInfo) {
+        return "KRW".equals(priceInfo.getCurrency());
+    }
+
+    private PriceInfo convertKrwToLocal(Integer krwAmount, String localCurrency) {
+        Integer localAmount = exchangeRateService.convertFromKrw(krwAmount, localCurrency);
+        return PriceInfo.of(localAmount, localCurrency);
+    }
 
     private PriceResponse createPriceResponse(Souvenir souvenir) {
         PriceInfo originalPrice = souvenir.getOriginalPrice();
@@ -185,18 +205,7 @@ public class SouvenirService {
             return null;
         }
 
-        String localCurrency = getLocalCurrency(souvenir.getCountryCode());
-        PriceInfo convertedPrice;
-
-        if ("KRW".equals(originalPrice.getCurrency())) {
-            Integer localAmount = exchangeRateService.convertFromKrw(
-                originalPrice.getAmount(),
-                localCurrency
-            );
-            convertedPrice = PriceInfo.of(localAmount, localCurrency);
-        } else {
-            convertedPrice = PriceInfo.of(souvenir.getExchangeAmount(), "KRW");
-        }
+        PriceInfo convertedPrice = souvenir.getConvertedPrice();
 
         String originalSymbol = getCurrencySymbol(originalPrice.getCurrency());
         String convertedSymbol = getCurrencySymbol(convertedPrice.getCurrency());
@@ -210,7 +219,7 @@ public class SouvenirService {
     }
 
     private String getLocalCurrency(String countryCode) {
-        return countryRepository.findByCode(countryCode)
+        return countryRepository.findByCodeWithCurrency(countryCode)
             .map(country -> country.getCurrency().getCode())
             .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
     }
@@ -224,8 +233,6 @@ public class SouvenirService {
             .map(Currency::getSymbol)
             .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
     }
-
-    // ==================== 기존 Helper Methods ====================
 
     @Nullable
     private String extractUserId(@Nullable String authorizationHeader) {
@@ -294,4 +301,11 @@ public class SouvenirService {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
     }
+
+    record PriceData(
+        PriceInfo originalPrice,
+        Integer exchangeAmount,
+        String currencySymbol,
+        PriceInfo convertedPrice
+    ) {}
 }

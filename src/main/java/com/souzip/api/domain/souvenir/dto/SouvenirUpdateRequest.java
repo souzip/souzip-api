@@ -9,6 +9,10 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
+/**
+ * @deprecated v2 API에서는 SouvenirRequest 사용 권장
+ */
+@Deprecated
 public record SouvenirUpdateRequest(
         @NotBlank(message = "기념품 이름은 필수입니다.")
         @Size(max = 30, message = "기념품 이름은 30자 이하여야 합니다.")

@@ -31,50 +31,32 @@ public class Souvenir extends BaseEntity {
     @Column(nullable = false, length = 30)
     private String name;
 
-    // ==================== 기존 필드 (하위 호환) ====================
-
-    /**
-     * @deprecated v2 API에서는 originalAmount 사용. 향후 버전에서 제거 예정.
-     */
     @Deprecated
     @Column
     private Integer localPrice;
 
-    /**
-     * @deprecated v2 API에서는 originalCurrency 기반 심볼 조회. 향후 버전에서 제거 예정.
-     */
     @Deprecated
     @Column(length = 10)
     private String currencySymbol;
 
-    /**
-     * @deprecated v2 API에서는 exchangeAmount 사용. 향후 버전에서 제거 예정.
-     */
     @Deprecated
     @Column
     private Integer krwPrice;
 
-    // ==================== 신규 필드 (v2) ====================
-
-    /**
-     * 사용자가 입력한 원본 금액
-     */
     @Column(name = "original_amount")
     private Integer originalAmount;
 
-    /**
-     * 사용자가 입력한 원본 통화 (ISO 4217 코드)
-     */
     @Column(name = "original_currency", length = 3)
     private String originalCurrency;
 
-    /**
-     * 원화로 환산된 금액 (검색/정렬용)
-     */
     @Column(name = "exchange_amount")
     private Integer exchangeAmount;
 
-    // ==================== 공통 필드 ====================
+    @Column(name = "converted_amount")
+    private Integer convertedAmount;
+
+    @Column(name = "converted_currency", length = 3)
+    private String convertedCurrency;
 
     @Column(length = 1000)
     private String description;
@@ -110,11 +92,6 @@ public class Souvenir extends BaseEntity {
     @Column
     private String countryCode;
 
-    // ==================== 생성 메서드 (v1 - Deprecated) ====================
-
-    /**
-     * @deprecated v2 API에서는 ofV2() 사용 권장
-     */
     @Deprecated
     public static Souvenir of(
         SouvenirCreateRequest request,
@@ -140,29 +117,24 @@ public class Souvenir extends BaseEntity {
             .build();
     }
 
-    // ==================== 생성 메서드 (v2) ====================
-
-    /**
-     * v2 API용 생성 메서드
-     */
     public static Souvenir ofV2(
         SouvenirRequest request,
         User user,
         PriceInfo originalPrice,
         Integer exchangeAmount,
-        String currencySymbol
+        String currencySymbol,
+        PriceInfo convertedPrice
     ) {
         return Souvenir.builder()
             .name(request.name())
-            // v2 필드
-            .originalAmount(originalPrice != null ? originalPrice.getAmount() : null)
-            .originalCurrency(originalPrice != null ? originalPrice.getCurrency() : null)
+            .originalAmount(extractAmount(originalPrice))
+            .originalCurrency(extractCurrency(originalPrice))
             .exchangeAmount(exchangeAmount)
-            // 하위 호환 필드 (기존 API용)
-            .localPrice(originalPrice != null ? originalPrice.getAmount() : null)
+            .convertedAmount(extractAmount(convertedPrice))
+            .convertedCurrency(extractCurrency(convertedPrice))
+            .localPrice(extractAmount(originalPrice))
             .currencySymbol(currencySymbol)
             .krwPrice(exchangeAmount)
-            // 공통 필드
             .description(request.description())
             .address(request.address())
             .locationDetail(request.locationDetail())
@@ -176,11 +148,6 @@ public class Souvenir extends BaseEntity {
             .build();
     }
 
-    // ==================== 업데이트 메서드 (v1 - Deprecated) ====================
-
-    /**
-     * @deprecated v2 API에서는 updateV2() 사용 권장
-     */
     @Deprecated
     public void update(
         SouvenirUpdateRequest request,
@@ -201,27 +168,22 @@ public class Souvenir extends BaseEntity {
         this.countryCode = request.countryCode();
     }
 
-    // ==================== 업데이트 메서드 (v2) ====================
-
-    /**
-     * v2 API용 업데이트 메서드
-     */
     public void updateV2(
         SouvenirRequest request,
         PriceInfo originalPrice,
         Integer exchangeAmount,
-        String currencySymbol
+        String currencySymbol,
+        PriceInfo convertedPrice
     ) {
         this.name = request.name();
-        // v2 필드
-        this.originalAmount = originalPrice != null ? originalPrice.getAmount() : null;
-        this.originalCurrency = originalPrice != null ? originalPrice.getCurrency() : null;
+        this.originalAmount = extractAmount(originalPrice);
+        this.originalCurrency = extractCurrency(originalPrice);
         this.exchangeAmount = exchangeAmount;
-        // 하위 호환 필드 (기존 API용)
-        this.localPrice = originalPrice != null ? originalPrice.getAmount() : null;
+        this.convertedAmount = extractAmount(convertedPrice);
+        this.convertedCurrency = extractCurrency(convertedPrice);
+        this.localPrice = extractAmount(originalPrice);
         this.currencySymbol = currencySymbol;
         this.krwPrice = exchangeAmount;
-        // 공통 필드
         this.description = request.description();
         this.address = request.address();
         this.locationDetail = request.locationDetail();
@@ -232,19 +194,19 @@ public class Souvenir extends BaseEntity {
         this.countryCode = request.countryCode();
     }
 
-    // ==================== 조회 메서드 ====================
-
-    /**
-     * v2 API용: PriceInfo 반환
-     */
     public PriceInfo getOriginalPrice() {
-        if (originalAmount == null || originalCurrency == null) {
+        if (hasNoOriginalPrice()) {
             return null;
         }
         return PriceInfo.of(originalAmount, originalCurrency);
     }
 
-    // ==================== 공통 메서드 ====================
+    public PriceInfo getConvertedPrice() {
+        if (hasNoConvertedPrice()) {
+            return null;
+        }
+        return PriceInfo.of(convertedAmount, convertedCurrency);
+    }
 
     public void delete() {
         this.deleted = true;
@@ -252,5 +214,27 @@ public class Souvenir extends BaseEntity {
 
     public boolean isOwnedBy(String userId) {
         return this.user.getUserId().equals(userId);
+    }
+
+    private static Integer extractAmount(PriceInfo priceInfo) {
+        if (priceInfo == null) {
+            return null;
+        }
+        return priceInfo.getAmount();
+    }
+
+    private static String extractCurrency(PriceInfo priceInfo) {
+        if (priceInfo == null) {
+            return null;
+        }
+        return priceInfo.getCurrency();
+    }
+
+    private boolean hasNoOriginalPrice() {
+        return originalAmount == null || originalCurrency == null;
+    }
+
+    private boolean hasNoConvertedPrice() {
+        return convertedAmount == null || convertedCurrency == null;
     }
 }

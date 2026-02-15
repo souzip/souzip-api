@@ -49,10 +49,6 @@ public class File extends BaseEntity {
     @Builder.Default
     private Integer displayOrder = 1;
 
-    @ManyToOne
-    @JoinColumn(name = "souvenir_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private Souvenir souvenir;
-
     public static File of(
         String entityType,
         Long entityId,

@@ -24,19 +24,4 @@ public class WebConfig implements WebMvcConfigurer {
         resolvers.add(currentUserIdArgumentResolver);
         resolvers.add(currentAdminIdArgumentResolver);
     }
-
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof MappingJackson2HttpMessageConverter) {
-                MappingJackson2HttpMessageConverter jsonConverter =
-                    (MappingJackson2HttpMessageConverter) converter;
-
-                jsonConverter.setSupportedMediaTypes(Arrays.asList(
-                    MediaType.APPLICATION_JSON,
-                    MediaType.APPLICATION_OCTET_STREAM
-                ));
-            }
-        }
-    }
 }

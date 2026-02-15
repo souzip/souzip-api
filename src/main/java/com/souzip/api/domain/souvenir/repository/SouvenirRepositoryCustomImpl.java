@@ -1,5 +1,6 @@
 package com.souzip.api.domain.souvenir.repository;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.souzip.api.domain.souvenir.entity.QSouvenir;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
@@ -18,16 +19,20 @@ import java.util.Optional;
 @Repository
 public class SouvenirRepositoryCustomImpl implements SouvenirRepositoryCustom {
 
+    private static final QSouvenir SOUVENIR = QSouvenir.souvenir;
+    private static final QUser USER = QUser.user;
+
     private final JPAQueryFactory queryFactory;
 
     @Override
     public Optional<Souvenir> findByIdWithUser(Long id) {
-        QSouvenir s = QSouvenir.souvenir;
-        QUser u = QUser.user;
-
-        Souvenir souvenir = queryFactory.selectFrom(s)
-            .leftJoin(s.user, u).fetchJoin()
-            .where(s.id.eq(id).and(s.deleted.eq(false)))
+        Souvenir souvenir = queryFactory
+            .selectFrom(SOUVENIR)
+            .leftJoin(SOUVENIR.user, USER).fetchJoin()
+            .where(
+                idEquals(id),
+                isNotDeleted()
+            )
             .fetchOne();
 
         return Optional.ofNullable(souvenir);
@@ -35,24 +40,55 @@ public class SouvenirRepositoryCustomImpl implements SouvenirRepositoryCustom {
 
     @Override
     public Page<Souvenir> findByUserWithUser(User user, Pageable pageable) {
-        QSouvenir s = QSouvenir.souvenir;
-        QUser u = QUser.user;
+        List<Souvenir> content = fetchSouvenirsByUser(user, pageable);
+        Long total = countSouvenirsByUser(user);
 
-        // 데이터 조회
-        List<Souvenir> content = queryFactory.selectFrom(s)
-            .leftJoin(s.user, u).fetchJoin()
-            .where(s.user.eq(user).and(s.deleted.eq(false)))
-            .orderBy(s.createdAt.desc())
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    private List<Souvenir> fetchSouvenirsByUser(User user, Pageable pageable) {
+        return queryFactory
+            .selectFrom(SOUVENIR)
+            .leftJoin(SOUVENIR.user, USER).fetchJoin()
+            .where(
+                userEquals(user),
+                isNotDeleted()
+            )
+            .orderBy(SOUVENIR.createdAt.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
+    }
 
-        // 카운트 쿼리
-        Long total = queryFactory.select(s.count())
-            .from(s)
-            .where(s.user.eq(user).and(s.deleted.eq(false)))
+    private Long countSouvenirsByUser(User user) {
+        Long count = queryFactory
+            .select(SOUVENIR.count())
+            .from(SOUVENIR)
+            .where(
+                userEquals(user),
+                isNotDeleted()
+            )
             .fetchOne();
 
-        return new PageImpl<>(content, pageable, total != null ? total : 0L);
+        return getCountOrZero(count);
+    }
+
+    private Long getCountOrZero(Long count) {
+        if (count == null) {
+            return 0L;
+        }
+        return count;
+    }
+
+    private BooleanExpression idEquals(Long id) {
+        return SOUVENIR.id.eq(id);
+    }
+
+    private BooleanExpression userEquals(User user) {
+        return SOUVENIR.user.eq(user);
+    }
+
+    private BooleanExpression isNotDeleted() {
+        return SOUVENIR.deleted.eq(Boolean.FALSE);
     }
 }

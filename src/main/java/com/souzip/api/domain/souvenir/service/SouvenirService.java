@@ -1,6 +1,9 @@
 package com.souzip.api.domain.souvenir.service;
 
 import com.souzip.api.domain.audit.entity.AuditAction;
+import com.souzip.api.domain.country.repository.CountryRepository;
+import com.souzip.api.domain.currency.entity.Currency;
+import com.souzip.api.domain.currency.repository.CurrencyRepository;
 import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
 import com.souzip.api.domain.file.dto.FileResponse;
@@ -9,6 +12,7 @@ import com.souzip.api.domain.file.service.FileStorageService;
 import com.souzip.api.domain.souvenir.dto.*;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
+import com.souzip.api.domain.souvenir.vo.PriceInfo;
 import com.souzip.api.domain.user.entity.User;
 import com.souzip.api.domain.user.repository.UserRepository;
 import com.souzip.api.global.audit.annotation.Audit;
@@ -30,12 +34,17 @@ import java.util.Optional;
 public class SouvenirService {
 
     public static final String ENTITY_TYPE_SOUVENIR = "Souvenir";
+
     private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
+    private final CountryRepository countryRepository;
+    private final CurrencyRepository currencyRepository;
     private final FileService fileService;
     private final ExchangeRateService exchangeRateService;
     private final FileStorageService fileStorageService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    // ==================== 공통 API ====================
 
     public SouvenirNearbyListResponse getNearbySouvenirs(double latitude, double longitude, double radiusMeter) {
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
@@ -56,8 +65,23 @@ public class SouvenirService {
         List<FileResponse> files = fileService.getFilesByEntity(ENTITY_TYPE_SOUVENIR, souvenirId);
         boolean isOwned = souvenir.isOwnedBy(userId);
 
-        return SouvenirDetailResponse.of(souvenir, files, isOwned);
+        PriceResponse priceResponse = createPriceResponse(souvenir);
+
+        return SouvenirDetailResponse.of(souvenir, files, isOwned, priceResponse);
     }
+
+    @Audit(action = AuditAction.SOUVENIR_DELETED)
+    @Transactional
+    public void deleteSouvenir(Long id, Long userId) {
+        requireUserId(userId);
+
+        Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
+
+        fileService.deleteFilesByEntity(ENTITY_TYPE_SOUVENIR, id);
+        souvenir.delete();
+    }
+
+    // ==================== v1 API ====================
 
     @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
@@ -95,16 +119,113 @@ public class SouvenirService {
         return SouvenirResponse.of(souvenir, List.of());
     }
 
-    @Audit(action = AuditAction.SOUVENIR_DELETED)
+    // ==================== v2 API ====================
+
+    @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
-    public void deleteSouvenir(Long id, Long userId) {
+    public SouvenirResponse createSouvenirV2(
+        SouvenirRequest request,
+        Long userId,
+        List<MultipartFile> files
+    ) {
+        requireUserId(userId);
+        User user = validateUser(userId);
+
+        PriceInfo originalPrice = null;
+        Integer exchangeAmount = null;
+        String currencySymbol = null;
+
+        if (request.price() != null && request.currency() != null) {
+            originalPrice = PriceInfo.of(request.price(), request.currency());
+            exchangeAmount = exchangeRateService.convertToKrw(request.price(), request.currency());
+            currencySymbol = getCurrencySymbol(request.currency());
+        }
+
+        Souvenir souvenir = Souvenir.ofV2(request, user, originalPrice, exchangeAmount, currencySymbol);
+        souvenirRepository.save(souvenir);
+
+        List<FileResponse> uploadedFiles = uploadFiles(souvenir.getId(), userId, files);
+
+        PriceResponse priceResponse = createPriceResponse(souvenir);
+        return SouvenirResponse.of(souvenir, uploadedFiles, priceResponse);
+    }
+
+    @Audit(action = AuditAction.SOUVENIR_UPDATED)
+    @Transactional
+    public SouvenirResponse updateSouvenirV2(
+        Long id,
+        SouvenirRequest request,
+        Long userId
+    ) {
         requireUserId(userId);
 
         Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
 
-        fileService.deleteFilesByEntity(ENTITY_TYPE_SOUVENIR, id);
-        souvenir.delete();
+        PriceInfo originalPrice = null;
+        Integer exchangeAmount = null;
+        String currencySymbol = null;
+
+        if (request.price() != null && request.currency() != null) {
+            originalPrice = PriceInfo.of(request.price(), request.currency());
+            exchangeAmount = exchangeRateService.convertToKrw(request.price(), request.currency());
+            currencySymbol = getCurrencySymbol(request.currency());
+        }
+
+        souvenir.updateV2(request, originalPrice, exchangeAmount, currencySymbol);
+
+        PriceResponse priceResponse = createPriceResponse(souvenir);
+        return SouvenirResponse.of(souvenir, List.of(), priceResponse);
     }
+
+    // ==================== Private Helper Methods ====================
+
+    private PriceResponse createPriceResponse(Souvenir souvenir) {
+        PriceInfo originalPrice = souvenir.getOriginalPrice();
+        if (originalPrice == null) {
+            return null;
+        }
+
+        String localCurrency = getLocalCurrency(souvenir.getCountryCode());
+        PriceInfo convertedPrice;
+
+        if ("KRW".equals(originalPrice.getCurrency())) {
+            Integer localAmount = exchangeRateService.convertFromKrw(
+                originalPrice.getAmount(),
+                localCurrency
+            );
+            convertedPrice = PriceInfo.of(localAmount, localCurrency);
+        } else {
+            convertedPrice = PriceInfo.of(souvenir.getExchangeAmount(), "KRW");
+        }
+
+        String originalSymbol = getCurrencySymbol(originalPrice.getCurrency());
+        String convertedSymbol = getCurrencySymbol(convertedPrice.getCurrency());
+
+        return PriceResponse.of(
+            originalPrice.getAmount(),
+            originalSymbol,
+            convertedPrice.getAmount(),
+            convertedSymbol
+        );
+    }
+
+    private String getLocalCurrency(String countryCode) {
+        return countryRepository.findByCode(countryCode)
+            .map(country -> country.getCurrency().getCode())
+            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+    }
+
+    private String getCurrencySymbol(String currencyCode) {
+        if (currencyCode == null) {
+            return null;
+        }
+
+        return currencyRepository.findByCode(currencyCode)
+            .map(Currency::getSymbol)
+            .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
+    }
+
+    // ==================== 기존 Helper Methods ====================
 
     @Nullable
     private String extractUserId(@Nullable String authorizationHeader) {

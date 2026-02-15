@@ -88,19 +88,6 @@ public class SouvenirService {
         souvenir.delete();
     }
 
-    @Audit(action = AuditAction.SOUVENIR_DELETED)
-    @Transactional
-    public void deleteSouvenir(Long id, Long userId) {
-        requireUserId(userId);
-
-        Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
-
-        fileService.deleteFilesByEntity(ENTITY_TYPE_SOUVENIR, id);
-        souvenir.delete();
-    }
-
-    // ==================== v1 API ====================
-
     @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
     public SouvenirResponse createSouvenir(

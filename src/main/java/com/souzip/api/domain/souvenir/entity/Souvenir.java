@@ -43,19 +43,14 @@ public class Souvenir extends BaseEntity {
     @Column
     private Integer krwPrice;
 
-    @Column(name = "original_amount")
     private Integer originalAmount;
 
-    @Column(name = "original_currency", length = 3)
     private String originalCurrency;
 
-    @Column(name = "exchange_amount")
     private Integer exchangeAmount;
 
-    @Column(name = "converted_amount")
     private Integer convertedAmount;
 
-    @Column(name = "converted_currency", length = 3)
     private String convertedCurrency;
 
     @Column(length = 1000)

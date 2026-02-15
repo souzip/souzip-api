@@ -32,9 +32,9 @@ public class ExchangeRateService {
     private final ExchangeRateExternalApiClient apiClient;
 
     public ExchangeCalculatedPrice calculatePrice(
-            String countryCode,
-            Integer localPrice,
-            Integer krwPrice
+        String countryCode,
+        Integer localPrice,
+        Integer krwPrice
     ) {
         CountryResponseDto country = countryService.getCountryByCode(countryCode);
         ExchangeRateResponseDto rate = getRate(country.currency().code());
@@ -47,58 +47,80 @@ public class ExchangeRateService {
             return fromKrwPrice(krwPrice, rate, country);
         }
 
-        return new ExchangeCalculatedPrice(
-                0,
-                0,
-                country.currency().symbol()
-        );
+        return new ExchangeCalculatedPrice(0, 0, country.currency().symbol());
     }
 
     private ExchangeCalculatedPrice fromLocalPrice(
-            Integer localPrice,
-            ExchangeRateResponseDto rate,
-            CountryResponseDto country
+        Integer localPrice,
+        ExchangeRateResponseDto rate,
+        CountryResponseDto country
     ) {
         int krw = multiply(localPrice, rate.rate());
 
         return new ExchangeCalculatedPrice(
-                localPrice,
-                krw,
-                country.currency().symbol()
+            localPrice,
+            krw,
+            country.currency().symbol()
         );
     }
 
     private ExchangeCalculatedPrice fromKrwPrice(
-            Integer krwPrice,
-            ExchangeRateResponseDto rate,
-            CountryResponseDto country
+        Integer krwPrice,
+        ExchangeRateResponseDto rate,
+        CountryResponseDto country
     ) {
         int local = divide(krwPrice, rate.rate());
 
         return new ExchangeCalculatedPrice(
-                local,
-                krwPrice,
-                country.currency().symbol()
+            local,
+            krwPrice,
+            country.currency().symbol()
         );
+    }
+
+    public Integer convertToKrw(Integer amount, String fromCurrency) {
+        if (amount == null || fromCurrency == null) {
+            return null;
+        }
+
+        if ("KRW".equals(fromCurrency)) {
+            return amount;
+        }
+
+        ExchangeRateResponseDto rate = getRate(fromCurrency);
+        return multiply(amount, rate.rate());
+    }
+
+    public Integer convertFromKrw(Integer krwAmount, String toCurrency) {
+        if (krwAmount == null || toCurrency == null) {
+            return null;
+        }
+
+        if ("KRW".equals(toCurrency)) {
+            return krwAmount;
+        }
+
+        ExchangeRateResponseDto rate = getRate(toCurrency);
+        return divide(krwAmount, rate.rate());
     }
 
     private int multiply(Integer value, BigDecimal rate) {
         return BigDecimal.valueOf(value)
-                .multiply(rate)
-                .setScale(0, RoundingMode.HALF_UP)
-                .intValue();
+            .multiply(rate)
+            .setScale(0, RoundingMode.HALF_UP)
+            .intValue();
     }
 
     private int divide(Integer value, BigDecimal rate) {
         return BigDecimal.valueOf(value)
-                .divide(rate, 0, RoundingMode.HALF_UP)
-                .intValue();
+            .divide(rate, 0, RoundingMode.HALF_UP)
+            .intValue();
     }
 
     public ExchangeRateResponseDto getRate(String currencyCode) {
         ExchangeRate rate = exchangeRateRepository
-                .findByCurrencyCodeAndBaseCode(currencyCode, DEFAULT_BASE_CURRENCY)
-                .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
+            .findByCurrencyCodeAndBaseCode(currencyCode, DEFAULT_BASE_CURRENCY)
+            .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
 
         return ExchangeRateResponseDto.from(rate);
     }
@@ -119,13 +141,13 @@ public class ExchangeRateService {
 
     private void saveOrUpdate(ExchangeRate newRate) {
         exchangeRateRepository
-                .findByCurrencyCodeAndBaseCode(
-                        newRate.getCurrencyCode(),
-                        newRate.getBaseCode()
-                )
-                .ifPresentOrElse(
-                        existing -> existing.updateRate(newRate.getRate()),
-                        () -> exchangeRateRepository.save(newRate)
-                );
+            .findByCurrencyCodeAndBaseCode(
+                newRate.getCurrencyCode(),
+                newRate.getBaseCode()
+            )
+            .ifPresentOrElse(
+                existing -> existing.updateRate(newRate.getRate()),
+                () -> exchangeRateRepository.save(newRate)
+            );
     }
 }

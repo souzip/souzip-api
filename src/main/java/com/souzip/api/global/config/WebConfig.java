@@ -2,9 +2,13 @@ package com.souzip.api.global.config;
 
 import com.souzip.api.domain.admin.infrastructure.security.resolver.CurrentAdminIdArgumentResolver;
 import com.souzip.api.global.security.resolver.CurrentUserIdArgumentResolver;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -19,5 +23,20 @@ public class WebConfig implements WebMvcConfigurer {
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(currentUserIdArgumentResolver);
         resolvers.add(currentAdminIdArgumentResolver);
+    }
+
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        for (HttpMessageConverter<?> converter : converters) {
+            if (converter instanceof MappingJackson2HttpMessageConverter) {
+                MappingJackson2HttpMessageConverter jsonConverter =
+                    (MappingJackson2HttpMessageConverter) converter;
+
+                jsonConverter.setSupportedMediaTypes(Arrays.asList(
+                    MediaType.APPLICATION_JSON,
+                    MediaType.APPLICATION_OCTET_STREAM
+                ));
+            }
+        }
     }
 }

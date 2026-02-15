@@ -13,13 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/souvenirs")
 @RequiredArgsConstructor
 public class SouvenirController {
 
     private final SouvenirService souvenirService;
 
-    @GetMapping("/nearby")
+    // ==================== 공통 API ====================
+
+    @GetMapping("/api/souvenirs/nearby")
     public SuccessResponse<SouvenirNearbyListResponse> getNearbySouvenirs(
         @RequestParam double latitude,
         @RequestParam double longitude,
@@ -28,7 +29,7 @@ public class SouvenirController {
         return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude, radiusMeter));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/souvenirs/{id}")
     public SuccessResponse<SouvenirDetailResponse> getSouvenir(
         @PathVariable Long id,
         @RequestHeader(value = "Authorization", required = false) String authorizationHeader
@@ -38,7 +39,16 @@ public class SouvenirController {
     }
 
     @RequireAuth
-    @PostMapping
+    @DeleteMapping("/api/souvenirs/{id}")
+    public SuccessResponse<Void> deleteSouvenir(@PathVariable Long id, @CurrentUserId Long userId) {
+        souvenirService.deleteSouvenir(id, userId);
+        return SuccessResponse.of(null, "기념품이 성공적으로 삭제되었습니다.");
+    }
+
+    // ==================== v1 API ====================
+
+    @RequireAuth
+    @PostMapping("/api/souvenirs")
     public SuccessResponse<SouvenirResponse> createSouvenir(
         @Valid @RequestPart("souvenir") SouvenirCreateRequest request,
         @RequestPart(value = "files") List<MultipartFile> files,
@@ -49,7 +59,7 @@ public class SouvenirController {
     }
 
     @RequireAuth
-    @PutMapping("/{id}")
+    @PutMapping("/api/souvenirs/{id}")
     public SuccessResponse<SouvenirResponse> updateSouvenir(
         @Valid @PathVariable Long id,
         @RequestPart("souvenir") SouvenirUpdateRequest request,
@@ -59,10 +69,27 @@ public class SouvenirController {
         return SuccessResponse.of(response);
     }
 
+    // ==================== v2 API ====================
+
     @RequireAuth
-    @DeleteMapping("/{id}")
-    public SuccessResponse<Void> deleteSouvenir(@PathVariable Long id, @CurrentUserId Long userId) {
-        souvenirService.deleteSouvenir(id, userId);
-        return SuccessResponse.of(null, "기념품이 성공적으로 삭제되었습니다.");
+    @PostMapping("/api/v2/souvenirs")
+    public SuccessResponse<SouvenirResponse> createSouvenirV2(
+        @Valid @RequestPart("souvenir") SouvenirRequest request,
+        @RequestPart(value = "files") List<MultipartFile> files,
+        @CurrentUserId Long userId
+    ) {
+        SouvenirResponse response = souvenirService.createSouvenirV2(request, userId, files);
+        return SuccessResponse.of(response);
+    }
+
+    @RequireAuth
+    @PutMapping("/api/v2/souvenirs/{id}")
+    public SuccessResponse<SouvenirResponse> updateSouvenirV2(
+        @PathVariable Long id,
+        @Valid @RequestPart("souvenir") SouvenirRequest request,
+        @CurrentUserId Long userId
+    ) {
+        SouvenirResponse response = souvenirService.updateSouvenirV2(id, request, userId);
+        return SuccessResponse.of(response);
     }
 }

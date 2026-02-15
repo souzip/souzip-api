@@ -10,21 +10,21 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 /**
- * @deprecated v2 API에서는 SouvenirRequest 사용 권장
+ * v2 API용 기념품 생성/수정 요청 DTO
+ * - price, currency로 통합 (localPrice, currencySymbol, krwPrice 대체)
+ * - 서버에서 자동으로 환율 계산
  */
-@Deprecated
-public record SouvenirCreateRequest(
+public record SouvenirRequest(
+
     @NotBlank(message = "기념품 이름은 필수입니다.")
     @Size(max = 30, message = "기념품 이름은 30자 이하여야 합니다.")
     String name,
 
-    @Positive(message = "현지 가격은 0보다 큰 값이어야 합니다.")
-    Integer localPrice,
+    @Positive(message = "가격은 0보다 큰 값이어야 합니다.")
+    Integer price,
 
-    String currencySymbol,
-
-    @Positive(message = "원화 가격은 0보다 큰 값이어야 합니다.")
-    Integer krwPrice,
+    @Size(min = 3, max = 3, message = "통화 코드는 3자리여야 합니다.")
+    String currency,
 
     @NotBlank(message = "기념품 설명은 필수입니다.")
     @Size(max = 1000, message = "기념품 설명은 1000자 이하여야 합니다.")

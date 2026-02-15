@@ -12,7 +12,6 @@ endif::[]
 
 include::../shared/overview.adoc[]
 
-== Public API
 include::auth.adoc[]
 include::user.adoc[]
 include::souvenir.adoc[]

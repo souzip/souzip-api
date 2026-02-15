@@ -36,6 +36,8 @@ public enum ErrorCode implements BaseErrorCode {
 
     CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 도시 정보를 찾을 수 없습니다."),
 
+    CURRENCY_NOT_FOUND(HttpStatus.BAD_REQUEST, "통화를 찾을 수 없습니다."),
+
     EXCHANGE_RATE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 환율 정보를 찾을 수 없습니다."),
 
     SOUVENIR_NOT_FOUND(HttpStatus.NOT_FOUND, "기념품을 찾을 수 없습니다."),

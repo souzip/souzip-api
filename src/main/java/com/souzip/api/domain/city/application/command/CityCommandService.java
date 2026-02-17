@@ -2,15 +2,18 @@ package com.souzip.api.domain.city.application.command;
 
 import com.souzip.api.domain.city.application.port.CityManagementPort;
 import com.souzip.api.domain.city.entity.City;
+import com.souzip.api.domain.city.event.CityCreatedEvent;
+import com.souzip.api.domain.city.event.CityDeletedEvent;
+import com.souzip.api.domain.city.event.CityPriorityUpdatedEvent;
 import com.souzip.api.domain.city.repository.CityRepository;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.repository.CountryRepository;
-import com.souzip.api.domain.search.scheduler.SearchIndexScheduler;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +23,7 @@ public class CityCommandService implements CityManagementPort {
 
     private final CityRepository cityRepository;
     private final CountryRepository countryRepository;
-    private final SearchIndexScheduler searchIndexScheduler;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -31,7 +34,12 @@ public class CityCommandService implements CityManagementPort {
 
         adjustPriorities(oldPriority, command.newPriority(), countryId);
         city.updatePriority(command.newPriority());
-        searchIndexScheduler.markReindexNeeded();
+
+        eventPublisher.publishEvent(CityPriorityUpdatedEvent.of(
+            city.getId(),
+            oldPriority,
+            command.newPriority()
+        ));
     }
 
     @Transactional
@@ -46,7 +54,11 @@ public class CityCommandService implements CityManagementPort {
             country
         );
         cityRepository.save(city);
-        searchIndexScheduler.markReindexNeeded();
+
+        eventPublisher.publishEvent(CityCreatedEvent.of(
+            city.getId(),
+            country.getId()
+        ));
     }
 
     @Transactional
@@ -54,7 +66,8 @@ public class CityCommandService implements CityManagementPort {
     public void deleteCity(DeleteCityCommand command) {
         City city = findCityById(command.cityId());
         cityRepository.delete(city);
-        searchIndexScheduler.markReindexNeeded();
+
+        eventPublisher.publishEvent(CityDeletedEvent.of(city.getId()));
     }
 
     private void adjustPriorities(Integer oldPriority, Integer newPriority, Long countryId) {

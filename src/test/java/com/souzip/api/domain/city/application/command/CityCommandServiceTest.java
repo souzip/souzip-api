@@ -1,10 +1,12 @@
 package com.souzip.api.domain.city.application.command;
 
 import com.souzip.api.domain.city.entity.City;
+import com.souzip.api.domain.city.event.CityCreatedEvent;
+import com.souzip.api.domain.city.event.CityDeletedEvent;
+import com.souzip.api.domain.city.event.CityPriorityUpdatedEvent;
 import com.souzip.api.domain.city.repository.CityRepository;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.repository.CountryRepository;
-import com.souzip.api.domain.search.scheduler.SearchIndexScheduler;
 import com.souzip.api.global.exception.BusinessException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,10 +17,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -34,7 +38,7 @@ class CityCommandServiceTest {
     private CountryRepository countryRepository;
 
     @Mock
-    private SearchIndexScheduler searchIndexScheduler;
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private CityCommandService cityCommandService;
@@ -65,7 +69,12 @@ class CityCommandServiceTest {
         verify(cityRepository).findByIdWithLock(cityId);
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(searchIndexScheduler).markReindexNeeded();
+        verify(eventPublisher).publishEvent(argThat(event ->
+            event instanceof CityPriorityUpdatedEvent &&
+                ((CityPriorityUpdatedEvent) event).cityId().equals(cityId) &&
+                ((CityPriorityUpdatedEvent) event).oldPriority() == null &&
+                ((CityPriorityUpdatedEvent) event).newPriority().equals(newPriority)
+        ));
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
@@ -102,7 +111,12 @@ class CityCommandServiceTest {
         // then
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(searchIndexScheduler).markReindexNeeded();
+        verify(eventPublisher).publishEvent(argThat(event ->
+            event instanceof CityPriorityUpdatedEvent &&
+                ((CityPriorityUpdatedEvent) event).cityId().equals(cityId) &&
+                ((CityPriorityUpdatedEvent) event).oldPriority().equals(oldPriority) &&
+                ((CityPriorityUpdatedEvent) event).newPriority().equals(newPriority)
+        ));
         assertThat(existingCity.getPriority()).isEqualTo(4);
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
@@ -133,7 +147,12 @@ class CityCommandServiceTest {
         // then
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, null);
-        verify(searchIndexScheduler).markReindexNeeded();
+        verify(eventPublisher).publishEvent(argThat(event ->
+            event instanceof CityPriorityUpdatedEvent &&
+                ((CityPriorityUpdatedEvent) event).cityId().equals(cityId) &&
+                ((CityPriorityUpdatedEvent) event).oldPriority().equals(oldPriority) &&
+                ((CityPriorityUpdatedEvent) event).newPriority() == null
+        ));
         assertThat(city.getPriority()).isNull();
     }
 
@@ -175,7 +194,7 @@ class CityCommandServiceTest {
         assertThat(city2.getPriority()).isEqualTo(3);
         assertThat(city3.getPriority()).isEqualTo(100);
         assertThat(city.getPriority()).isEqualTo(newPriority);
-        verify(searchIndexScheduler).markReindexNeeded();
+        verify(eventPublisher).publishEvent(any(CityPriorityUpdatedEvent.class));
     }
 
     @DisplayName("연속 구간만 밀리고 gap 이후는 유지된다")
@@ -212,7 +231,7 @@ class CityCommandServiceTest {
         assertThat(city2.getPriority()).isEqualTo(3);
         assertThat(city3.getPriority()).isEqualTo(100);
         assertThat(city.getPriority()).isEqualTo(newPriority);
-        verify(searchIndexScheduler).markReindexNeeded();
+        verify(eventPublisher).publishEvent(any(CityPriorityUpdatedEvent.class));
     }
 
     @DisplayName("존재하지 않는 도시 우선순위 설정 시 예외 발생")
@@ -229,7 +248,7 @@ class CityCommandServiceTest {
             .isInstanceOf(BusinessException.class);
 
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(any(), any());
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @DisplayName("도시 생성 성공")
@@ -237,6 +256,7 @@ class CityCommandServiceTest {
     void createCity_success() {
         // given
         Country country = mock(Country.class);
+        given(country.getId()).willReturn(1L);
         given(countryRepository.findById(1L)).willReturn(Optional.of(country));
 
         CreateCityCommand command = new CreateCityCommand(
@@ -249,7 +269,10 @@ class CityCommandServiceTest {
         // then
         verify(countryRepository).findById(1L);
         verify(cityRepository).save(any(City.class));
-        verify(searchIndexScheduler).markReindexNeeded();
+        verify(eventPublisher).publishEvent(argThat(event ->
+            event instanceof CityCreatedEvent &&
+                ((CityCreatedEvent) event).countryId().equals(1L)
+        ));
     }
 
     @DisplayName("도시 생성 실패 - 나라 없음")
@@ -267,7 +290,7 @@ class CityCommandServiceTest {
             .isInstanceOf(BusinessException.class);
 
         verify(cityRepository, never()).save(any());
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @DisplayName("도시 삭제 성공")
@@ -289,7 +312,10 @@ class CityCommandServiceTest {
         // then
         verify(cityRepository).findById(cityId);
         verify(cityRepository).delete(city);
-        verify(searchIndexScheduler).markReindexNeeded();
+        verify(eventPublisher).publishEvent(argThat(event ->
+            event instanceof CityDeletedEvent &&
+                ((CityDeletedEvent) event).cityId().equals(cityId)
+        ));
     }
 
     @DisplayName("도시 삭제 실패 - 도시 없음")
@@ -305,7 +331,6 @@ class CityCommandServiceTest {
             .isInstanceOf(BusinessException.class);
 
         verify(cityRepository, never()).delete(any());
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(eventPublisher, never()).publishEvent(any());
     }
 }
-

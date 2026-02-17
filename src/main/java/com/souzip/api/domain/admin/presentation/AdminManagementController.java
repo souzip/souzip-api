@@ -1,6 +1,10 @@
 package com.souzip.api.domain.admin.presentation;
 
+import com.souzip.api.domain.admin.application.AdminCityQueryUseCase;
+import com.souzip.api.domain.admin.application.AdminCountryQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminManagementService;
+import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
+import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.AdminAccess;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.SuperAdminOnly;
@@ -12,6 +16,7 @@ import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.common.dto.pagination.PaginationRequest;
 import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminManagementController {
 
     private final AdminManagementService adminManagementService;
+    private final AdminCityQueryUseCase adminCityQueryUseCase;
+    private final AdminCountryQueryUseCase adminCountryQueryUseCase;
 
     @SuperAdminOnly
     @PostMapping("/invite")
@@ -54,7 +61,10 @@ public class AdminManagementController {
 
     @SuperAdminOnly
     @DeleteMapping("/{adminId}")
-    public SuccessResponse<Void> deleteAdmin(@PathVariable UUID adminId, @CurrentAdminId UUID requesterId) {
+    public SuccessResponse<Void> deleteAdmin(
+        @PathVariable UUID adminId,
+        @CurrentAdminId UUID requesterId
+    ) {
         adminManagementService.deleteAdmin(adminId, requesterId);
         return SuccessResponse.of(null, "관리자가 삭제되었습니다.");
     }
@@ -67,5 +77,17 @@ public class AdminManagementController {
     ) {
         adminManagementService.updateCityPriority(cityId, priority);
         return SuccessResponse.of(null, "우선순위가 업데이트되었습니다.");
+    }
+
+    @AdminAccess
+    @GetMapping("/countries")
+    public SuccessResponse<List<CountryQueryResult>> getCountries() {
+        return SuccessResponse.of(adminCountryQueryUseCase.getCountries());
+    }
+
+    @AdminAccess
+    @GetMapping("/cities")
+    public SuccessResponse<List<CityQueryResult>> getCities(@RequestParam Long countryId) {
+        return SuccessResponse.of(adminCityQueryUseCase.getCities(countryId));
     }
 }

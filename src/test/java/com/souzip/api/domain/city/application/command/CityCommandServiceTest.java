@@ -1,4 +1,4 @@
-package com.souzip.api.domain.city.event;
+package com.souzip.api.domain.city.application.command;
 
 import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
 import com.souzip.api.domain.city.entity.City;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class CityEventHandlerTest {
+class CityCommandServiceTest {
 
     @Mock
     private CityRepository cityRepository;
@@ -33,11 +33,11 @@ class CityEventHandlerTest {
     private SearchIndexScheduler searchIndexScheduler;
 
     @InjectMocks
-    private CityEventHandler cityEventHandler;
+    private CityCommandService cityCommandService;
 
     @DisplayName("도시 우선순위 설정 성공 - 기존 우선순위 없음")
     @Test
-    void handleCityPriorityChangeRequested_withNoPreviousPriority_success() {
+    void handlePriorityChangeRequested_withNoPreviousPriority_success() {
         // given
         Long cityId = 1L;
         Integer newPriority = 1;
@@ -54,7 +54,7 @@ class CityEventHandlerTest {
             AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority);
 
         // when
-        cityEventHandler.handleCityPriorityChangeRequested(event);
+        cityCommandService.handlePriorityChangeRequested(event);
 
         // then
         verify(cityRepository).findByIdWithLock(cityId);
@@ -66,7 +66,7 @@ class CityEventHandlerTest {
 
     @DisplayName("도시 우선순위 설정 성공 - 기존 우선순위 있음")
     @Test
-    void handleCityPriorityChangeRequested_withPreviousPriority_success() {
+    void handlePriorityChangeRequested_withPreviousPriority_success() {
         // given
         Long cityId = 1L;
         Integer newPriority = 3;
@@ -84,7 +84,7 @@ class CityEventHandlerTest {
             AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority);
 
         // when
-        cityEventHandler.handleCityPriorityChangeRequested(event);
+        cityCommandService.handlePriorityChangeRequested(event);
 
         // then
         verify(cityRepository).pullPriorityFrom(1, 1L);
@@ -95,7 +95,7 @@ class CityEventHandlerTest {
 
     @DisplayName("도시 우선순위 초기화 성공 - null로 설정")
     @Test
-    void handleCityPriorityChangeRequested_resetToNull_success() {
+    void handlePriorityChangeRequested_resetToNull_success() {
         // given
         Long cityId = 1L;
 
@@ -112,7 +112,7 @@ class CityEventHandlerTest {
             AdminCityPriorityChangeRequestedEvent.of(cityId, null);
 
         // when
-        cityEventHandler.handleCityPriorityChangeRequested(event);
+        cityCommandService.handlePriorityChangeRequested(event);
 
         // then
         verify(cityRepository).pullPriorityFrom(1, 1L);
@@ -123,7 +123,7 @@ class CityEventHandlerTest {
 
     @DisplayName("존재하지 않는 도시 우선순위 설정 시 예외 발생")
     @Test
-    void handleCityPriorityChangeRequested_cityNotFound_throwsException() {
+    void handlePriorityChangeRequested_cityNotFound_throwsException() {
         // given
         Long cityId = 999L;
 
@@ -133,7 +133,7 @@ class CityEventHandlerTest {
             AdminCityPriorityChangeRequestedEvent.of(cityId, 1);
 
         // when & then
-        assertThatThrownBy(() -> cityEventHandler.handleCityPriorityChangeRequested(event))
+        assertThatThrownBy(() -> cityCommandService.handlePriorityChangeRequested(event))
             .isInstanceOf(BusinessException.class);
 
         verify(cityRepository, never()).pullPriorityFrom(any(), any());

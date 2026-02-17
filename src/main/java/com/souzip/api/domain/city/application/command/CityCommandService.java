@@ -1,4 +1,4 @@
-package com.souzip.api.domain.city.event;
+package com.souzip.api.domain.city.application.command;
 
 import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
 import com.souzip.api.domain.city.entity.City;
@@ -7,21 +7,22 @@ import com.souzip.api.domain.search.scheduler.SearchIndexScheduler;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
-@Component
-public class CityEventHandler {
+@Service
+public class CityCommandService {
 
     private final CityRepository cityRepository;
     private final SearchIndexScheduler searchIndexScheduler;
 
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     @Transactional
-    public void handleCityPriorityChangeRequested(AdminCityPriorityChangeRequestedEvent event) {
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handlePriorityChangeRequested(AdminCityPriorityChangeRequestedEvent event) {
         City city = findCityByIdWithLock(event.cityId());
         Integer oldPriority = city.getPriority();
         Long countryId = city.getCountry().getId();

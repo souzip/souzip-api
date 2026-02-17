@@ -1,8 +1,12 @@
 package com.souzip.api.domain.admin.presentation;
 
 import com.souzip.api.docs.RestDocsSupport;
+import com.souzip.api.domain.admin.application.AdminCityQueryUseCase;
+import com.souzip.api.domain.admin.application.AdminCountryQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminManagementService;
 import com.souzip.api.domain.admin.application.AdminManagementService.AdminPageResult;
+import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
+import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
 import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
@@ -23,6 +27,7 @@ import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
 import static com.souzip.api.docs.CommonDocumentation.apiResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
@@ -47,10 +52,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AdminManagementControllerTest extends RestDocsSupport {
 
     private final AdminManagementService adminManagementService = mock(AdminManagementService.class);
+    private final AdminCityQueryUseCase adminCityQueryUseCase = mock(AdminCityQueryUseCase.class);
+    private final AdminCountryQueryUseCase adminCountryQueryUseCase = mock(AdminCountryQueryUseCase.class);
 
     @Override
     protected Object initController() {
-        return new AdminManagementController(adminManagementService);
+        return new AdminManagementController(adminManagementService, adminCityQueryUseCase, adminCountryQueryUseCase);
     }
 
     @DisplayName("관리자 초대 - ADMIN 역할")
@@ -269,6 +276,91 @@ class AdminManagementControllerTest extends RestDocsSupport {
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터 (없음)").optional(),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("나라 목록 조회 성공")
+    @Test
+    void getCountries_success() throws Exception {
+        // given
+        setAdminAuthentication();
+
+        List<CountryQueryResult> countries = List.of(
+            new CountryQueryResult(1L, "대한민국"),
+            new CountryQueryResult(2L, "일본")
+        );
+
+        given(adminCountryQueryUseCase.getCountries()).willReturn(countries);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/countries")
+                .header("Authorization", "Bearer admin-token"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data[0].id").value(1))
+            .andExpect(jsonPath("$.data[0].nameKr").value("대한민국"))
+            .andExpect(jsonPath("$.data[1].id").value(2))
+            .andExpect(jsonPath("$.data[1].nameKr").value("일본"))
+            .andDo(document("admin/get-countries",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라 목록"),
+                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("나라 ID"),
+                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("나라 한글 이름"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("도시 목록 조회 성공")
+    @Test
+    void getCities_success() throws Exception {
+        // given
+        setAdminAuthentication();
+
+        List<CityQueryResult> cities = List.of(
+            new CityQueryResult(1L, "서울", "Seoul", 1),
+            new CityQueryResult(2L, "부산", "Busan", 2)
+        );
+
+        given(adminCityQueryUseCase.getCities(anyLong())).willReturn(cities);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/cities")
+                .header("Authorization", "Bearer admin-token")
+                .param("countryId", "1"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data[0].id").value(1))
+            .andExpect(jsonPath("$.data[0].nameKr").value("서울"))
+            .andExpect(jsonPath("$.data[0].priority").value(1))
+            .andExpect(jsonPath("$.data[1].id").value(2))
+            .andExpect(jsonPath("$.data[1].nameKr").value("부산"))
+            .andDo(document("admin/get-cities",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                ),
+                queryParameters(
+                    parameterWithName("countryId").description("나라 ID")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("도시 목록"),
+                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("도시 ID"),
+                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("도시 한글 이름"),
+                    fieldWithPath("data[].nameEn").type(JsonFieldType.STRING).description("도시 영문 이름"),
+                    fieldWithPath("data[].priority").type(JsonFieldType.NUMBER).description("우선순위").optional(),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
 

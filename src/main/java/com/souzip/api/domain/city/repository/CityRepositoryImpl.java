@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.entity.QCity;
 import jakarta.persistence.LockModeType;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,6 +24,15 @@ public class CityRepositoryImpl implements CityRepositoryCustom {
             .setLockMode(LockModeType.PESSIMISTIC_WRITE)
             .fetchOne();
         return Optional.ofNullable(result);
+    }
+
+    @Override
+    public List<City> findByCountryId(Long countryId) {
+        return queryFactory
+            .selectFrom(city)
+            .where(city.country.id.eq(countryId))
+            .orderBy(city.priority.asc().nullsLast(), city.nameKr.asc())
+            .fetch();
     }
 
     @Override

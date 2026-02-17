@@ -1,5 +1,6 @@
 package com.souzip.api.domain.country.application.query;
 
+import com.souzip.api.domain.country.application.port.CountryAdminPort.CountryAdminResult;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.repository.CountryRepository;
 import java.util.List;
@@ -39,7 +40,7 @@ class CountryQueryServiceTest {
         given(countryRepository.findAll()).willReturn(List.of(korea, japan));
 
         // when
-        List<CountryQueryService.CountryQueryResult> results = countryQueryService.getCountries();
+        List<CountryAdminResult> results = countryQueryService.getCountries();
 
         // then
         assertThat(results).hasSize(2);
@@ -56,7 +57,7 @@ class CountryQueryServiceTest {
         given(countryRepository.findAll()).willReturn(List.of());
 
         // when
-        List<CountryQueryService.CountryQueryResult> results = countryQueryService.getCountries();
+        List<CountryAdminResult> results = countryQueryService.getCountries();
 
         // then
         assertThat(results).isEmpty();

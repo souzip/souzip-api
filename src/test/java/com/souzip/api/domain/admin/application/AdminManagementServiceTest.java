@@ -294,7 +294,6 @@ class AdminManagementServiceTest {
         DeleteCityCommand command = new DeleteCityCommand(1L);
 
         // when
-        adminManagementService.updateCityPriority(cityId, null);
         adminManagementService.deleteCity(command);
 
         // then

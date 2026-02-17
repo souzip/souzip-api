@@ -8,6 +8,10 @@ import com.souzip.api.domain.admin.infrastructure.encoder.AdminPasswordEncoderIm
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.repository.AdminRepository;
+import com.souzip.api.domain.city.entity.City;
+import com.souzip.api.domain.city.repository.CityRepository;
+import com.souzip.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.ErrorCode;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ public class AdminManagementService {
 
     private final AdminRepository adminRepository;
     private final AdminPasswordEncoderImpl passwordEncoder;
+    private final CityRepository cityRepository;
 
     @Transactional
     public Admin inviteAdmin(InviteAdminCommand command) {
@@ -48,16 +53,35 @@ public class AdminManagementService {
         adminRepository.delete(adminToDelete);
     }
 
+    @Transactional
+    public void updateCityPriority(Long cityId, Integer priority) {
+        City city = findCityById(cityId);
+        city.updatePriority(priority);
+    }
+
+    private City findCityById(Long cityId) {
+        return cityRepository.findById(cityId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "도시를 찾을 수 없습니다."));
+    }
+
     private void validateNotSuperAdmin(AdminRole role) {
-        if (role == AdminRole.SUPER_ADMIN) {
+        if (isSuperAdmin(role)) {
             throw new AdminException(AdminErrorCode.CANNOT_INVITE_SUPER_ADMIN);
         }
     }
 
+    private boolean isSuperAdmin(AdminRole role) {
+        return role == AdminRole.SUPER_ADMIN;
+    }
+
     private void validateUsernameNotDuplicated(String username) {
-        if (adminRepository.existsByUsername(username)) {
+        if (isUsernameDuplicated(username)) {
             throw new AdminException(AdminErrorCode.ADMIN_USERNAME_DUPLICATED);
         }
+    }
+
+    private boolean isUsernameDuplicated(String username) {
+        return adminRepository.existsByUsername(username);
     }
 
     private Admin createAdmin(InviteAdminCommand command) {
@@ -76,5 +100,4 @@ public class AdminManagementService {
         long total,
         int totalPages
     ) {}
-
 }

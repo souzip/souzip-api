@@ -69,7 +69,15 @@ public class CityCommandService {
 
     private void pullOldPriorityIfExists(Integer oldPriority, Long countryId) {
         if (hasPriority(oldPriority)) {
-            cityRepository.pullPriorityFrom(oldPriority, countryId);
+            AtomicInteger expected = new AtomicInteger(oldPriority + 1);
+
+            cityRepository
+                .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, oldPriority + 1)
+                .stream()
+                .takeWhile(city -> city.getPriority().equals(expected.get()))
+                .forEach(city -> {
+                    city.updatePriority(expected.getAndIncrement() - 1);
+                });
         }
     }
 

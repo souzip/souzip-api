@@ -53,18 +53,6 @@ public class CityRepositoryImpl implements CityRepositoryCustom {
     }
 
     @Override
-    public void pullPriorityFrom(Integer priority, Long countryId) {
-        queryFactory
-            .update(city)
-            .set(city.priority, city.priority.subtract(1))
-            .where(
-                city.priority.gt(priority),
-                city.country.id.eq(countryId)
-            )
-            .execute();
-    }
-
-    @Override
     public Page<City> findByCountryIdWithPaging(Long countryId, Pageable pageable) {
         List<City> content = queryFactory
             .selectFrom(city)

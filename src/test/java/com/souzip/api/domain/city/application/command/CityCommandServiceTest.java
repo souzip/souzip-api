@@ -67,7 +67,7 @@ class CityCommandServiceTest {
 
         // then
         verify(cityRepository).findByIdWithLock(cityId);
-        verify(cityRepository, never()).pullPriorityFrom(any(), any());
+        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
         verify(searchIndexScheduler).markReindexNeeded();
         assertThat(city.getPriority()).isEqualTo(newPriority);
@@ -78,6 +78,7 @@ class CityCommandServiceTest {
     void handlePriorityChangeRequested_withPreviousPriority_success() {
         // given
         Long cityId = 1L;
+        Integer oldPriority = 1;
         Integer newPriority = 3;
 
         Country country = mock(Country.class);
@@ -85,13 +86,19 @@ class CityCommandServiceTest {
 
         City city = City.create("Seoul", "서울",
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
-        city.updatePriority(1);
+        city.updatePriority(oldPriority);
+
+        City existingCity = City.create("Busan", "부산",
+            BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
+        existingCity.updatePriority(newPriority);
 
         City existingCity = City.create("Busan", "부산",
             BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
         existingCity.updatePriority(3);
 
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
+        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
+            .willReturn(List.of());
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
             .willReturn(List.of(existingCity));
 
@@ -102,7 +109,7 @@ class CityCommandServiceTest {
         cityCommandService.handlePriorityChangeRequested(event);
 
         // then
-        verify(cityRepository).pullPriorityFrom(1, 1L);
+        verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
         verify(searchIndexScheduler).markReindexNeeded();
         assertThat(existingCity.getPriority()).isEqualTo(4);
@@ -114,15 +121,18 @@ class CityCommandServiceTest {
     void handlePriorityChangeRequested_resetToNull_success() {
         // given
         Long cityId = 1L;
+        Integer oldPriority = 1;
 
         Country country = mock(Country.class);
         given(country.getId()).willReturn(1L);
 
         City city = City.create("Seoul", "서울",
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
-        city.updatePriority(1);
+        city.updatePriority(oldPriority);
 
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
+        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
+            .willReturn(List.of());
 
         AdminCityPriorityChangeRequestedEvent event =
             AdminCityPriorityChangeRequestedEvent.of(cityId, null);
@@ -131,13 +141,54 @@ class CityCommandServiceTest {
         cityCommandService.handlePriorityChangeRequested(event);
 
         // then
-        verify(cityRepository).pullPriorityFrom(1, 1L);
-        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(any(), any());
+        verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
+        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, null);
         verify(searchIndexScheduler).markReindexNeeded();
         assertThat(city.getPriority()).isNull();
     }
 
-    @DisplayName("연속 구간만 우선순위가 밀리고 gap 이후는 유지된다")
+    @DisplayName("연속 구간만 당겨지고 gap 이후는 유지된다")
+    @Test
+    void handlePriorityChangeRequested_onlyPullsContiguousRange() {
+        // given
+        Long cityId = 1L;
+        Integer oldPriority = 3;
+        Integer newPriority = 5;
+
+        Country country = mock(Country.class);
+        given(country.getId()).willReturn(1L);
+
+        City city = City.create("Seoul", "서울",
+            BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
+        city.updatePriority(oldPriority);
+
+        City city2 = City.create("Busan", "부산",
+            BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
+        city2.updatePriority(4);
+
+        City city3 = City.create("Jeju", "제주",
+            BigDecimal.valueOf(33.49), BigDecimal.valueOf(126.53), country);
+        city3.updatePriority(100); // gap
+
+        given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
+        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
+            .willReturn(List.of(city2, city3));
+        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
+            .willReturn(List.of(city3));
+
+        AdminCityPriorityChangeRequestedEvent event =
+            AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority);
+
+        // when
+        cityCommandService.handlePriorityChangeRequested(event);
+
+        // then
+        assertThat(city2.getPriority()).isEqualTo(3); // 4 → 3으로 당겨짐
+        assertThat(city3.getPriority()).isEqualTo(100); // gap → 그대로
+        assertThat(city.getPriority()).isEqualTo(newPriority);
+    }
+
+    @DisplayName("연속 구간만 밀리고 gap 이후는 유지된다")
     @Test
     void handlePriorityChangeRequested_onlyShiftsContiguousRange() {
         // given
@@ -156,7 +207,7 @@ class CityCommandServiceTest {
 
         City city3 = City.create("Jeju", "제주",
             BigDecimal.valueOf(33.49), BigDecimal.valueOf(126.53), country);
-        city3.updatePriority(100);
+        city3.updatePriority(100); // gap
 
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
@@ -169,8 +220,9 @@ class CityCommandServiceTest {
         cityCommandService.handlePriorityChangeRequested(event);
 
         // then
-        assertThat(city2.getPriority()).isEqualTo(3);
-        assertThat(city3.getPriority()).isEqualTo(100);
+        assertThat(city2.getPriority()).isEqualTo(3); // 2 → 3으로 밀림
+        assertThat(city3.getPriority()).isEqualTo(100); // gap → 그대로
+        assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
     @DisplayName("존재하지 않는 도시 우선순위 설정 시 예외 발생")
@@ -188,7 +240,6 @@ class CityCommandServiceTest {
         assertThatThrownBy(() -> cityCommandService.handlePriorityChangeRequested(event))
             .isInstanceOf(BusinessException.class);
 
-        verify(cityRepository, never()).pullPriorityFrom(any(), any());
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(any(), any());
         verify(searchIndexScheduler, never()).markReindexNeeded();
     }

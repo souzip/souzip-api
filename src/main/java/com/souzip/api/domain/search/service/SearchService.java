@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class SearchService {
     private static final int MAX_CITIES_PER_COUNTRY = 1000;
     private static final boolean ENABLE_AUTO_SPLIT = false;
     private static final int MIN_KEYWORD_LENGTH_FOR_SPLIT = 6;
+    private static final int MIN_SPLIT_LENGTH = 2;
 
     private final LocationRepository locationRepository;
     private static final ThreadLocal<String> CURRENT_KEYWORD = new ThreadLocal<>();
@@ -53,66 +55,72 @@ public class SearchService {
     }
 
     private String[] splitKeywords(String keyword) {
-        String[] spaceSplit = keyword.split("\\s+");
-        if (spaceSplit.length > 1) {
+        String[] spaceSplit = splitBySpace(keyword);
+        if (hasMultipleKeywords(spaceSplit)) {
             return spaceSplit;
         }
+        return tryAutoSplitIfEnabled(keyword);
+    }
 
-        if (ENABLE_AUTO_SPLIT && keyword.length() >= MIN_KEYWORD_LENGTH_FOR_SPLIT) {
-            String[] autoSplit = tryAutoSplit(keyword);
-            if (autoSplit.length > 1) {
-                log.debug("키워드 자동 분리: {} -> {}", keyword, Arrays.toString(autoSplit));
-                return autoSplit;
-            }
+    private String[] splitBySpace(String keyword) {
+        return keyword.split("\\s+");
+    }
+
+    private boolean hasMultipleKeywords(String[] keywords) {
+        return keywords.length > 1;
+    }
+
+    private String[] tryAutoSplitIfEnabled(String keyword) {
+        if (isAutoSplitDisabled(keyword)) {
+            return new String[]{keyword};
         }
+        return resolveAutoSplit(keyword);
+    }
 
+    private boolean isAutoSplitDisabled(String keyword) {
+        return !ENABLE_AUTO_SPLIT || keyword.length() < MIN_KEYWORD_LENGTH_FOR_SPLIT;
+    }
+
+    private String[] resolveAutoSplit(String keyword) {
+        String[] autoSplit = tryAutoSplit(keyword);
+        if (hasMultipleKeywords(autoSplit)) {
+            log.debug("키워드 자동 분리: {} -> {}", keyword, Arrays.toString(autoSplit));
+            return autoSplit;
+        }
         return new String[]{keyword};
     }
 
     private String[] tryAutoSplit(String keyword) {
-        List<String[]> possibleSplits = generatePossibleSplits(keyword);
-
-        for (String[] split : possibleSplits) {
-            if (isValidSplit(split)) {
-                return split;
-            }
-        }
-
-        return new String[]{keyword};
+        return generatePossibleSplits(keyword).stream()
+            .filter(this::isValidSplit)
+            .findFirst()
+            .orElse(new String[]{keyword});
     }
 
     private List<String[]> generatePossibleSplits(String keyword) {
-        List<String[]> splits = new ArrayList<>();
-
-        for (int i = 2; i <= keyword.length() - 2; i++) {
-            String first = keyword.substring(0, i);
-            String second = keyword.substring(i);
-            splits.add(new String[]{first, second});
-        }
-
-        return splits;
+        return IntStream.rangeClosed(MIN_SPLIT_LENGTH, keyword.length() - MIN_SPLIT_LENGTH)
+            .mapToObj(i -> new String[]{keyword.substring(0, i), keyword.substring(i)})
+            .toList();
     }
 
     private boolean isValidSplit(String[] keywords) {
-        if (Arrays.stream(keywords).anyMatch(k -> k.length() < 2)) {
+        if (hasTooShortKeyword(keywords)) {
             return false;
         }
+        return Arrays.stream(keywords).allMatch(this::hasSearchResult);
+    }
 
-        for (String keyword : keywords) {
-            try {
-                List<SearchHit<LocationDocument>> results =
-                    locationRepository.searchByKeywordWithFuzzy(keyword);
+    private boolean hasTooShortKeyword(String[] keywords) {
+        return Arrays.stream(keywords).anyMatch(k -> k.length() < MIN_SPLIT_LENGTH);
+    }
 
-                if (results.isEmpty()) {
-                    return false;
-                }
-            } catch (Exception e) {
-                log.debug("키워드 검증 중 오류: {}", keyword, e);
-                return false;
-            }
+    private boolean hasSearchResult(String keyword) {
+        try {
+            return locationRepository.searchByKeywordWithFuzzy(keyword).isEmpty() == false;
+        } catch (Exception e) {
+            log.debug("키워드 검증 중 오류: {}", keyword, e);
+            return false;
         }
-
-        return true;
     }
 
     private void setCurrentKeyword(String[] keywords, String trimmedKeyword) {
@@ -129,54 +137,48 @@ public class SearchService {
         PaginationRequest paginationRequest
     ) {
         Map<String, SearchHit<LocationDocument>> allHitsMap = searchByKeywordCount(keywords, trimmedKeyword);
-        List<SearchResponse> allLocations = convertToResponsesWithScore(allHitsMap.values());
-        List<SearchResponse> sortedLocations = sortByPriority(allLocations);
-        return paginateResults(sortedLocations, paginationRequest);
+        List<SearchHit<LocationDocument>> sortedHits = sortHitsByPriority(allHitsMap.values());
+        List<SearchResponse> allLocations = convertToResponsesWithScore(sortedHits);
+        return paginateResults(allLocations, paginationRequest);
     }
 
-    private List<SearchResponse> sortByPriority(List<SearchResponse> responses) {
-        return responses.stream()
+    private List<SearchHit<LocationDocument>> sortHitsByPriority(Collection<SearchHit<LocationDocument>> hits) {
+        return hits.stream()
             .sorted(this::compareByPriority)
             .toList();
     }
 
-    private int compareByPriority(SearchResponse a, SearchResponse b) {
-        if (hasBothPriority(a, b)) {
-            return comparePriority(a, b);
+    private int compareByPriority(SearchHit<LocationDocument> a, SearchHit<LocationDocument> b) {
+        Integer priorityA = a.getContent().getPriority();
+        Integer priorityB = b.getContent().getPriority();
+
+        if (hasBothPriority(priorityA, priorityB)) {
+            return Integer.compare(priorityA, priorityB);
         }
-        if (hasNoPriority(a, b)) {
+        if (hasNoPriority(priorityA, priorityB)) {
             return compareScore(a, b);
         }
-        return priorityFirst(a);
+        return priorityFirst(priorityA);
     }
 
-    private boolean hasBothPriority(SearchResponse a, SearchResponse b) {
-        return a.priority() != null && b.priority() != null;
+    private boolean hasBothPriority(Integer a, Integer b) {
+        return a != null && b != null;
     }
 
-    private boolean hasNoPriority(SearchResponse a, SearchResponse b) {
-        return a.priority() == null && b.priority() == null;
+    private boolean hasNoPriority(Integer a, Integer b) {
+        return a == null && b == null;
     }
 
-    private int comparePriority(SearchResponse a, SearchResponse b) {
-        return Integer.compare(a.priority(), b.priority());
+    private int compareScore(SearchHit<LocationDocument> a, SearchHit<LocationDocument> b) {
+        return Float.compare(getScore(b), getScore(a));
     }
 
-    private int compareScore(SearchResponse a, SearchResponse b) {
-        float scoreA = getScore(a);
-        float scoreB = getScore(b);
-        return Float.compare(scoreB, scoreA);
+    private float getScore(SearchHit<LocationDocument> hit) {
+        return hit.getScore();
     }
 
-    private float getScore(SearchResponse response) {
-        if (response.score() == null) {
-            return 0f;
-        }
-        return response.score();
-    }
-
-    private int priorityFirst(SearchResponse a) {
-        if (a.priority() != null) {
+    private int priorityFirst(Integer priority) {
+        if (priority != null) {
             return -1;
         }
         return 1;
@@ -209,10 +211,14 @@ public class SearchService {
         Map<String, SearchHit<LocationDocument>> results
     ) {
         List<LocationDocument> countries = extractCountries(searchHits);
-        if (!hasCountries(countries)) {
+        if (hasNoCountries(countries)) {
             return;
         }
         addAllCitiesFromCountries(countries, results);
+    }
+
+    private boolean hasNoCountries(List<LocationDocument> countries) {
+        return countries.isEmpty();
     }
 
     private void addAllCitiesFromCountries(
@@ -252,13 +258,13 @@ public class SearchService {
         float score
     ) {
         String id = city.getId();
-        if (isNotInResults(id, results)) {
+        if (isAbsentInResults(id, results)) {
             results.put(id, createSearchHit(city, score));
         }
     }
 
-    private boolean isNotInResults(String id, Map<String, SearchHit<LocationDocument>> results) {
-        return !results.containsKey(id);
+    private boolean isAbsentInResults(String id, Map<String, SearchHit<LocationDocument>> results) {
+        return results.containsKey(id) == false;
     }
 
     private Map<String, SearchHit<LocationDocument>> searchMultipleKeywords(String[] keywords) {
@@ -373,7 +379,7 @@ public class SearchService {
         return keywords.length == 1;
     }
 
-    private List<SearchResponse> convertToResponsesWithScore(Collection<SearchHit<LocationDocument>> searchHits) {
+    private List<SearchResponse> convertToResponsesWithScore(List<SearchHit<LocationDocument>> searchHits) {
         return searchHits.stream()
             .map(this::convertToResponse)
             .toList();
@@ -407,10 +413,9 @@ public class SearchService {
 
     private void addHighlightIfMatched(Map<String, List<String>> highlight, String field, String text, String keyword) {
         String highlighted = highlightText(text, keyword);
-        if (!hasHighlight(highlighted)) {
-            return;
+        if (hasHighlight(highlighted)) {
+            addHighlightToMap(highlight, field, highlighted);
         }
-        addHighlightToMap(highlight, field, highlighted);
     }
 
     private void addHighlightToMap(Map<String, List<String>> highlight, String field, String highlighted) {
@@ -464,10 +469,6 @@ public class SearchService {
 
     private boolean isCountry(LocationDocument document) {
         return "country".equals(document.getType());
-    }
-
-    private boolean hasCountries(List<LocationDocument> countries) {
-        return !countries.isEmpty();
     }
 
     private boolean isCity(LocationDocument document) {

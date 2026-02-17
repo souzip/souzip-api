@@ -17,7 +17,6 @@ public record SearchResponse(
     String countryNameKr,
     BigDecimal latitude,
     BigDecimal longitude,
-    Integer priority,
     Float score,
     Map<String, List<String>> highlight
 ) {
@@ -33,7 +32,6 @@ public record SearchResponse(
             document.getCountryNameKr(),
             document.getLatitude(),
             document.getLongitude(),
-            document.getPriority(),
             score,
             highlight
         );

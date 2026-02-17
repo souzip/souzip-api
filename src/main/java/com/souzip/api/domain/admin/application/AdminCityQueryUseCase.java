@@ -1,20 +1,10 @@
 package com.souzip.api.domain.admin.application;
 
-import com.souzip.api.domain.admin.application.port.CityQueryPort;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.souzip.api.domain.admin.application.query.CitySearchQuery;
+import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 
-@Transactional(readOnly = true)
-@RequiredArgsConstructor
-@Service
-public class AdminCityQueryUseCase {
+public interface AdminCityQueryUseCase {
 
-    private final CityQueryPort cityQueryPort;
-
-    public List<CityQueryResult> getCities(Long countryId) {
-        return cityQueryPort.getCities(countryId);
-    }
+    PaginationResponse<CityQueryResult> getCities(CitySearchQuery query);
 }

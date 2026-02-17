@@ -18,7 +18,7 @@ operation::search/locations-english-city[snippets='http-request,query-parameters
 
 [[search-country]]
 ==== 국가명으로 검색
-국가명으로 검색하면 해당 국가와 국가 내 도시들이 함께 반환됩니다.
+국가명으로 검색하면 해당 국가의 도시들이 반환됩니다.
 
 operation::search/locations-country[snippets='http-request,query-parameters,http-response,response-fields']
 

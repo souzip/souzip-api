@@ -67,8 +67,8 @@ class SearchControllerTest extends RestDocsSupport {
         return response;
     }
 
-    @Test
     @DisplayName("한글 도시명으로 위치를 검색한다.")
+    @Test
     void searchLocations_koreanCityName() throws Exception {
         // given
         SearchResponse seoul = new SearchResponse(
@@ -130,8 +130,8 @@ class SearchControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("영문 도시명으로 위치를 검색한다.")
+    @Test
     void searchLocations_englishCityName() throws Exception {
         // given
         SearchResponse seoul = new SearchResponse(
@@ -192,19 +192,19 @@ class SearchControllerTest extends RestDocsSupport {
             ));
     }
 
+    @DisplayName("국가명으로 검색하면 해당 국가의 도시들이 반환된다.")
     @Test
-    @DisplayName("국가명으로 검색하면 국가와 해당 국가의 도시들이 함께 반환된다.")
     void searchLocations_countryName() throws Exception {
         // given
-        SearchResponse japan = new SearchResponse(
-            1L, "country", "일본", "Japan", "일본",
-            null, null, null,
-            BigDecimal.valueOf(36.2048), BigDecimal.valueOf(138.2529), 1000.0f,
-            Map.of("nameKr", List.of("<em>일본</em>"))
+        SearchResponse tokyo = new SearchResponse(
+            1L, "city", "도쿄", "Tokyo", "도쿄",
+            "일본", "Japan", "일본",
+            BigDecimal.valueOf(35.68), BigDecimal.valueOf(139.69), 1500.0f,
+            Map.of("countryNameKr", List.of("<em>일본</em>"))
         );
 
         PaginationResponse<SearchResponse> response = createMockPaginationResponse(
-            List.of(japan), 1, 1, 1L, 10, true, true, false, false
+            List.of(tokyo), 1, 1, 1L, 10, true, true, false, false
         );
 
         given(searchService.search(eq("일본"), any(PaginationRequest.class)))
@@ -216,6 +216,7 @@ class SearchControllerTest extends RestDocsSupport {
                 .param("pageSize", "10"))
             .andDo(print())
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].type").value("city"))
             .andDo(document("search/locations-country",
                 getDocumentRequest(),
                 getDocumentResponse(),
@@ -228,13 +229,13 @@ class SearchControllerTest extends RestDocsSupport {
                     fieldWithPath("data").type(JsonFieldType.OBJECT).description("검색 결과 데이터"),
                     fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("검색된 위치 목록"),
                     fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("위치 엔티티 ID"),
-                    fieldWithPath("data.content[].type").type(JsonFieldType.STRING).description("위치 타입 (country 또는 city)"),
+                    fieldWithPath("data.content[].type").type(JsonFieldType.STRING).description("위치 타입 (city)"),
                     fieldWithPath("data.content[].name").type(JsonFieldType.STRING).description("위치 이름"),
                     fieldWithPath("data.content[].nameEn").type(JsonFieldType.STRING).description("위치 영문 이름"),
                     fieldWithPath("data.content[].nameKr").type(JsonFieldType.STRING).description("위치 한글 이름"),
-                    fieldWithPath("data.content[].countryName").type(JsonFieldType.STRING).description("국가 이름 (도시인 경우)").optional(),
-                    fieldWithPath("data.content[].countryNameEn").type(JsonFieldType.STRING).description("국가 영문 이름 (도시인 경우)").optional(),
-                    fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING).description("국가 한글 이름 (도시인 경우)").optional(),
+                    fieldWithPath("data.content[].countryName").type(JsonFieldType.STRING).description("국가 이름").optional(),
+                    fieldWithPath("data.content[].countryNameEn").type(JsonFieldType.STRING).description("국가 영문 이름").optional(),
+                    fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING).description("국가 한글 이름").optional(),
                     fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER).description("위도 (double)"),
                     fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER).description("경도 (double)"),
                     fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER).description("검색 점수"),
@@ -253,8 +254,8 @@ class SearchControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("복수 키워드로 위치를 검색한다.")
+    @Test
     void searchLocations_multipleKeywords() throws Exception {
         // given
         SearchResponse osaka = new SearchResponse(
@@ -314,8 +315,8 @@ class SearchControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("검색어가 비어있으면 400 에러가 발생한다.")
+    @Test
     void searchLocations_emptyKeyword() throws Exception {
         // given
         given(searchService.search(eq(""), any(PaginationRequest.class)))
@@ -340,8 +341,8 @@ class SearchControllerTest extends RestDocsSupport {
             ));
     }
 
-    @Test
     @DisplayName("검색 결과가 없으면 빈 목록을 반환한다.")
+    @Test
     void searchLocations_noResults() throws Exception {
         // given
         PaginationResponse<SearchResponse> response = createMockPaginationResponse(

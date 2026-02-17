@@ -34,6 +34,9 @@ public class LocationDocument {
     @Field(type = FieldType.Long)
     private Long entityId;
 
+    @Field(type = FieldType.Integer)
+    private Integer priority;
+
     @MultiField(
         mainField = @Field(type = FieldType.Text, analyzer = "korean_analyzer"),
         otherFields = {
@@ -99,6 +102,7 @@ public class LocationDocument {
             .longitude(country.getLongitude())
             .countryNameEn(null)
             .countryNameKr(null)
+            .priority(null)
             .build();
     }
 
@@ -113,6 +117,7 @@ public class LocationDocument {
             .countryNameKr(city.getCountry().getNameKr())
             .latitude(city.getLatitude())
             .longitude(city.getLongitude())
+            .priority(city.getPriority())
             .build();
     }
 }

@@ -76,3 +76,24 @@ operation::admin/get-admins[snippets='http-request,request-headers,query-paramet
 * SUPER_ADMIN 권한이 필요합니다.
 
 operation::admin/delete-admin[snippets='http-request,request-headers,path-parameters,http-response,response-fields']
+
+[[city-priority]]
+==== 도시 우선순위 설정
+
+도시의 검색 우선순위를 설정합니다.
+
+* SUPER_ADMIN 또는 ADMIN 권한이 필요합니다.
+* priority 미입력 시 우선순위가 초기화됩니다.
+* 우선순위는 1 이상이어야 합니다.
+* 같은 국가 내에서 우선순위가 중복되지 않도록 자동으로 조정됩니다.
+
+operation::admin/update-city-priority[snippets='http-request,request-headers,path-parameters,query-parameters,http-response,response-fields']
+
+[[city-priority-reset]]
+==== 도시 우선순위 초기화
+
+도시의 검색 우선순위를 초기화합니다.
+
+* SUPER_ADMIN 또는 ADMIN 권한이 필요합니다.
+
+operation::admin/reset-city-priority[snippets='http-request,request-headers,path-parameters,http-response,response-fields']

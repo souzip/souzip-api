@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,10 +27,9 @@ import java.util.*;
 public class SearchService {
 
     private static final int MAX_CITIES_PER_COUNTRY = 1000;
-    private static final float COUNTRY_CITY_SCORE = 0.5f;
-    // 🔧 수정 1: 자동 분리 기능 비활성화 (4글자 이상 검색 문제 해결)
     private static final boolean ENABLE_AUTO_SPLIT = false;
-    private static final int MIN_KEYWORD_LENGTH_FOR_SPLIT = 6; // 더 보수적으로 변경
+    private static final int MIN_KEYWORD_LENGTH_FOR_SPLIT = 6;
+    private static final int MIN_SPLIT_LENGTH = 2;
 
     private final LocationRepository locationRepository;
     private static final ThreadLocal<String> CURRENT_KEYWORD = new ThreadLocal<>();
@@ -54,94 +54,73 @@ public class SearchService {
         ensureIndexReady();
     }
 
-    /**
-     * 키워드를 분리합니다.
-     * 1. 공백이 있으면 공백으로 분리
-     * 2. 자동 분리 기능이 활성화되어 있고 조건을 만족하면 분리 시도
-     * 3. 그 외에는 단일 키워드로 처리
-     */
     private String[] splitKeywords(String keyword) {
-        // 1. 공백으로 분리
-        String[] spaceSplit = keyword.split("\\s+");
-        if (spaceSplit.length > 1) {
+        String[] spaceSplit = splitBySpace(keyword);
+        if (hasMultipleKeywords(spaceSplit)) {
             return spaceSplit;
         }
+        return tryAutoSplitIfEnabled(keyword);
+    }
 
-        // 🔧 수정 1: 자동 분리 기능을 조건부로 실행
-        if (ENABLE_AUTO_SPLIT && keyword.length() >= MIN_KEYWORD_LENGTH_FOR_SPLIT) {
-            String[] autoSplit = tryAutoSplit(keyword);
-            if (autoSplit.length > 1) {
-                log.debug("키워드 자동 분리: {} -> {}", keyword, Arrays.toString(autoSplit));
-                return autoSplit;
-            }
+    private String[] splitBySpace(String keyword) {
+        return keyword.split("\\s+");
+    }
+
+    private boolean hasMultipleKeywords(String[] keywords) {
+        return keywords.length > 1;
+    }
+
+    private String[] tryAutoSplitIfEnabled(String keyword) {
+        if (isAutoSplitDisabled(keyword)) {
+            return new String[]{keyword};
         }
+        return resolveAutoSplit(keyword);
+    }
 
-        // 3. 단일 키워드
+    private boolean isAutoSplitDisabled(String keyword) {
+        return !ENABLE_AUTO_SPLIT || keyword.length() < MIN_KEYWORD_LENGTH_FOR_SPLIT;
+    }
+
+    private String[] resolveAutoSplit(String keyword) {
+        String[] autoSplit = tryAutoSplit(keyword);
+        if (hasMultipleKeywords(autoSplit)) {
+            log.debug("키워드 자동 분리: {} -> {}", keyword, Arrays.toString(autoSplit));
+            return autoSplit;
+        }
         return new String[]{keyword};
     }
 
-    /**
-     * 띄어쓰기 없는 키워드를 자동으로 분리합니다.
-     * 예: "일본오사카" -> ["일본", "오사카"]
-     */
     private String[] tryAutoSplit(String keyword) {
-        // 가능한 모든 분리 조합 시도
-        List<String[]> possibleSplits = generatePossibleSplits(keyword);
-
-        // 각 조합을 실제로 검색해보고 결과가 있는지 확인
-        for (String[] split : possibleSplits) {
-            if (isValidSplit(split)) {
-                return split;
-            }
-        }
-
-        // 분리 실패시 원본 반환
-        return new String[]{keyword};
+        return generatePossibleSplits(keyword).stream()
+            .filter(this::isValidSplit)
+            .findFirst()
+            .orElse(new String[]{keyword});
     }
 
-    /**
-     * 가능한 2-way 분리 조합 생성
-     * 예: "일본오사카" -> [["일", "본오사카"], ["일본", "오사카"], ["일본오", "사카"], ["일본오사", "카"]]
-     */
     private List<String[]> generatePossibleSplits(String keyword) {
-        List<String[]> splits = new ArrayList<>();
-
-        // 최소 2글자씩 분리 (너무 짧은 단어 방지)
-        for (int i = 2; i <= keyword.length() - 2; i++) {
-            String first = keyword.substring(0, i);
-            String second = keyword.substring(i);
-            splits.add(new String[]{first, second});
-        }
-
-        return splits;
+        return IntStream.rangeClosed(MIN_SPLIT_LENGTH, keyword.length() - MIN_SPLIT_LENGTH)
+            .mapToObj(i -> new String[]{keyword.substring(0, i), keyword.substring(i)})
+            .toList();
     }
 
-    /**
-     * 분리된 키워드 조합이 유효한지 검증
-     * 각 키워드가 실제로 검색 결과를 반환하는지 확인
-     */
     private boolean isValidSplit(String[] keywords) {
-        // 각 키워드가 모두 2글자 이상이어야 함
-        if (Arrays.stream(keywords).anyMatch(k -> k.length() < 2)) {
+        if (hasTooShortKeyword(keywords)) {
             return false;
         }
+        return Arrays.stream(keywords).allMatch(this::hasSearchResult);
+    }
 
-        // 각 키워드로 검색했을 때 결과가 있어야 함
-        for (String keyword : keywords) {
-            try {
-                List<SearchHit<LocationDocument>> results =
-                    locationRepository.searchByKeywordWithFuzzy(keyword);
+    private boolean hasTooShortKeyword(String[] keywords) {
+        return Arrays.stream(keywords).anyMatch(k -> k.length() < MIN_SPLIT_LENGTH);
+    }
 
-                if (results.isEmpty()) {
-                    return false;
-                }
-            } catch (Exception e) {
-                log.debug("키워드 검증 중 오류: {}", keyword, e);
-                return false;
-            }
+    private boolean hasSearchResult(String keyword) {
+        try {
+            return locationRepository.searchByKeywordWithFuzzy(keyword).isEmpty() == false;
+        } catch (Exception e) {
+            log.debug("키워드 검증 중 오류: {}", keyword, e);
+            return false;
         }
-
-        return true;
     }
 
     private void setCurrentKeyword(String[] keywords, String trimmedKeyword) {
@@ -158,8 +137,51 @@ public class SearchService {
         PaginationRequest paginationRequest
     ) {
         Map<String, SearchHit<LocationDocument>> allHitsMap = searchByKeywordCount(keywords, trimmedKeyword);
-        List<SearchResponse> allLocations = convertToResponsesWithScore(allHitsMap.values());
+        List<SearchHit<LocationDocument>> sortedHits = sortHitsByPriority(allHitsMap.values());
+        List<SearchResponse> allLocations = convertToResponsesWithScore(sortedHits);
         return paginateResults(allLocations, paginationRequest);
+    }
+
+    private List<SearchHit<LocationDocument>> sortHitsByPriority(Collection<SearchHit<LocationDocument>> hits) {
+        return hits.stream()
+            .sorted(this::compareByPriority)
+            .toList();
+    }
+
+    private int compareByPriority(SearchHit<LocationDocument> a, SearchHit<LocationDocument> b) {
+        Integer priorityA = a.getContent().getPriority();
+        Integer priorityB = b.getContent().getPriority();
+
+        if (hasBothPriority(priorityA, priorityB)) {
+            return Integer.compare(priorityA, priorityB);
+        }
+        if (hasNoPriority(priorityA, priorityB)) {
+            return compareScore(a, b);
+        }
+        return priorityFirst(priorityA);
+    }
+
+    private boolean hasBothPriority(Integer a, Integer b) {
+        return a != null && b != null;
+    }
+
+    private boolean hasNoPriority(Integer a, Integer b) {
+        return a == null && b == null;
+    }
+
+    private int compareScore(SearchHit<LocationDocument> a, SearchHit<LocationDocument> b) {
+        return Float.compare(getScore(b), getScore(a));
+    }
+
+    private float getScore(SearchHit<LocationDocument> hit) {
+        return hit.getScore();
+    }
+
+    private int priorityFirst(Integer priority) {
+        if (priority != null) {
+            return -1;
+        }
+        return 1;
     }
 
     private Map<String, SearchHit<LocationDocument>> searchByKeywordCount(String[] keywords, String trimmedKeyword) {
@@ -189,11 +211,14 @@ public class SearchService {
         Map<String, SearchHit<LocationDocument>> results
     ) {
         List<LocationDocument> countries = extractCountries(searchHits);
-        if (!hasCountries(countries)) {
+        if (hasNoCountries(countries)) {
             return;
         }
-        // 🔧 수정 2: 국가 검색 시 해당 국가의 도시들을 더 높은 스코어로 추가
         addAllCitiesFromCountries(countries, results);
+    }
+
+    private boolean hasNoCountries(List<LocationDocument> countries) {
+        return countries.isEmpty();
     }
 
     private void addAllCitiesFromCountries(
@@ -208,8 +233,7 @@ public class SearchService {
         Map<String, SearchHit<LocationDocument>> results
     ) {
         List<LocationDocument> cities = fetchCitiesForCountry(country);
-        // 🔧 수정 2: 국가의 도시들을 더 높은 스코어로 추가
-        addCitiesToResults(cities, results, 1500.0f); // 국가 도시는 높은 스코어
+        addCitiesToResults(cities, results, 1500.0f);
     }
 
     private List<LocationDocument> fetchCitiesForCountry(LocationDocument country) {
@@ -222,14 +246,6 @@ public class SearchService {
 
     private void addCitiesToResults(
         List<LocationDocument> cities,
-        Map<String, SearchHit<LocationDocument>> results
-    ) {
-        cities.forEach(city -> addCityIfNotExists(city, results));
-    }
-
-    // 🔧 수정 2: 오버로드 메서드 추가 - 스코어를 지정할 수 있도록
-    private void addCitiesToResults(
-        List<LocationDocument> cities,
         Map<String, SearchHit<LocationDocument>> results,
         float score
     ) {
@@ -238,28 +254,17 @@ public class SearchService {
 
     private void addCityIfNotExists(
         LocationDocument city,
-        Map<String, SearchHit<LocationDocument>> results
-    ) {
-        String id = city.getId();
-        if (isNotInResults(id, results)) {
-            results.put(id, createSearchHit(city, COUNTRY_CITY_SCORE));
-        }
-    }
-
-    // 🔧 수정 2: 오버로드 메서드 추가
-    private void addCityIfNotExists(
-        LocationDocument city,
         Map<String, SearchHit<LocationDocument>> results,
         float score
     ) {
         String id = city.getId();
-        if (isNotInResults(id, results)) {
+        if (isAbsentInResults(id, results)) {
             results.put(id, createSearchHit(city, score));
         }
     }
 
-    private boolean isNotInResults(String id, Map<String, SearchHit<LocationDocument>> results) {
-        return !results.containsKey(id);
+    private boolean isAbsentInResults(String id, Map<String, SearchHit<LocationDocument>> results) {
+        return results.containsKey(id) == false;
     }
 
     private Map<String, SearchHit<LocationDocument>> searchMultipleKeywords(String[] keywords) {
@@ -374,7 +379,7 @@ public class SearchService {
         return keywords.length == 1;
     }
 
-    private List<SearchResponse> convertToResponsesWithScore(Collection<SearchHit<LocationDocument>> searchHits) {
+    private List<SearchResponse> convertToResponsesWithScore(List<SearchHit<LocationDocument>> searchHits) {
         return searchHits.stream()
             .map(this::convertToResponse)
             .toList();
@@ -408,13 +413,12 @@ public class SearchService {
 
     private void addHighlightIfMatched(Map<String, List<String>> highlight, String field, String text, String keyword) {
         String highlighted = highlightText(text, keyword);
-        if (!hasHighlight(highlighted)) {
-            return;
+        if (hasHighlight(highlighted)) {
+            addHighlightToMap(highlight, field, highlighted);
         }
-        addHighlightToMap(highlight, field, highlighted, text);
     }
 
-    private void addHighlightToMap(Map<String, List<String>> highlight, String field, String highlighted, String original) {
+    private void addHighlightToMap(Map<String, List<String>> highlight, String field, String highlighted) {
         highlight.put(field, List.of(highlighted));
     }
 
@@ -465,10 +469,6 @@ public class SearchService {
 
     private boolean isCountry(LocationDocument document) {
         return "country".equals(document.getType());
-    }
-
-    private boolean hasCountries(List<LocationDocument> countries) {
-        return !countries.isEmpty();
     }
 
     private boolean isCity(LocationDocument document) {

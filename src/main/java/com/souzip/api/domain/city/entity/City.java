@@ -2,6 +2,8 @@ package com.souzip.api.domain.city.entity;
 
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +16,8 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "city", indexes = {
     @Index(name = "idx_city_country", columnList = "country_id"),
-    @Index(name = "idx_city_name", columnList = "name_en, name_kr")
+    @Index(name = "idx_city_name", columnList = "name_en, name_kr"),
+    @Index(name = "idx_city_priority", columnList = "country_id, priority")
 })
 public class City extends BaseEntity {
 
@@ -29,6 +32,9 @@ public class City extends BaseEntity {
 
     @Column(nullable = false)
     private BigDecimal longitude;
+
+    @Column(nullable = true)
+    private Integer priority;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -47,6 +53,22 @@ public class City extends BaseEntity {
             .latitude(latitude)
             .longitude(longitude)
             .country(country)
+            .priority(null)
             .build();
+    }
+
+    public void updatePriority(Integer priority) {
+        validatePriority(priority);
+        this.priority = priority;
+    }
+
+    private void validatePriority(Integer priority) {
+        if (isInvalidPriority(priority)) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT, "우선순위는 1 이상이어야 합니다.");
+        }
+    }
+
+    private boolean isInvalidPriority(Integer priority) {
+        return priority != null && priority < 1;
     }
 }

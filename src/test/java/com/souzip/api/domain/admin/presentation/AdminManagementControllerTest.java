@@ -1,12 +1,22 @@
 package com.souzip.api.domain.admin.presentation;
 
 import com.souzip.api.docs.RestDocsSupport;
+import com.souzip.api.domain.admin.application.AdminCityQueryUseCase;
+import com.souzip.api.domain.admin.application.AdminCountryQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminManagementService;
 import com.souzip.api.domain.admin.application.AdminManagementService.AdminPageResult;
+import com.souzip.api.domain.admin.application.command.CreateCityCommand;
+import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
+import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
+import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
+import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
 import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
+import com.souzip.api.domain.admin.presentation.request.CreateCityRequest;
 import com.souzip.api.domain.admin.presentation.request.InviteAdminRequest;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -23,8 +33,7 @@ import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
 import static com.souzip.api.docs.CommonDocumentation.apiResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -47,10 +56,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AdminManagementControllerTest extends RestDocsSupport {
 
     private final AdminManagementService adminManagementService = mock(AdminManagementService.class);
+    private final AdminCityQueryUseCase adminCityQueryUseCase = mock(AdminCityQueryUseCase.class);
+    private final AdminCountryQueryUseCase adminCountryQueryUseCase = mock(AdminCountryQueryUseCase.class);
 
     @Override
     protected Object initController() {
-        return new AdminManagementController(adminManagementService);
+        return new AdminManagementController(adminManagementService, adminCityQueryUseCase, adminCountryQueryUseCase);
     }
 
     @DisplayName("관리자 초대 - ADMIN 역할")
@@ -68,7 +79,13 @@ class AdminManagementControllerTest extends RestDocsSupport {
         Admin createdAdmin = Admin.create("newadmin", "password123", AdminRole.ADMIN,
             new TestAdminPasswordEncoder());
 
-        given(adminManagementService.inviteAdmin(any())).willReturn(createdAdmin);
+        given(adminManagementService.inviteAdmin(
+            new InviteAdminCommand(
+                request.username(),
+                request.password(),
+                request.role()
+            )
+        )).willReturn(createdAdmin);
 
         // when & then
         mockMvc.perform(post("/api/admin/invite")
@@ -212,7 +229,8 @@ class AdminManagementControllerTest extends RestDocsSupport {
         setAdminAuthentication();
         Long cityId = 1L;
 
-        doNothing().when(adminManagementService).updateCityPriority(eq(cityId), eq(1));
+        doNothing().when(adminManagementService)
+            .updateCityPriority(new UpdateCityPriorityCommand(cityId, 1));
 
         // when & then
         mockMvc.perform(patch("/api/admin/cities/{cityId}/priority", cityId)
@@ -249,7 +267,8 @@ class AdminManagementControllerTest extends RestDocsSupport {
         setAdminAuthentication();
         Long cityId = 1L;
 
-        doNothing().when(adminManagementService).updateCityPriority(eq(cityId), isNull());
+        doNothing().when(adminManagementService)
+            .updateCityPriority(new UpdateCityPriorityCommand(cityId, null));
 
         // when & then
         mockMvc.perform(patch("/api/admin/cities/{cityId}/priority", cityId)
@@ -265,6 +284,176 @@ class AdminManagementControllerTest extends RestDocsSupport {
                 ),
                 pathParameters(
                     parameterWithName("cityId").description("도시 ID")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터 (없음)").optional(),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("나라 목록 조회 성공")
+    @Test
+    void getCountries_success() throws Exception {
+        // given
+        setAdminAuthentication();
+
+        List<CountryQueryResult> countries = List.of(
+            new CountryQueryResult(1L, "대한민국"),
+            new CountryQueryResult(2L, "일본")
+        );
+
+        given(adminCountryQueryUseCase.getCountries()).willReturn(countries);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/countries")
+                .header("Authorization", "Bearer admin-token"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data[0].id").value(1))
+            .andExpect(jsonPath("$.data[0].nameKr").value("대한민국"))
+            .andExpect(jsonPath("$.data[1].id").value(2))
+            .andExpect(jsonPath("$.data[1].nameKr").value("일본"))
+            .andDo(document("admin/get-countries",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라 목록"),
+                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("나라 ID"),
+                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("나라 한글 이름"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("도시 목록 조회 성공")
+    @Test
+    void getCities_success() throws Exception {
+        // given
+        setAdminAuthentication();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<CityQueryResult> cities = List.of(
+            new CityQueryResult(1L, "서울", 1, now),
+            new CityQueryResult(2L, "부산", 2, now)
+        );
+
+        given(adminCityQueryUseCase.getCities(anyLong())).willReturn(cities);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/cities")
+                .header("Authorization", "Bearer admin-token")
+                .param("countryId", "1"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data[0].id").value(1))
+            .andExpect(jsonPath("$.data[0].nameKr").value("서울"))
+            .andExpect(jsonPath("$.data[0].priority").value(1))
+            .andExpect(jsonPath("$.data[1].id").value(2))
+            .andExpect(jsonPath("$.data[1].nameKr").value("부산"))
+            .andDo(document("admin/get-cities",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
+                ),
+                queryParameters(
+                    parameterWithName("countryId").description("나라 ID (기본값: 1)").optional()
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("도시 목록"),
+                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("도시 ID"),
+                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("도시 한글 이름"),
+                    fieldWithPath("data[].priority").type(JsonFieldType.NUMBER).description("우선순위").optional(),
+                    fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING).description("수정 시각"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("도시 추가 성공")
+    @Test
+    void createCity_success() throws Exception {
+        // given
+        setAdminAuthentication();
+
+        CreateCityRequest request = new CreateCityRequest(
+            "Seoul", "서울", 37.56, 126.97, 1L
+        );
+
+        doNothing().when(adminManagementService).createCity(
+            new CreateCityCommand(
+                request.nameEn(),
+                request.nameKr(),
+                request.latitude(),
+                request.longitude(),
+                request.countryId()
+            )
+        );
+
+        // when & then
+        mockMvc.perform(post("/api/admin/cities")
+                .header("Authorization", "Bearer admin-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value("도시가 추가되었습니다."))
+            .andDo(document("admin/create-city",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                ),
+                requestFields(
+                    fieldWithPath("nameEn").type(JsonFieldType.STRING).description("도시 영문명"),
+                    fieldWithPath("nameKr").type(JsonFieldType.STRING).description("도시 한글명"),
+                    fieldWithPath("latitude").type(JsonFieldType.NUMBER).description("위도"),
+                    fieldWithPath("longitude").type(JsonFieldType.NUMBER).description("경도"),
+                    fieldWithPath("countryId").type(JsonFieldType.NUMBER).description("나라 ID")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터 (없음)").optional(),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("도시 삭제 성공")
+    @Test
+    void deleteCity_success() throws Exception {
+        // given
+        setAdminAuthentication();
+        Long cityId = 1L;
+
+        doNothing().when(adminManagementService)
+            .deleteCity(new DeleteCityCommand(cityId));
+
+        // when & then
+        mockMvc.perform(delete("/api/admin/cities/{cityId}", cityId)
+                .header("Authorization", "Bearer admin-token"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value("도시가 삭제되었습니다."))
+            .andDo(document("admin/delete-city",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                ),
+                pathParameters(
+                    parameterWithName("cityId").description("삭제할 도시 ID")
                 ),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터 (없음)").optional(),

@@ -1,6 +1,12 @@
 package com.souzip.api.domain.admin.application;
 
+import com.souzip.api.domain.admin.application.command.CreateCityCommand;
+import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
+import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
+import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
+import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
+import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
 import com.souzip.api.domain.admin.exception.AdminErrorCode;
 import com.souzip.api.domain.admin.exception.AdminException;
 import com.souzip.api.domain.admin.exception.AdminNotFoundException;
@@ -8,14 +14,10 @@ import com.souzip.api.domain.admin.infrastructure.encoder.AdminPasswordEncoderIm
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.repository.AdminRepository;
-import com.souzip.api.domain.city.entity.City;
-import com.souzip.api.domain.city.repository.CityRepository;
-import com.souzip.api.domain.search.scheduler.SearchIndexScheduler;
-import com.souzip.api.global.exception.BusinessException;
-import com.souzip.api.global.exception.ErrorCode;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +28,7 @@ public class AdminManagementService {
 
     private final AdminRepository adminRepository;
     private final AdminPasswordEncoderImpl passwordEncoder;
-    private final CityRepository cityRepository;
-    private final SearchIndexScheduler searchIndexScheduler;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AdminPageResult getAdmins(int pageNo, int pageSize) {
         int offset = (pageNo - 1) * pageSize;
@@ -56,40 +57,30 @@ public class AdminManagementService {
     }
 
     @Transactional
-    public void updateCityPriority(Long cityId, Integer newPriority) {
-        City city = findCityByIdWithLock(cityId);
-        Integer oldPriority = city.getPriority();
-        Long countryId = city.getCountry().getId();
-
-        adjustPriorities(oldPriority, newPriority, countryId);
-        city.updatePriority(newPriority);
-        searchIndexScheduler.markReindexNeeded();
+    public void updateCityPriority(UpdateCityPriorityCommand command) {
+        eventPublisher.publishEvent(
+            AdminCityPriorityChangeRequestedEvent.of(command.cityId(), command.newPriority())
+        );
     }
 
-    private void adjustPriorities(Integer oldPriority, Integer newPriority, Long countryId) {
-        pullOldPriorityIfExists(oldPriority, countryId);
-        pushNewPriorityIfExists(newPriority, countryId);
+    @Transactional
+    public void createCity(CreateCityCommand command) {
+        eventPublisher.publishEvent(
+            AdminCityCreateRequestedEvent.of(
+                command.nameEn(),
+                command.nameKr(),
+                command.latitude(),
+                command.longitude(),
+                command.countryId()
+            )
+        );
     }
 
-    private void pullOldPriorityIfExists(Integer oldPriority, Long countryId) {
-        if (hasPriority(oldPriority)) {
-            cityRepository.pullPriorityFrom(oldPriority, countryId);
-        }
-    }
-
-    private void pushNewPriorityIfExists(Integer newPriority, Long countryId) {
-        if (hasPriority(newPriority)) {
-            cityRepository.shiftPriorityFrom(newPriority, countryId);
-        }
-    }
-
-    private boolean hasPriority(Integer priority) {
-        return priority != null;
-    }
-
-    private City findCityByIdWithLock(Long cityId) {
-        return cityRepository.findByIdWithLock(cityId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "도시를 찾을 수 없습니다."));
+    @Transactional
+    public void deleteCity(DeleteCityCommand command) {
+        eventPublisher.publishEvent(
+            AdminCityDeleteRequestedEvent.of(command.cityId())
+        );
     }
 
     private void validateNotSuperAdmin(AdminRole role) {

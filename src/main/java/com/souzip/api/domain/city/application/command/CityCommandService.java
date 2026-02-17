@@ -1,6 +1,10 @@
 package com.souzip.api.domain.city.application.command;
 
+import com.souzip.api.domain.city.application.command.CreateCityCommand;
+import com.souzip.api.domain.city.application.command.DeleteCityCommand;
+import com.souzip.api.domain.city.application.command.UpdateCityPriorityCommand;
 import com.souzip.api.domain.city.application.port.CityManagementPort;
+import com.souzip.api.domain.city.domain.service.CityPriorityDomainService;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.event.CityCreatedEvent;
 import com.souzip.api.domain.city.event.CityDeletedEvent;
@@ -11,7 +15,6 @@ import com.souzip.api.domain.country.repository.CountryRepository;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import java.math.BigDecimal;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ public class CityCommandService implements CityManagementPort {
     private final CityRepository cityRepository;
     private final CountryRepository countryRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final CityPriorityDomainService cityPriorityDomainService;
 
     @Transactional
     @Override
@@ -32,7 +36,8 @@ public class CityCommandService implements CityManagementPort {
         Integer oldPriority = city.getPriority();
         Long countryId = city.getCountry().getId();
 
-        adjustPriorities(oldPriority, command.newPriority(), countryId);
+        // Domain Service 위임
+        cityPriorityDomainService.adjustPriorities(oldPriority, command.newPriority(), countryId);
         city.updatePriority(command.newPriority());
 
         eventPublisher.publishEvent(CityPriorityUpdatedEvent.of(
@@ -68,39 +73,6 @@ public class CityCommandService implements CityManagementPort {
         cityRepository.delete(city);
 
         eventPublisher.publishEvent(CityDeletedEvent.of(city.getId()));
-    }
-
-    private void adjustPriorities(Integer oldPriority, Integer newPriority, Long countryId) {
-        pullOldPriorityIfExists(oldPriority, countryId);
-        pushNewPriorityIfExists(newPriority, countryId);
-    }
-
-    private void pullOldPriorityIfExists(Integer oldPriority, Long countryId) {
-        if (hasPriority(oldPriority)) {
-            AtomicInteger expected = new AtomicInteger(oldPriority + 1);
-
-            cityRepository
-                .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, oldPriority + 1)
-                .stream()
-                .takeWhile(city -> city.getPriority().equals(expected.get()))
-                .forEach(city -> city.updatePriority(expected.getAndIncrement() - 1));
-        }
-    }
-
-    private void pushNewPriorityIfExists(Integer newPriority, Long countryId) {
-        if (hasPriority(newPriority)) {
-            AtomicInteger expected = new AtomicInteger(newPriority);
-
-            cityRepository
-                .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, newPriority)
-                .stream()
-                .takeWhile(city -> city.getPriority().equals(expected.get()))
-                .forEach(city -> city.updatePriority(expected.getAndIncrement() + 1));
-        }
-    }
-
-    private boolean hasPriority(Integer priority) {
-        return priority != null;
     }
 
     private City findCityByIdWithLock(Long cityId) {

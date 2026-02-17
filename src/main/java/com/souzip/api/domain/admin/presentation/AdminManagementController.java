@@ -3,6 +3,10 @@ package com.souzip.api.domain.admin.presentation;
 import com.souzip.api.domain.admin.application.AdminCityQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminCountryQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminManagementService;
+import com.souzip.api.domain.admin.application.command.CreateCityCommand;
+import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
+import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
 import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.AdminAccess;
@@ -10,6 +14,7 @@ import com.souzip.api.domain.admin.infrastructure.security.annotation.CurrentAdm
 import com.souzip.api.domain.admin.infrastructure.security.annotation.SuperAdminOnly;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.ViewerAccess;
 import com.souzip.api.domain.admin.model.Admin;
+import com.souzip.api.domain.admin.presentation.request.CreateCityRequest;
 import com.souzip.api.domain.admin.presentation.request.InviteAdminRequest;
 import com.souzip.api.domain.admin.presentation.response.AdminResponse;
 import com.souzip.api.domain.admin.presentation.response.InviteAdminResponse;
@@ -45,7 +50,11 @@ public class AdminManagementController {
     public SuccessResponse<InviteAdminResponse> inviteAdmin(
         @Valid @RequestBody InviteAdminRequest request
     ) {
-        Admin admin = adminManagementService.inviteAdmin(request.toCommand());
+        Admin admin = adminManagementService.inviteAdmin( new InviteAdminCommand(
+            request.username(),
+            request.password(),
+            request.role()
+        ));
         return SuccessResponse.of(InviteAdminResponse.from(admin), "관리자 초대가 완료되었습니다.");
     }
 
@@ -70,16 +79,6 @@ public class AdminManagementController {
         return SuccessResponse.of(null, "관리자가 삭제되었습니다.");
     }
 
-    @AdminAccess
-    @PatchMapping("/cities/{cityId}/priority")
-    public SuccessResponse<Void> updateCityPriority(
-        @PathVariable Long cityId,
-        @RequestParam(required = false) Integer priority
-    ) {
-        adminManagementService.updateCityPriority(cityId, priority);
-        return SuccessResponse.of(null, "우선순위가 업데이트되었습니다.");
-    }
-
     @ViewerAccess
     @GetMapping("/countries")
     public SuccessResponse<List<CountryQueryResult>> getCountries() {
@@ -92,5 +91,37 @@ public class AdminManagementController {
         @RequestParam(defaultValue = "83") Long countryId
     ) {
         return SuccessResponse.of(adminCityQueryUseCase.getCities(countryId));
+    }
+
+    @AdminAccess
+    @PatchMapping("/cities/{cityId}/priority")
+    public SuccessResponse<Void> updateCityPriority(
+        @PathVariable Long cityId,
+        @RequestParam(required = false) Integer priority
+    ) {
+        adminManagementService.updateCityPriority(new UpdateCityPriorityCommand(cityId, priority));
+        return SuccessResponse.of(null, "우선순위가 업데이트되었습니다.");
+    }
+
+    @AdminAccess
+    @PostMapping("/cities")
+    public SuccessResponse<Void> createCity(@Valid @RequestBody CreateCityRequest request) {
+        adminManagementService.createCity(
+            new CreateCityCommand(
+                request.nameEn(),
+                request.nameKr(),
+                request.latitude(),
+                request.longitude(),
+                request.countryId()
+            )
+        );
+        return SuccessResponse.of(null, "도시가 추가되었습니다.");
+    }
+
+    @AdminAccess
+    @DeleteMapping("/cities/{cityId}")
+    public SuccessResponse<Void> deleteCity(@PathVariable Long cityId) {
+        adminManagementService.deleteCity(new DeleteCityCommand(cityId));
+        return SuccessResponse.of(null, "도시가 삭제되었습니다.");
     }
 }

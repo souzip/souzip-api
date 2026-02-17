@@ -40,7 +40,7 @@ public class City extends BaseEntity {
     @JoinColumn(name = "country_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Country country;
 
-    public static City of(
+    public static City create(
         String nameEn,
         String nameKr,
         BigDecimal latitude,

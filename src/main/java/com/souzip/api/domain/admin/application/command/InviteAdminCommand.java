@@ -6,5 +6,4 @@ public record InviteAdminCommand(
     String username,
     String password,
     AdminRole role
-) {
-}
+) {}

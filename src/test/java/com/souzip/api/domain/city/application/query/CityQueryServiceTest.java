@@ -34,9 +34,9 @@ class CityQueryServiceTest {
 
         Country country = mock(Country.class);
 
-        City seoul = City.of("Seoul", "서울",
+        City seoul = City.create("Seoul", "서울",
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
-        City busan = City.of("Busan", "부산",
+        City busan = City.create("Busan", "부산",
             BigDecimal.valueOf(35.18), BigDecimal.valueOf(129.08), country);
         seoul.updatePriority(1);
         busan.updatePriority(2);

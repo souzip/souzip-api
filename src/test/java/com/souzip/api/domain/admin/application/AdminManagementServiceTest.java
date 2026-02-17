@@ -1,7 +1,12 @@
 package com.souzip.api.domain.admin.application;
 
 import com.souzip.api.domain.admin.application.AdminManagementService.AdminPageResult;
+import com.souzip.api.domain.admin.application.command.CreateCityCommand;
+import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
+import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
+import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
+import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
 import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
 import com.souzip.api.domain.admin.exception.AdminErrorCode;
 import com.souzip.api.domain.admin.exception.AdminException;
@@ -233,15 +238,14 @@ class AdminManagementServiceTest {
     @Test
     void updateCityPriority_publishesEvent() {
         // given
-        Long cityId = 1L;
-        Integer newPriority = 1;
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(1L, 1);
 
         // when
-        adminManagementService.updateCityPriority(cityId, newPriority);
+        adminManagementService.updateCityPriority(command);
 
         // then
         verify(eventPublisher).publishEvent(
-            AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority)
+            AdminCityPriorityChangeRequestedEvent.of(command.cityId(), command.newPriority())
         );
     }
 
@@ -249,14 +253,52 @@ class AdminManagementServiceTest {
     @Test
     void updateCityPriority_reset_publishesEvent() {
         // given
-        Long cityId = 1L;
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(1L, null);
 
         // when
-        adminManagementService.updateCityPriority(cityId, null);
+        adminManagementService.updateCityPriority(command);
 
         // then
         verify(eventPublisher).publishEvent(
-            AdminCityPriorityChangeRequestedEvent.of(cityId, null)
+            AdminCityPriorityChangeRequestedEvent.of(command.cityId(), null)
+        );
+    }
+
+    @DisplayName("도시 생성 시 이벤트 발행")
+    @Test
+    void createCity_publishesEvent() {
+        // given
+        CreateCityCommand command = new CreateCityCommand(
+            "Seoul", "서울", 37.56, 126.97, 1L
+        );
+
+        // when
+        adminManagementService.createCity(command);
+
+        // then
+        verify(eventPublisher).publishEvent(
+            AdminCityCreateRequestedEvent.of(
+                command.nameEn(),
+                command.nameKr(),
+                command.latitude(),
+                command.longitude(),
+                command.countryId()
+            )
+        );
+    }
+
+    @DisplayName("도시 삭제 시 이벤트 발행")
+    @Test
+    void deleteCity_publishesEvent() {
+        // given
+        DeleteCityCommand command = new DeleteCityCommand(1L);
+
+        // when
+        adminManagementService.deleteCity(command);
+
+        // then
+        verify(eventPublisher).publishEvent(
+            AdminCityDeleteRequestedEvent.of(command.cityId())
         );
     }
 }

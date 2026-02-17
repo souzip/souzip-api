@@ -1,7 +1,9 @@
 package com.souzip.api.domain.admin.application;
 
 import com.souzip.api.domain.admin.application.command.CreateCityCommand;
+import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
+import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
 import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
 import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
@@ -55,9 +57,9 @@ public class AdminManagementService {
     }
 
     @Transactional
-    public void updateCityPriority(Long cityId, Integer newPriority) {
+    public void updateCityPriority(UpdateCityPriorityCommand command) {
         eventPublisher.publishEvent(
-            AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority)
+            AdminCityPriorityChangeRequestedEvent.of(command.cityId(), command.newPriority())
         );
     }
 
@@ -75,9 +77,9 @@ public class AdminManagementService {
     }
 
     @Transactional
-    public void deleteCity(Long cityId) {
+    public void deleteCity(DeleteCityCommand command) {
         eventPublisher.publishEvent(
-            AdminCityDeleteRequestedEvent.of(cityId)
+            AdminCityDeleteRequestedEvent.of(command.cityId())
         );
     }
 

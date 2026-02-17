@@ -1,9 +1,12 @@
 package com.souzip.api.domain.city.application.command;
 
+import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
+import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
 import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.repository.CityRepository;
 import com.souzip.api.domain.country.entity.Country;
+import com.souzip.api.domain.country.repository.CountryRepository;
 import com.souzip.api.domain.search.scheduler.SearchIndexScheduler;
 import com.souzip.api.global.exception.BusinessException;
 import java.math.BigDecimal;
@@ -30,6 +33,9 @@ class CityCommandServiceTest {
     private CityRepository cityRepository;
 
     @Mock
+    private CountryRepository countryRepository;
+
+    @Mock
     private SearchIndexScheduler searchIndexScheduler;
 
     @InjectMocks
@@ -45,7 +51,7 @@ class CityCommandServiceTest {
         Country country = mock(Country.class);
         given(country.getId()).willReturn(1L);
 
-        City city = City.of("Seoul", "서울",
+        City city = City.create("Seoul", "서울",
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
 
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
@@ -74,7 +80,7 @@ class CityCommandServiceTest {
         Country country = mock(Country.class);
         given(country.getId()).willReturn(1L);
 
-        City city = City.of("Seoul", "서울",
+        City city = City.create("Seoul", "서울",
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
         city.updatePriority(1);
 
@@ -102,7 +108,7 @@ class CityCommandServiceTest {
         Country country = mock(Country.class);
         given(country.getId()).willReturn(1L);
 
-        City city = City.of("Seoul", "서울",
+        City city = City.create("Seoul", "서울",
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
         city.updatePriority(1);
 
@@ -138,6 +144,80 @@ class CityCommandServiceTest {
 
         verify(cityRepository, never()).pullPriorityFrom(any(), any());
         verify(cityRepository, never()).shiftPriorityFrom(any(), any());
+        verify(searchIndexScheduler, never()).markReindexNeeded();
+    }
+
+    @DisplayName("도시 생성 성공")
+    @Test
+    void handleCityCreateRequested_success() {
+        // given
+        Country country = mock(Country.class);
+        given(countryRepository.findById(1L)).willReturn(Optional.of(country));
+
+        AdminCityCreateRequestedEvent event =
+            AdminCityCreateRequestedEvent.of("Seoul", "서울", 37.56, 126.97, 1L);
+
+        // when
+        cityCommandService.handleCityCreateRequested(event);
+
+        // then
+        verify(countryRepository).findById(1L);
+        verify(cityRepository).save(any(City.class));
+        verify(searchIndexScheduler).markReindexNeeded();
+    }
+
+    @DisplayName("도시 생성 실패 - 나라 없음")
+    @Test
+    void handleCityCreateRequested_countryNotFound_throwsException() {
+        // given
+        given(countryRepository.findById(999L)).willReturn(Optional.empty());
+
+        AdminCityCreateRequestedEvent event =
+            AdminCityCreateRequestedEvent.of("Seoul", "서울", 37.56, 126.97, 999L);
+
+        // when & then
+        assertThatThrownBy(() -> cityCommandService.handleCityCreateRequested(event))
+            .isInstanceOf(BusinessException.class);
+
+        verify(cityRepository, never()).save(any());
+        verify(searchIndexScheduler, never()).markReindexNeeded();
+    }
+
+    @DisplayName("도시 삭제 성공")
+    @Test
+    void handleCityDeleteRequested_success() {
+        // given
+        Long cityId = 1L;
+        Country country = mock(Country.class);
+        City city = City.create("Seoul", "서울",
+            BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
+
+        given(cityRepository.findById(cityId)).willReturn(Optional.of(city));
+
+        AdminCityDeleteRequestedEvent event = AdminCityDeleteRequestedEvent.of(cityId);
+
+        // when
+        cityCommandService.handleCityDeleteRequested(event);
+
+        // then
+        verify(cityRepository).findById(cityId);
+        verify(cityRepository).delete(city);
+        verify(searchIndexScheduler).markReindexNeeded();
+    }
+
+    @DisplayName("도시 삭제 실패 - 도시 없음")
+    @Test
+    void handleCityDeleteRequested_cityNotFound_throwsException() {
+        // given
+        given(cityRepository.findById(999L)).willReturn(Optional.empty());
+
+        AdminCityDeleteRequestedEvent event = AdminCityDeleteRequestedEvent.of(999L);
+
+        // when & then
+        assertThatThrownBy(() -> cityCommandService.handleCityDeleteRequested(event))
+            .isInstanceOf(BusinessException.class);
+
+        verify(cityRepository, never()).delete(any());
         verify(searchIndexScheduler, never()).markReindexNeeded();
     }
 }

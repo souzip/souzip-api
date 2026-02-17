@@ -22,8 +22,4 @@ public record InviteAdminRequest(
     AdminRole role
 ) {
     private static final String USERNAME_PATTERN = "^[a-zA-Z0-9_가-힣]+$";
-
-    public InviteAdminCommand toCommand() {
-        return new InviteAdminCommand(username, password, role);
-    }
 }

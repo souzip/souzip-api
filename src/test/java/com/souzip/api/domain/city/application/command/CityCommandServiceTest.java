@@ -69,12 +69,7 @@ class CityCommandServiceTest {
         verify(cityRepository).findByIdWithLock(cityId);
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(eventPublisher).publishEvent(argThat(event ->
-            event instanceof CityPriorityUpdatedEvent &&
-                ((CityPriorityUpdatedEvent) event).cityId().equals(cityId) &&
-                ((CityPriorityUpdatedEvent) event).oldPriority() == null &&
-                ((CityPriorityUpdatedEvent) event).newPriority().equals(newPriority)
-        ));
+        verify(eventPublisher).publishEvent(argThat(event -> false));
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
@@ -111,12 +106,7 @@ class CityCommandServiceTest {
         // then
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(eventPublisher).publishEvent(argThat(event ->
-            event instanceof CityPriorityUpdatedEvent &&
-                ((CityPriorityUpdatedEvent) event).cityId().equals(cityId) &&
-                ((CityPriorityUpdatedEvent) event).oldPriority().equals(oldPriority) &&
-                ((CityPriorityUpdatedEvent) event).newPriority().equals(newPriority)
-        ));
+        verify(eventPublisher).publishEvent(argThat(event -> false));
         assertThat(existingCity.getPriority()).isEqualTo(4);
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
@@ -147,12 +137,7 @@ class CityCommandServiceTest {
         // then
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, null);
-        verify(eventPublisher).publishEvent(argThat(event ->
-            event instanceof CityPriorityUpdatedEvent &&
-                ((CityPriorityUpdatedEvent) event).cityId().equals(cityId) &&
-                ((CityPriorityUpdatedEvent) event).oldPriority().equals(oldPriority) &&
-                ((CityPriorityUpdatedEvent) event).newPriority() == null
-        ));
+        verify(eventPublisher).publishEvent(argThat(event -> false));
         assertThat(city.getPriority()).isNull();
     }
 
@@ -269,10 +254,7 @@ class CityCommandServiceTest {
         // then
         verify(countryRepository).findById(1L);
         verify(cityRepository).save(any(City.class));
-        verify(eventPublisher).publishEvent(argThat(event ->
-            event instanceof CityCreatedEvent &&
-                ((CityCreatedEvent) event).countryId().equals(1L)
-        ));
+        verify(eventPublisher).publishEvent(argThat(event -> false));
     }
 
     @DisplayName("도시 생성 실패 - 나라 없음")
@@ -312,10 +294,7 @@ class CityCommandServiceTest {
         // then
         verify(cityRepository).findById(cityId);
         verify(cityRepository).delete(city);
-        verify(eventPublisher).publishEvent(argThat(event ->
-            event instanceof CityDeletedEvent &&
-                ((CityDeletedEvent) event).cityId().equals(cityId)
-        ));
+        verify(eventPublisher).publishEvent(argThat(event -> false));
     }
 
     @DisplayName("도시 삭제 실패 - 도시 없음")

@@ -1,5 +1,6 @@
 package com.souzip.api.domain.admin.application.port;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CityQueryPort {
@@ -8,7 +9,7 @@ public interface CityQueryPort {
     record CityQueryResult(
         Long id,
         String nameKr,
-        String nameEn,
-        Integer priority
+        Integer priority,
+        LocalDateTime updatedAt
     ) {}
 }

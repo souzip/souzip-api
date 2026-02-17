@@ -11,6 +11,7 @@ import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.presentation.request.InviteAdminRequest;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -308,7 +309,7 @@ class AdminManagementControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
-                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
                 ),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라 목록"),
@@ -326,10 +327,11 @@ class AdminManagementControllerTest extends RestDocsSupport {
     void getCities_success() throws Exception {
         // given
         setAdminAuthentication();
+        LocalDateTime now = LocalDateTime.now();
 
         List<CityQueryResult> cities = List.of(
-            new CityQueryResult(1L, "서울", "Seoul", 1),
-            new CityQueryResult(2L, "부산", "Busan", 2)
+            new CityQueryResult(1L, "서울", 1, now),
+            new CityQueryResult(2L, "부산", 2, now)
         );
 
         given(adminCityQueryUseCase.getCities(anyLong())).willReturn(cities);
@@ -349,17 +351,17 @@ class AdminManagementControllerTest extends RestDocsSupport {
                 getDocumentRequest(),
                 getDocumentResponse(),
                 requestHeaders(
-                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
                 ),
                 queryParameters(
-                    parameterWithName("countryId").description("나라 ID")
+                    parameterWithName("countryId").description("나라 ID (기본값: 1)").optional()
                 ),
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.ARRAY).description("도시 목록"),
                     fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("도시 ID"),
                     fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("도시 한글 이름"),
-                    fieldWithPath("data[].nameEn").type(JsonFieldType.STRING).description("도시 영문 이름"),
                     fieldWithPath("data[].priority").type(JsonFieldType.NUMBER).description("우선순위").optional(),
+                    fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING).description("수정 시각"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));

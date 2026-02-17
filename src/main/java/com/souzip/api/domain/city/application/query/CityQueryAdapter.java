@@ -17,8 +17,8 @@ public class CityQueryAdapter implements CityQueryPort {
             .map(result -> new CityQueryResult(
                 result.id(),
                 result.nameKr(),
-                result.nameEn(),
-                result.priority()
+                result.priority(),
+                result.updatedAt()
             ))
             .toList();
     }

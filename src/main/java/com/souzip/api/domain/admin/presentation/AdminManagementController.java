@@ -8,6 +8,7 @@ import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQuer
 import com.souzip.api.domain.admin.infrastructure.security.annotation.AdminAccess;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.SuperAdminOnly;
+import com.souzip.api.domain.admin.infrastructure.security.annotation.ViewerAccess;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.presentation.request.InviteAdminRequest;
 import com.souzip.api.domain.admin.presentation.response.AdminResponse;
@@ -79,15 +80,17 @@ public class AdminManagementController {
         return SuccessResponse.of(null, "우선순위가 업데이트되었습니다.");
     }
 
-    @AdminAccess
+    @ViewerAccess
     @GetMapping("/countries")
     public SuccessResponse<List<CountryQueryResult>> getCountries() {
         return SuccessResponse.of(adminCountryQueryUseCase.getCountries());
     }
 
-    @AdminAccess
+    @ViewerAccess
     @GetMapping("/cities")
-    public SuccessResponse<List<CityQueryResult>> getCities(@RequestParam Long countryId) {
+    public SuccessResponse<List<CityQueryResult>> getCities(
+        @RequestParam(defaultValue = "83") Long countryId
+    ) {
         return SuccessResponse.of(adminCityQueryUseCase.getCities(countryId));
     }
 }

@@ -2,6 +2,8 @@ package com.souzip.api.domain.city.entity;
 
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.global.exception.BusinessException;
+import com.souzip.api.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 

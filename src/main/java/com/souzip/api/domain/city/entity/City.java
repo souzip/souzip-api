@@ -56,4 +56,19 @@ public class City extends BaseEntity {
             .priority(null)
             .build();
     }
+
+    public void updatePriority(Integer priority) {
+        validatePriority(priority);
+        this.priority = priority;
+    }
+
+    private void validatePriority(Integer priority) {
+        if (isInvalidPriority(priority)) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT, "우선순위는 1 이상이어야 합니다.");
+        }
+    }
+
+    private boolean isInvalidPriority(Integer priority) {
+        return priority != null && priority < 1;
+    }
 }

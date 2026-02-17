@@ -138,8 +138,15 @@ public class SearchService {
     ) {
         Map<String, SearchHit<LocationDocument>> allHitsMap = searchByKeywordCount(keywords, trimmedKeyword);
         List<SearchHit<LocationDocument>> sortedHits = sortHitsByPriority(allHitsMap.values());
-        List<SearchResponse> allLocations = convertToResponsesWithScore(sortedHits);
+        List<SearchHit<LocationDocument>> cityHits = filterCities(sortedHits);
+        List<SearchResponse> allLocations = convertToResponsesWithScore(cityHits);
         return paginateResults(allLocations, paginationRequest);
+    }
+
+    private List<SearchHit<LocationDocument>> filterCities(List<SearchHit<LocationDocument>> hits) {
+        return hits.stream()
+            .filter(hit -> isCity(hit.getContent()))
+            .toList();
     }
 
     private List<SearchHit<LocationDocument>> sortHitsByPriority(Collection<SearchHit<LocationDocument>> hits) {

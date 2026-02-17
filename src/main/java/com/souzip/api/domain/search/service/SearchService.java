@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,7 +117,7 @@ public class SearchService {
 
     private boolean hasSearchResult(String keyword) {
         try {
-            return locationRepository.searchByKeywordWithFuzzy(keyword).isEmpty() == false;
+            return !locationRepository.searchByKeywordWithFuzzy(keyword).isEmpty();
         } catch (Exception e) {
             log.debug("키워드 검증 중 오류: {}", keyword, e);
             return false;
@@ -244,10 +245,10 @@ public class SearchService {
     }
 
     private List<LocationDocument> fetchCitiesForCountry(LocationDocument country) {
-        return locationRepository.findByCountryNameKrOrCountryNameEn(
+        return locationRepository.findCitiesByCountryNameOrderByPriority(
             country.getNameKr(),
             country.getNameEn(),
-            PageRequest.of(0, MAX_CITIES_PER_COUNTRY)
+            PageRequest.of(0, MAX_CITIES_PER_COUNTRY, Sort.by(Sort.Direction.ASC, "priority"))
         );
     }
 
@@ -271,7 +272,7 @@ public class SearchService {
     }
 
     private boolean isAbsentInResults(String id, Map<String, SearchHit<LocationDocument>> results) {
-        return results.containsKey(id) == false;
+        return !results.containsKey(id);
     }
 
     private Map<String, SearchHit<LocationDocument>> searchMultipleKeywords(String[] keywords) {

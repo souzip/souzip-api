@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -27,7 +28,7 @@ public class CityCommandService {
     private final CountryRepository countryRepository;
     private final SearchIndexScheduler searchIndexScheduler;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handlePriorityChangeRequested(AdminCityPriorityChangeRequestedEvent event) {
         City city = findCityByIdWithLock(event.cityId());
@@ -36,10 +37,15 @@ public class CityCommandService {
 
         adjustPriorities(oldPriority, event.newPriority(), countryId);
         city.updatePriority(event.newPriority());
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleReindexAfterPriorityChange(AdminCityPriorityChangeRequestedEvent event) {
         searchIndexScheduler.markReindexNeeded();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleCityCreateRequested(AdminCityCreateRequestedEvent event) {
         Country country = findCountryById(event.countryId());
@@ -51,14 +57,24 @@ public class CityCommandService {
             country
         );
         cityRepository.save(city);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleReindexAfterCreate(AdminCityCreateRequestedEvent event) {
         searchIndexScheduler.markReindexNeeded();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void handleCityDeleteRequested(AdminCityDeleteRequestedEvent event) {
         City city = findCityById(event.cityId());
         cityRepository.delete(city);
+    }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleReindexAfterDelete(AdminCityDeleteRequestedEvent event) {
         searchIndexScheduler.markReindexNeeded();
     }
 

@@ -27,15 +27,6 @@ public class AdminManagementService {
     private final AdminPasswordEncoderImpl passwordEncoder;
     private final CityRepository cityRepository;
 
-    @Transactional
-    public Admin inviteAdmin(InviteAdminCommand command) {
-        validateNotSuperAdmin(command.role());
-        validateUsernameNotDuplicated(command.username());
-
-        Admin admin = createAdmin(command);
-        return adminRepository.save(admin);
-    }
-
     public AdminPageResult getAdmins(int pageNo, int pageSize) {
         int offset = (pageNo - 1) * pageSize;
         List<Admin> admins = adminRepository.findAllExcludingSuperAdmin(offset, pageSize);
@@ -43,6 +34,15 @@ public class AdminManagementService {
         int totalPages = (int) Math.ceil((double) total / pageSize);
 
         return new AdminPageResult(admins, pageNo, pageSize, total, totalPages);
+    }
+
+    @Transactional
+    public Admin inviteAdmin(InviteAdminCommand command) {
+        validateNotSuperAdmin(command.role());
+        validateUsernameNotDuplicated(command.username());
+
+        Admin admin = createAdmin(command);
+        return adminRepository.save(admin);
     }
 
     @Transactional
@@ -54,9 +54,34 @@ public class AdminManagementService {
     }
 
     @Transactional
-    public void updateCityPriority(Long cityId, Integer priority) {
+    public void updateCityPriority(Long cityId, Integer newPriority) {
         City city = findCityById(cityId);
-        city.updatePriority(priority);
+        Integer oldPriority = city.getPriority();
+        Long countryId = city.getCountry().getId();
+
+        adjustPriorities(oldPriority, newPriority, countryId);
+        city.updatePriority(newPriority);
+    }
+
+    private void adjustPriorities(Integer oldPriority, Integer newPriority, Long countryId) {
+        pullOldPriorityIfExists(oldPriority, countryId);
+        pushNewPriorityIfExists(newPriority, countryId);
+    }
+
+    private void pullOldPriorityIfExists(Integer oldPriority, Long countryId) {
+        if (hasPriority(oldPriority)) {
+            cityRepository.pullPriorityFrom(oldPriority, countryId);
+        }
+    }
+
+    private void pushNewPriorityIfExists(Integer newPriority, Long countryId) {
+        if (hasPriority(newPriority)) {
+            cityRepository.shiftPriorityFrom(newPriority, countryId);
+        }
+    }
+
+    private boolean hasPriority(Integer priority) {
+        return priority != null;
     }
 
     private City findCityById(Long cityId) {

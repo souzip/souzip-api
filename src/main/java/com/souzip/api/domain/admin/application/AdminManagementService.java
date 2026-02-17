@@ -10,6 +10,7 @@ import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.repository.AdminRepository;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.repository.CityRepository;
+import com.souzip.api.domain.search.scheduler.SearchIndexScheduler;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import java.util.List;
@@ -26,6 +27,7 @@ public class AdminManagementService {
     private final AdminRepository adminRepository;
     private final AdminPasswordEncoderImpl passwordEncoder;
     private final CityRepository cityRepository;
+    private final SearchIndexScheduler searchIndexScheduler;
 
     public AdminPageResult getAdmins(int pageNo, int pageSize) {
         int offset = (pageNo - 1) * pageSize;
@@ -61,6 +63,7 @@ public class AdminManagementService {
 
         adjustPriorities(oldPriority, newPriority, countryId);
         city.updatePriority(newPriority);
+        searchIndexScheduler.markReindexNeeded();
     }
 
     private void adjustPriorities(Integer oldPriority, Integer newPriority, Long countryId) {

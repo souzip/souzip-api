@@ -55,7 +55,7 @@ public class AdminManagementService {
 
     @Transactional
     public void updateCityPriority(Long cityId, Integer newPriority) {
-        City city = findCityById(cityId);
+        City city = findCityByIdWithLock(cityId);
         Integer oldPriority = city.getPriority();
         Long countryId = city.getCountry().getId();
 
@@ -84,8 +84,8 @@ public class AdminManagementService {
         return priority != null;
     }
 
-    private City findCityById(Long cityId) {
-        return cityRepository.findById(cityId)
+    private City findCityByIdWithLock(Long cityId) {
+        return cityRepository.findByIdWithLock(cityId)
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "도시를 찾을 수 없습니다."));
     }
 

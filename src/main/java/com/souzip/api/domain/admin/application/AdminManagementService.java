@@ -83,6 +83,26 @@ public class AdminManagementService {
         );
     }
 
+    @Transactional
+    public void createCity(CreateCityCommand command) {
+        eventPublisher.publishEvent(
+            AdminCityCreateRequestedEvent.of(
+                command.nameEn(),
+                command.nameKr(),
+                command.latitude(),
+                command.longitude(),
+                command.countryId()
+            )
+        );
+    }
+
+    @Transactional
+    public void deleteCity(Long cityId) {
+        eventPublisher.publishEvent(
+            AdminCityDeleteRequestedEvent.of(cityId)
+        );
+    }
+
     private void validateNotSuperAdmin(AdminRole role) {
         if (isSuperAdmin(role)) {
             throw new AdminException(AdminErrorCode.CANNOT_INVITE_SUPER_ADMIN);

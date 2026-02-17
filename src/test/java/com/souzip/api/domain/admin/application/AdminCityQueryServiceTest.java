@@ -2,6 +2,7 @@ package com.souzip.api.domain.admin.application;
 
 import com.souzip.api.domain.admin.application.port.CityQueryPort;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
+import com.souzip.api.domain.admin.application.query.AdminCityQueryService;
 import com.souzip.api.domain.admin.application.query.CitySearchQuery;
 import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 import java.time.LocalDateTime;

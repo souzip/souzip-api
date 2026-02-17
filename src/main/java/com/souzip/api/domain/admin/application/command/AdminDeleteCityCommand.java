@@ -1,5 +1,5 @@
 package com.souzip.api.domain.admin.application.command;
 
-public record DeleteCityCommand(
+public record AdminDeleteCityCommand(
     Long cityId
 ) {}

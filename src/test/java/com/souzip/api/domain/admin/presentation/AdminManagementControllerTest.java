@@ -5,10 +5,10 @@ import com.souzip.api.domain.admin.application.AdminCityQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminCountryQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminManagementService;
 import com.souzip.api.domain.admin.application.AdminManagementService.AdminPageResult;
-import com.souzip.api.domain.admin.application.command.CreateCityCommand;
-import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminCreateCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminDeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminUpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
-import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
 import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
 import com.souzip.api.domain.admin.application.query.CitySearchQuery;
@@ -368,7 +368,7 @@ class AdminManagementControllerTest extends RestDocsSupport {
         Long cityId = 1L;
 
         doNothing().when(adminManagementService)
-            .updateCityPriority(new UpdateCityPriorityCommand(cityId, 1));
+            .updateCityPriority(new AdminUpdateCityPriorityCommand(cityId, 1));
 
         // when & then
         mockMvc.perform(patch("/api/admin/cities/{cityId}/priority", cityId)
@@ -406,7 +406,7 @@ class AdminManagementControllerTest extends RestDocsSupport {
         Long cityId = 1L;
 
         doNothing().when(adminManagementService)
-            .updateCityPriority(new UpdateCityPriorityCommand(cityId, null));
+            .updateCityPriority(new AdminUpdateCityPriorityCommand(cityId, null));
 
         // when & then
         mockMvc.perform(patch("/api/admin/cities/{cityId}/priority", cityId)
@@ -443,7 +443,7 @@ class AdminManagementControllerTest extends RestDocsSupport {
         );
 
         doNothing().when(adminManagementService).createCity(
-            new CreateCityCommand(
+            new AdminCreateCityCommand(
                 request.nameEn(),
                 request.nameKr(),
                 request.latitude(),
@@ -490,7 +490,7 @@ class AdminManagementControllerTest extends RestDocsSupport {
         Long cityId = 1L;
 
         doNothing().when(adminManagementService)
-            .deleteCity(new DeleteCityCommand(cityId));
+            .deleteCity(new AdminDeleteCityCommand(cityId));
 
         // when & then
         mockMvc.perform(delete("/api/admin/cities/{cityId}", cityId)

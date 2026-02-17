@@ -1,12 +1,10 @@
 package com.souzip.api.domain.admin.application;
 
-import com.souzip.api.domain.admin.application.command.CreateCityCommand;
-import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminCreateCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminDeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminUpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
-import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
-import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
+import com.souzip.api.domain.admin.application.port.CityCommandPort;
 import com.souzip.api.domain.admin.exception.AdminErrorCode;
 import com.souzip.api.domain.admin.exception.AdminException;
 import com.souzip.api.domain.admin.exception.AdminNotFoundException;
@@ -17,19 +15,19 @@ import com.souzip.api.domain.admin.repository.AdminRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class AdminManagementService {
+public class AdminManagementService implements AdminManagementUseCase {
 
     private final AdminRepository adminRepository;
     private final AdminPasswordEncoderImpl passwordEncoder;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CityCommandPort cityCommandPort;
 
+    @Override
     public AdminPageResult getAdmins(int pageNo, int pageSize) {
         int offset = (pageNo - 1) * pageSize;
         List<Admin> admins = adminRepository.findAllExcludingSuperAdmin(offset, pageSize);
@@ -40,6 +38,7 @@ public class AdminManagementService {
     }
 
     @Transactional
+    @Override
     public Admin inviteAdmin(InviteAdminCommand command) {
         validateNotSuperAdmin(command.role());
         validateUsernameNotDuplicated(command.username());
@@ -49,6 +48,7 @@ public class AdminManagementService {
     }
 
     @Transactional
+    @Override
     public void deleteAdmin(UUID adminId, UUID requesterId) {
         Admin adminToDelete = adminRepository.findById(adminId)
             .orElseThrow(AdminNotFoundException::new);
@@ -57,30 +57,21 @@ public class AdminManagementService {
     }
 
     @Transactional
-    public void updateCityPriority(UpdateCityPriorityCommand command) {
-        eventPublisher.publishEvent(
-            AdminCityPriorityChangeRequestedEvent.of(command.cityId(), command.newPriority())
-        );
+    @Override
+    public void updateCityPriority(AdminUpdateCityPriorityCommand command) {
+        cityCommandPort.updateCityPriority(command);
     }
 
     @Transactional
-    public void createCity(CreateCityCommand command) {
-        eventPublisher.publishEvent(
-            AdminCityCreateRequestedEvent.of(
-                command.nameEn(),
-                command.nameKr(),
-                command.latitude(),
-                command.longitude(),
-                command.countryId()
-            )
-        );
+    @Override
+    public void createCity(AdminCreateCityCommand command) {
+        cityCommandPort.createCity(command);
     }
 
     @Transactional
-    public void deleteCity(DeleteCityCommand command) {
-        eventPublisher.publishEvent(
-            AdminCityDeleteRequestedEvent.of(command.cityId())
-        );
+    @Override
+    public void deleteCity(AdminDeleteCityCommand command) {
+        cityCommandPort.deleteCity(command);
     }
 
     private void validateNotSuperAdmin(AdminRole role) {

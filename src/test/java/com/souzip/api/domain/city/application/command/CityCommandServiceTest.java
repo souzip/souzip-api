@@ -92,10 +92,6 @@ class CityCommandServiceTest {
             BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
         existingCity.updatePriority(newPriority);
 
-        City existingCity = City.create("Busan", "부산",
-            BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
-        existingCity.updatePriority(3);
-
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
             .willReturn(List.of());

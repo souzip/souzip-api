@@ -23,12 +23,15 @@ import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
 import static com.souzip.api.docs.CommonDocumentation.apiResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.patch;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -202,6 +205,76 @@ class AdminManagementControllerTest extends RestDocsSupport {
         SecurityContextHolder.clearContext();
     }
 
+    @DisplayName("도시 우선순위 설정 성공")
+    @Test
+    void updateCityPriority_success() throws Exception {
+        // given
+        setAdminAuthentication();
+        Long cityId = 1L;
+
+        doNothing().when(adminManagementService).updateCityPriority(eq(cityId), eq(1));
+
+        // when & then
+        mockMvc.perform(patch("/api/admin/cities/{cityId}/priority", cityId)
+                .header("Authorization", "Bearer admin-token")
+                .param("priority", "1"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value("우선순위가 업데이트되었습니다."))
+            .andDo(document("admin/update-city-priority",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                ),
+                pathParameters(
+                    parameterWithName("cityId").description("도시 ID")
+                ),
+                queryParameters(
+                    parameterWithName("priority").description("우선순위 (1 이상, 미입력 시 초기화)").optional()
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터 (없음)").optional(),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("도시 우선순위 초기화 성공")
+    @Test
+    void updateCityPriority_reset_success() throws Exception {
+        // given
+        setAdminAuthentication();
+        Long cityId = 1L;
+
+        doNothing().when(adminManagementService).updateCityPriority(eq(cityId), isNull());
+
+        // when & then
+        mockMvc.perform(patch("/api/admin/cities/{cityId}/priority", cityId)
+                .header("Authorization", "Bearer admin-token"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.message").value("우선순위가 업데이트되었습니다."))
+            .andDo(document("admin/reset-city-priority",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 권한 필요")
+                ),
+                pathParameters(
+                    parameterWithName("cityId").description("도시 ID")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터 (없음)").optional(),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
     private void setSuperAdminAuthentication() {
         Admin superAdmin = Admin.create("superadmin", "password", AdminRole.SUPER_ADMIN,
             new TestAdminPasswordEncoder());
@@ -211,6 +284,19 @@ class AdminManagementControllerTest extends RestDocsSupport {
                 superAdmin,
                 null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"))
+            );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private void setAdminAuthentication() {
+        Admin admin = Admin.create("admin", "password", AdminRole.ADMIN,
+            new TestAdminPasswordEncoder());
+
+        UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(
+                admin,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
             );
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

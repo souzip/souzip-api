@@ -1,13 +1,11 @@
 package com.souzip.api.domain.admin.application;
 
 import com.souzip.api.domain.admin.application.AdminManagementService.AdminPageResult;
-import com.souzip.api.domain.admin.application.command.CreateCityCommand;
-import com.souzip.api.domain.admin.application.command.DeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminCreateCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminDeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminUpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
-import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
-import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
+import com.souzip.api.domain.admin.application.port.CityCommandPort;
 import com.souzip.api.domain.admin.exception.AdminErrorCode;
 import com.souzip.api.domain.admin.exception.AdminException;
 import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
@@ -24,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -44,7 +41,7 @@ class AdminManagementServiceTest {
     private AdminPasswordEncoderImpl passwordEncoder;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
+    private CityCommandPort cityCommandPort;
 
     @InjectMocks
     private AdminManagementService adminManagementService;
@@ -234,41 +231,37 @@ class AdminManagementServiceTest {
         verify(adminRepository).delete(adminToDelete);
     }
 
-    @DisplayName("도시 우선순위 변경 시 이벤트 발행")
+    @DisplayName("도시 우선순위 변경 시 포트 호출")
     @Test
-    void updateCityPriority_publishesEvent() {
+    void updateCityPriority_callsPort() {
         // given
-        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(1L, 1);
+        AdminUpdateCityPriorityCommand command = new AdminUpdateCityPriorityCommand(1L, 1);
 
         // when
         adminManagementService.updateCityPriority(command);
 
         // then
-        verify(eventPublisher).publishEvent(
-            AdminCityPriorityChangeRequestedEvent.of(command.cityId(), command.newPriority())
-        );
+        verify(cityCommandPort).updateCityPriority(command);
     }
 
-    @DisplayName("도시 우선순위 초기화 시 이벤트 발행")
+    @DisplayName("도시 우선순위 초기화 시 포트 호출")
     @Test
-    void updateCityPriority_reset_publishesEvent() {
+    void updateCityPriority_reset_callsPort() {
         // given
-        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(1L, null);
+        AdminUpdateCityPriorityCommand command = new AdminUpdateCityPriorityCommand(1L, null);
 
         // when
         adminManagementService.updateCityPriority(command);
 
         // then
-        verify(eventPublisher).publishEvent(
-            AdminCityPriorityChangeRequestedEvent.of(command.cityId(), null)
-        );
+        verify(cityCommandPort).updateCityPriority(command);
     }
 
-    @DisplayName("도시 생성 시 이벤트 발행")
+    @DisplayName("도시 생성 시 포트 호출")
     @Test
-    void createCity_publishesEvent() {
+    void createCity_callsPort() {
         // given
-        CreateCityCommand command = new CreateCityCommand(
+        AdminCreateCityCommand command = new AdminCreateCityCommand(
             "Seoul", "서울", 37.56, 126.97, 1L
         );
 
@@ -276,29 +269,19 @@ class AdminManagementServiceTest {
         adminManagementService.createCity(command);
 
         // then
-        verify(eventPublisher).publishEvent(
-            AdminCityCreateRequestedEvent.of(
-                command.nameEn(),
-                command.nameKr(),
-                command.latitude(),
-                command.longitude(),
-                command.countryId()
-            )
-        );
+        verify(cityCommandPort).createCity(command);
     }
 
-    @DisplayName("도시 삭제 시 이벤트 발행")
+    @DisplayName("도시 삭제 시 포트 호출")
     @Test
-    void deleteCity_publishesEvent() {
+    void deleteCity_callsPort() {
         // given
-        DeleteCityCommand command = new DeleteCityCommand(1L);
+        AdminDeleteCityCommand command = new AdminDeleteCityCommand(1L);
 
         // when
         adminManagementService.deleteCity(command);
 
         // then
-        verify(eventPublisher).publishEvent(
-            AdminCityDeleteRequestedEvent.of(command.cityId())
-        );
+        verify(cityCommandPort).deleteCity(command);
     }
 }

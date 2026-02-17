@@ -1,8 +1,8 @@
-package com.souzip.api.domain.admin.application;
+package com.souzip.api.domain.admin.application.query;
 
+import com.souzip.api.domain.admin.application.AdminCityQueryUseCase;
 import com.souzip.api.domain.admin.application.port.CityQueryPort;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
-import com.souzip.api.domain.admin.application.query.CitySearchQuery;
 import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

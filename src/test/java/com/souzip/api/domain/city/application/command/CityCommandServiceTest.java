@@ -1,8 +1,5 @@
 package com.souzip.api.domain.city.application.command;
 
-import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.repository.CityRepository;
 import com.souzip.api.domain.country.entity.Country;
@@ -44,7 +41,7 @@ class CityCommandServiceTest {
 
     @DisplayName("도시 우선순위 설정 성공 - 기존 우선순위 없음")
     @Test
-    void handlePriorityChangeRequested_withNoPreviousPriority_success() {
+    void updateCityPriority_withNoPreviousPriority_success() {
         // given
         Long cityId = 1L;
         Integer newPriority = 1;
@@ -59,23 +56,22 @@ class CityCommandServiceTest {
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
             .willReturn(List.of());
 
-        AdminCityPriorityChangeRequestedEvent event =
-            AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority);
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
         // when
-        cityCommandService.handlePriorityChangeRequested(event);
+        cityCommandService.updateCityPriority(command);
 
         // then
         verify(cityRepository).findByIdWithLock(cityId);
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(searchIndexScheduler).markReindexNeeded();
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
     @DisplayName("도시 우선순위 설정 성공 - 기존 우선순위 있음")
     @Test
-    void handlePriorityChangeRequested_withPreviousPriority_success() {
+    void updateCityPriority_withPreviousPriority_success() {
         // given
         Long cityId = 1L;
         Integer oldPriority = 1;
@@ -98,23 +94,22 @@ class CityCommandServiceTest {
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
             .willReturn(List.of(existingCity));
 
-        AdminCityPriorityChangeRequestedEvent event =
-            AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority);
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
         // when
-        cityCommandService.handlePriorityChangeRequested(event);
+        cityCommandService.updateCityPriority(command);
 
         // then
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(searchIndexScheduler).markReindexNeeded();
         assertThat(existingCity.getPriority()).isEqualTo(4);
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
     @DisplayName("도시 우선순위 초기화 성공 - null로 설정")
     @Test
-    void handlePriorityChangeRequested_resetToNull_success() {
+    void updateCityPriority_resetToNull_success() {
         // given
         Long cityId = 1L;
         Integer oldPriority = 1;
@@ -130,22 +125,21 @@ class CityCommandServiceTest {
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
             .willReturn(List.of());
 
-        AdminCityPriorityChangeRequestedEvent event =
-            AdminCityPriorityChangeRequestedEvent.of(cityId, null);
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, null);
 
         // when
-        cityCommandService.handlePriorityChangeRequested(event);
+        cityCommandService.updateCityPriority(command);
 
         // then
         verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, null);
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(searchIndexScheduler).markReindexNeeded();
         assertThat(city.getPriority()).isNull();
     }
 
     @DisplayName("연속 구간만 당겨지고 gap 이후는 유지된다")
     @Test
-    void handlePriorityChangeRequested_onlyPullsContiguousRange() {
+    void updateCityPriority_onlyPullsContiguousRange() {
         // given
         Long cityId = 1L;
         Integer oldPriority = 3;
@@ -172,22 +166,21 @@ class CityCommandServiceTest {
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
             .willReturn(List.of(city3));
 
-        AdminCityPriorityChangeRequestedEvent event =
-            AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority);
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
         // when
-        cityCommandService.handlePriorityChangeRequested(event);
+        cityCommandService.updateCityPriority(command);
 
         // then
         assertThat(city2.getPriority()).isEqualTo(3);
         assertThat(city3.getPriority()).isEqualTo(100);
         assertThat(city.getPriority()).isEqualTo(newPriority);
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(searchIndexScheduler).markReindexNeeded();
     }
 
     @DisplayName("연속 구간만 밀리고 gap 이후는 유지된다")
     @Test
-    void handlePriorityChangeRequested_onlyShiftsContiguousRange() {
+    void updateCityPriority_onlyShiftsContiguousRange() {
         // given
         Long cityId = 1L;
         Integer newPriority = 2;
@@ -210,32 +203,29 @@ class CityCommandServiceTest {
         given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
             .willReturn(List.of(city2, city3));
 
-        AdminCityPriorityChangeRequestedEvent event =
-            AdminCityPriorityChangeRequestedEvent.of(cityId, newPriority);
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
         // when
-        cityCommandService.handlePriorityChangeRequested(event);
+        cityCommandService.updateCityPriority(command);
 
         // then
         assertThat(city2.getPriority()).isEqualTo(3);
         assertThat(city3.getPriority()).isEqualTo(100);
         assertThat(city.getPriority()).isEqualTo(newPriority);
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(searchIndexScheduler).markReindexNeeded();
     }
 
     @DisplayName("존재하지 않는 도시 우선순위 설정 시 예외 발생")
     @Test
-    void handlePriorityChangeRequested_cityNotFound_throwsException() {
+    void updateCityPriority_cityNotFound_throwsException() {
         // given
         Long cityId = 999L;
-
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.empty());
 
-        AdminCityPriorityChangeRequestedEvent event =
-            AdminCityPriorityChangeRequestedEvent.of(cityId, 1);
+        UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, 1);
 
         // when & then
-        assertThatThrownBy(() -> cityCommandService.handlePriorityChangeRequested(event))
+        assertThatThrownBy(() -> cityCommandService.updateCityPriority(command))
             .isInstanceOf(BusinessException.class);
 
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(any(), any());
@@ -244,34 +234,36 @@ class CityCommandServiceTest {
 
     @DisplayName("도시 생성 성공")
     @Test
-    void handleCityCreateRequested_success() {
+    void createCity_success() {
         // given
         Country country = mock(Country.class);
         given(countryRepository.findById(1L)).willReturn(Optional.of(country));
 
-        AdminCityCreateRequestedEvent event =
-            AdminCityCreateRequestedEvent.of("Seoul", "서울", 37.56, 126.97, 1L);
+        CreateCityCommand command = new CreateCityCommand(
+            "Seoul", "서울", 37.56, 126.97, 1L
+        );
 
         // when
-        cityCommandService.handleCityCreateRequested(event);
+        cityCommandService.createCity(command);
 
         // then
         verify(countryRepository).findById(1L);
         verify(cityRepository).save(any(City.class));
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(searchIndexScheduler).markReindexNeeded();
     }
 
     @DisplayName("도시 생성 실패 - 나라 없음")
     @Test
-    void handleCityCreateRequested_countryNotFound_throwsException() {
+    void createCity_countryNotFound_throwsException() {
         // given
         given(countryRepository.findById(999L)).willReturn(Optional.empty());
 
-        AdminCityCreateRequestedEvent event =
-            AdminCityCreateRequestedEvent.of("Seoul", "서울", 37.56, 126.97, 999L);
+        CreateCityCommand command = new CreateCityCommand(
+            "Seoul", "서울", 37.56, 126.97, 999L
+        );
 
         // when & then
-        assertThatThrownBy(() -> cityCommandService.handleCityCreateRequested(event))
+        assertThatThrownBy(() -> cityCommandService.createCity(command))
             .isInstanceOf(BusinessException.class);
 
         verify(cityRepository, never()).save(any());
@@ -280,7 +272,7 @@ class CityCommandServiceTest {
 
     @DisplayName("도시 삭제 성공")
     @Test
-    void handleCityDeleteRequested_success() {
+    void deleteCity_success() {
         // given
         Long cityId = 1L;
         Country country = mock(Country.class);
@@ -289,62 +281,31 @@ class CityCommandServiceTest {
 
         given(cityRepository.findById(cityId)).willReturn(Optional.of(city));
 
-        AdminCityDeleteRequestedEvent event = AdminCityDeleteRequestedEvent.of(cityId);
+        DeleteCityCommand command = new DeleteCityCommand(cityId);
 
         // when
-        cityCommandService.handleCityDeleteRequested(event);
+        cityCommandService.deleteCity(command);
 
         // then
         verify(cityRepository).findById(cityId);
         verify(cityRepository).delete(city);
-        verify(searchIndexScheduler, never()).markReindexNeeded();
+        verify(searchIndexScheduler).markReindexNeeded();
     }
 
     @DisplayName("도시 삭제 실패 - 도시 없음")
     @Test
-    void handleCityDeleteRequested_cityNotFound_throwsException() {
+    void deleteCity_cityNotFound_throwsException() {
         // given
         given(cityRepository.findById(999L)).willReturn(Optional.empty());
 
-        AdminCityDeleteRequestedEvent event = AdminCityDeleteRequestedEvent.of(999L);
+        DeleteCityCommand command = new DeleteCityCommand(999L);
 
         // when & then
-        assertThatThrownBy(() -> cityCommandService.handleCityDeleteRequested(event))
+        assertThatThrownBy(() -> cityCommandService.deleteCity(command))
             .isInstanceOf(BusinessException.class);
 
         verify(cityRepository, never()).delete(any());
         verify(searchIndexScheduler, never()).markReindexNeeded();
     }
-
-    @DisplayName("우선순위 변경 후 reindex 마킹")
-    @Test
-    void handleReindexAfterPriorityChange_success() {
-        AdminCityPriorityChangeRequestedEvent event =
-            AdminCityPriorityChangeRequestedEvent.of(1L, 1);
-
-        cityCommandService.handleReindexAfterPriorityChange(event);
-
-        verify(searchIndexScheduler).markReindexNeeded();
-    }
-
-    @DisplayName("도시 생성 후 reindex 마킹")
-    @Test
-    void handleReindexAfterCreate_success() {
-        AdminCityCreateRequestedEvent event =
-            AdminCityCreateRequestedEvent.of("Seoul", "서울", 37.56, 126.97, 1L);
-
-        cityCommandService.handleReindexAfterCreate(event);
-
-        verify(searchIndexScheduler).markReindexNeeded();
-    }
-
-    @DisplayName("도시 삭제 후 reindex 마킹")
-    @Test
-    void handleReindexAfterDelete_success() {
-        AdminCityDeleteRequestedEvent event = AdminCityDeleteRequestedEvent.of(1L);
-
-        cityCommandService.handleReindexAfterDelete(event);
-
-        verify(searchIndexScheduler).markReindexNeeded();
-    }
 }
+

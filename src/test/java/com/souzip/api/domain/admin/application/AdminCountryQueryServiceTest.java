@@ -2,6 +2,7 @@ package com.souzip.api.domain.admin.application;
 
 import com.souzip.api.domain.admin.application.port.CountryQueryPort;
 import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
+import com.souzip.api.domain.admin.application.query.AdminCountryQueryService;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

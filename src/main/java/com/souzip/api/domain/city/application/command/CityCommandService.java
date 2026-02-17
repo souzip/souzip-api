@@ -1,8 +1,6 @@
 package com.souzip.api.domain.city.application.command;
 
-import com.souzip.api.domain.admin.event.AdminCityCreateRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityDeleteRequestedEvent;
-import com.souzip.api.domain.admin.event.AdminCityPriorityChangeRequestedEvent;
+import com.souzip.api.domain.city.application.port.CityManagementPort;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.repository.CityRepository;
 import com.souzip.api.domain.country.entity.Country;
@@ -14,67 +12,48 @@ import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class CityCommandService {
+public class CityCommandService implements CityManagementPort {
 
     private final CityRepository cityRepository;
     private final CountryRepository countryRepository;
     private final SearchIndexScheduler searchIndexScheduler;
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-    public void handlePriorityChangeRequested(AdminCityPriorityChangeRequestedEvent event) {
-        City city = findCityByIdWithLock(event.cityId());
+    @Transactional
+    @Override
+    public void updateCityPriority(UpdateCityPriorityCommand command) {
+        City city = findCityByIdWithLock(command.cityId());
         Integer oldPriority = city.getPriority();
         Long countryId = city.getCountry().getId();
 
-        adjustPriorities(oldPriority, event.newPriority(), countryId);
-        city.updatePriority(event.newPriority());
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleReindexAfterPriorityChange(AdminCityPriorityChangeRequestedEvent event) {
+        adjustPriorities(oldPriority, command.newPriority(), countryId);
+        city.updatePriority(command.newPriority());
         searchIndexScheduler.markReindexNeeded();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-    public void handleCityCreateRequested(AdminCityCreateRequestedEvent event) {
-        Country country = findCountryById(event.countryId());
+    @Transactional
+    @Override
+    public void createCity(CreateCityCommand command) {
+        Country country = findCountryById(command.countryId());
         City city = City.create(
-            event.nameEn(),
-            event.nameKr(),
-            BigDecimal.valueOf(event.latitude()),
-            BigDecimal.valueOf(event.longitude()),
+            command.nameEn(),
+            command.nameKr(),
+            BigDecimal.valueOf(command.latitude()),
+            BigDecimal.valueOf(command.longitude()),
             country
         );
         cityRepository.save(city);
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleReindexAfterCreate(AdminCityCreateRequestedEvent event) {
         searchIndexScheduler.markReindexNeeded();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
-    public void handleCityDeleteRequested(AdminCityDeleteRequestedEvent event) {
-        City city = findCityById(event.cityId());
+    @Transactional
+    @Override
+    public void deleteCity(DeleteCityCommand command) {
+        City city = findCityById(command.cityId());
         cityRepository.delete(city);
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleReindexAfterDelete(AdminCityDeleteRequestedEvent event) {
         searchIndexScheduler.markReindexNeeded();
     }
 
@@ -91,9 +70,7 @@ public class CityCommandService {
                 .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, oldPriority + 1)
                 .stream()
                 .takeWhile(city -> city.getPriority().equals(expected.get()))
-                .forEach(city -> {
-                    city.updatePriority(expected.getAndIncrement() - 1);
-                });
+                .forEach(city -> city.updatePriority(expected.getAndIncrement() - 1));
         }
     }
 
@@ -105,9 +82,7 @@ public class CityCommandService {
                 .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, newPriority)
                 .stream()
                 .takeWhile(city -> city.getPriority().equals(expected.get()))
-                .forEach(city -> {
-                    city.updatePriority(expected.getAndIncrement() + 1);
-                });
+                .forEach(city -> city.updatePriority(expected.getAndIncrement() + 1));
         }
     }
 

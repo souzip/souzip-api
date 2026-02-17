@@ -1,4 +1,4 @@
-package com.souzip.api.domain.admin.application.command;
+package com.souzip.api.domain.city.application.command;
 
 public record UpdateCityPriorityCommand(
     Long cityId,

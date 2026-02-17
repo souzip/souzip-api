@@ -1,5 +1,6 @@
-package com.souzip.api.domain.admin.application;
+package com.souzip.api.domain.admin.application.query;
 
+import com.souzip.api.domain.admin.application.AdminCountryQueryUseCase;
 import com.souzip.api.domain.admin.application.port.CountryQueryPort;
 import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
 import java.util.List;

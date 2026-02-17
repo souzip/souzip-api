@@ -5,11 +5,11 @@ import com.souzip.api.domain.city.event.CityCreatedEvent;
 import com.souzip.api.domain.city.event.CityDeletedEvent;
 import com.souzip.api.domain.city.event.CityPriorityUpdatedEvent;
 import com.souzip.api.domain.city.repository.CityRepository;
+import com.souzip.api.domain.city.service.CityPriorityDomainService;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.repository.CountryRepository;
 import com.souzip.api.global.exception.BusinessException;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -39,6 +38,9 @@ class CityCommandServiceTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private CityPriorityDomainService cityPriorityDomainService;
 
     @InjectMocks
     private CityCommandService cityCommandService;
@@ -57,8 +59,6 @@ class CityCommandServiceTest {
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
 
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
-        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
-            .willReturn(List.of());
 
         UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
@@ -67,9 +67,8 @@ class CityCommandServiceTest {
 
         // then
         verify(cityRepository).findByIdWithLock(cityId);
-        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority + 1);
-        verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(eventPublisher).publishEvent(argThat(event -> false));
+        verify(cityPriorityDomainService).adjustPriorities(null, newPriority, 1L);
+        verify(eventPublisher).publishEvent(any(CityPriorityUpdatedEvent.class));
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
@@ -88,15 +87,7 @@ class CityCommandServiceTest {
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
         city.updatePriority(oldPriority);
 
-        City existingCity = City.create("Busan", "부산",
-            BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
-        existingCity.updatePriority(newPriority);
-
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
-        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
-            .willReturn(List.of());
-        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
-            .willReturn(List.of(existingCity));
 
         UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
@@ -104,10 +95,8 @@ class CityCommandServiceTest {
         cityCommandService.updateCityPriority(command);
 
         // then
-        verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
-        verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority);
-        verify(eventPublisher).publishEvent(argThat(event -> false));
-        assertThat(existingCity.getPriority()).isEqualTo(4);
+        verify(cityPriorityDomainService).adjustPriorities(oldPriority, newPriority, 1L);
+        verify(eventPublisher).publishEvent(any(CityPriorityUpdatedEvent.class));
         assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
@@ -126,8 +115,6 @@ class CityCommandServiceTest {
         city.updatePriority(oldPriority);
 
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
-        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
-            .willReturn(List.of());
 
         UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, null);
 
@@ -135,9 +122,8 @@ class CityCommandServiceTest {
         cityCommandService.updateCityPriority(command);
 
         // then
-        verify(cityRepository).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1);
-        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, null);
-        verify(eventPublisher).publishEvent(argThat(event -> false));
+        verify(cityPriorityDomainService).adjustPriorities(oldPriority, null, 1L);
+        verify(eventPublisher).publishEvent(any(CityPriorityUpdatedEvent.class));
         assertThat(city.getPriority()).isNull();
     }
 
@@ -156,19 +142,7 @@ class CityCommandServiceTest {
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
         city.updatePriority(oldPriority);
 
-        City city2 = City.create("Busan", "부산",
-            BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
-        city2.updatePriority(4);
-
-        City city3 = City.create("Jeju", "제주",
-            BigDecimal.valueOf(33.49), BigDecimal.valueOf(126.53), country);
-        city3.updatePriority(100);
-
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
-        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, oldPriority + 1))
-            .willReturn(List.of(city2, city3));
-        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
-            .willReturn(List.of(city3));
 
         UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
@@ -176,10 +150,9 @@ class CityCommandServiceTest {
         cityCommandService.updateCityPriority(command);
 
         // then
-        assertThat(city2.getPriority()).isEqualTo(3);
-        assertThat(city3.getPriority()).isEqualTo(100);
-        assertThat(city.getPriority()).isEqualTo(newPriority);
+        verify(cityPriorityDomainService).adjustPriorities(oldPriority, newPriority, 1L);
         verify(eventPublisher).publishEvent(any(CityPriorityUpdatedEvent.class));
+        assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
     @DisplayName("연속 구간만 밀리고 gap 이후는 유지된다")
@@ -195,17 +168,7 @@ class CityCommandServiceTest {
         City city = City.create("Seoul", "서울",
             BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97), country);
 
-        City city2 = City.create("Busan", "부산",
-            BigDecimal.valueOf(35.10), BigDecimal.valueOf(129.03), country);
-        city2.updatePriority(2);
-
-        City city3 = City.create("Jeju", "제주",
-            BigDecimal.valueOf(33.49), BigDecimal.valueOf(126.53), country);
-        city3.updatePriority(100);
-
         given(cityRepository.findByIdWithLock(cityId)).willReturn(Optional.of(city));
-        given(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(1L, newPriority))
-            .willReturn(List.of(city2, city3));
 
         UpdateCityPriorityCommand command = new UpdateCityPriorityCommand(cityId, newPriority);
 
@@ -213,10 +176,9 @@ class CityCommandServiceTest {
         cityCommandService.updateCityPriority(command);
 
         // then
-        assertThat(city2.getPriority()).isEqualTo(3);
-        assertThat(city3.getPriority()).isEqualTo(100);
-        assertThat(city.getPriority()).isEqualTo(newPriority);
+        verify(cityPriorityDomainService).adjustPriorities(null, newPriority, 1L);
         verify(eventPublisher).publishEvent(any(CityPriorityUpdatedEvent.class));
+        assertThat(city.getPriority()).isEqualTo(newPriority);
     }
 
     @DisplayName("존재하지 않는 도시 우선순위 설정 시 예외 발생")
@@ -232,7 +194,7 @@ class CityCommandServiceTest {
         assertThatThrownBy(() -> cityCommandService.updateCityPriority(command))
             .isInstanceOf(BusinessException.class);
 
-        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(any(), any());
+        verify(cityPriorityDomainService, never()).adjustPriorities(any(), any(), any());
         verify(eventPublisher, never()).publishEvent(any());
     }
 
@@ -254,7 +216,7 @@ class CityCommandServiceTest {
         // then
         verify(countryRepository).findById(1L);
         verify(cityRepository).save(any(City.class));
-        verify(eventPublisher).publishEvent(argThat(event -> false));
+        verify(eventPublisher).publishEvent(any(CityCreatedEvent.class));
     }
 
     @DisplayName("도시 생성 실패 - 나라 없음")
@@ -294,7 +256,7 @@ class CityCommandServiceTest {
         // then
         verify(cityRepository).findById(cityId);
         verify(cityRepository).delete(city);
-        verify(eventPublisher).publishEvent(argThat(event -> false));
+        verify(eventPublisher).publishEvent(any(CityDeletedEvent.class));
     }
 
     @DisplayName("도시 삭제 실패 - 도시 없음")

@@ -41,15 +41,15 @@ public class CityRepositoryImpl implements CityRepositoryCustom {
     }
 
     @Override
-    public void shiftPriorityFrom(Integer priority, Long countryId) {
-        queryFactory
-            .update(city)
-            .set(city.priority, city.priority.add(1))
+    public List<City> findByCountryIdAndPriorityGoeOrderByPriorityAsc(Long countryId, Integer priority) {
+        return queryFactory
+            .selectFrom(city)
             .where(
-                city.priority.goe(priority),
-                city.country.id.eq(countryId)
+                city.country.id.eq(countryId),
+                city.priority.goe(priority)
             )
-            .execute();
+            .orderBy(city.priority.asc())
+            .fetch();
     }
 
     @Override

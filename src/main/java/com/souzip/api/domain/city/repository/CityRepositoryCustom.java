@@ -12,7 +12,7 @@ public interface CityRepositoryCustom {
 
     List<City> findByCountryId(Long countryId);
 
-    void shiftPriorityFrom(Integer priority, Long countryId);
+    List<City> findByCountryIdAndPriorityGoeOrderByPriorityAsc(Long countryId, Integer priority);
 
     void pullPriorityFrom(Integer priority, Long countryId);
 

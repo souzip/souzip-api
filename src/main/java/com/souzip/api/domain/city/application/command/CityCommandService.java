@@ -11,6 +11,7 @@ import com.souzip.api.domain.search.scheduler.SearchIndexScheduler;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
 import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,7 +75,15 @@ public class CityCommandService {
 
     private void pushNewPriorityIfExists(Integer newPriority, Long countryId) {
         if (hasPriority(newPriority)) {
-            cityRepository.shiftPriorityFrom(newPriority, countryId);
+            AtomicInteger expected = new AtomicInteger(newPriority);
+
+            cityRepository
+                .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, newPriority)
+                .stream()
+                .takeWhile(city -> city.getPriority().equals(expected.get()))
+                .forEach(city -> {
+                    city.updatePriority(expected.getAndIncrement() + 1);
+                });
         }
     }
 

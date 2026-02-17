@@ -9,6 +9,7 @@ import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
 import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
 import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
+import com.souzip.api.domain.admin.application.query.CitySearchQuery;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.AdminAccess;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.api.domain.admin.infrastructure.security.annotation.SuperAdminOnly;
@@ -50,7 +51,7 @@ public class AdminManagementController {
     public SuccessResponse<InviteAdminResponse> inviteAdmin(
         @Valid @RequestBody InviteAdminRequest request
     ) {
-        Admin admin = adminManagementService.inviteAdmin( new InviteAdminCommand(
+        Admin admin = adminManagementService.inviteAdmin(new InviteAdminCommand(
             request.username(),
             request.password(),
             request.role()
@@ -63,10 +64,12 @@ public class AdminManagementController {
     public SuccessResponse<PaginationResponse<AdminResponse>> getAdmins(
         @ModelAttribute PaginationRequest paginationRequest
     ) {
-        return SuccessResponse.of(AdminResponse.ofPageResult(adminManagementService.getAdmins(
-            paginationRequest.getPageNo(),
-            paginationRequest.getPageSize()
-        )));
+        return SuccessResponse.of(AdminResponse.ofPageResult(
+            adminManagementService.getAdmins(
+                paginationRequest.getPageNo(),
+                paginationRequest.getPageSize()
+            )
+        ));
     }
 
     @SuperAdminOnly
@@ -87,10 +90,42 @@ public class AdminManagementController {
 
     @ViewerAccess
     @GetMapping("/cities")
-    public SuccessResponse<List<CityQueryResult>> getCities(
-        @RequestParam(defaultValue = "83") Long countryId
+    public SuccessResponse<PaginationResponse<CityQueryResult>> getCities(
+        @RequestParam Long countryId,
+        @RequestParam(required = false) String keyword,
+        @ModelAttribute PaginationRequest paginationRequest
     ) {
-        return SuccessResponse.of(adminCityQueryUseCase.getCities(countryId));
+        CitySearchQuery query = CitySearchQuery.of(
+            countryId,
+            keyword,
+            paginationRequest.getPageNo(),
+            paginationRequest.getPageSize()
+        );
+        return SuccessResponse.of(adminCityQueryUseCase.getCities(query));
+    }
+
+    @AdminAccess
+    @PostMapping("/cities")
+    public SuccessResponse<Void> createCity(
+        @Valid @RequestBody CreateCityRequest request
+    ) {
+        adminManagementService.createCity(new CreateCityCommand(
+            request.nameEn(),
+            request.nameKr(),
+            request.latitude(),
+            request.longitude(),
+            request.countryId()
+        ));
+        return SuccessResponse.of(null, "도시가 추가되었습니다.");
+    }
+
+    @AdminAccess
+    @DeleteMapping("/cities/{cityId}")
+    public SuccessResponse<Void> deleteCity(
+        @PathVariable Long cityId
+    ) {
+        adminManagementService.deleteCity(new DeleteCityCommand(cityId));
+        return SuccessResponse.of(null, "도시가 삭제되었습니다.");
     }
 
     @AdminAccess
@@ -101,27 +136,5 @@ public class AdminManagementController {
     ) {
         adminManagementService.updateCityPriority(new UpdateCityPriorityCommand(cityId, priority));
         return SuccessResponse.of(null, "우선순위가 업데이트되었습니다.");
-    }
-
-    @AdminAccess
-    @PostMapping("/cities")
-    public SuccessResponse<Void> createCity(@Valid @RequestBody CreateCityRequest request) {
-        adminManagementService.createCity(
-            new CreateCityCommand(
-                request.nameEn(),
-                request.nameKr(),
-                request.latitude(),
-                request.longitude(),
-                request.countryId()
-            )
-        );
-        return SuccessResponse.of(null, "도시가 추가되었습니다.");
-    }
-
-    @AdminAccess
-    @DeleteMapping("/cities/{cityId}")
-    public SuccessResponse<Void> deleteCity(@PathVariable Long cityId) {
-        adminManagementService.deleteCity(new DeleteCityCommand(cityId));
-        return SuccessResponse.of(null, "도시가 삭제되었습니다.");
     }
 }

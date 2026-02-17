@@ -15,13 +15,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class AdminCountryQueryUseCaseTest {
+class AdminCountryQueryServiceTest {
 
     @Mock
     private CountryQueryPort countryQueryPort;
 
     @InjectMocks
-    private AdminCountryQueryUseCase adminCountryQueryUseCase;
+    private AdminCountryQueryService adminCountryQueryService;
 
     @DisplayName("나라 목록 조회 성공")
     @Test
@@ -29,18 +29,36 @@ class AdminCountryQueryUseCaseTest {
         // given
         List<CountryQueryResult> expected = List.of(
             new CountryQueryResult(1L, "대한민국"),
-            new CountryQueryResult(2L, "일본")
+            new CountryQueryResult(2L, "일본"),
+            new CountryQueryResult(3L, "미국")
         );
 
         given(countryQueryPort.getCountries()).willReturn(expected);
 
         // when
-        List<CountryQueryResult> results = adminCountryQueryUseCase.getCountries();
+        List<CountryQueryResult> result = adminCountryQueryService.getCountries();
 
         // then
-        assertThat(results).hasSize(2);
-        assertThat(results.get(0).nameKr()).isEqualTo("대한민국");
-        assertThat(results.get(1).nameKr()).isEqualTo("일본");
+        assertThat(result).hasSize(3);
+        assertThat(result.get(0).id()).isEqualTo(1L);
+        assertThat(result.get(0).nameKr()).isEqualTo("대한민국");
+        assertThat(result.get(1).nameKr()).isEqualTo("일본");
+        assertThat(result.get(2).nameKr()).isEqualTo("미국");
+
+        verify(countryQueryPort).getCountries();
+    }
+
+    @DisplayName("나라 목록이 비어있는 경우 빈 리스트 반환")
+    @Test
+    void getCountries_empty() {
+        // given
+        given(countryQueryPort.getCountries()).willReturn(List.of());
+
+        // when
+        List<CountryQueryResult> result = adminCountryQueryService.getCountries();
+
+        // then
+        assertThat(result).isEmpty();
 
         verify(countryQueryPort).getCountries();
     }

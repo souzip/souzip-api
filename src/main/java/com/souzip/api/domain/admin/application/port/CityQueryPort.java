@@ -1,10 +1,11 @@
 package com.souzip.api.domain.admin.application.port;
 
+import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public interface CityQueryPort {
-    List<CityQueryResult> getCities(Long countryId);
+
+    PaginationResponse<CityQueryResult> getCities(Long countryId, String keyword, int pageNo, int pageSize);
 
     record CityQueryResult(
         Long id,

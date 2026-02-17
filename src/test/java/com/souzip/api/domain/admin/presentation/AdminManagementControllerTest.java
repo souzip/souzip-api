@@ -11,11 +11,13 @@ import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
 import com.souzip.api.domain.admin.application.command.UpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
 import com.souzip.api.domain.admin.application.port.CountryQueryPort.CountryQueryResult;
+import com.souzip.api.domain.admin.application.query.CitySearchQuery;
 import com.souzip.api.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.model.AdminRole;
 import com.souzip.api.domain.admin.presentation.request.CreateCityRequest;
 import com.souzip.api.domain.admin.presentation.request.InviteAdminRequest;
+import com.souzip.api.global.common.dto.pagination.PaginationResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +35,6 @@ import static com.souzip.api.docs.ApiDocumentUtils.getDocumentResponse;
 import static com.souzip.api.docs.CommonDocumentation.apiResponseFields;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -166,8 +167,7 @@ class AdminManagementControllerTest extends RestDocsSupport {
                     fieldWithPath("data.content[].id").type(JsonFieldType.STRING).description("관리자 ID"),
                     fieldWithPath("data.content[].username").type(JsonFieldType.STRING).description("아이디"),
                     fieldWithPath("data.content[].role").type(JsonFieldType.STRING).description("역할"),
-                    fieldWithPath("data.content[].lastLoginAt").type(JsonFieldType.STRING).description("마지막 로그인 시각")
-                        .optional(),
+                    fieldWithPath("data.content[].lastLoginAt").type(JsonFieldType.STRING).description("마지막 로그인 시각").optional(),
                     fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성 시각"),
                     fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이징 정보"),
                     fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지"),
@@ -177,8 +177,7 @@ class AdminManagementControllerTest extends RestDocsSupport {
                     fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 페이지 여부"),
                     fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
                     fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
-                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN)
-                        .description("이전 페이지 존재 여부"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
@@ -218,6 +217,145 @@ class AdminManagementControllerTest extends RestDocsSupport {
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                 )
             ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("나라 목록 조회 성공")
+    @Test
+    void getCountries_success() throws Exception {
+        // given
+        setAdminAuthentication();
+
+        List<CountryQueryResult> countries = List.of(
+            new CountryQueryResult(1L, "대한민국"),
+            new CountryQueryResult(2L, "일본")
+        );
+
+        given(adminCountryQueryUseCase.getCountries()).willReturn(countries);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/countries")
+                .header("Authorization", "Bearer admin-token"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data[0].id").value(1))
+            .andExpect(jsonPath("$.data[0].nameKr").value("대한민국"))
+            .andExpect(jsonPath("$.data[1].id").value(2))
+            .andExpect(jsonPath("$.data[1].nameKr").value("일본"))
+            .andDo(document("admin/get-countries",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라 목록"),
+                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("나라 ID"),
+                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("나라 한글 이름"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("도시 목록 조회 성공")
+    @Test
+    void getCities_success() throws Exception {
+        // given
+        setAdminAuthentication();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<CityQueryResult> content = List.of(
+            new CityQueryResult(1L, "서울", 1, now),
+            new CityQueryResult(2L, "부산", 2, now)
+        );
+
+        PaginationResponse<CityQueryResult> pageResponse = PaginationResponse.of(
+            content, 1, 20, 2, 1
+        );
+
+        given(adminCityQueryUseCase.getCities(any(CitySearchQuery.class))).willReturn(pageResponse);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/cities")
+                .header("Authorization", "Bearer admin-token")
+                .param("countryId", "83")
+                .param("pageNo", "1")
+                .param("pageSize", "20"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].id").value(1))
+            .andExpect(jsonPath("$.data.content[0].nameKr").value("서울"))
+            .andExpect(jsonPath("$.data.content[0].priority").value(1))
+            .andExpect(jsonPath("$.data.content[1].id").value(2))
+            .andExpect(jsonPath("$.data.content[1].nameKr").value("부산"))
+            .andExpect(jsonPath("$.data.pagination.currentPage").value(1))
+            .andExpect(jsonPath("$.data.pagination.totalItems").value(2))
+            .andDo(document("admin/get-cities",
+                getDocumentRequest(),
+                getDocumentResponse(),
+                requestHeaders(
+                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
+                ),
+                queryParameters(
+                    parameterWithName("countryId").description("나라 ID (기본값: 83)").optional(),
+                    parameterWithName("keyword").description("도시명 검색어 (한글명, 영문명)").optional(),
+                    parameterWithName("pageNo").description("페이지 번호 (기본값: 1)").optional(),
+                    parameterWithName("pageSize").description("페이지 크기 (기본값: 10, 최대: 30)").optional()
+                ),
+                apiResponseFields(
+                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                    fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("도시 목록"),
+                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("도시 ID"),
+                    fieldWithPath("data.content[].nameKr").type(JsonFieldType.STRING).description("도시 한글 이름"),
+                    fieldWithPath("data.content[].priority").type(JsonFieldType.NUMBER).description("우선순위").optional(),
+                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정 시각"),
+                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이징 정보"),
+                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지"),
+                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 항목 수"),
+                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 페이지 여부"),
+                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
+                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                )
+            ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("도시 키워드 검색 성공")
+    @Test
+    void getCities_withKeyword_success() throws Exception {
+        // given
+        setAdminAuthentication();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<CityQueryResult> content = List.of(
+            new CityQueryResult(1L, "서울", 1, now)
+        );
+
+        PaginationResponse<CityQueryResult> pageResponse = PaginationResponse.of(
+            content, 1, 20, 1, 1
+        );
+
+        given(adminCityQueryUseCase.getCities(any(CitySearchQuery.class))).willReturn(pageResponse);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/cities")
+                .header("Authorization", "Bearer admin-token")
+                .param("countryId", "83")
+                .param("keyword", "서울")
+                .param("pageNo", "1")
+                .param("pageSize", "20"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content[0].nameKr").value("서울"))
+            .andExpect(jsonPath("$.data.pagination.totalItems").value(1));
 
         SecurityContextHolder.clearContext();
     }
@@ -288,92 +426,6 @@ class AdminManagementControllerTest extends RestDocsSupport {
                 apiResponseFields(
                     fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터 (없음)").optional(),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
-                )
-            ));
-
-        SecurityContextHolder.clearContext();
-    }
-
-    @DisplayName("나라 목록 조회 성공")
-    @Test
-    void getCountries_success() throws Exception {
-        // given
-        setAdminAuthentication();
-
-        List<CountryQueryResult> countries = List.of(
-            new CountryQueryResult(1L, "대한민국"),
-            new CountryQueryResult(2L, "일본")
-        );
-
-        given(adminCountryQueryUseCase.getCountries()).willReturn(countries);
-
-        // when & then
-        mockMvc.perform(get("/api/admin/countries")
-                .header("Authorization", "Bearer admin-token"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data[0].id").value(1))
-            .andExpect(jsonPath("$.data[0].nameKr").value("대한민국"))
-            .andExpect(jsonPath("$.data[1].id").value(2))
-            .andExpect(jsonPath("$.data[1].nameKr").value("일본"))
-            .andDo(document("admin/get-countries",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestHeaders(
-                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
-                ),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라 목록"),
-                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("나라 ID"),
-                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("나라 한글 이름"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
-                )
-            ));
-
-        SecurityContextHolder.clearContext();
-    }
-
-    @DisplayName("도시 목록 조회 성공")
-    @Test
-    void getCities_success() throws Exception {
-        // given
-        setAdminAuthentication();
-        LocalDateTime now = LocalDateTime.now();
-
-        List<CityQueryResult> cities = List.of(
-            new CityQueryResult(1L, "서울", 1, now),
-            new CityQueryResult(2L, "부산", 2, now)
-        );
-
-        given(adminCityQueryUseCase.getCities(anyLong())).willReturn(cities);
-
-        // when & then
-        mockMvc.perform(get("/api/admin/cities")
-                .header("Authorization", "Bearer admin-token")
-                .param("countryId", "1"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data[0].id").value(1))
-            .andExpect(jsonPath("$.data[0].nameKr").value("서울"))
-            .andExpect(jsonPath("$.data[0].priority").value(1))
-            .andExpect(jsonPath("$.data[1].id").value(2))
-            .andExpect(jsonPath("$.data[1].nameKr").value("부산"))
-            .andDo(document("admin/get-cities",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestHeaders(
-                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
-                ),
-                queryParameters(
-                    parameterWithName("countryId").description("나라 ID (기본값: 1)").optional()
-                ),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("도시 목록"),
-                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("도시 ID"),
-                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("도시 한글 이름"),
-                    fieldWithPath("data[].priority").type(JsonFieldType.NUMBER).description("우선순위").optional(),
-                    fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING).description("수정 시각"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
 

@@ -1,15 +1,12 @@
 package com.souzip.api.domain.city.application.command;
 
-import com.souzip.api.domain.city.application.command.CreateCityCommand;
-import com.souzip.api.domain.city.application.command.DeleteCityCommand;
-import com.souzip.api.domain.city.application.command.UpdateCityPriorityCommand;
 import com.souzip.api.domain.city.application.port.CityManagementPort;
-import com.souzip.api.domain.city.domain.service.CityPriorityDomainService;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.event.CityCreatedEvent;
 import com.souzip.api.domain.city.event.CityDeletedEvent;
 import com.souzip.api.domain.city.event.CityPriorityUpdatedEvent;
 import com.souzip.api.domain.city.repository.CityRepository;
+import com.souzip.api.domain.city.service.CityPriorityDomainService;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.repository.CountryRepository;
 import com.souzip.api.global.exception.BusinessException;
@@ -36,7 +33,6 @@ public class CityCommandService implements CityManagementPort {
         Integer oldPriority = city.getPriority();
         Long countryId = city.getCountry().getId();
 
-        // Domain Service 위임
         cityPriorityDomainService.adjustPriorities(oldPriority, command.newPriority(), countryId);
         city.updatePriority(command.newPriority());
 

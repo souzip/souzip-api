@@ -1,3 +1,22 @@
+package com.souzip.api.domain.city.entity;
+
+import com.souzip.api.domain.country.entity.Country;
+import com.souzip.api.global.entity.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+
+@Getter
+@Builder(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "city", indexes = {
+    @Index(name = "idx_city_country", columnList = "country_id"),
+    @Index(name = "idx_city_name", columnList = "name_en, name_kr"),
+    @Index(name = "idx_city_priority", columnList = "country_id, priority")
+})
 public class City extends BaseEntity {
 
     @Column(nullable = false)

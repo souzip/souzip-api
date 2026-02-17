@@ -97,9 +97,9 @@ public class AdminManagementService {
     }
 
     @Transactional
-    public void deleteCity(Long cityId) {
+    public void deleteCity(DeleteCityCommand command) {
         eventPublisher.publishEvent(
-            AdminCityDeleteRequestedEvent.of(cityId)
+            AdminCityDeleteRequestedEvent.of(command.cityId())
         );
     }
 

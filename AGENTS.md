@@ -18,6 +18,10 @@ Prefer actionable, specific feedback with code references.
 - Do not nitpick formatting if it doesn't affect readability or bugs.
 - Do not request large refactors unless clearly justified.
 
+## Language
+- Write the entire review in Korean (ko-KR).
+- Keep technical terms in English when common (e.g., N+1, transaction, idempotency).
+- Use concise bullet points and include file/line references when possible.
 ---
 
 ## 1) Security & Access Control

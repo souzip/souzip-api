@@ -16,7 +16,7 @@ public class AdminCountryQueryService implements AdminCountryQueryUseCase {
     private final CountryQueryPort countryQueryPort;
 
     @Override
-    public List<CountryQueryResult> getCountries() {
-        return countryQueryPort.getCountries();
+    public List<CountryQueryResult> getCountries(String keyword) {
+        return countryQueryPort.getCountries(keyword);
     }
 }

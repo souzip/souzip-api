@@ -84,8 +84,10 @@ public class AdminManagementController {
 
     @ViewerAccess
     @GetMapping("/countries")
-    public SuccessResponse<List<CountryQueryResult>> getCountries() {
-        return SuccessResponse.of(adminCountryQueryUseCase.getCountries());
+    public SuccessResponse<List<CountryQueryResult>> getCountries(
+            @RequestParam(required = false) String keyword  // 추가
+    ) {
+        return SuccessResponse.of(adminCountryQueryUseCase.getCountries(keyword));
     }
 
     @ViewerAccess

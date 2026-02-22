@@ -13,8 +13,8 @@ public class CountryQueryAdapter implements CountryQueryPort {
     private final CountryAdminPort countryAdminPort;
 
     @Override
-    public List<CountryQueryResult> getCountries() {
-        return countryAdminPort.getCountries().stream()
+    public List<CountryQueryResult> getCountries(String keyword) {
+        return countryAdminPort.getCountries(keyword).stream()
             .map(c -> new CountryQueryResult(
                 c.id(),
                 c.nameKr()

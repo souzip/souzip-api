@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface CountryAdminPort {
 
-    List<CountryAdminResult> getCountries();
+    List<CountryAdminResult> getCountries(String keyword);
 
     record CountryAdminResult(Long id, String nameKr) {
         public static CountryAdminResult from(Country country) {

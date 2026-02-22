@@ -228,34 +228,61 @@ class AdminManagementControllerTest extends RestDocsSupport {
         setAdminAuthentication();
 
         List<CountryQueryResult> countries = List.of(
-            new CountryQueryResult(1L, "대한민국"),
-            new CountryQueryResult(2L, "일본")
+                new CountryQueryResult(1L, "대한민국"),
+                new CountryQueryResult(2L, "일본")
         );
 
-        given(adminCountryQueryUseCase.getCountries()).willReturn(countries);
+        given(adminCountryQueryUseCase.getCountries(null)).willReturn(countries);
 
         // when & then
         mockMvc.perform(get("/api/admin/countries")
-                .header("Authorization", "Bearer admin-token"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data[0].id").value(1))
-            .andExpect(jsonPath("$.data[0].nameKr").value("대한민국"))
-            .andExpect(jsonPath("$.data[1].id").value(2))
-            .andExpect(jsonPath("$.data[1].nameKr").value("일본"))
-            .andDo(document("admin/get-countries",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                requestHeaders(
-                    headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
-                ),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라 목록"),
-                    fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("나라 ID"),
-                    fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("나라 한글 이름"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
-                )
-            ));
+                        .header("Authorization", "Bearer admin-token"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(1))
+                .andExpect(jsonPath("$.data[0].nameKr").value("대한민국"))
+                .andExpect(jsonPath("$.data[1].id").value(2))
+                .andExpect(jsonPath("$.data[1].nameKr").value("일본"))
+                .andDo(document("admin/get-countries",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer {accessToken} - SUPER_ADMIN 또는 ADMIN 또는 VIEWER 권한 필요")
+                        ),
+                        queryParameters(
+                                parameterWithName("keyword").description("국가명 검색 키워드 (한글명)").optional()
+                        ),
+                        apiResponseFields(
+                                fieldWithPath("data").type(JsonFieldType.ARRAY).description("나라 목록"),
+                                fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("나라 ID"),
+                                fieldWithPath("data[].nameKr").type(JsonFieldType.STRING).description("나라 한글 이름"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                        )
+                ));
+
+        SecurityContextHolder.clearContext();
+    }
+
+    @DisplayName("나라 키워드 검색 성공")
+    @Test
+    void getCountries_withKeyword_success() throws Exception {
+        // given
+        setAdminAuthentication();
+
+        List<CountryQueryResult> countries = List.of(
+                new CountryQueryResult(1L, "대한민국")
+        );
+
+        given(adminCountryQueryUseCase.getCountries("한국")).willReturn(countries);
+
+        // when & then
+        mockMvc.perform(get("/api/admin/countries")
+                        .header("Authorization", "Bearer admin-token")
+                        .param("keyword", "한국"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].nameKr").value("대한민국"))
+                .andExpect(jsonPath("$.data.length()").value(1));
 
         SecurityContextHolder.clearContext();
     }

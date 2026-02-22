@@ -1,6 +1,7 @@
 package com.souzip.api.domain.country.application.query;
 
 import com.souzip.api.domain.country.application.port.CountryAdminPort.CountryAdminResult;
+import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.repository.CountryRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,21 @@ public class CountryQueryService {
 
     private final CountryRepository countryRepository;
 
-    public List<CountryAdminResult> getCountries() {
-        return countryRepository.findAll().stream()
-            .map(CountryAdminResult::from)
-            .toList();
+    public List<CountryAdminResult> getCountries(String keyword) {
+        if (hasNoKeyword(keyword)) {
+            return toResults(countryRepository.findAllByOrderByNameKrAsc());
+        }
+
+        return toResults(countryRepository.findByKeywordOrderByNameKrAsc(keyword));
+    }
+
+    private boolean hasNoKeyword(String keyword) {
+        return keyword == null || keyword.isBlank();
+    }
+
+    private List<CountryAdminResult> toResults(List<Country> countries) {
+        return countries.stream()
+                .map(CountryAdminResult::from)
+                .toList();
     }
 }

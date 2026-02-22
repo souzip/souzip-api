@@ -13,7 +13,7 @@ public class CountryAdminAdapter implements CountryAdminPort {
     private final CountryQueryService countryQueryService;
 
     @Override
-    public List<CountryAdminResult> getCountries() {
-        return countryQueryService.getCountries();
+    public List<CountryAdminResult> getCountries(String keyword) {
+        return countryQueryService.getCountries(keyword);
     }
 }

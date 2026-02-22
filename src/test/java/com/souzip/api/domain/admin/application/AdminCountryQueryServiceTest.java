@@ -24,20 +24,20 @@ class AdminCountryQueryServiceTest {
     @InjectMocks
     private AdminCountryQueryService adminCountryQueryService;
 
-    @DisplayName("나라 목록 조회 성공")
+    @DisplayName("나라 목록 전체 조회 성공")
     @Test
-    void getCountries_success() {
+    void getCountries_withoutKeyword_success() {
         // given
         List<CountryQueryResult> expected = List.of(
-            new CountryQueryResult(1L, "대한민국"),
-            new CountryQueryResult(2L, "일본"),
-            new CountryQueryResult(3L, "미국")
+                new CountryQueryResult(1L, "대한민국"),
+                new CountryQueryResult(2L, "일본"),
+                new CountryQueryResult(3L, "미국")
         );
 
-        given(countryQueryPort.getCountries()).willReturn(expected);
+        given(countryQueryPort.getCountries(null)).willReturn(expected);
 
         // when
-        List<CountryQueryResult> result = adminCountryQueryService.getCountries();
+        List<CountryQueryResult> result = adminCountryQueryService.getCountries(null);
 
         // then
         assertThat(result).hasSize(3);
@@ -46,21 +46,41 @@ class AdminCountryQueryServiceTest {
         assertThat(result.get(1).nameKr()).isEqualTo("일본");
         assertThat(result.get(2).nameKr()).isEqualTo("미국");
 
-        verify(countryQueryPort).getCountries();
+        verify(countryQueryPort).getCountries(null);
+    }
+
+    @DisplayName("나라 키워드 검색 성공")
+    @Test
+    void getCountries_withKeyword_success() {
+        // given
+        List<CountryQueryResult> expected = List.of(
+                new CountryQueryResult(1L, "대한민국")
+        );
+
+        given(countryQueryPort.getCountries("한국")).willReturn(expected);
+
+        // when
+        List<CountryQueryResult> result = adminCountryQueryService.getCountries("한국");
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().nameKr()).isEqualTo("대한민국");
+
+        verify(countryQueryPort).getCountries("한국");
     }
 
     @DisplayName("나라 목록이 비어있는 경우 빈 리스트 반환")
     @Test
     void getCountries_empty() {
         // given
-        given(countryQueryPort.getCountries()).willReturn(List.of());
+        given(countryQueryPort.getCountries(null)).willReturn(List.of());
 
         // when
-        List<CountryQueryResult> result = adminCountryQueryService.getCountries();
+        List<CountryQueryResult> result = adminCountryQueryService.getCountries(null);
 
         // then
         assertThat(result).isEmpty();
 
-        verify(countryQueryPort).getCountries();
+        verify(countryQueryPort).getCountries(null);
     }
 }

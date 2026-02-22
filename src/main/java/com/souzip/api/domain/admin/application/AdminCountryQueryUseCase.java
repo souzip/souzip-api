@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface AdminCountryQueryUseCase {
 
-    List<CountryQueryResult> getCountries();
+    List<CountryQueryResult> getCountries(String keyword);
 }

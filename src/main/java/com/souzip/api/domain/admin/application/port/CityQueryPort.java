@@ -8,9 +8,10 @@ public interface CityQueryPort {
     PaginationResponse<CityQueryResult> getCities(Long countryId, String keyword, int pageNo, int pageSize);
 
     record CityQueryResult(
-        Long id,
-        String nameKr,
-        Integer priority,
-        LocalDateTime updatedAt
+            Long id,
+            String nameKr,
+            String nameEn,
+            Integer priority,
+            LocalDateTime updatedAt
     ) {}
 }

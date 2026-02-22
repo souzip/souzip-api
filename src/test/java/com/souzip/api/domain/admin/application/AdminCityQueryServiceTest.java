@@ -35,12 +35,12 @@ class AdminCityQueryServiceTest {
         CitySearchQuery query = CitySearchQuery.of(83L, null, 1, 20);
 
         List<CityQueryResult> content = List.of(
-            new CityQueryResult(1L, "서울", 1, now),
-            new CityQueryResult(2L, "부산", 2, now)
+                new CityQueryResult(1L, "서울", "Seoul", 1, now),
+                new CityQueryResult(2L, "부산", "Busan", 2, now)
         );
 
         PaginationResponse<CityQueryResult> expected = PaginationResponse.of(
-            content, 1, 20, 2, 1
+                content, 1, 20, 2, 1
         );
 
         given(cityQueryPort.getCities(83L, null, 1, 20)).willReturn(expected);
@@ -51,7 +51,9 @@ class AdminCityQueryServiceTest {
         // then
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent().get(0).nameKr()).isEqualTo("서울");
+        assertThat(result.getContent().get(0).nameEn()).isEqualTo("Seoul");
         assertThat(result.getContent().get(1).nameKr()).isEqualTo("부산");
+        assertThat(result.getContent().get(1).nameEn()).isEqualTo("Busan");
         assertThat(result.getPagination().getTotalItems()).isEqualTo(2);
 
         verify(cityQueryPort).getCities(83L, null, 1, 20);
@@ -65,11 +67,11 @@ class AdminCityQueryServiceTest {
         CitySearchQuery query = CitySearchQuery.of(83L, "서울", 1, 20);
 
         List<CityQueryResult> content = List.of(
-            new CityQueryResult(1L, "서울", 1, now)
+                new CityQueryResult(1L, "서울", "Seoul", 1, now)
         );
 
         PaginationResponse<CityQueryResult> expected = PaginationResponse.of(
-            content, 1, 20, 1, 1
+                content, 1, 20, 1, 1
         );
 
         given(cityQueryPort.getCities(83L, "서울", 1, 20)).willReturn(expected);
@@ -80,6 +82,7 @@ class AdminCityQueryServiceTest {
         // then
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().getFirst().nameKr()).isEqualTo("서울");
+        assertThat(result.getContent().getFirst().nameEn()).isEqualTo("Seoul");
 
         verify(cityQueryPort).getCities(83L, "서울", 1, 20);
     }

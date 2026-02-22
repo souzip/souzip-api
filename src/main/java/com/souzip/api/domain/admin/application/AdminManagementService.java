@@ -2,6 +2,7 @@ package com.souzip.api.domain.admin.application;
 
 import com.souzip.api.domain.admin.application.command.AdminCreateCityCommand;
 import com.souzip.api.domain.admin.application.command.AdminDeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminUpdateCityCommand;
 import com.souzip.api.domain.admin.application.command.AdminUpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
 import com.souzip.api.domain.admin.application.port.CityCommandPort;
@@ -51,15 +52,9 @@ public class AdminManagementService implements AdminManagementUseCase {
     @Override
     public void deleteAdmin(UUID adminId, UUID requesterId) {
         Admin adminToDelete = adminRepository.findById(adminId)
-            .orElseThrow(AdminNotFoundException::new);
+                .orElseThrow(AdminNotFoundException::new);
 
         adminRepository.delete(adminToDelete);
-    }
-
-    @Transactional
-    @Override
-    public void updateCityPriority(AdminUpdateCityPriorityCommand command) {
-        cityCommandPort.updateCityPriority(command);
     }
 
     @Transactional
@@ -70,8 +65,20 @@ public class AdminManagementService implements AdminManagementUseCase {
 
     @Transactional
     @Override
+    public void updateCity(AdminUpdateCityCommand command) {
+        cityCommandPort.updateCity(command);
+    }
+
+    @Transactional
+    @Override
     public void deleteCity(AdminDeleteCityCommand command) {
         cityCommandPort.deleteCity(command);
+    }
+
+    @Transactional
+    @Override
+    public void updateCityPriority(AdminUpdateCityPriorityCommand command) {
+        cityCommandPort.updateCityPriority(command);
     }
 
     private void validateNotSuperAdmin(AdminRole role) {
@@ -96,18 +103,18 @@ public class AdminManagementService implements AdminManagementUseCase {
 
     private Admin createAdmin(InviteAdminCommand command) {
         return Admin.create(
-            command.username(),
-            command.password(),
-            command.role(),
-            passwordEncoder
+                command.username(),
+                command.password(),
+                command.role(),
+                passwordEncoder
         );
     }
 
     public record AdminPageResult(
-        List<Admin> admins,
-        int pageNo,
-        int pageSize,
-        long total,
-        int totalPages
+            List<Admin> admins,
+            int pageNo,
+            int pageSize,
+            long total,
+            int totalPages
     ) {}
 }

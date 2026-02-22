@@ -62,6 +62,11 @@ public class City extends BaseEntity {
         this.priority = priority;
     }
 
+    public void updateName(String nameEn, String nameKr) {
+        this.nameEn = nameEn;
+        this.nameKr = nameKr;
+    }
+
     private void validatePriority(Integer priority) {
         if (isInvalidPriority(priority)) {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "우선순위는 1 이상이어야 합니다.");

@@ -12,6 +12,7 @@ public interface CityAdminPort {
     record CityAdminResult(
         Long id,
         String nameKr,
+        String nameEn,
         Integer priority,
         LocalDateTime updatedAt
     ) {
@@ -19,6 +20,7 @@ public interface CityAdminPort {
             return new CityAdminResult(
                 city.getId(),
                 city.getNameKr(),
+                city.getNameEn(),
                 city.getPriority(),
                 city.getUpdatedAt()
             );

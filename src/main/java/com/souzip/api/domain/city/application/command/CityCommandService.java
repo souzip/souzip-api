@@ -28,38 +28,28 @@ public class CityCommandService implements CityManagementPort {
 
     @Transactional
     @Override
-    public void updateCityPriority(UpdateCityPriorityCommand command) {
-        City city = findCityByIdWithLock(command.cityId());
-        Integer oldPriority = city.getPriority();
-        Long countryId = city.getCountry().getId();
+    public void createCity(CreateCityCommand command) {
+        Country country = findCountryById(command.countryId());
+        City city = City.create(
+                command.nameEn(),
+                command.nameKr(),
+                BigDecimal.valueOf(command.latitude()),
+                BigDecimal.valueOf(command.longitude()),
+                country
+        );
+        cityRepository.save(city);
 
-        cityPriorityDomainService.adjustPriorities(oldPriority, command.newPriority(), countryId);
-        city.updatePriority(command.newPriority());
-
-        eventPublisher.publishEvent(CityPriorityUpdatedEvent.of(
-            city.getId(),
-            oldPriority,
-            command.newPriority()
+        eventPublisher.publishEvent(CityCreatedEvent.of(
+                city.getId(),
+                country.getId()
         ));
     }
 
     @Transactional
     @Override
-    public void createCity(CreateCityCommand command) {
-        Country country = findCountryById(command.countryId());
-        City city = City.create(
-            command.nameEn(),
-            command.nameKr(),
-            BigDecimal.valueOf(command.latitude()),
-            BigDecimal.valueOf(command.longitude()),
-            country
-        );
-        cityRepository.save(city);
-
-        eventPublisher.publishEvent(CityCreatedEvent.of(
-            city.getId(),
-            country.getId()
-        ));
+    public void updateCity(UpdateCityCommand command) {
+        City city = findCityById(command.cityId());
+        city.updateName(command.nameEn(), command.nameKr());
     }
 
     @Transactional
@@ -71,18 +61,35 @@ public class CityCommandService implements CityManagementPort {
         eventPublisher.publishEvent(CityDeletedEvent.of(city.getId()));
     }
 
+    @Transactional
+    @Override
+    public void updateCityPriority(UpdateCityPriorityCommand command) {
+        City city = findCityByIdWithLock(command.cityId());
+        Integer oldPriority = city.getPriority();
+        Long countryId = city.getCountry().getId();
+
+        cityPriorityDomainService.adjustPriorities(oldPriority, command.newPriority(), countryId);
+        city.updatePriority(command.newPriority());
+
+        eventPublisher.publishEvent(CityPriorityUpdatedEvent.of(
+                city.getId(),
+                oldPriority,
+                command.newPriority()
+        ));
+    }
+
     private City findCityByIdWithLock(Long cityId) {
         return cityRepository.findByIdWithLock(cityId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "도시를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "도시를 찾을 수 없습니다."));
     }
 
     private City findCityById(Long cityId) {
         return cityRepository.findById(cityId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "도시를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "도시를 찾을 수 없습니다."));
     }
 
     private Country findCountryById(Long countryId) {
         return countryRepository.findById(countryId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "나라를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "나라를 찾을 수 없습니다."));
     }
 }

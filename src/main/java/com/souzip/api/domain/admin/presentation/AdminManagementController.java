@@ -5,6 +5,7 @@ import com.souzip.api.domain.admin.application.AdminCountryQueryUseCase;
 import com.souzip.api.domain.admin.application.AdminManagementUseCase;
 import com.souzip.api.domain.admin.application.command.AdminCreateCityCommand;
 import com.souzip.api.domain.admin.application.command.AdminDeleteCityCommand;
+import com.souzip.api.domain.admin.application.command.AdminUpdateCityCommand;
 import com.souzip.api.domain.admin.application.command.AdminUpdateCityPriorityCommand;
 import com.souzip.api.domain.admin.application.command.InviteAdminCommand;
 import com.souzip.api.domain.admin.application.port.CityQueryPort.CityQueryResult;
@@ -17,6 +18,7 @@ import com.souzip.api.domain.admin.infrastructure.security.annotation.ViewerAcce
 import com.souzip.api.domain.admin.model.Admin;
 import com.souzip.api.domain.admin.presentation.request.CreateCityRequest;
 import com.souzip.api.domain.admin.presentation.request.InviteAdminRequest;
+import com.souzip.api.domain.admin.presentation.request.UpdateCityRequest;
 import com.souzip.api.domain.admin.presentation.response.AdminResponse;
 import com.souzip.api.domain.admin.presentation.response.InviteAdminResponse;
 import com.souzip.api.global.common.dto.SuccessResponse;
@@ -85,7 +87,7 @@ public class AdminManagementController {
     @ViewerAccess
     @GetMapping("/countries")
     public SuccessResponse<List<CountryQueryResult>> getCountries(
-            @RequestParam(required = false) String keyword  // 추가
+            @RequestParam(required = false) String keyword
     ) {
         return SuccessResponse.of(adminCountryQueryUseCase.getCountries(keyword));
     }
@@ -138,5 +140,19 @@ public class AdminManagementController {
     ) {
         adminManagementUseCase.updateCityPriority(new AdminUpdateCityPriorityCommand(cityId, priority));
         return SuccessResponse.of(null, "우선순위가 업데이트되었습니다.");
+    }
+
+    @AdminAccess
+    @PatchMapping("/cities/{cityId}/name")
+    public SuccessResponse<Void> updateCityName(
+            @PathVariable Long cityId,
+            @Valid @RequestBody UpdateCityRequest request
+    ) {
+        adminManagementUseCase.updateCity(new AdminUpdateCityCommand(
+                cityId,
+                request.nameEn(),
+                request.nameKr()
+        ));
+        return SuccessResponse.of(null, "도시 이름이 수정되었습니다.");
     }
 }

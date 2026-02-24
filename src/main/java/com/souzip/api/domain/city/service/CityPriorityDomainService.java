@@ -3,6 +3,7 @@ package com.souzip.api.domain.city.service;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.city.repository.CityRepository;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,34 +14,82 @@ public class CityPriorityDomainService {
 
     private final CityRepository cityRepository;
 
-    public void adjustPriorities(Integer oldPriority, Integer newPriority, Long countryId) {
-        pullOldPriorityIfExists(oldPriority, countryId);
-        pushNewPriorityIfExists(newPriority, countryId);
+    public void adjustPriorities(Long excludeCityId, Integer oldPriority, Integer newPriority, Long countryId) {
+        if (isSamePriority(oldPriority, newPriority)) {
+            return;
+        }
+
+        if (isSettingNewPriority(oldPriority, newPriority)) {
+            pushNewPriorityIfExists(excludeCityId, newPriority, countryId);
+            return;
+        }
+
+        if (isRemovingPriority(oldPriority, newPriority)) {
+            pullOldPriorityIfExists(excludeCityId, oldPriority, countryId);
+            return;
+        }
+
+        if (isMovingDown(oldPriority, newPriority)) {
+            pullOldPriorityIfExists(excludeCityId, oldPriority, countryId);
+            pushNewPriorityIfExists(excludeCityId, newPriority - 1, countryId);
+            return;
+        }
+
+        if (isMovingUp(oldPriority, newPriority)) {
+            pushNewPriorityIfExists(excludeCityId, newPriority, countryId);
+            pullOldPriorityIfExists(excludeCityId, oldPriority + 1, countryId);
+        }
     }
 
-    private void pullOldPriorityIfExists(Integer oldPriority, Long countryId) {
+    private boolean isSamePriority(Integer oldPriority, Integer newPriority) {
+        return Objects.equals(oldPriority, newPriority);
+    }
+
+    private boolean isSettingNewPriority(Integer oldPriority, Integer newPriority) {
+        return oldPriority == null && newPriority != null;
+    }
+
+    private boolean isRemovingPriority(Integer oldPriority, Integer newPriority) {
+        return oldPriority != null && newPriority == null;
+    }
+
+    private boolean isMovingDown(Integer oldPriority, Integer newPriority) {
+        return oldPriority != null && newPriority != null && oldPriority < newPriority;
+    }
+
+    private boolean isMovingUp(Integer oldPriority, Integer newPriority) {
+        return oldPriority != null && newPriority != null && oldPriority > newPriority;
+    }
+
+    private void pullOldPriorityIfExists(Long excludeCityId, Integer oldPriority, Long countryId) {
         if (hasPriority(oldPriority)) {
             AtomicInteger expected = new AtomicInteger(oldPriority + 1);
 
             List<City> citiesToPull = cityRepository
-                .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, oldPriority + 1);
+                    .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, oldPriority + 1)
+                    .stream()
+                    .filter(city -> !city.getId().equals(excludeCityId))
+                    .toList();
 
             citiesToPull.stream()
-                .takeWhile(city -> city.getPriority().equals(expected.get()))
-                .forEach(city -> city.updatePriority(expected.getAndIncrement() - 1));
+                    .takeWhile(city -> city.getPriority().equals(expected.get()))
+                    .forEach(city -> city.updatePriority(expected.getAndIncrement() - 1));
         }
     }
 
-    private void pushNewPriorityIfExists(Integer newPriority, Long countryId) {
+    private void pushNewPriorityIfExists(Long excludeCityId, Integer newPriority, Long countryId) {
         if (hasPriority(newPriority)) {
             AtomicInteger expected = new AtomicInteger(newPriority);
 
             List<City> citiesToPush = cityRepository
-                .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, newPriority);
+                    .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, newPriority)
+                    .stream()
+                    .filter(city -> !city.getId().equals(excludeCityId))
+                    .toList();
 
             citiesToPush.stream()
-                .takeWhile(city -> city.getPriority().equals(expected.get()))
-                .forEach(city -> city.updatePriority(expected.getAndIncrement() + 1));
+                    .takeWhile(city -> city.getPriority().equals(expected.get()))
+                    .forEach(city -> city.updatePriority(expected.getAndIncrement() + 1));
         }
     }
 

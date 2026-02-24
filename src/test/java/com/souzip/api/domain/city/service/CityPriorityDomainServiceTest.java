@@ -172,7 +172,7 @@ class CityPriorityDomainServiceTest {
 
         // then
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 2);
-        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 7);
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 6);
     }
 
     @DisplayName("연속되지 않은 우선순위가 있을 때 중간에서 멈춘다")

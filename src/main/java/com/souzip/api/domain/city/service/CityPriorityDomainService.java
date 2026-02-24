@@ -37,7 +37,7 @@ public class CityPriorityDomainService {
 
         if (isMovingUp(oldPriority, newPriority)) {
             pushNewPriorityIfExists(excludeCityId, newPriority, countryId);
-            pullOldPriorityIfExists(excludeCityId, oldPriority + 1, countryId);
+            pullOldPriorityIfExists(excludeCityId, oldPriority, countryId);
         }
     }
 

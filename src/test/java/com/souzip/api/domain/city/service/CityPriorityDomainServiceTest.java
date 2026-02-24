@@ -34,6 +34,7 @@ class CityPriorityDomainServiceTest {
         cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(anyLong(), anyInt());
+        verify(cityRepository, never()).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(anyLong(), anyInt(), anyInt());
     }
 
     @DisplayName("우선순위 없음 -> 3번으로 설정 시 3번 이후가 밀린다")
@@ -114,12 +115,12 @@ class CityPriorityDomainServiceTest {
         when(city4.getPriority()).thenReturn(4);
         when(city5.getPriority()).thenReturn(5);
 
-        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3))
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 5))
                 .thenReturn(Arrays.asList(city3, city4, city5));
 
         cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
-        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3);
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 5);
         verify(city3).updatePriority(2);
         verify(city4).updatePriority(3);
         verify(city5).updatePriority(4);
@@ -145,18 +146,18 @@ class CityPriorityDomainServiceTest {
         when(city3.getPriority()).thenReturn(3);
         when(city4.getPriority()).thenReturn(4);
 
-        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 2))
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 4))
                 .thenReturn(Arrays.asList(city2, city3, city4));
 
         cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
-        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 2);
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 4);
         verify(city2).updatePriority(3);
         verify(city3).updatePriority(4);
         verify(city4).updatePriority(5);
     }
 
-    @DisplayName("연속되지 않은 우선순위가 있을 때 중간에서 멈춘다")
+    @DisplayName("연속되지 않은 우선순위가 있을 때도 이동 범위 내에서는 정상 동작한다")
     @Test
     void adjustPriorities_NonConsecutivePriorities_StopsAtGap() {
         Long excludeCityId = 2L;
@@ -219,6 +220,7 @@ class CityPriorityDomainServiceTest {
         cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(anyLong(), anyInt());
+        verify(cityRepository, never()).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(anyLong(), anyInt(), anyInt());
     }
 
     @DisplayName("2번 -> 3번 변경 시 올바르게 조정된다 (인접한 번호)")
@@ -234,11 +236,12 @@ class CityPriorityDomainServiceTest {
         when(city3.getId()).thenReturn(3L);
         when(city3.getPriority()).thenReturn(3);
 
-        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3))
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 3))
                 .thenReturn(Arrays.asList(city3));
 
         cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 3);
         verify(city3).updatePriority(2);
     }
 
@@ -255,11 +258,12 @@ class CityPriorityDomainServiceTest {
         when(city2.getId()).thenReturn(2L);
         when(city2.getPriority()).thenReturn(2);
 
-        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 2))
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 2))
                 .thenReturn(Arrays.asList(city2));
 
         cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 2);
         verify(city2).updatePriority(3);
     }
 }

@@ -12,9 +12,11 @@ public interface CityRepositoryCustom {
 
     List<City> findByCountryId(Long countryId);
 
-    List<City> findByCountryIdAndPriorityGoeOrderByPriorityAsc(Long countryId, Integer priority);
-
     List<City> findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(Long countryId, Integer priority);
+
+    List<City> findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(
+            Long countryId, Integer startInclusive, Integer endInclusive
+    );
 
     Page<City> findByCountryIdWithPaging(Long countryId, Pageable pageable);
 

@@ -41,24 +41,27 @@ public class CityRepositoryImpl implements CityRepositoryCustom {
     }
 
     @Override
-    public List<City> findByCountryIdAndPriorityGoeOrderByPriorityAsc(Long countryId, Integer priority) {
-        return queryFactory
-                .selectFrom(city)
-                .where(
-                        city.country.id.eq(countryId),
-                        city.priority.goe(priority)
-                )
-                .orderBy(city.priority.asc())
-                .fetch();
-    }
-
-    @Override
     public List<City> findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(Long countryId, Integer priority) {
         return queryFactory
                 .selectFrom(city)
                 .where(
                         city.country.id.eq(countryId),
                         city.priority.goe(priority)
+                )
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .orderBy(city.priority.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<City> findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(
+            Long countryId, Integer startInclusive, Integer endInclusive
+    ) {
+        return queryFactory
+                .selectFrom(city)
+                .where(
+                        city.country.id.eq(countryId),
+                        city.priority.between(startInclusive, endInclusive)
                 )
                 .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .orderBy(city.priority.asc())

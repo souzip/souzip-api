@@ -30,12 +30,12 @@ public class CityPriorityDomainService {
         }
 
         if (isMovingDown(oldPriority, newPriority)) {
-            pullOldPriorityIfExists(excludeCityId, oldPriority, newPriority, countryId);
+            shiftLeftBetween(excludeCityId, countryId, oldPriority + 1, newPriority);
             return;
         }
 
         if (isMovingUp(oldPriority, newPriority)) {
-            pushNewPriorityIfExists(excludeCityId, newPriority, oldPriority - 1, countryId);
+            shiftRightBetween(excludeCityId, countryId, newPriority, oldPriority - 1);
         }
     }
 
@@ -99,6 +99,34 @@ public class CityPriorityDomainService {
                                 && (endPriority == null || city.getPriority() <= endPriority)
                 )
                 .forEach(city -> city.updatePriority(expected.getAndIncrement() + 1));
+    }
+
+    private void shiftLeftBetween(Long excludeCityId, Long countryId, Integer startInclusive, Integer endInclusive) {
+        if (startInclusive > endInclusive) {
+            return;
+        }
+
+        List<City> cities = cityRepository
+                .findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, startInclusive, endInclusive)
+                .stream()
+                .filter(city -> !city.getId().equals(excludeCityId))
+                .toList();
+
+        cities.forEach(city -> city.updatePriority(city.getPriority() - 1));
+    }
+
+    private void shiftRightBetween(Long excludeCityId, Long countryId, Integer startInclusive, Integer endInclusive) {
+        if (startInclusive > endInclusive) {
+            return;
+        }
+
+        List<City> cities = cityRepository
+                .findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, startInclusive, endInclusive)
+                .stream()
+                .filter(city -> !city.getId().equals(excludeCityId))
+                .toList();
+
+        cities.forEach(city -> city.updatePriority(city.getPriority() + 1));
     }
 
     private boolean hasPriority(Integer priority) {

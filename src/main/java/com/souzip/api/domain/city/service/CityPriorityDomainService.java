@@ -14,30 +14,30 @@ public class CityPriorityDomainService {
 
     private final CityRepository cityRepository;
 
-    public void adjustPriorities(Integer oldPriority, Integer newPriority, Long countryId) {
+    public void adjustPriorities(Long excludeCityId, Integer oldPriority, Integer newPriority, Long countryId) {
         if (isSamePriority(oldPriority, newPriority)) {
             return;
         }
 
         if (isSettingNewPriority(oldPriority, newPriority)) {
-            pushNewPriorityIfExists(newPriority, countryId);
+            pushNewPriorityIfExists(excludeCityId, newPriority, countryId);
             return;
         }
 
         if (isRemovingPriority(oldPriority, newPriority)) {
-            pullOldPriorityIfExists(oldPriority, countryId);
+            pullOldPriorityIfExists(excludeCityId, oldPriority, countryId);
             return;
         }
 
         if (isMovingDown(oldPriority, newPriority)) {
-            pullOldPriorityIfExists(oldPriority, countryId);
-            pushNewPriorityIfExists(newPriority - 1, countryId);
+            pullOldPriorityIfExists(excludeCityId, oldPriority, countryId);
+            pushNewPriorityIfExists(excludeCityId, newPriority - 1, countryId);
             return;
         }
 
         if (isMovingUp(oldPriority, newPriority)) {
-            pushNewPriorityIfExists(newPriority, countryId);
-            pullOldPriorityIfExists(oldPriority + 1, countryId);
+            pushNewPriorityIfExists(excludeCityId, newPriority, countryId);
+            pullOldPriorityIfExists(excludeCityId, oldPriority + 1, countryId);
         }
     }
 
@@ -61,12 +61,15 @@ public class CityPriorityDomainService {
         return oldPriority != null && newPriority != null && oldPriority > newPriority;
     }
 
-    private void pullOldPriorityIfExists(Integer oldPriority, Long countryId) {
+    private void pullOldPriorityIfExists(Long excludeCityId, Integer oldPriority, Long countryId) {
         if (hasPriority(oldPriority)) {
             AtomicInteger expected = new AtomicInteger(oldPriority + 1);
 
             List<City> citiesToPull = cityRepository
-                    .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, oldPriority + 1);
+                    .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, oldPriority + 1)
+                    .stream()
+                    .filter(city -> !city.getId().equals(excludeCityId))
+                    .toList();
 
             citiesToPull.stream()
                     .takeWhile(city -> city.getPriority().equals(expected.get()))
@@ -74,12 +77,15 @@ public class CityPriorityDomainService {
         }
     }
 
-    private void pushNewPriorityIfExists(Integer newPriority, Long countryId) {
+    private void pushNewPriorityIfExists(Long excludeCityId, Integer newPriority, Long countryId) {
         if (hasPriority(newPriority)) {
             AtomicInteger expected = new AtomicInteger(newPriority);
 
             List<City> citiesToPush = cityRepository
-                    .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, newPriority);
+                    .findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, newPriority)
+                    .stream()
+                    .filter(city -> !city.getId().equals(excludeCityId))
+                    .toList();
 
             citiesToPush.stream()
                     .takeWhile(city -> city.getPriority().equals(expected.get()))

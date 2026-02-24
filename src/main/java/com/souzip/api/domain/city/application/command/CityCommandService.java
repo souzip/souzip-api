@@ -68,7 +68,7 @@ public class CityCommandService implements CityManagementPort {
         Integer oldPriority = city.getPriority();
         Long countryId = city.getCountry().getId();
 
-        cityPriorityDomainService.adjustPriorities(oldPriority, command.newPriority(), countryId);
+        cityPriorityDomainService.adjustPriorities(city.getId(), oldPriority, command.newPriority(), countryId);
         city.updatePriority(command.newPriority());
 
         eventPublisher.publishEvent(CityPriorityUpdatedEvent.of(

@@ -24,25 +24,27 @@ class CityPriorityDomainServiceTest {
     @InjectMocks
     private CityPriorityDomainService cityPriorityDomainService;
 
-    @Test
     @DisplayName("같은 우선순위로 변경 시 아무것도 실행되지 않는다")
+    @Test
     void adjustPriorities_SamePriority_DoesNothing() {
         // given
+        Long excludeCityId = 1L;
         Integer oldPriority = 3;
         Integer newPriority = 3;
         Long countryId = 1L;
 
         // when
-        cityPriorityDomainService.adjustPriorities(oldPriority, newPriority, countryId);
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         // then
         verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAsc(anyLong(), anyInt());
     }
 
-    @Test
     @DisplayName("우선순위 없음 -> 3번으로 설정 시 3번 이후가 밀린다")
+    @Test
     void adjustPriorities_NullToNumber_PushesExisting() {
         // given
+        Long excludeCityId = 1L;
         Integer oldPriority = null;
         Integer newPriority = 3;
         Long countryId = 1L;
@@ -51,6 +53,10 @@ class CityPriorityDomainServiceTest {
         City city4 = mock(City.class);
         City city5 = mock(City.class);
 
+        when(city3.getId()).thenReturn(3L);
+        when(city4.getId()).thenReturn(4L);
+        when(city5.getId()).thenReturn(5L);
+
         when(city3.getPriority()).thenReturn(3);
         when(city4.getPriority()).thenReturn(4);
         when(city5.getPriority()).thenReturn(5);
@@ -59,7 +65,7 @@ class CityPriorityDomainServiceTest {
                 .thenReturn(Arrays.asList(city3, city4, city5));
 
         // when
-        cityPriorityDomainService.adjustPriorities(oldPriority, newPriority, countryId);
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         // then
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 3);
@@ -68,16 +74,20 @@ class CityPriorityDomainServiceTest {
         verify(city5).updatePriority(6);
     }
 
-    @Test
     @DisplayName("3번 우선순위 제거 시 4번 이후가 당겨진다")
+    @Test
     void adjustPriorities_NumberToNull_PullsFollowing() {
         // given
+        Long excludeCityId = 3L;
         Integer oldPriority = 3;
         Integer newPriority = null;
         Long countryId = 1L;
 
         City city4 = mock(City.class);
         City city5 = mock(City.class);
+
+        when(city4.getId()).thenReturn(4L);
+        when(city5.getId()).thenReturn(5L);
 
         when(city4.getPriority()).thenReturn(4);
         when(city5.getPriority()).thenReturn(5);
@@ -86,7 +96,7 @@ class CityPriorityDomainServiceTest {
                 .thenReturn(Arrays.asList(city4, city5));
 
         // when
-        cityPriorityDomainService.adjustPriorities(oldPriority, newPriority, countryId);
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         // then
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 4);
@@ -94,18 +104,22 @@ class CityPriorityDomainServiceTest {
         verify(city5).updatePriority(4);
     }
 
-    @Test
     @DisplayName("2번 -> 5번으로 변경 시 올바르게 조정된다")
+    @Test
     void adjustPriorities_LowerToHigher_AdjustsCorrectly() {
         // given
+        Long excludeCityId = 2L;
         Integer oldPriority = 2;
         Integer newPriority = 5;
         Long countryId = 1L;
 
-        // pull 단계: 3번부터 당김
         City city3 = mock(City.class);
         City city4 = mock(City.class);
         City city5 = mock(City.class);
+
+        when(city3.getId()).thenReturn(3L);
+        when(city4.getId()).thenReturn(4L);
+        when(city5.getId()).thenReturn(5L);
 
         when(city3.getPriority()).thenReturn(3);
         when(city4.getPriority()).thenReturn(4);
@@ -114,22 +128,22 @@ class CityPriorityDomainServiceTest {
         when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 3))
                 .thenReturn(Arrays.asList(city3, city4, city5));
 
-        // push 단계: pull 후 city5가 4로 변경됐으므로, 4번부터 밀림
         when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 4))
                 .thenReturn(Collections.emptyList());
 
         // when
-        cityPriorityDomainService.adjustPriorities(oldPriority, newPriority, countryId);
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         // then
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 3);
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 4);
     }
 
-    @Test
     @DisplayName("5번 -> 2번으로 변경 시 올바르게 조정된다")
+    @Test
     void adjustPriorities_HigherToLower_AdjustsCorrectly() {
         // given
+        Long excludeCityId = 5L;
         Integer oldPriority = 5;
         Integer newPriority = 2;
         Long countryId = 1L;
@@ -137,37 +151,43 @@ class CityPriorityDomainServiceTest {
         City city2 = mock(City.class);
         City city3 = mock(City.class);
         City city4 = mock(City.class);
-        City city5 = mock(City.class);
+
+        when(city2.getId()).thenReturn(2L);
+        when(city3.getId()).thenReturn(3L);
+        when(city4.getId()).thenReturn(4L);
 
         when(city2.getPriority()).thenReturn(2);
         when(city3.getPriority()).thenReturn(3);
         when(city4.getPriority()).thenReturn(4);
-        when(city5.getPriority()).thenReturn(5);
 
         when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 2))
-                .thenReturn(Arrays.asList(city2, city3, city4, city5));
+                .thenReturn(Arrays.asList(city2, city3, city4));
 
-        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 7))
+        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 6))
                 .thenReturn(Collections.emptyList());
 
         // when
-        cityPriorityDomainService.adjustPriorities(oldPriority, newPriority, countryId);
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         // then
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 2);
-        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 7);
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 6);
     }
 
-    @Test
     @DisplayName("연속되지 않은 우선순위가 있을 때 중간에서 멈춘다")
+    @Test
     void adjustPriorities_NonConsecutivePriorities_StopsAtGap() {
         // given
+        Long excludeCityId = 2L;
         Integer oldPriority = 2;
         Integer newPriority = null;
         Long countryId = 1L;
 
         City city3 = mock(City.class);
         City city5 = mock(City.class);
+
+        when(city3.getId()).thenReturn(3L);
+        when(city5.getId()).thenReturn(5L);
 
         when(city3.getPriority()).thenReturn(3);
         when(city5.getPriority()).thenReturn(5);
@@ -176,7 +196,7 @@ class CityPriorityDomainServiceTest {
                 .thenReturn(Arrays.asList(city3, city5));
 
         // when
-        cityPriorityDomainService.adjustPriorities(oldPriority, newPriority, countryId);
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
 
         // then
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 3);

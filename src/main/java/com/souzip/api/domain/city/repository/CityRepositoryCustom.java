@@ -14,6 +14,8 @@ public interface CityRepositoryCustom {
 
     List<City> findByCountryIdAndPriorityGoeOrderByPriorityAsc(Long countryId, Integer priority);
 
+    List<City> findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(Long countryId, Integer priority);
+
     Page<City> findByCountryIdWithPaging(Long countryId, Pageable pageable);
 
     Page<City> searchByKeyword(Long countryId, String keyword, Pageable pageable);

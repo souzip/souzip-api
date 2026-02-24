@@ -163,7 +163,8 @@ class CityPriorityDomainServiceTest {
         when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 2))
                 .thenReturn(Arrays.asList(city2, city3, city4));
 
-        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 6))
+        // pull(6)을 호출하면 실제로는 7번부터 조회함!
+        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 7))
                 .thenReturn(Collections.emptyList());
 
         // when
@@ -171,7 +172,7 @@ class CityPriorityDomainServiceTest {
 
         // then
         verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 2);
-        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 6);
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAsc(countryId, 7);
     }
 
     @DisplayName("연속되지 않은 우선순위가 있을 때 중간에서 멈춘다")

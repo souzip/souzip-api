@@ -68,6 +68,8 @@ fi
 docker-compose up -d postgres
 if [ $? -ne 0 ]; then
     echo -e "${RED}[ERROR] DB 컨테이너 시작 실패${NC}"
+    echo -e "${YELLOW}[INFO] 롤백을 시작합니다${NC}"
+    $WORK_DIR/deploy/scripts/rollback.sh
     exit 1
 fi
 

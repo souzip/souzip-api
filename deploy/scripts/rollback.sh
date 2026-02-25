@@ -44,10 +44,14 @@ if [ ! -f .env ]; then
 fi
 
 docker-compose up -d postgres
-docker-compose up -d souzip-api
-
 if [ $? -ne 0 ]; then
-    echo -e "${RED}[ERROR] 컨테이너 시작 실패${NC}"
+    echo -e "${RED}[ERROR] DB 컨테이너 시작 실패${NC}"
+    exit 1
+fi
+
+docker-compose up -d souzip-api
+if [ $? -ne 0 ]; then
+    echo -e "${RED}[ERROR] API 컨테이너 시작 실패${NC}"
     exit 1
 fi
 
@@ -62,8 +66,8 @@ if curl -f -s --max-time 5 $HEALTH_CHECK_URL > /dev/null 2>&1; then
     docker ps | grep souzip-api
 
     if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
-            source "$WORK_DIR/deploy/notification/discord-notify.sh"
-            notify_rollback_success
+        source "$WORK_DIR/deploy/notification/discord-notify.sh"
+        notify_rollback_success
     fi
 
     exit 0
@@ -73,10 +77,10 @@ else
     echo -e "${RED}========================================${NC}"
     docker logs --tail 50 souzip-api
 
-     if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
-            source "$WORK_DIR/deploy/notification/discord-notify.sh"
-            notify_rollback_failed
-     fi
+    if [ ! -z "$DISCORD_WEBHOOK_URL" ] && [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
+        source "$WORK_DIR/deploy/notification/discord-notify.sh"
+        notify_rollback_failed
+    fi
 
     exit 1
 fi

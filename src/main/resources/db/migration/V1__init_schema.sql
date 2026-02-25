@@ -4,83 +4,26 @@
 
 
 -- Dumped from database version 14.18
--- Dumped by pg_dump version 14.20 (Homebrew)
+-- Dumped by pg_dump version 15.15 (Homebrew)
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
 
-ALTER TABLE IF EXISTS ONLY public.souvenir DROP CONSTRAINT IF EXISTS fkforav2lab0pssqkonqt34m5f9;
-ALTER TABLE IF EXISTS ONLY public.user_category DROP CONSTRAINT IF EXISTS fk6gbxowf7xyes5y6gqf7qu7haf;
-DROP INDEX IF EXISTS public.idx_user_id;
-DROP INDEX IF EXISTS public.idx_transfer_identifier;
-DROP INDEX IF EXISTS public.idx_refresh_token_user_id;
-DROP INDEX IF EXISTS public.idx_refresh_token_token;
-DROP INDEX IF EXISTS public.idx_provider;
-DROP INDEX IF EXISTS public.idx_file_storage_key;
-DROP INDEX IF EXISTS public.idx_file_entity_order;
-DROP INDEX IF EXISTS public.idx_file_entity;
-DROP INDEX IF EXISTS public.idx_file_created_at;
-DROP INDEX IF EXISTS public.idx_email;
-DROP INDEX IF EXISTS public.idx_deleted;
-DROP INDEX IF EXISTS public.idx_city_priority;
-DROP INDEX IF EXISTS public.idx_city_name;
-DROP INDEX IF EXISTS public.idx_city_country;
-DROP INDEX IF EXISTS public.idx_audit_user_id;
-DROP INDEX IF EXISTS public.idx_audit_target;
-DROP INDEX IF EXISTS public.idx_audit_created_at;
-DROP INDEX IF EXISTS public.idx_audit_category;
-DROP INDEX IF EXISTS public.idx_audit_action;
-DROP INDEX IF EXISTS public.idx_admin_username;
-DROP INDEX IF EXISTS public.idx_admin_refresh_token_token;
-DROP INDEX IF EXISTS public.idx_admin_refresh_token_admin_id;
-ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS user_pkey;
-ALTER TABLE IF EXISTS ONLY public.user_agreement DROP CONSTRAINT IF EXISTS user_agreement_pkey;
-ALTER TABLE IF EXISTS ONLY public.file DROP CONSTRAINT IF EXISTS uq_file_entity_order;
-ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS ukavppunt4c0qpxo9giv18an98o;
-ALTER TABLE IF EXISTS ONLY public."user" DROP CONSTRAINT IF EXISTS uk6icoy2m5c9xvcuer66s7kkjv6;
-ALTER TABLE IF EXISTS ONLY public.souvenir DROP CONSTRAINT IF EXISTS souvenir_pkey;
-ALTER TABLE IF EXISTS ONLY public.refresh_token DROP CONSTRAINT IF EXISTS refresh_token_token_key;
-ALTER TABLE IF EXISTS ONLY public.refresh_token DROP CONSTRAINT IF EXISTS refresh_token_pkey;
-ALTER TABLE IF EXISTS ONLY public.file DROP CONSTRAINT IF EXISTS file_pkey;
-ALTER TABLE IF EXISTS ONLY public.exchange_rate DROP CONSTRAINT IF EXISTS exchange_rate_pkey;
-ALTER TABLE IF EXISTS ONLY public.currency DROP CONSTRAINT IF EXISTS currency_pkey;
-ALTER TABLE IF EXISTS ONLY public.currency DROP CONSTRAINT IF EXISTS currency_code_key;
-ALTER TABLE IF EXISTS ONLY public.country DROP CONSTRAINT IF EXISTS country_pkey;
-ALTER TABLE IF EXISTS ONLY public.city DROP CONSTRAINT IF EXISTS city_pkey;
-ALTER TABLE IF EXISTS ONLY public.audit_log DROP CONSTRAINT IF EXISTS audit_log_pkey;
-ALTER TABLE IF EXISTS ONLY public.admin DROP CONSTRAINT IF EXISTS admin_username_key;
-ALTER TABLE IF EXISTS ONLY public.admin_refresh_token DROP CONSTRAINT IF EXISTS admin_refresh_token_token_key;
-ALTER TABLE IF EXISTS ONLY public.admin_refresh_token DROP CONSTRAINT IF EXISTS admin_refresh_token_pkey;
-ALTER TABLE IF EXISTS ONLY public.admin DROP CONSTRAINT IF EXISTS admin_pkey;
-DROP TABLE IF EXISTS public.user_category;
-DROP TABLE IF EXISTS public.user_agreement;
-DROP TABLE IF EXISTS public."user";
-DROP TABLE IF EXISTS public.souvenir;
-DROP TABLE IF EXISTS public.refresh_token;
-DROP TABLE IF EXISTS public.file;
-DROP TABLE IF EXISTS public.exchange_rate;
-DROP TABLE IF EXISTS public.currency;
-DROP TABLE IF EXISTS public.country;
-DROP TABLE IF EXISTS public.city;
-DROP TABLE IF EXISTS public.audit_log;
-DROP TABLE IF EXISTS public.admin_refresh_token;
-DROP TABLE IF EXISTS public.admin;
-DROP EXTENSION IF EXISTS postgis;
-DROP SCHEMA IF EXISTS cdb_admin;
 --
--- Name: cdb_admin; Type: SCHEMA; Schema: -; Owner: -
+-- Name: cdb_admin; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
 CREATE SCHEMA cdb_admin;
 
+
+ALTER SCHEMA cdb_admin OWNER TO postgres;
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+ALTER SCHEMA public OWNER TO postgres;
 
 --
 -- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
@@ -90,46 +33,16 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA cdb_admin;
 
 
 --
--- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: -
+-- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
 
 COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
 
 
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
---
--- Name: admin; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.admin (
-    id uuid NOT NULL,
-    username character varying(20) NOT NULL,
-    password character varying(255) NOT NULL,
-    role character varying(50) NOT NULL,
-    last_login_at timestamp without time zone,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
 
 
 --
--- Name: admin_refresh_token; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.admin_refresh_token (
-    id uuid NOT NULL,
-    admin_id uuid NOT NULL,
-    token character varying(500) NOT NULL,
-    expires_at timestamp without time zone NOT NULL,
-    created_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: audit_log; Type: TABLE; Schema: public; Owner: -
+-- Name: audit_log; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.audit_log (
@@ -148,14 +61,14 @@ CREATE TABLE public.audit_log (
     target_id bigint,
     target_type character varying(255),
     user_agent text,
-    user_id text,
-    CONSTRAINT audit_log_device_type_check CHECK (((device_type)::text = ANY (ARRAY[('IOS'::character varying)::text, ('ANDROID'::character varying)::text, ('UNKNOWN'::character varying)::text]))),
-    CONSTRAINT audit_log_provider_check CHECK (((provider)::text = ANY (ARRAY[('KAKAO'::character varying)::text, ('APPLE'::character varying)::text, ('GOOGLE'::character varying)::text])))
+    user_id character varying(255)
 );
 
 
+ALTER TABLE public.audit_log OWNER TO souzip_admin;
+
 --
--- Name: audit_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: audit_log_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.audit_log ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -169,7 +82,7 @@ ALTER TABLE public.audit_log ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTIT
 
 
 --
--- Name: city; Type: TABLE; Schema: public; Owner: -
+-- Name: city; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.city (
@@ -180,13 +93,14 @@ CREATE TABLE public.city (
     longitude numeric(38,2) NOT NULL,
     name_en character varying(255) NOT NULL,
     name_kr character varying(255) NOT NULL,
-    country_id bigint,
-    priority integer
+    country_id bigint
 );
 
 
+ALTER TABLE public.city OWNER TO souzip_admin;
+
 --
--- Name: city_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: city_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.city ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -200,7 +114,7 @@ ALTER TABLE public.city ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
 
 
 --
--- Name: country; Type: TABLE; Schema: public; Owner: -
+-- Name: country; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.country (
@@ -215,13 +129,14 @@ CREATE TABLE public.country (
     image_url character varying(255) NOT NULL,
     name_en character varying(255) NOT NULL,
     name_kr character varying(255) NOT NULL,
-    region character varying(255) NOT NULL,
-    CONSTRAINT country_region_check CHECK (((region)::text = ANY ((ARRAY['AFRICA'::character varying, 'AMERICAS'::character varying, 'ASIA'::character varying, 'EUROPE'::character varying, 'OCEANIA'::character varying, 'ANTARCTIC'::character varying])::text[])))
+    region character varying(255) NOT NULL
 );
 
 
+ALTER TABLE public.country OWNER TO souzip_admin;
+
 --
--- Name: country_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: country_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.country ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -235,7 +150,7 @@ ALTER TABLE public.country ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY 
 
 
 --
--- Name: currency; Type: TABLE; Schema: public; Owner: -
+-- Name: currency; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.currency (
@@ -245,8 +160,10 @@ CREATE TABLE public.currency (
 );
 
 
+ALTER TABLE public.currency OWNER TO souzip_admin;
+
 --
--- Name: currency_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: currency_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.currency ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -260,7 +177,7 @@ ALTER TABLE public.currency ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY
 
 
 --
--- Name: exchange_rate; Type: TABLE; Schema: public; Owner: -
+-- Name: exchange_rate; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.exchange_rate (
@@ -272,8 +189,10 @@ CREATE TABLE public.exchange_rate (
 );
 
 
+ALTER TABLE public.exchange_rate OWNER TO souzip_admin;
+
 --
--- Name: exchange_rate_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: exchange_rate_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.exchange_rate ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -287,7 +206,7 @@ ALTER TABLE public.exchange_rate ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: file; Type: TABLE; Schema: public; Owner: -
+-- Name: file; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.file (
@@ -300,12 +219,15 @@ CREATE TABLE public.file (
     entity_type character varying(255) NOT NULL,
     original_name character varying(255) NOT NULL,
     storage_key character varying(255) NOT NULL,
-    type character varying(255) NOT NULL
+    type character varying(255) NOT NULL,
+    souvenir_id bigint
 );
 
 
+ALTER TABLE public.file OWNER TO souzip_admin;
+
 --
--- Name: file_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: file_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.file ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -319,7 +241,7 @@ ALTER TABLE public.file ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
 
 
 --
--- Name: refresh_token; Type: TABLE; Schema: public; Owner: -
+-- Name: refresh_token; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.refresh_token (
@@ -332,8 +254,10 @@ CREATE TABLE public.refresh_token (
 );
 
 
+ALTER TABLE public.refresh_token OWNER TO souzip_admin;
+
 --
--- Name: refresh_token_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: refresh_token_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.refresh_token ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -347,7 +271,7 @@ ALTER TABLE public.refresh_token ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: souvenir; Type: TABLE; Schema: public; Owner: -
+-- Name: souvenir; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.souvenir (
@@ -360,6 +284,7 @@ CREATE TABLE public.souvenir (
     currency_symbol character varying(10),
     deleted boolean NOT NULL,
     description character varying(1000),
+    is_owned boolean NOT NULL,
     krw_price integer,
     latitude numeric(10,7) NOT NULL,
     local_price integer,
@@ -367,19 +292,14 @@ CREATE TABLE public.souvenir (
     longitude numeric(10,7) NOT NULL,
     name character varying(30) NOT NULL,
     purpose character varying(255) NOT NULL,
-    user_id bigint NOT NULL,
-    original_amount integer,
-    original_currency character varying(3),
-    exchange_amount integer,
-    converted_amount integer,
-    converted_currency character varying(3),
-    CONSTRAINT souvenir_category_check CHECK (((category)::text = ANY ((ARRAY['FOOD_SNACK'::character varying, 'BEAUTY_HEALTH'::character varying, 'FASHION_ACCESSORY'::character varying, 'CULTURE_TRADITION'::character varying, 'TOY_KIDS'::character varying, 'SOUVENIR_BASIC'::character varying, 'HOME_LIFESTYLE'::character varying, 'STATIONERY_ART'::character varying, 'TRAVEL_PRACTICAL'::character varying, 'TECH_GADGET'::character varying])::text[]))),
-    CONSTRAINT souvenir_purpose_check CHECK (((purpose)::text = ANY ((ARRAY['GIFT'::character varying, 'PERSONAL'::character varying])::text[])))
+    user_id bigint NOT NULL
 );
 
 
+ALTER TABLE public.souvenir OWNER TO souzip_admin;
+
 --
--- Name: souvenir_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: souvenir_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.souvenir ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -393,7 +313,7 @@ ALTER TABLE public.souvenir ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY
 
 
 --
--- Name: user; Type: TABLE; Schema: public; Owner: -
+-- Name: user; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public."user" (
@@ -404,28 +324,20 @@ CREATE TABLE public."user" (
     deleted_at timestamp(6) without time zone,
     email character varying(255),
     name character varying(100) NOT NULL,
-    nickname character varying(255),
+    nickname character varying(100),
     profile_image_url character varying(255),
     provider character varying(255) NOT NULL,
     provider_id character varying(255) NOT NULL,
     restored_at timestamp(6) without time zone,
     user_id character varying(36) NOT NULL,
-    onboarding_completed boolean DEFAULT false NOT NULL,
-    transfer_identifier character varying(255),
-    last_login_at timestamp without time zone,
-    CONSTRAINT user_provider_check CHECK (((provider)::text = ANY ((ARRAY['KAKAO'::character varying, 'APPLE'::character varying, 'GOOGLE'::character varying])::text[])))
+    onboarding_completed boolean DEFAULT false NOT NULL
 );
 
 
---
--- Name: COLUMN "user".transfer_identifier; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public."user".transfer_identifier IS 'Apple 앱 이전 시 사용자 마이그레이션을 위한 transfer identifier';
-
+ALTER TABLE public."user" OWNER TO souzip_admin;
 
 --
--- Name: user_agreement; Type: TABLE; Schema: public; Owner: -
+-- Name: user_agreement; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.user_agreement (
@@ -441,8 +353,10 @@ CREATE TABLE public.user_agreement (
 );
 
 
+ALTER TABLE public.user_agreement OWNER TO souzip_admin;
+
 --
--- Name: user_agreement_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: user_agreement_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public.user_agreement ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -456,18 +370,19 @@ ALTER TABLE public.user_agreement ALTER COLUMN id ADD GENERATED BY DEFAULT AS ID
 
 
 --
--- Name: user_category; Type: TABLE; Schema: public; Owner: -
+-- Name: user_category; Type: TABLE; Schema: public; Owner: souzip_admin
 --
 
 CREATE TABLE public.user_category (
     user_id bigint NOT NULL,
-    category character varying(255),
-    CONSTRAINT user_category_category_check CHECK (((category)::text = ANY ((ARRAY['FOOD_SNACK'::character varying, 'BEAUTY_HEALTH'::character varying, 'FASHION_ACCESSORY'::character varying, 'CULTURE_TRADITION'::character varying, 'TOY_KIDS'::character varying, 'SOUVENIR_BASIC'::character varying, 'HOME_LIFESTYLE'::character varying, 'STATIONERY_ART'::character varying, 'TRAVEL_PRACTICAL'::character varying, 'TECH_GADGET'::character varying])::text[])))
+    category character varying(255)
 );
 
 
+ALTER TABLE public.user_category OWNER TO souzip_admin;
+
 --
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE public."user" ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -481,39 +396,139 @@ ALTER TABLE public."user" ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
 
 
 --
--- Name: admin admin_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: cdb_admin; Owner: postgres
 --
 
-ALTER TABLE ONLY public.admin
-    ADD CONSTRAINT admin_pkey PRIMARY KEY (id);
 
 
 --
--- Name: admin_refresh_token admin_refresh_token_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Data for Name: audit_log; Type: TABLE DATA; Schema: public; Owner: souzip_admin
 --
 
-ALTER TABLE ONLY public.admin_refresh_token
-    ADD CONSTRAINT admin_refresh_token_pkey PRIMARY KEY (id);
 
 
 --
--- Name: admin_refresh_token admin_refresh_token_token_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Data for Name: city; Type: TABLE DATA; Schema: public; Owner: souzip_admin
 --
 
-ALTER TABLE ONLY public.admin_refresh_token
-    ADD CONSTRAINT admin_refresh_token_token_key UNIQUE (token);
 
 
 --
--- Name: admin admin_username_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Data for Name: country; Type: TABLE DATA; Schema: public; Owner: souzip_admin
 --
 
-ALTER TABLE ONLY public.admin
-    ADD CONSTRAINT admin_username_key UNIQUE (username);
 
 
 --
--- Name: audit_log audit_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Data for Name: currency; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Data for Name: exchange_rate; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Data for Name: file; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Data for Name: refresh_token; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Data for Name: souvenir; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Data for Name: user_agreement; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Data for Name: user_category; Type: TABLE DATA; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: audit_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: city_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: country_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: exchange_rate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: file_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: refresh_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: souvenir_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: user_agreement_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: souzip_admin
+--
+
+
+
+--
+-- Name: audit_log audit_log_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.audit_log
@@ -521,7 +536,7 @@ ALTER TABLE ONLY public.audit_log
 
 
 --
--- Name: city city_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: city city_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.city
@@ -529,7 +544,7 @@ ALTER TABLE ONLY public.city
 
 
 --
--- Name: country country_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: country country_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.country
@@ -537,7 +552,7 @@ ALTER TABLE ONLY public.country
 
 
 --
--- Name: currency currency_code_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: currency currency_code_key; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.currency
@@ -545,7 +560,7 @@ ALTER TABLE ONLY public.currency
 
 
 --
--- Name: currency currency_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: currency currency_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.currency
@@ -553,7 +568,7 @@ ALTER TABLE ONLY public.currency
 
 
 --
--- Name: exchange_rate exchange_rate_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: exchange_rate exchange_rate_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.exchange_rate
@@ -561,7 +576,7 @@ ALTER TABLE ONLY public.exchange_rate
 
 
 --
--- Name: file file_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: file file_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.file
@@ -569,7 +584,7 @@ ALTER TABLE ONLY public.file
 
 
 --
--- Name: refresh_token refresh_token_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: refresh_token refresh_token_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.refresh_token
@@ -577,7 +592,7 @@ ALTER TABLE ONLY public.refresh_token
 
 
 --
--- Name: refresh_token refresh_token_token_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: refresh_token refresh_token_token_key; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.refresh_token
@@ -585,7 +600,7 @@ ALTER TABLE ONLY public.refresh_token
 
 
 --
--- Name: souvenir souvenir_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: souvenir souvenir_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.souvenir
@@ -593,7 +608,7 @@ ALTER TABLE ONLY public.souvenir
 
 
 --
--- Name: user uk6icoy2m5c9xvcuer66s7kkjv6; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: user uk6icoy2m5c9xvcuer66s7kkjv6; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public."user"
@@ -601,7 +616,7 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: user ukavppunt4c0qpxo9giv18an98o; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: user ukavppunt4c0qpxo9giv18an98o; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public."user"
@@ -609,7 +624,7 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: file uq_file_entity_order; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: file uq_file_entity_order; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.file
@@ -617,7 +632,7 @@ ALTER TABLE ONLY public.file
 
 
 --
--- Name: user_agreement user_agreement_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: user_agreement user_agreement_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.user_agreement
@@ -625,7 +640,7 @@ ALTER TABLE ONLY public.user_agreement
 
 
 --
--- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public."user"
@@ -633,161 +648,126 @@ ALTER TABLE ONLY public."user"
 
 
 --
--- Name: idx_admin_refresh_token_admin_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_admin_refresh_token_admin_id ON public.admin_refresh_token USING btree (admin_id);
-
-
---
--- Name: idx_admin_refresh_token_token; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_admin_refresh_token_token ON public.admin_refresh_token USING btree (token);
-
-
---
--- Name: idx_admin_username; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_admin_username ON public.admin USING btree (username);
-
-
---
--- Name: idx_audit_action; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_audit_action; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_audit_action ON public.audit_log USING btree (action, created_at);
 
 
 --
--- Name: idx_audit_category; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_audit_category; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_audit_category ON public.audit_log USING btree (category, created_at);
 
 
 --
--- Name: idx_audit_created_at; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_audit_created_at; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_audit_created_at ON public.audit_log USING btree (created_at DESC);
 
 
 --
--- Name: idx_audit_target; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_audit_target; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_audit_target ON public.audit_log USING btree (target_type, target_id);
 
 
 --
--- Name: idx_audit_user_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_audit_user_id; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_audit_user_id ON public.audit_log USING btree (user_id);
 
 
 --
--- Name: idx_city_country; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_city_country; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_city_country ON public.city USING btree (country_id);
 
 
 --
--- Name: idx_city_name; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_city_name; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_city_name ON public.city USING btree (name_en, name_kr);
 
 
 --
--- Name: idx_city_priority; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_city_priority ON public.city USING btree (country_id, priority);
-
-
---
--- Name: idx_deleted; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_deleted; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_deleted ON public."user" USING btree (deleted);
 
 
 --
--- Name: idx_email; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_email; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_email ON public."user" USING btree (email);
 
 
 --
--- Name: idx_file_created_at; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_file_created_at; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_file_created_at ON public.file USING btree (created_at);
 
 
 --
--- Name: idx_file_entity; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_file_entity; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_file_entity ON public.file USING btree (entity_type, entity_id);
 
 
 --
--- Name: idx_file_entity_order; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_file_entity_order; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_file_entity_order ON public.file USING btree (entity_type, entity_id, display_order);
 
 
 --
--- Name: idx_file_storage_key; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_file_storage_key; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_file_storage_key ON public.file USING btree (storage_key);
 
 
 --
--- Name: idx_provider; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_provider; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_provider ON public."user" USING btree (provider, provider_id);
 
 
 --
--- Name: idx_refresh_token_token; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_refresh_token_token; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_refresh_token_token ON public.refresh_token USING btree (token);
 
 
 --
--- Name: idx_refresh_token_user_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_refresh_token_user_id; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_refresh_token_user_id ON public.refresh_token USING btree (user_id);
 
 
 --
--- Name: idx_transfer_identifier; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_transfer_identifier ON public."user" USING btree (transfer_identifier);
-
-
---
--- Name: idx_user_id; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_user_id; Type: INDEX; Schema: public; Owner: souzip_admin
 --
 
 CREATE INDEX idx_user_id ON public."user" USING btree (user_id);
 
 
 --
--- Name: user_category fk6gbxowf7xyes5y6gqf7qu7haf; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: user_category fk6gbxowf7xyes5y6gqf7qu7haf; Type: FK CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.user_category
@@ -795,7 +775,7 @@ ALTER TABLE ONLY public.user_category
 
 
 --
--- Name: souvenir fkforav2lab0pssqkonqt34m5f9; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: souvenir fkforav2lab0pssqkonqt34m5f9; Type: FK CONSTRAINT; Schema: public; Owner: souzip_admin
 --
 
 ALTER TABLE ONLY public.souvenir
@@ -803,7 +783,35 @@ ALTER TABLE ONLY public.souvenir
 
 
 --
--- PostgreSQL database dump complete
+-- Name: SCHEMA cdb_admin; Type: ACL; Schema: -; Owner: postgres
 --
 
 
+
+--
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+--
+
+
+
+--
+-- Name: TABLE geography_columns; Type: ACL; Schema: cdb_admin; Owner: postgres
+--
+
+
+
+--
+-- Name: TABLE geometry_columns; Type: ACL; Schema: cdb_admin; Owner: postgres
+--
+
+
+
+--
+-- Name: TABLE spatial_ref_sys; Type: ACL; Schema: cdb_admin; Owner: postgres
+--
+
+
+
+--
+-- PostgreSQL database dump complete
+--

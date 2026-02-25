@@ -111,8 +111,8 @@ jobs:
             cat > deploy/.env << 'EOF'
             SPRING_PROFILES_ACTIVE=dev
             DEV_DB_URL=${{ secrets.DEV_DB_URL }}
-            POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }}
-            POSTGRES_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}
+            DEV_POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }}
+            DEV_POSTGRES_PASSWORD=${{ secrets.DEV_DB_PASSWORD }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             NCP_ENDPOINT=${{ secrets.NCP_ENDPOINT }}
             NCP_REGION=${{ secrets.NCP_REGION }}

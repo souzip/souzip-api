@@ -43,7 +43,8 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-docker-compose up -d
+docker-compose up -d postgres
+docker-compose up -d souzip-api
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}[ERROR] 컨테이너 시작 실패${NC}"

@@ -65,14 +65,20 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-docker-compose up -d
-
+docker-compose up -d postgres
 if [ $? -ne 0 ]; then
-    echo -e "${RED}[ERROR] 컨테이너 시작 실패${NC}"
+    echo -e "${RED}[ERROR] DB 컨테이너 시작 실패${NC}"
+    exit 1
+fi
+
+docker-compose up -d souzip-api
+if [ $? -ne 0 ]; then
+    echo -e "${RED}[ERROR] API 컨테이너 시작 실패${NC}"
     echo -e "${YELLOW}[INFO] 롤백을 시작합니다${NC}"
     $WORK_DIR/deploy/scripts/rollback.sh
     exit 1
 fi
+
 echo -e "${GREEN}[SUCCESS] 새 컨테이너 시작 완료${NC}"
 
 echo -e "${YELLOW}[6/9] 애플리케이션 시작 대기${NC}"

@@ -1,9 +1,7 @@
 spring:
-  datasource:
-    url: ${LOCAL_DB_URL}
-    username: ${LOCAL_POSTGRES_USER}
-    password: ${LOCAL_POSTGRES_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+  docker:
+    compose:
+      enabled: true
 
   jpa:
     show-sql: true
@@ -31,4 +29,3 @@ management:
   endpoint:
     health:
       show-details: always
-

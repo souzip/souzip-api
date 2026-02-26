@@ -17,7 +17,7 @@ spring:
         default_schema: public
 
   flyway:
-    enabled: false
+    enabled: true
     baseline-on-migrate: true
     baseline-version: 1
 

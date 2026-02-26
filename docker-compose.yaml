@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    platform: linux/amd64
+    container_name: souzip-local-db
+    environment:
+      POSTGRES_DB: souzip_local
+      POSTGRES_USER: souzip-developer
+      POSTGRES_PASSWORD: souzip!!
+      TZ: Asia/Seoul
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    labels:
+      org.springframework.boot.service-connection: postgres
+
+volumes:
+  postgres-data:

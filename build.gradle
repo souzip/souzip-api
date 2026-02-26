@@ -41,6 +41,8 @@ dependencies {
 
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
+	runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
+
 	runtimeOnly 'org.postgresql:postgresql'
 
 	implementation 'org.flywaydb:flyway-core'

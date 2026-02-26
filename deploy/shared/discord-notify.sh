@@ -2,6 +2,7 @@
 
 DISCORD_WEBHOOK_URL="${DISCORD_WEBHOOK_URL:-}"
 DEVELOP_DISCORD_WEBHOOK_URL="${DEVELOP_DISCORD_WEBHOOK_URL:-}"
+PROD_DISCORD_WEBHOOK_URL="${PROD_DISCORD_WEBHOOK_URL:-}"
 
 COLOR_RED=15158332
 COLOR_GREEN=3066993
@@ -13,9 +14,17 @@ notify_deploy_success() {
     local api_docs_url=${2:-""}
     local commit_message=${3:-""}
     local deployer=${4:-""}
+    local env=${5:-"dev"}
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
-    if [ -z "$DEVELOP_DISCORD_WEBHOOK_URL" ]; then
+    local webhook_url
+    if [ "$env" = "dev" ]; then
+        webhook_url="$DEVELOP_DISCORD_WEBHOOK_URL"
+    else
+        webhook_url="$PROD_DISCORD_WEBHOOK_URL"
+    fi
+
+    if [ -z "$webhook_url" ]; then
         return
     fi
 
@@ -25,14 +34,16 @@ notify_deploy_success() {
       --arg url "$api_docs_url" \
       --arg ts "$timestamp" \
       --arg deployer "$deployer" \
+      --arg env "$env" \
       --argjson color "$COLOR_GREEN" \
       '{
         username: "Souzip Bot",
         embeds: [{
-          title: "배포 완료",
+          title: ("배포 완료 [" + $env + "]"),
           description: ("\($msg)\n\n[API 문서 바로가기](\($url))"),
           color: $color,
           fields: [
+            {name: "환경", value: $env, inline: true},
             {name: "이미지 ID", value: $image_id, inline: false},
             {name: "시간", value: $ts, inline: true},
             {name: "담당자", value: $deployer, inline: true},
@@ -41,7 +52,7 @@ notify_deploy_success() {
         }]
       }')
 
-    curl -s -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "${DEVELOP_DISCORD_WEBHOOK_URL}" > /dev/null
+    curl -s -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "${webhook_url}" > /dev/null
 }
 
 notify_rollback_success() {

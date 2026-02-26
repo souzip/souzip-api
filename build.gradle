@@ -39,8 +39,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
 	runtimeOnly 'org.postgresql:postgresql'

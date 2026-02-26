@@ -1,4 +1,4 @@
-name: souzip CI/CD
+name: develop
 
 on:
   pull_request:
@@ -105,10 +105,10 @@ jobs:
           script: |
             cd /home/ubuntu/souzip
 
-            chmod +x deploy/scripts/*.sh
-            chmod +x deploy/notification/*.sh
+            chmod +x deploy/dev/scripts/*.sh
+            chmod +x deploy/shared/*.sh
 
-            cat > deploy/.env << 'EOF'
+            cat > deploy/dev/.env << 'EOF'
             SPRING_PROFILES_ACTIVE=dev
             DEV_DB_URL=${{ secrets.DEV_DB_URL }}
             DEV_POSTGRES_USER=${{ secrets.DEV_DB_USERNAME }}
@@ -124,18 +124,17 @@ jobs:
             CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }}
             DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
             DEVELOP_DISCORD_WEBHOOK_URL=${{ secrets.DEVELOP_DISCORD_WEBHOOK_URL }}
-            API_DOCS_URL=${{ secrets.API_DOCS_URL }}
+            DEV_API_DOCS_URL=${{ secrets.DEV_API_DOCS_URL }}
             ADMIN_INITIAL_USERNAME=${{ secrets.ADMIN_INITIAL_USERNAME }}
             ADMIN_INITIAL_PASSWORD=${{ secrets.ADMIN_INITIAL_PASSWORD }}
             EOF
 
-            echo "DEPLOYER=${{ github.actor }}" >> deploy/.env
-            printf 'COMMIT_MESSAGE=%s\n' "$(echo "$COMMIT_MSG" | head -1)" >> deploy/.env
+            echo "DEPLOYER=${{ github.actor }}" >> deploy/dev/.env
+            printf 'COMMIT_MESSAGE=%s\n' "$(echo "$COMMIT_MSG" | head -1)" >> deploy/dev/.env
 
-            chmod 600 deploy/.env
+            chmod 600 deploy/dev/.env
 
-            docker login souzip.kr.ncr.ntruss.com \
-              -u ${{ secrets.NCP_ACCESS_KEY }} \
-              -p ${{ secrets.NCP_SECRET_KEY }}
+            echo "${{ secrets.NCP_SECRET_KEY }}" | docker login souzip.kr.ncr.ntruss.com \
+              -u "${{ secrets.NCP_ACCESS_KEY }}" --password-stdin
 
-            ./deploy/scripts/deploy.sh
+            ./deploy/dev/scripts/deploy.sh

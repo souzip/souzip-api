@@ -1,19 +1,22 @@
 #!/bin/bash
 
+ENV=${1:-dev}
+
 WORK_DIR="/home/ubuntu/souzip"
+DEPLOY_DIR="$WORK_DIR/deploy/$ENV"
 HEALTH_CHECK_URL="http://localhost:8080/actuator/health"
-STATUS_FILE="$WORK_DIR/.system-status"
+STATUS_FILE="$DEPLOY_DIR/.system-status"
 
 DISK_THRESHOLD=80
 MEMORY_THRESHOLD=90
 MAX_HEALTH_FAILURES=3
 
-if [ -f "$WORK_DIR/deploy/.env" ]; then
-    export $(grep DISCORD_WEBHOOK_URL "$WORK_DIR/deploy/.env" | xargs)
+if [ -f "$DEPLOY_DIR/.env" ]; then
+    export DISCORD_WEBHOOK_URL=$(grep '^DISCORD_WEBHOOK_URL=' "$DEPLOY_DIR/.env" | cut -d= -f2-)
 fi
 
-if [ -f "$WORK_DIR/deploy/notification/discord-notify.sh" ]; then
-    source "$WORK_DIR/deploy/notification/discord-notify.sh"
+if [ -f "$WORK_DIR/deploy/shared/discord-notify.sh" ]; then
+    source "$WORK_DIR/deploy/shared/discord-notify.sh"
 fi
 
 if [ -f "$STATUS_FILE" ]; then
@@ -87,7 +90,13 @@ else
     MEMORY_WARNING_SENT=false
 fi
 
-CONTAINER_RUNNING=$(docker ps --filter "name=souzip-api" --filter "status=running" -q)
+if [ "$ENV" = "dev" ]; then
+    CONTAINER_NAME="souzip-api"
+else
+    CONTAINER_NAME="souzip-api-prod"
+fi
+
+CONTAINER_RUNNING=$(docker ps --filter "name=$CONTAINER_NAME" --filter "status=running" -q)
 
 if [ -z "$CONTAINER_RUNNING" ]; then
     if [ "$CONTAINER_WARNING_SENT" = "false" ]; then

@@ -68,7 +68,7 @@ fi
 
 echo -e "${YELLOW}[4/9] DB 컨테이너 확인(없으면 시작)${NC}"
 if ! docker ps --format '{{.Names}}' | grep -q '^souzip-dev-db$'; then
-  docker compose -f "$DB_COMPOSE" up -d
+  docker-compose -f "$DB_COMPOSE" up -d
   if [ $? -ne 0 ]; then
     echo -e "${RED}[ERROR] DB 컨테이너 시작 실패${NC}"
     exit 1
@@ -79,11 +79,11 @@ else
 fi
 
 echo -e "${YELLOW}[5/9] 기존 APP 컨테이너 중지${NC}"
-docker compose -f "$APP_COMPOSE" down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
+docker-compose -f "$APP_COMPOSE" down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
 echo -e "${GREEN}[SUCCESS] 기존 APP 컨테이너 중지 완료${NC}"
 
 echo -e "${YELLOW}[6/9] 새 APP 컨테이너 시작${NC}"
-docker compose -f "$APP_COMPOSE" up -d
+docker-compose -f "$APP_COMPOSE" up -d
 if [ $? -ne 0 ]; then
   echo -e "${RED}[ERROR] APP 컨테이너 시작 실패${NC}"
   echo -e "${YELLOW}[INFO] 롤백을 시작합니다${NC}"

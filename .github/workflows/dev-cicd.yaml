@@ -124,7 +124,7 @@ jobs:
             CLOVA_STUDIO_API_URL=${{ secrets.CLOVA_STUDIO_API_URL }}
             DISCORD_WEBHOOK_URL=${{ secrets.DISCORD_WEBHOOK_URL }}
             DEVELOP_DISCORD_WEBHOOK_URL=${{ secrets.DEVELOP_DISCORD_WEBHOOK_URL }}
-            API_DOCS_URL=${{ secrets.API_DOCS_URL }}
+            DEV_API_DOCS_URL=${{ secrets.DEV_API_DOCS_URL }}
             ADMIN_INITIAL_USERNAME=${{ secrets.ADMIN_INITIAL_USERNAME }}
             ADMIN_INITIAL_PASSWORD=${{ secrets.ADMIN_INITIAL_PASSWORD }}
             EOF

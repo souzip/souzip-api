@@ -1,4 +1,4 @@
-package com.souzip.api.global.entity;
+package com.souzip.api.domain.shared;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

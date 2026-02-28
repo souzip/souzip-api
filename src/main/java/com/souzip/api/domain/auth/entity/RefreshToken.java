@@ -1,7 +1,7 @@
 package com.souzip.api.domain.auth.entity;
 
 import com.souzip.api.domain.user.entity.User;
-import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.domain.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

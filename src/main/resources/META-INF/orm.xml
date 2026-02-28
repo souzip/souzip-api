@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://www.hibernate.org/xsd/orm/mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.hibernate.org/xsd/orm/mapping
+                    https://hibernate.org/xsd/orm/mapping/mapping-3.1.0.xsd">
+  <access>FIELD</access>
+
+  <mapped-superclass class="com.souzip.api.domain.shared.BaseEntity">
+    <attributes>
+      <id name="id">
+        <column name="id"/>
+        <generated-value strategy="IDENTITY"/>
+      </id>
+      <basic name="createdAt">
+        <column name="created_at" nullable="false" updatable="false"/>
+      </basic>
+      <basic name="updatedAt">
+        <column name="updated_at" nullable="false"/>
+      </basic>
+    </attributes>
+  </mapped-superclass>
+
+  <entity class="com.souzip.api.domain.location.Location">
+    <table name="location">
+      <unique-constraint name="UK_LOCATION_NAME_ADDRESS">
+        <column-name>name</column-name>
+        <column-name>address</column-name>
+      </unique-constraint>
+    </table>
+    <attributes>
+      <basic name="name">
+        <column name="name" nullable="false"/>
+      </basic>
+      <basic name="address">
+        <column name="address" length="500" nullable="false"/>
+      </basic>
+      <embedded name="coordinate"/>
+    </attributes>
+  </entity>
+
+  <embeddable class="com.souzip.api.domain.shared.Coordinate">
+    <attributes>
+      <basic name="latitude">
+        <column name="latitude" nullable="false" precision="10" scale="7"/>
+      </basic>
+      <basic name="longitude">
+        <column name="longitude" nullable="false" precision="10" scale="7"/>
+      </basic>
+    </attributes>
+  </embeddable>
+
+</entity-mappings>
+

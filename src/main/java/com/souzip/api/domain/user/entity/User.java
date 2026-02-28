@@ -2,7 +2,7 @@ package com.souzip.api.domain.user.entity;
 
 import com.souzip.api.domain.auth.dto.OAuthUserInfo;
 import com.souzip.api.domain.category.entity.Category;
-import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.domain.shared.BaseEntity;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;

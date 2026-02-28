@@ -21,7 +21,7 @@ import static org.springframework.util.Assert.hasText;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class SearchService implements LocationSearch {
+public class LocationSearchService implements LocationSearch {
 
     private final CitySearchRepository cityRepository;
     private final LocationRepository locationRepository;

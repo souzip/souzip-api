@@ -36,7 +36,7 @@ class SearchServiceTest {
     private LocationRepository locationRepository;
 
     @InjectMocks
-    private SearchService searchService;
+    private LocationSearchService searchService;
 
     @Test
     void searchCities() {

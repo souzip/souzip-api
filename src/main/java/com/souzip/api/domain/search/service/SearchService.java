@@ -34,7 +34,7 @@ public class SearchService {
         long totalCount = locationSearchRepository.countByKeyword(trimmedKeyword);
 
         List<SearchResponse> responses = cities.stream()
-                .map(city -> convertToResponse(city, trimmedKeyword))
+                .map(this::convertToResponse)
                 .toList();
 
         Page<SearchResponse> page = new PageImpl<>(responses, pageable, totalCount);
@@ -48,7 +48,7 @@ public class SearchService {
         }
     }
 
-    private SearchResponse convertToResponse(City city, String keyword) {
+    private SearchResponse convertToResponse(City city) {
         return SearchResponse.of(
                 city.getId(),
                 "city",

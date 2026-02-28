@@ -40,44 +40,44 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/auth/login/**",
-                    "/api/admin/auth/login",
-                    "/api/admin/auth/refresh",
-                    "/api/auth/refresh",
-                    "/docs/**",
-                    "/api/test/**",
-                    "/api/countries/**",
-                    "/api/categories",
-                    "/api/search/**",
-                    "/api/souvenirs/nearby",
-                    "/api/discovery/**",
-                    "/actuator/**",
-                    "/api/migration/apple/prepare"
-                ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/souvenirs/*").permitAll()
-                .anyRequest().authenticated()
-            )
-            .exceptionHandling(exceptions -> exceptions
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.setContentType("application/json;charset=UTF-8");
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/auth/login/**",
+                                "/api/admin/auth/login",
+                                "/api/admin/auth/refresh",
+                                "/api/auth/refresh",
+                                "/docs/**",
+                                "/api/test/**",
+                                "/api/countries/**",
+                                "/api/categories",
+                                "/api/search/**",
+                                "/api/souvenirs/nearby",
+                                "/api/discovery/**",
+                                "/actuator/**",
+                                "/api/migration/apple/prepare"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/souvenirs/*").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
 
-                    ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.FORBIDDEN.getMessage());
-                    response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
-                })
-            )
-            .addFilterBefore(adminJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
+                            ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.FORBIDDEN.getMessage());
+                            response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
+                        })
+                )
+                .addFilterBefore(adminJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean

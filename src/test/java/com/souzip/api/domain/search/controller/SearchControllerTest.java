@@ -70,7 +70,9 @@ class SearchControllerTest extends RestDocsSupport {
         SearchResponse seoul = new SearchResponse(
                 1L, "city", "서울", "Seoul", "서울",
                 "대한민국", "South Korea", "대한민국",
-                BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97)
+                BigDecimal.valueOf(37.56), BigDecimal.valueOf(126.97),
+                1.0,      // score
+                "서울"    // highlight
         );
 
         PaginationResponse<SearchResponse> response = createMockPaginationResponse(
@@ -111,6 +113,8 @@ class SearchControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING).description("국가 한글 이름").optional(),
                                 fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER).description("위도"),
                                 fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                                fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER).description("검색 점수"),
+                                fieldWithPath("data.content[].highlight").type(JsonFieldType.STRING).description("하이라이팅된 이름"),
                                 fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
                                 fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                 fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
@@ -132,13 +136,17 @@ class SearchControllerTest extends RestDocsSupport {
         SearchResponse tokyo = new SearchResponse(
                 1L, "city", "도쿄", "Tokyo", "도쿄",
                 "일본", "Japan", "일본",
-                BigDecimal.valueOf(35.68), BigDecimal.valueOf(139.69)
+                BigDecimal.valueOf(35.68), BigDecimal.valueOf(139.69),
+                0.8,      // score
+                "도쿄"    // highlight
         );
 
         SearchResponse osaka = new SearchResponse(
                 2L, "city", "오사카", "Osaka", "오사카",
                 "일본", "Japan", "일본",
-                BigDecimal.valueOf(34.69), BigDecimal.valueOf(135.50)
+                BigDecimal.valueOf(34.69), BigDecimal.valueOf(135.50),
+                0.8,      // score
+                "오사카"  // highlight
         );
 
         PaginationResponse<SearchResponse> response = createMockPaginationResponse(
@@ -179,6 +187,8 @@ class SearchControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING).description("국가 한글 이름").optional(),
                                 fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER).description("위도"),
                                 fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                                fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER).description("검색 점수"),
+                                fieldWithPath("data.content[].highlight").type(JsonFieldType.STRING).description("하이라이팅된 이름"),
                                 fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
                                 fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                 fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
@@ -340,10 +350,12 @@ class SearchControllerTest extends RestDocsSupport {
         List<SearchResponse> cities = List.of(
                 new SearchResponse(1L, "city", "도쿄", "Tokyo", "도쿄",
                         "일본", "Japan", "일본",
-                        BigDecimal.valueOf(35.68), BigDecimal.valueOf(139.69)),
+                        BigDecimal.valueOf(35.68), BigDecimal.valueOf(139.69),
+                        0.8, "도쿄"),
                 new SearchResponse(2L, "city", "오사카", "Osaka", "오사카",
                         "일본", "Japan", "일본",
-                        BigDecimal.valueOf(34.69), BigDecimal.valueOf(135.50))
+                        BigDecimal.valueOf(34.69), BigDecimal.valueOf(135.50),
+                        0.8, "오사카")
         );
 
         PaginationResponse<SearchResponse> response = createMockPaginationResponse(
@@ -385,6 +397,8 @@ class SearchControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.content[].countryNameKr").type(JsonFieldType.STRING).description("국가 한글 이름").optional(),
                                 fieldWithPath("data.content[].latitude").type(JsonFieldType.NUMBER).description("위도"),
                                 fieldWithPath("data.content[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                                fieldWithPath("data.content[].score").type(JsonFieldType.NUMBER).description("검색 점수"),
+                                fieldWithPath("data.content[].highlight").type(JsonFieldType.STRING).description("하이라이팅된 이름"),
                                 fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
                                 fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                 fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),

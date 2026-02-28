@@ -12,7 +12,10 @@ public record SearchResponse(
         String countryNameEn,
         String countryNameKr,
         BigDecimal latitude,
-        BigDecimal longitude
+        BigDecimal longitude,
+        Double score,
+        String highlight
+
 ) {
     public static SearchResponse of(
             Long id,
@@ -34,7 +37,9 @@ public record SearchResponse(
                 countryNameEn,
                 countryNameKr,
                 latitude,
-                longitude
+                longitude,
+                null,
+                null
         );
     }
 }

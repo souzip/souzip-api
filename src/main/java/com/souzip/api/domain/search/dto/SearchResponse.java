@@ -1,6 +1,8 @@
 package com.souzip.api.domain.search.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 public record SearchResponse(
         Long id,
@@ -13,9 +15,8 @@ public record SearchResponse(
         String countryNameKr,
         BigDecimal latitude,
         BigDecimal longitude,
-        Double score,
-        String highlight
-
+        Float score,
+        Map<String, List<String>> highlight
 ) {
     public static SearchResponse of(
             Long id,
@@ -38,8 +39,8 @@ public record SearchResponse(
                 countryNameKr,
                 latitude,
                 longitude,
-                null,
-                null
+                0.0f,
+                Map.of()
         );
     }
 }

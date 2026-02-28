@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface CityRepository extends Repository<City, Long> {
+public interface CitySearchRepository extends Repository<City, Long> {
 
     @Query("""
             SELECT c FROM City c

@@ -4,7 +4,7 @@ import com.souzip.api.application.search.dto.CitySearchResult;
 import com.souzip.api.application.search.dto.LocationSearchResult;
 import com.souzip.api.application.search.dto.SearchResult;
 import com.souzip.api.application.search.provided.LocationSearch;
-import com.souzip.api.application.search.required.CityRepository;
+import com.souzip.api.application.search.required.CitySearchRepository;
 import com.souzip.api.application.search.required.LocationRepository;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.location.Location;
@@ -23,7 +23,7 @@ import static org.springframework.util.Assert.hasText;
 @Service
 public class SearchService implements LocationSearch {
 
-    private final CityRepository cityRepository;
+    private final CitySearchRepository cityRepository;
     private final LocationRepository locationRepository;
 
     @Override

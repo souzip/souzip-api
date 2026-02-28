@@ -3,7 +3,7 @@ package com.souzip.api.application.search;
 import com.souzip.api.application.search.dto.CitySearchResult;
 import com.souzip.api.application.search.dto.LocationSearchResult;
 import com.souzip.api.application.search.dto.SearchResult;
-import com.souzip.api.application.search.required.CityRepository;
+import com.souzip.api.application.search.required.CitySearchRepository;
 import com.souzip.api.application.search.required.LocationRepository;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.country.entity.Country;
@@ -30,7 +30,7 @@ import static org.mockito.BDDMockito.then;
 class SearchServiceTest {
 
     @Mock
-    private CityRepository cityRepository;
+    private CitySearchRepository cityRepository;
 
     @Mock
     private LocationRepository locationRepository;

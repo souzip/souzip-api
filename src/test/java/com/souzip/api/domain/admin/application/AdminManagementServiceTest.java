@@ -51,9 +51,9 @@ class AdminManagementServiceTest {
     void inviteAdmin_withAdminRole_success() {
         // given
         InviteAdminCommand command = new InviteAdminCommand(
-            "newadmin",
-            "password123",
-            AdminRole.ADMIN
+                "newadmin",
+                "password123",
+                AdminRole.ADMIN
         );
 
         given(passwordEncoder.encode(anyString())).willReturn("encoded_password123");
@@ -78,9 +78,9 @@ class AdminManagementServiceTest {
     void inviteAdmin_withViewerRole_success() {
         // given
         InviteAdminCommand command = new InviteAdminCommand(
-            "viewer01",
-            "password123",
-            AdminRole.VIEWER
+                "viewer01",
+                "password123",
+                AdminRole.VIEWER
         );
 
         given(passwordEncoder.encode(anyString())).willReturn("encoded_password123");
@@ -104,15 +104,15 @@ class AdminManagementServiceTest {
     void inviteAdmin_withSuperAdminRole_throwsException() {
         // given
         InviteAdminCommand command = new InviteAdminCommand(
-            "superadmin",
-            "password123",
-            AdminRole.SUPER_ADMIN
+                "superadmin",
+                "password123",
+                AdminRole.SUPER_ADMIN
         );
 
         // when & then
         assertThatThrownBy(() -> adminManagementService.inviteAdmin(command))
-            .isInstanceOf(AdminException.class)
-            .hasMessage(AdminErrorCode.CANNOT_INVITE_SUPER_ADMIN.getMessage());
+                .isInstanceOf(AdminException.class)
+                .hasMessage(AdminErrorCode.CANNOT_INVITE_SUPER_ADMIN.getMessage());
 
         verify(adminRepository, never()).existsByUsername(anyString());
         verify(adminRepository, never()).save(any(Admin.class));
@@ -124,17 +124,17 @@ class AdminManagementServiceTest {
     void inviteAdmin_withDuplicateUsername_throwsException() {
         // given
         InviteAdminCommand command = new InviteAdminCommand(
-            "existing",
-            "password123",
-            AdminRole.ADMIN
+                "existing",
+                "password123",
+                AdminRole.ADMIN
         );
 
         given(adminRepository.existsByUsername("existing")).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> adminManagementService.inviteAdmin(command))
-            .isInstanceOf(AdminException.class)
-            .hasMessage(AdminErrorCode.ADMIN_USERNAME_DUPLICATED.getMessage());
+                .isInstanceOf(AdminException.class)
+                .hasMessage(AdminErrorCode.ADMIN_USERNAME_DUPLICATED.getMessage());
 
         verify(adminRepository).existsByUsername("existing");
         verify(adminRepository, never()).save(any(Admin.class));
@@ -146,9 +146,9 @@ class AdminManagementServiceTest {
     void inviteAdmin_passwordIsEncoded() {
         // given
         InviteAdminCommand command = new InviteAdminCommand(
-            "newadmin",
-            "rawPassword123",
-            AdminRole.ADMIN
+                "newadmin",
+                "rawPassword123",
+                AdminRole.ADMIN
         );
 
         given(passwordEncoder.encode("rawPassword123")).willReturn("encoded_rawPassword123");
@@ -168,8 +168,8 @@ class AdminManagementServiceTest {
     void getAdmins_success() {
         // given
         List<Admin> admins = List.of(
-            Admin.create("admin1", "password123", AdminRole.ADMIN, new TestAdminPasswordEncoder()),
-            Admin.create("admin2", "password123", AdminRole.VIEWER, new TestAdminPasswordEncoder())
+                Admin.create("admin1", "password123", AdminRole.ADMIN, new TestAdminPasswordEncoder()),
+                Admin.create("admin2", "password123", AdminRole.VIEWER, new TestAdminPasswordEncoder())
         );
 
         given(adminRepository.findAllExcludingSuperAdmin(0, 10)).willReturn(admins);
@@ -194,7 +194,7 @@ class AdminManagementServiceTest {
     void getAdmins_secondPage() {
         // given
         List<Admin> admins = List.of(
-            Admin.create("admin11", "password123", AdminRole.ADMIN, new TestAdminPasswordEncoder())
+                Admin.create("admin11", "password123", AdminRole.ADMIN, new TestAdminPasswordEncoder())
         );
 
         given(adminRepository.findAllExcludingSuperAdmin(10, 10)).willReturn(admins);
@@ -219,7 +219,7 @@ class AdminManagementServiceTest {
         UUID requesterId = UUID.randomUUID();
 
         Admin adminToDelete = Admin.create("admin1", "password123", AdminRole.ADMIN,
-            new TestAdminPasswordEncoder());
+                new TestAdminPasswordEncoder());
 
         given(adminRepository.findById(adminId)).willReturn(Optional.of(adminToDelete));
 
@@ -262,7 +262,7 @@ class AdminManagementServiceTest {
     void createCity_callsPort() {
         // given
         AdminCreateCityCommand command = new AdminCreateCityCommand(
-            "Seoul", "서울", 37.56, 126.97, 1L
+                "Seoul", "서울", 37.56, 126.97, 1L
         );
 
         // when

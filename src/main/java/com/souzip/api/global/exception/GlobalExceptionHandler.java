@@ -24,14 +24,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ensureTraceId();
 
         log.error("[BUSINESS-ERROR] errorCode={} status={} message={}",
-            e.getErrorCode().name(),
-            e.getErrorCode().getStatus(),
-            e.getMessage()
+                e.getErrorCode().name(),
+                e.getErrorCode().getStatus(),
+                e.getMessage()
         );
 
         return ResponseEntity
-            .status(e.getErrorCode().getStatus())
-            .body(ErrorResponse.of(e.getMessage()));
+                .status(e.getErrorCode().getStatus())
+                .body(ErrorResponse.of(e.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -41,8 +41,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("[ILLEGAL-ARGUMENT-ERROR] message={}", e.getMessage(), e);
 
         return ResponseEntity
-            .status(ErrorCode.INVALID_INPUT.getStatus())
-            .body(ErrorResponse.of(e.getMessage()));
+                .status(ErrorCode.INVALID_INPUT.getStatus())
+                .body(ErrorResponse.of(e.getMessage()));
     }
 
     @Override
@@ -54,20 +54,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ensureTraceId();
 
         List<ErrorResponse.FieldError> errors = ex.getBindingResult()
-            .getFieldErrors()
-            .stream()
-            .map(error -> ErrorResponse.FieldError.of(
-                error.getField(),
-                Optional.ofNullable(error.getRejectedValue()).map(Object::toString).orElse(""),
-                error.getDefaultMessage()
-            ))
-            .collect(Collectors.toList());
+                .getFieldErrors()
+                .stream()
+                .map(error -> ErrorResponse.FieldError.of(
+                        error.getField(),
+                        Optional.ofNullable(error.getRejectedValue()).map(Object::toString).orElse(""),
+                        error.getDefaultMessage()
+                ))
+                .collect(Collectors.toList());
 
         log.error("[VALIDATION-ERROR] errors={}", errors);
 
         return ResponseEntity
-            .status(ErrorCode.INVALID_INPUT.getStatus())
-            .body(ErrorResponse.of(ErrorCode.INVALID_INPUT.getMessage(), errors));
+                .status(ErrorCode.INVALID_INPUT.getStatus())
+                .body(ErrorResponse.of(ErrorCode.INVALID_INPUT.getMessage(), errors));
     }
 
     @ExceptionHandler(Exception.class)
@@ -77,8 +77,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("[UNEXPECTED-ERROR] type={} message={}", e.getClass().getSimpleName(), e.getMessage());
 
         return ResponseEntity
-            .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
-            .body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage()));
+                .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
+                .body(ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage()));
     }
 
     private void ensureTraceId() {

@@ -2,6 +2,7 @@ spring:
   docker:
     compose:
       enabled: true
+      lifecycle-management: start_only
 
   jpa:
     show-sql: true
@@ -14,9 +15,6 @@ spring:
 
   flyway:
     enabled: false
-
-  elasticsearch:
-    uris: ${ELASTICSEARCH_URIS}
 
 jwt:
   secret: ${JWT_SECRET}

@@ -1,7 +1,6 @@
 package com.souzip.api.domain.file.entity;
 
-import com.souzip.api.domain.souvenir.entity.Souvenir;
-import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.domain.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

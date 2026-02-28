@@ -6,7 +6,7 @@ import com.souzip.api.domain.souvenir.dto.SouvenirRequest;
 import com.souzip.api.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.api.domain.souvenir.vo.PriceInfo;
 import com.souzip.api.domain.user.entity.User;
-import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.domain.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

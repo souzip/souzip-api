@@ -1,7 +1,7 @@
 package com.souzip.api.domain.country.entity;
 
 import com.souzip.api.domain.currency.entity.Currency;
-import com.souzip.api.global.entity.BaseEntity;
+import com.souzip.api.domain.shared.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;

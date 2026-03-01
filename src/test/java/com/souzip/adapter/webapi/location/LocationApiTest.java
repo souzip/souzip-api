@@ -151,7 +151,7 @@ class LocationApiTest extends RestDocsSupport {
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.ARRAY).description("검색 결과 목록"),
-                                fieldWithPath("data[].contentType").type(JsonFieldType.STRING).description("검색 결과 타입 (city, place)"),
+                                fieldWithPath("data[].type").type(JsonFieldType.STRING).description("검색 결과 타입 (city, place)"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("도시명 또는 장소명"),
                                 fieldWithPath("data[].country").type(JsonFieldType.STRING).description("국가명 (도시 검색 시)").optional(),
                                 fieldWithPath("data[].address").type(JsonFieldType.STRING).description("주소 (장소 검색 시)").optional(),
@@ -198,7 +198,7 @@ class LocationApiTest extends RestDocsSupport {
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.ARRAY).description("검색 결과 목록"),
-                                fieldWithPath("data[].contentType").type(JsonFieldType.STRING).description("검색 결과 타입 (city, place)"),
+                                fieldWithPath("data[].type").type(JsonFieldType.STRING).description("검색 결과 타입 (city, place)"),
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("도시명 또는 장소명"),
                                 fieldWithPath("data[].country").type(JsonFieldType.STRING).description("국가명 (도시 검색 시)").optional(),
                                 fieldWithPath("data[].address").type(JsonFieldType.STRING).description("주소 (장소 검색 시)").optional(),

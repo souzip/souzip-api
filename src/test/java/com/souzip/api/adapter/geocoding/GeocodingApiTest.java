@@ -67,7 +67,7 @@ class GeocodingApiTest extends RestDocsSupport {
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                fieldWithPath("data.address").type(JsonFieldType.STRING).description("전체 주소"),
+                                fieldWithPath("data.formattedAddress").type(JsonFieldType.STRING).description("전체 주소"),
                                 fieldWithPath("data.city").type(JsonFieldType.STRING).description("도시 이름"),
                                 fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()

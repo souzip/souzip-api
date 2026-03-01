@@ -3,8 +3,7 @@ package com.souzip.api.application.file;
 import com.souzip.api.application.file.provided.FileFinder;
 import com.souzip.api.application.file.required.FileRepository;
 import com.souzip.api.domain.file.File;
-import com.souzip.api.global.exception.BusinessException;
-import com.souzip.api.global.exception.ErrorCode;
+import com.souzip.api.domain.file.FileNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +29,7 @@ public class FileQueryService implements FileFinder {
     public File findFirst(String entityType, Long entityId) {
         return fileRepository
                 .findFirstByEntityTypeAndEntityIdOrderByDisplayOrderAsc(entityType, entityId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.FILE_NOT_FOUND));
+                .orElseThrow(() -> new FileNotFoundException(entityType, entityId));
     }
 
     @Override

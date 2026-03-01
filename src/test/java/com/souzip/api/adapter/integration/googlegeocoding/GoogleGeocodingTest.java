@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class GoogleGeocodingAdapterTest {
+class GoogleGeocodingTest {
 
     @Mock
     private RestTemplate restTemplate;

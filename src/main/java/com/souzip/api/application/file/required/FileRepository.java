@@ -20,8 +20,6 @@ public interface FileRepository extends Repository<File, Long> {
 
     void delete(File file);
 
-    void deleteByEntityTypeAndEntityId(String entityType, Long entityId);
-
     List<File> findByEntityTypeAndEntityIdInAndDisplayOrderOrderByDisplayOrder(
             String entityType,
             List<Long> entityIds,

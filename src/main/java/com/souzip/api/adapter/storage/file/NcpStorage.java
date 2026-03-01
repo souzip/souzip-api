@@ -2,10 +2,11 @@ package com.souzip.api.adapter.storage.file;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.souzip.api.adapter.config.ObjectStorageProperties;
 import com.souzip.api.application.file.required.FileStorage;
+import com.souzip.api.domain.file.InvalidFileException;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
-import com.souzip.api.adapter.config.ObjectStorageProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,6 @@ import java.util.UUID;
 public class NcpStorage implements FileStorage {
 
     private final AmazonS3 s3Client;
-
     private final ObjectStorageProperties properties;
 
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp");
@@ -81,46 +81,43 @@ public class NcpStorage implements FileStorage {
     }
 
     private void validateFile(MultipartFile file) {
-        validateFileExists(file);
+        validateFileNotEmpty(file);
         validateFileSize(file);
         validateFileType(file);
     }
 
-    private void validateFileExists(MultipartFile file) {
-        if (isInvalidFile(file)) {
-            throw new BusinessException(ErrorCode.FILE_EMPTY);
+    private void validateFileNotEmpty(MultipartFile file) {
+        if (isEmpty(file)) {
+            throw InvalidFileException.empty();
         }
     }
 
     private void validateFileSize(MultipartFile file) {
-        if (isFileSizeExceeded(file)) {
-            throw new BusinessException(ErrorCode.FILE_SIZE_EXCEEDED);
+        if (exceedsMaxSize(file)) {
+            throw InvalidFileException.sizeExceeded(file.getSize(), MAX_FILE_SIZE);
         }
     }
 
     private void validateFileType(MultipartFile file) {
-        if (isInvalidFileType(file)) {
-            throw new BusinessException(ErrorCode.INVALID_FILE_TYPE);
+        if (!hasAllowedExtension(file)) {
+            throw InvalidFileException.invalidType(file.getOriginalFilename());
         }
     }
 
-    private boolean isInvalidFile(MultipartFile file) {
+    private boolean isEmpty(MultipartFile file) {
         return file == null || file.isEmpty();
     }
 
-    private boolean isFileSizeExceeded(MultipartFile file) {
+    private boolean exceedsMaxSize(MultipartFile file) {
         return file.getSize() > MAX_FILE_SIZE;
     }
 
-    private boolean isInvalidFileType(MultipartFile file) {
+    private boolean hasAllowedExtension(MultipartFile file) {
         String filename = file.getOriginalFilename();
         if (filename == null) {
-            return true;
+            return false;
         }
-        return !hasAllowedExtension(filename);
-    }
 
-    private boolean hasAllowedExtension(String filename) {
         String lowerFilename = filename.toLowerCase();
         return ALLOWED_EXTENSIONS.stream()
                 .anyMatch(lowerFilename::endsWith);

@@ -1,11 +1,11 @@
 package com.souzip.api.application.file;
 
-import com.souzip.api.application.file.provided.FileRegister;
+import com.souzip.api.application.file.provided.FileModifier;
 import com.souzip.api.application.file.required.FileRepository;
 import com.souzip.api.application.file.required.FileStorage;
 import com.souzip.api.domain.file.File;
-import com.souzip.api.global.exception.BusinessException;
-import com.souzip.api.global.exception.ErrorCode;
+import com.souzip.api.domain.file.FileNotFoundException;
+import com.souzip.api.domain.file.FileRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @Service
-public class FileModifyService implements FileRegister {
+public class FileModifyService implements FileModifier {
 
     private final FileRepository fileRepository;
     private final FileStorage fileStorage;
@@ -30,9 +30,9 @@ public class FileModifyService implements FileRegister {
             Integer displayOrder
     ) {
         String storageKey = fileStorage.upload(userId, file);
-        Integer order = getDisplayOrder(entityType, entityId, displayOrder);
+        Integer order = resolveDisplayOrder(entityType, entityId, displayOrder);
 
-        File fileEntity = File.create(
+        FileRegisterRequest request = FileRegisterRequest.of(
                 entityType,
                 entityId,
                 storageKey,
@@ -42,16 +42,15 @@ public class FileModifyService implements FileRegister {
                 order
         );
 
+        File fileEntity = File.register(request);
+
         return fileRepository.save(fileEntity);
     }
 
     @Override
     public void delete(Long fileId) {
-        File file = fileRepository.findById(fileId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.FILE_NOT_FOUND));
-
-        fileStorage.delete(file.getStorageKey());
-        fileRepository.delete(file);
+        File file = findFileById(fileId);
+        deleteFileWithStorage(file);
     }
 
     @Override
@@ -59,27 +58,24 @@ public class FileModifyService implements FileRegister {
         List<File> files = fileRepository
                 .findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(entityType, entityId);
 
-        files.forEach(file -> fileStorage.delete(file.getStorageKey()));
-        fileRepository.deleteByEntityTypeAndEntityId(entityType, entityId);
+        files.forEach(this::deleteFileWithStorage);
     }
 
-    @Override
-    public void updateDisplayOrder(Long fileId, Integer newDisplayOrder) {
-        File file = fileRepository.findById(fileId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.FILE_NOT_FOUND));
-
-        file.updateDisplayOrder(newDisplayOrder);
-        fileRepository.save(file);
+    private File findFileById(Long fileId) {
+        return fileRepository.findById(fileId)
+                .orElseThrow(() -> new FileNotFoundException(fileId));
     }
 
-    private Integer getDisplayOrder(String entityType, Long entityId, Integer displayOrder) {
+    private void deleteFileWithStorage(File file) {
+        fileStorage.delete(file.getStorageKey());
+        fileRepository.delete(file);
+    }
+
+    private Integer resolveDisplayOrder(String entityType, Long entityId, Integer displayOrder) {
         if (displayOrder != null) {
             return displayOrder;
         }
-        return calculateNextDisplayOrder(entityType, entityId);
-    }
 
-    private Integer calculateNextDisplayOrder(String entityType, Long entityId) {
         List<File> existingFiles = fileRepository
                 .findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(entityType, entityId);
 
@@ -87,7 +83,6 @@ public class FileModifyService implements FileRegister {
             return 1;
         }
 
-        File lastFile = existingFiles.getLast();
-        return lastFile.getDisplayOrder() + 1;
+        return existingFiles.getLast().getDisplayOrder() + 1;
     }
 }

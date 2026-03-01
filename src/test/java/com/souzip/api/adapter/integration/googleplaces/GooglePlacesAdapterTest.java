@@ -1,7 +1,7 @@
 package com.souzip.api.adapter.integration.googleplaces;
 
 import com.souzip.api.adapter.integration.googleplaces.dto.GooglePlacesSearchResponse;
-import com.souzip.api.application.search.dto.SearchPlace;
+import com.souzip.api.application.location.dto.SearchPlace;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

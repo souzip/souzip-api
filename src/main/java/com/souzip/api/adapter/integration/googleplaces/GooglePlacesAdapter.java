@@ -2,8 +2,8 @@ package com.souzip.api.adapter.integration.googleplaces;
 
 import com.souzip.api.adapter.integration.googleplaces.dto.GooglePlacesSearchResponse;
 import com.souzip.api.adapter.integration.googleplaces.dto.GooglePlacesSearchResponse.Result;
-import com.souzip.api.application.search.dto.SearchPlace;
-import com.souzip.api.application.search.required.PlaceSearchProvider;
+import com.souzip.api.application.location.dto.SearchPlace;
+import com.souzip.api.application.location.required.PlaceSearchProvider;
 import com.souzip.api.domain.shared.Coordinate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
-package com.souzip.api.application.search.required;
+package com.souzip.api.application.location.required;
 
-import com.souzip.api.application.search.dto.SearchPlace;
+import com.souzip.api.application.location.dto.SearchPlace;
 import java.util.List;
 
 public interface PlaceSearchProvider {

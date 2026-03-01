@@ -1,4 +1,4 @@
-package com.souzip.api.application.search.dto;
+package com.souzip.api.application.location.dto;
 
 import com.souzip.api.domain.city.entity.City;
 import java.util.List;

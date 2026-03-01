@@ -1,4 +1,4 @@
-package com.souzip.api.application.search.required;
+package com.souzip.api.application.location.required;
 
 import com.souzip.api.domain.city.entity.City;
 import org.springframework.data.domain.Pageable;

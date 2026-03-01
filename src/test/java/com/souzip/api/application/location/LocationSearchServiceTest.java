@@ -1,11 +1,11 @@
-package com.souzip.api.application.search;
+package com.souzip.api.application.location;
 
-import com.souzip.api.application.search.dto.CitySearchResult;
-import com.souzip.api.application.search.dto.SearchPlace;
-import com.souzip.api.application.search.dto.PlaceSearchResult;
-import com.souzip.api.application.search.dto.SearchResult;
-import com.souzip.api.application.search.required.CitySearchRepository;
-import com.souzip.api.application.search.required.PlaceSearchProvider;
+import com.souzip.api.application.location.dto.CitySearchResult;
+import com.souzip.api.application.location.dto.SearchPlace;
+import com.souzip.api.application.location.dto.PlaceSearchResult;
+import com.souzip.api.application.location.dto.SearchResult;
+import com.souzip.api.application.location.required.CitySearchRepository;
+import com.souzip.api.application.location.required.PlaceSearchProvider;
 import com.souzip.api.domain.city.entity.City;
 import com.souzip.api.domain.country.entity.Country;
 import com.souzip.api.domain.country.entity.Region;

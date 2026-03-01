@@ -3,8 +3,8 @@ package com.souzip.api.adapter.integration.googlegeocoding;
 import com.souzip.api.adapter.integration.googlegeocoding.dto.GoogleGeocodingResponse;
 import com.souzip.api.adapter.integration.googlegeocoding.dto.GoogleGeocodingResponse.AddressComponent;
 import com.souzip.api.adapter.integration.googlegeocoding.dto.GoogleGeocodingResponse.Result;
-import com.souzip.api.application.geocoding.dto.GeocodingResult;
-import com.souzip.api.application.geocoding.required.AddressProvider;
+import com.souzip.api.application.location.dto.AddressResult;
+import com.souzip.api.application.location.required.AddressProvider;
 import com.souzip.api.domain.shared.Coordinate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,19 +37,19 @@ public class GoogleGeocodingAdapter implements AddressProvider {
 
 
     @Override
-    public GeocodingResult getAddress(Coordinate coordinate) {
+    public AddressResult getAddress(Coordinate coordinate) {
         try {
             GoogleGeocodingResponse response = callGeocodingApi(coordinate);
 
             if (isInvalidResponse(response)) {
-                return GeocodingResult.empty();
+                return AddressResult.empty();
             }
 
             return parseToGeocodingResult(response.results());
 
         } catch (Exception e) {
             log.error("Geocoding API 호출 실패 coordinate={}", coordinate, e);
-            return GeocodingResult.empty();
+            return AddressResult.empty();
         }
     }
 
@@ -75,8 +75,8 @@ public class GoogleGeocodingAdapter implements AddressProvider {
                 || response.results().isEmpty();
     }
 
-    private GeocodingResult parseToGeocodingResult(List<Result> results) {
-        return new GeocodingResult(
+    private AddressResult parseToGeocodingResult(List<Result> results) {
+        return new AddressResult(
                 extractFormattedAddress(results),
                 extractCity(results),
                 extractCountryCode(results)

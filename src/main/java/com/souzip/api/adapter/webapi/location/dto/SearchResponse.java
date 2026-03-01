@@ -1,10 +1,10 @@
-package com.souzip.api.adapter.webapi.search.dto;
+package com.souzip.api.adapter.webapi.location.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.souzip.api.application.search.dto.CitySearchResult;
-import com.souzip.api.application.search.dto.SearchPlace;
-import com.souzip.api.application.search.dto.PlaceSearchResult;
-import com.souzip.api.application.search.dto.SearchResult;
+import com.souzip.api.application.location.dto.CitySearchResult;
+import com.souzip.api.application.location.dto.SearchPlace;
+import com.souzip.api.application.location.dto.PlaceSearchResult;
+import com.souzip.api.application.location.dto.SearchResult;
 import com.souzip.api.domain.city.entity.City;
 
 import java.math.BigDecimal;

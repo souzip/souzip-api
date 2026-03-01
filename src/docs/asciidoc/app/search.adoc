@@ -1,5 +1,11 @@
 [[search-api]]
-== Search API
+== Search API (Deprecated)
+
+[WARNING]
+====
+이 API는 2026-03-15 삭제 예정입니다.
+`/api/location/search`로 마이그레이션하세요.
+====
 
 * 인증 불필요 (Public API)
 

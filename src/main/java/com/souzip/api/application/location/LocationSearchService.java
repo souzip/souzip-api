@@ -1,12 +1,12 @@
-package com.souzip.api.application.search;
+package com.souzip.api.application.location;
 
-import com.souzip.api.application.search.dto.CitySearchResult;
-import com.souzip.api.application.search.dto.PlaceSearchResult;  // ← 추가
-import com.souzip.api.application.search.dto.SearchPlace;  // ← 추가
-import com.souzip.api.application.search.dto.SearchResult;
-import com.souzip.api.application.search.provided.LocationSearch;
-import com.souzip.api.application.search.required.CitySearchRepository;
-import com.souzip.api.application.search.required.PlaceSearchProvider;  // ← 추가
+import com.souzip.api.application.location.dto.CitySearchResult;
+import com.souzip.api.application.location.dto.PlaceSearchResult;  // ← 추가
+import com.souzip.api.application.location.dto.SearchPlace;  // ← 추가
+import com.souzip.api.application.location.dto.SearchResult;
+import com.souzip.api.application.location.provided.LocationSearch;
+import com.souzip.api.application.location.required.CitySearchRepository;
+import com.souzip.api.application.location.required.PlaceSearchProvider;  // ← 추가
 import com.souzip.api.domain.city.entity.City;
 import java.util.List;
 import java.util.Optional;

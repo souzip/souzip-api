@@ -1,7 +1,7 @@
 package com.souzip.api.adapter.integration.googlegeocoding;
 
 import com.souzip.api.adapter.integration.googlegeocoding.dto.GoogleGeocodingResponse;
-import com.souzip.api.application.geocoding.dto.GeocodingResult;
+import com.souzip.api.application.location.dto.AddressResult;
 import com.souzip.api.domain.shared.Coordinate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +51,7 @@ class GoogleGeocodingAdapterTest {
                 .thenReturn(mockResponse);
 
         // when
-        GeocodingResult result = adapter.getAddress(coordinate);
+        AddressResult result = adapter.getAddress(coordinate);
 
         // then
         assertThat(result).isNotNull();
@@ -74,7 +74,7 @@ class GoogleGeocodingAdapterTest {
                 .thenReturn(mockResponse);
 
         // when
-        GeocodingResult result = adapter.getAddress(coordinate);
+        AddressResult result = adapter.getAddress(coordinate);
 
         // then
         assertThat(result.city()).isEqualTo("강남구");
@@ -93,10 +93,10 @@ class GoogleGeocodingAdapterTest {
                 .thenReturn(null);
 
         // when
-        GeocodingResult result = adapter.getAddress(coordinate);
+        AddressResult result = adapter.getAddress(coordinate);
 
         // then
-        assertThat(result).isEqualTo(GeocodingResult.empty());
+        assertThat(result).isEqualTo(AddressResult.empty());
     }
 
     @DisplayName("결과가 비어있으면 빈 결과를 반환한다")
@@ -113,10 +113,10 @@ class GoogleGeocodingAdapterTest {
                 .thenReturn(emptyResponse);
 
         // when
-        GeocodingResult result = adapter.getAddress(coordinate);
+        AddressResult result = adapter.getAddress(coordinate);
 
         // then
-        assertThat(result).isEqualTo(GeocodingResult.empty());
+        assertThat(result).isEqualTo(AddressResult.empty());
     }
 
     @DisplayName("API 호출 실패 시 빈 결과를 반환한다")
@@ -132,10 +132,10 @@ class GoogleGeocodingAdapterTest {
                 .thenThrow(new RuntimeException("API Error"));
 
         // when
-        GeocodingResult result = adapter.getAddress(coordinate);
+        AddressResult result = adapter.getAddress(coordinate);
 
         // then
-        assertThat(result).isEqualTo(GeocodingResult.empty());
+        assertThat(result).isEqualTo(AddressResult.empty());
     }
 
     private GoogleGeocodingResponse createMockResponse() {

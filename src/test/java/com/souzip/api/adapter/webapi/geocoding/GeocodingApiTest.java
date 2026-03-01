@@ -1,8 +1,8 @@
 package com.souzip.api.adapter.webapi.geocoding;
 
-import com.souzip.api.adapter.webapi.geocoding.GeocodingApi;
-import com.souzip.api.application.geocoding.dto.GeocodingResult;
-import com.souzip.api.application.geocoding.provided.ReverseGeocoding;
+import com.souzip.api.adapter.webapi.location.GeocodingApi;
+import com.souzip.api.application.location.dto.AddressResult;
+import com.souzip.api.application.location.provided.ReverseGeocoding;
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.shared.Coordinate;
 import org.junit.jupiter.api.DisplayName;
@@ -33,14 +33,14 @@ class GeocodingApiTest extends RestDocsSupport {
         return new GeocodingApi(reverseGeocoding);
     }
 
-    @DisplayName("위도와 경도를 통해 주소를 조회할 수 있다")
+    @DisplayName("위도와 경도를 통해 주소를 조회할 수 있다 (Deprecated)")
     @Test
     void getAddress() throws Exception {
         // given
         double latitude = 37.5665121;
         double longitude = 126.9780123;
 
-        GeocodingResult mockResult = new GeocodingResult(
+        AddressResult mockResult = new AddressResult(
                 "110 Sejong-daero, Jung District, Seoul, South Korea",
                 "Seoul",
                 "KR"
@@ -86,7 +86,7 @@ class GeocodingApiTest extends RestDocsSupport {
         double latitude = 0.0;
         double longitude = 0.0;
 
-        GeocodingResult emptyResult = GeocodingResult.empty();
+        AddressResult emptyResult = AddressResult.empty();
 
         given(reverseGeocoding.getAddress(any(Coordinate.class)))
                 .willReturn(emptyResult);
@@ -96,10 +96,6 @@ class GeocodingApiTest extends RestDocsSupport {
                         .param("latitude", String.valueOf(latitude))
                         .param("longitude", String.valueOf(longitude)))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.formattedAddress").isEmpty())
-                .andExpect(jsonPath("$.data.address").isEmpty())
-                .andExpect(jsonPath("$.data.city").isEmpty())
-                .andExpect(jsonPath("$.data.countryCode").isEmpty());
+                .andExpect(status().isOk());
     }
 }

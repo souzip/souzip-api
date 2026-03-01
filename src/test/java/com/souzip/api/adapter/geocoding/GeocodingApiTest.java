@@ -55,6 +55,7 @@ class GeocodingApiTest extends RestDocsSupport {
                         .param("longitude", String.valueOf(longitude)))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.formattedAddress").value("110 Sejong-daero, Jung District, Seoul, South Korea"))
                 .andExpect(jsonPath("$.data.address").value("110 Sejong-daero, Jung District, Seoul, South Korea"))
                 .andExpect(jsonPath("$.data.city").value("Seoul"))
                 .andExpect(jsonPath("$.data.countryCode").value("KR"))
@@ -67,7 +68,10 @@ class GeocodingApiTest extends RestDocsSupport {
                         ),
                         apiResponseFields(
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                fieldWithPath("data.address").type(JsonFieldType.STRING).description("전체 주소"),
+                                fieldWithPath("data.formattedAddress").type(JsonFieldType.STRING)
+                                        .description("전체 주소 (Deprecated: address 필드 사용 권장)"),
+                                fieldWithPath("data.address").type(JsonFieldType.STRING)
+                                        .description("전체 주소"),
                                 fieldWithPath("data.city").type(JsonFieldType.STRING).description("도시 이름"),
                                 fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
@@ -93,6 +97,7 @@ class GeocodingApiTest extends RestDocsSupport {
                         .param("longitude", String.valueOf(longitude)))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.formattedAddress").isEmpty())
                 .andExpect(jsonPath("$.data.address").isEmpty())
                 .andExpect(jsonPath("$.data.city").isEmpty())
                 .andExpect(jsonPath("$.data.countryCode").isEmpty());

@@ -71,6 +71,25 @@
     </attributes>
   </entity>
 
+  <entity class="com.souzip.domain.notice.Notice">
+    <table name="notice"/>
+    <attributes>
+      <basic name="title">
+        <column name="title" nullable="false" length="200"/>
+      </basic>
+      <basic name="content">
+        <column name="content" nullable="false" column-definition="TEXT"/>
+      </basic>
+      <basic name="authorId">
+        <column name="author_id" nullable="false"/>
+      </basic>
+      <basic name="status">
+        <column name="status" nullable="false" length="20"/>
+        <enumerated>STRING</enumerated>
+      </basic>
+    </attributes>
+  </entity>
+
   <embeddable class="com.souzip.domain.shared.Coordinate">
     <attributes>
       <basic name="latitude">

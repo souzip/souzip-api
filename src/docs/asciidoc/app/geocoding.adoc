@@ -7,3 +7,5 @@
 * 인증 필요
 
 operation::geocoding/get-address[snippets='http-request,query-parameters,http-response,response-fields']
+
+NOTE: `formattedAddress` 필드는 deprecated 되었습니다. `address` 필드를 사용해주세요.

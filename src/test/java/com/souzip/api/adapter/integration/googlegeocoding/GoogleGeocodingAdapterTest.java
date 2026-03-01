@@ -55,7 +55,7 @@ class GoogleGeocodingAdapterTest {
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.formattedAddress()).isEqualTo("서울특별시 대한민국");
+        assertThat(result.address()).isEqualTo("서울특별시 대한민국");
         assertThat(result.city()).isEqualTo("서울특별시");
         assertThat(result.countryCode()).isEqualTo("KR");
     }

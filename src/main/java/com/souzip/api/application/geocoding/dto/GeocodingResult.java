@@ -1,7 +1,7 @@
 package com.souzip.api.application.geocoding.dto;
 
 public record GeocodingResult(
-        String formattedAddress,
+        String address,
         String city,
         String countryCode
 ) {

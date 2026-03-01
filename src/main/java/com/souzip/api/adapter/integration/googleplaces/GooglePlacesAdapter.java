@@ -2,8 +2,9 @@ package com.souzip.api.adapter.integration.googleplaces;
 
 import com.souzip.api.adapter.integration.googleplaces.dto.GooglePlacesSearchResponse;
 import com.souzip.api.adapter.integration.googleplaces.dto.GooglePlacesSearchResponse.Result;
-import com.souzip.api.application.search.dto.Place;
+import com.souzip.api.application.search.dto.SearchPlace;
 import com.souzip.api.application.search.required.PlaceSearchProvider;
+import com.souzip.api.domain.shared.Coordinate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,7 @@ public class GooglePlacesAdapter implements PlaceSearchProvider {
     private String language;
 
     @Override
-    public List<Place> searchByKeyword(String keyword) {
+    public List<SearchPlace> searchByKeyword(String keyword) {
         try {
             GooglePlacesSearchResponse response = callPlacesApi(keyword);
 
@@ -69,19 +70,21 @@ public class GooglePlacesAdapter implements PlaceSearchProvider {
                 || response.results().isEmpty();
     }
 
-    private List<Place> convertToPlaces(List<Result> results) {
+    private List<SearchPlace> convertToPlaces(List<Result> results) {
         return results.stream()
                 .limit(MAX_RESULTS)
                 .map(this::convertToPlace)
                 .toList();
     }
 
-    private Place convertToPlace(Result result) {
-        return new Place(
+    private SearchPlace convertToPlace(Result result) {
+        return new SearchPlace(
                 result.name(),
                 result.formattedAddress(),
-                BigDecimal.valueOf(result.geometry().location().lat()),
-                BigDecimal.valueOf(result.geometry().location().lng())
+                Coordinate.of(
+                        BigDecimal.valueOf(result.geometry().location().lat()),
+                        BigDecimal.valueOf(result.geometry().location().lng())
+                )
         );
     }
 }

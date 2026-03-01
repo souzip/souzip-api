@@ -1,7 +1,7 @@
 package com.souzip.api.adapter.integration.googleplaces;
 
 import com.souzip.api.adapter.integration.googleplaces.dto.GooglePlacesSearchResponse;
-import com.souzip.api.application.search.dto.Place;
+import com.souzip.api.application.search.dto.SearchPlace;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,14 +48,14 @@ class GooglePlacesAdapterTest {
                 .thenReturn(mockResponse);
 
         // when
-        List<Place> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword(keyword);
 
         // then
         assertThat(places).hasSize(1);
         assertThat(places.getFirst().name()).isEqualTo("에펠탑 기념품샵");
         assertThat(places.getFirst().address()).isEqualTo("프랑스 파리 샹드마르스 에펠탑");
-        assertThat(places.getFirst().latitude()).isEqualTo(BigDecimal.valueOf(48.8584));
-        assertThat(places.getFirst().longitude()).isEqualTo(BigDecimal.valueOf(2.2945));
+        assertThat(places.getFirst().coordinate().latitude()).isEqualTo(BigDecimal.valueOf(48.8584));
+        assertThat(places.getFirst().coordinate().longitude()).isEqualTo(BigDecimal.valueOf(2.2945));
     }
 
     @DisplayName("상위 10개만 반환한다")
@@ -69,7 +69,7 @@ class GooglePlacesAdapterTest {
                 .thenReturn(mockResponse);
 
         // when
-        List<Place> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword(keyword);
 
         // then
         assertThat(places).hasSize(10);
@@ -85,7 +85,7 @@ class GooglePlacesAdapterTest {
                 .thenReturn(null);
 
         // when
-        List<Place> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword(keyword);
 
         // then
         assertThat(places).isEmpty();
@@ -102,7 +102,7 @@ class GooglePlacesAdapterTest {
                 .thenReturn(emptyResponse);
 
         // when
-        List<Place> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword(keyword);
 
         // then
         assertThat(places).isEmpty();
@@ -118,7 +118,7 @@ class GooglePlacesAdapterTest {
                 .thenThrow(new RuntimeException("API Error"));
 
         // when
-        List<Place> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword(keyword);
 
         // then
         assertThat(places).isEmpty();

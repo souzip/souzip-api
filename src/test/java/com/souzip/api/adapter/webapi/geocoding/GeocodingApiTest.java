@@ -1,4 +1,4 @@
-package com.souzip.api.adapter.geocoding;
+package com.souzip.api.adapter.webapi.geocoding;
 
 import com.souzip.api.adapter.webapi.geocoding.GeocodingApi;
 import com.souzip.api.application.geocoding.dto.GeocodingResult;

@@ -1,6 +1,7 @@
 package com.souzip.api.application.search.required;
 
 import com.souzip.api.domain.city.entity.City;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -23,5 +24,5 @@ public interface CitySearchRepository extends Repository<City, Long> {
                 c.priority ASC NULLS LAST,
                 c.nameKr ASC
             """)
-    List<City> searchByKeyword(@Param("keyword") String keyword);
+    List<City> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

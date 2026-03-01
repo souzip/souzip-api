@@ -55,6 +55,7 @@ public class SecurityConfig {
                                 "/api/auth/refresh",
                                 "/docs/**",
                                 "/api/test/**",
+                                "/api/location/search",
                                 "/api/countries/**",
                                 "/api/categories",
                                 "/api/search/**",

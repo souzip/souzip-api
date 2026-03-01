@@ -1,8 +1,8 @@
-package com.souzip.api.adapter.webapi.geocoding;
+package com.souzip.api.adapter.webapi.location;
 
-import com.souzip.api.adapter.webapi.geocoding.dto.GeocodingAddressResponse;
-import com.souzip.api.application.geocoding.dto.GeocodingResult;
-import com.souzip.api.application.geocoding.provided.ReverseGeocoding;
+import com.souzip.api.adapter.webapi.location.dto.AddressResponse;
+import com.souzip.api.application.location.dto.AddressResult;
+import com.souzip.api.application.location.provided.ReverseGeocoding;
 import com.souzip.api.domain.shared.Coordinate;
 import com.souzip.api.global.common.dto.SuccessResponse;
 import com.souzip.api.global.security.annotation.RequireAuth;
@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
+/**
+ * @deprecated 2026-03-15부터 삭제 예정. {@link LocationApi} 사용 권장
+ */
+@Deprecated(since = "2026-03-01", forRemoval = true)
 @RequestMapping("/api/geocoding")
 @RequiredArgsConstructor
 @RestController
@@ -20,7 +24,7 @@ public class GeocodingApi {
 
     @RequireAuth
     @GetMapping("/address")
-    public SuccessResponse<GeocodingAddressResponse> getAddress(
+    public SuccessResponse<AddressResponse> getAddress(
             @RequestParam double latitude,
             @RequestParam double longitude
     ) {
@@ -29,9 +33,9 @@ public class GeocodingApi {
                 BigDecimal.valueOf(longitude)
         );
 
-        GeocodingResult result = reverseGeocoding.getAddress(coordinate);
+        AddressResult result = reverseGeocoding.getAddress(coordinate);
 
-        GeocodingAddressResponse response = GeocodingAddressResponse.from(result);
+        AddressResponse response = AddressResponse.from(result);
 
         return SuccessResponse.of(response);
     }

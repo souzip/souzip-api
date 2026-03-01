@@ -1,5 +1,11 @@
 [[geocoding-api]]
-== Address API
+== Geocoding API (Deprecated)
+
+[WARNING]
+====
+이 API는 2026-03-15 삭제 예정입니다.
+`/api/location/search`로 마이그레이션하세요.
+====
 
 [[geocoding-get-address]]
 === 위도/경도 기준 주소 조회 (기념품 업로드 시 사용)

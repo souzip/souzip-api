@@ -1,9 +1,9 @@
-package com.souzip.api.adapter.webapi.geocoding.dto;
+package com.souzip.api.adapter.webapi.location.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.souzip.api.application.geocoding.dto.GeocodingResult;
+import com.souzip.api.application.location.dto.AddressResult;
 
-public record GeocodingAddressResponse(
+public record AddressResponse(
         @Deprecated
         @JsonProperty("formattedAddress")
         String formattedAddress,
@@ -12,8 +12,8 @@ public record GeocodingAddressResponse(
         String city,
         String countryCode
 ) {
-    public static GeocodingAddressResponse from(GeocodingResult result) {
-        return new GeocodingAddressResponse(
+    public static AddressResponse from(AddressResult result) {
+        return new AddressResponse(
                 result.address(),
                 result.address(),
                 result.city(),

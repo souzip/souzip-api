@@ -1,0 +1,269 @@
+package com.souzip.domain.city.service;
+
+import com.souzip.domain.city.entity.City;
+import com.souzip.domain.city.repository.CityRepository;
+import java.util.Arrays;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class CityPriorityDomainServiceTest {
+
+    @Mock
+    private CityRepository cityRepository;
+
+    @InjectMocks
+    private CityPriorityDomainService cityPriorityDomainService;
+
+    @DisplayName("같은 우선순위로 변경 시 아무것도 실행되지 않는다")
+    @Test
+    void adjustPriorities_SamePriority_DoesNothing() {
+        Long excludeCityId = 1L;
+        Integer oldPriority = 3;
+        Integer newPriority = 3;
+        Long countryId = 1L;
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(anyLong(), anyInt());
+        verify(cityRepository, never()).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(anyLong(), anyInt(), anyInt());
+    }
+
+    @DisplayName("우선순위 없음 -> 3번으로 설정 시 3번 이후가 밀린다")
+    @Test
+    void adjustPriorities_NullToNumber_PushesExisting() {
+        Long excludeCityId = 1L;
+        Integer oldPriority = null;
+        Integer newPriority = 3;
+        Long countryId = 1L;
+
+        City city3 = mock(City.class);
+        City city4 = mock(City.class);
+        City city5 = mock(City.class);
+
+        when(city3.getId()).thenReturn(3L);
+        when(city4.getId()).thenReturn(4L);
+        when(city5.getId()).thenReturn(5L);
+
+        when(city3.getPriority()).thenReturn(3);
+        when(city4.getPriority()).thenReturn(4);
+        when(city5.getPriority()).thenReturn(5);
+
+        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3))
+                .thenReturn(Arrays.asList(city3, city4, city5));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3);
+        verify(city3).updatePriority(4);
+        verify(city4).updatePriority(5);
+        verify(city5).updatePriority(6);
+    }
+
+    @DisplayName("3번 우선순위 제거 시 4번 이후가 당겨진다")
+    @Test
+    void adjustPriorities_NumberToNull_PullsFollowing() {
+        Long excludeCityId = 3L;
+        Integer oldPriority = 3;
+        Integer newPriority = null;
+        Long countryId = 1L;
+
+        City city4 = mock(City.class);
+        City city5 = mock(City.class);
+
+        when(city4.getId()).thenReturn(4L);
+        when(city5.getId()).thenReturn(5L);
+
+        when(city4.getPriority()).thenReturn(4);
+        when(city5.getPriority()).thenReturn(5);
+
+        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 4))
+                .thenReturn(Arrays.asList(city4, city5));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 4);
+        verify(city4).updatePriority(3);
+        verify(city5).updatePriority(4);
+    }
+
+    @DisplayName("2번 -> 5번으로 변경 시 올바르게 조정된다")
+    @Test
+    void adjustPriorities_LowerToHigher_AdjustsCorrectly() {
+        Long excludeCityId = 2L;
+        Integer oldPriority = 2;
+        Integer newPriority = 5;
+        Long countryId = 1L;
+
+        City city3 = mock(City.class);
+        City city4 = mock(City.class);
+        City city5 = mock(City.class);
+
+        when(city3.getId()).thenReturn(3L);
+        when(city4.getId()).thenReturn(4L);
+        when(city5.getId()).thenReturn(5L);
+
+        when(city3.getPriority()).thenReturn(3);
+        when(city4.getPriority()).thenReturn(4);
+        when(city5.getPriority()).thenReturn(5);
+
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 5))
+                .thenReturn(Arrays.asList(city3, city4, city5));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 5);
+        verify(city3).updatePriority(2);
+        verify(city4).updatePriority(3);
+        verify(city5).updatePriority(4);
+    }
+
+    @DisplayName("5번 -> 2번으로 변경 시 올바르게 조정된다")
+    @Test
+    void adjustPriorities_HigherToLower_AdjustsCorrectly() {
+        Long excludeCityId = 5L;
+        Integer oldPriority = 5;
+        Integer newPriority = 2;
+        Long countryId = 1L;
+
+        City city2 = mock(City.class);
+        City city3 = mock(City.class);
+        City city4 = mock(City.class);
+
+        when(city2.getId()).thenReturn(2L);
+        when(city3.getId()).thenReturn(3L);
+        when(city4.getId()).thenReturn(4L);
+
+        when(city2.getPriority()).thenReturn(2);
+        when(city3.getPriority()).thenReturn(3);
+        when(city4.getPriority()).thenReturn(4);
+
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 4))
+                .thenReturn(Arrays.asList(city2, city3, city4));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 4);
+        verify(city2).updatePriority(3);
+        verify(city3).updatePriority(4);
+        verify(city4).updatePriority(5);
+    }
+
+    @DisplayName("연속되지 않은 우선순위가 있을 때도 이동 범위 내에서는 정상 동작한다")
+    @Test
+    void adjustPriorities_NonConsecutivePriorities_StopsAtGap() {
+        Long excludeCityId = 2L;
+        Integer oldPriority = 2;
+        Integer newPriority = null;
+        Long countryId = 1L;
+
+        City city3 = mock(City.class);
+        City city5 = mock(City.class);
+
+        when(city3.getId()).thenReturn(3L);
+        when(city5.getId()).thenReturn(5L);
+
+        when(city3.getPriority()).thenReturn(3);
+        when(city5.getPriority()).thenReturn(5);
+
+        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3))
+                .thenReturn(Arrays.asList(city3, city5));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3);
+        verify(city3).updatePriority(2);
+        verify(city5, never()).updatePriority(anyInt());
+    }
+
+    @DisplayName("변경 대상 도시가 조회 결과에 포함되어도 필터링된다")
+    @Test
+    void adjustPriorities_ExcludesTargetCity() {
+        Long excludeCityId = 100L;
+        Integer oldPriority = null;
+        Integer newPriority = 3;
+        Long countryId = 1L;
+
+        City targetCity = mock(City.class);
+        City existingCity3 = mock(City.class);
+
+        when(targetCity.getId()).thenReturn(100L);
+        when(existingCity3.getId()).thenReturn(3L);
+
+        when(existingCity3.getPriority()).thenReturn(3);
+
+        when(cityRepository.findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(countryId, 3))
+                .thenReturn(Arrays.asList(targetCity, existingCity3));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(targetCity, never()).updatePriority(anyInt());
+        verify(existingCity3).updatePriority(4);
+    }
+
+    @DisplayName("둘 다 null이면 아무것도 실행되지 않는다")
+    @Test
+    void adjustPriorities_BothNull_DoesNothing() {
+        Long excludeCityId = 1L;
+        Integer oldPriority = null;
+        Integer newPriority = null;
+        Long countryId = 1L;
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, never()).findByCountryIdAndPriorityGoeOrderByPriorityAscWithLock(anyLong(), anyInt());
+        verify(cityRepository, never()).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(anyLong(), anyInt(), anyInt());
+    }
+
+    @DisplayName("2번 -> 3번 변경 시 올바르게 조정된다 (인접한 번호)")
+    @Test
+    void adjustPriorities_AdjacentNumbers_LowerToHigher() {
+        Long excludeCityId = 2L;
+        Integer oldPriority = 2;
+        Integer newPriority = 3;
+        Long countryId = 1L;
+
+        City city3 = mock(City.class);
+
+        when(city3.getId()).thenReturn(3L);
+        when(city3.getPriority()).thenReturn(3);
+
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 3))
+                .thenReturn(Arrays.asList(city3));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 3, 3);
+        verify(city3).updatePriority(2);
+    }
+
+    @DisplayName("3번 -> 2번 변경 시 올바르게 조정된다 (인접한 번호)")
+    @Test
+    void adjustPriorities_AdjacentNumbers_HigherToLower() {
+        Long excludeCityId = 3L;
+        Integer oldPriority = 3;
+        Integer newPriority = 2;
+        Long countryId = 1L;
+
+        City city2 = mock(City.class);
+
+        when(city2.getId()).thenReturn(2L);
+        when(city2.getPriority()).thenReturn(2);
+
+        when(cityRepository.findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 2))
+                .thenReturn(Arrays.asList(city2));
+
+        cityPriorityDomainService.adjustPriorities(excludeCityId, oldPriority, newPriority, countryId);
+
+        verify(cityRepository, times(1)).findByCountryIdAndPriorityBetweenOrderByPriorityAscWithLock(countryId, 2, 2);
+        verify(city2).updatePriority(3);
+    }
+}

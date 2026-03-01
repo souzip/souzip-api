@@ -74,7 +74,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception e) {
         ensureTraceId();
 
-        log.error("[UNEXPECTED-ERROR] type={} message={}", e.getClass().getSimpleName(), e.getMessage());
+        log.error("[UNEXPECTED-ERROR] contentType={} message={}", e.getClass().getSimpleName(), e.getMessage());
 
         return ResponseEntity
                 .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())

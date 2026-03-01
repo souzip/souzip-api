@@ -62,8 +62,8 @@
       <basic name="fileSize">
         <column name="file_size" nullable="false"/>
       </basic>
-      <basic name="type">
-        <column name="type" nullable="false"/>
+      <basic name="contentType">
+        <column name="content_type" nullable="false"/>
       </basic>
       <basic name="displayOrder">
         <column name="display_order" nullable="false"/>

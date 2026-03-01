@@ -21,7 +21,7 @@ public class File extends BaseEntity {
 
     private Long fileSize;
 
-    private String type;
+    private String contentType;
 
     private Integer displayOrder;
 
@@ -33,7 +33,7 @@ public class File extends BaseEntity {
         file.storageKey = requireNonNull(request.storageKey(), "스토리지 키는 필수입니다.");
         file.originalName = requireNonNull(request.originalName(), "파일명은 필수입니다.");
         file.fileSize = requireNonNull(request.fileSize(), "파일 크기는 필수입니다.");
-        file.type = requireNonNull(request.type(), "파일 타입은 필수입니다.");
+        file.contentType = requireNonNull(request.contentType(), "파일 타입은 필수입니다.");
         file.displayOrder = requireNonNull(request.displayOrder(), "정렬 순서는 필수입니다.");
 
         return file;

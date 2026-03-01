@@ -6,7 +6,7 @@ public record FileRegisterRequest(
         String storageKey,
         String originalName,
         Long fileSize,
-        String type,
+        String contentType,
         Integer displayOrder
 ) {
     public static FileRegisterRequest of(
@@ -15,12 +15,12 @@ public record FileRegisterRequest(
             String storageKey,
             String originalName,
             Long fileSize,
-            String type,
+            String contentType,
             Integer displayOrder
     ) {
         return new FileRegisterRequest(
                 entityType, entityId, storageKey,
-                originalName, fileSize, type, displayOrder
+                originalName, fileSize, contentType, displayOrder
         );
     }
 }

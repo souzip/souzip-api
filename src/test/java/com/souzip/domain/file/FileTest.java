@@ -29,7 +29,7 @@ class FileTest {
         assertThat(file.getStorageKey()).isEqualTo("user123/uuid-1234.jpg");
         assertThat(file.getOriginalName()).isEqualTo("photo.jpg");
         assertThat(file.getFileSize()).isEqualTo(1024L);
-        assertThat(file.getType()).isEqualTo("image/jpeg");
+        assertThat(file.getContentType()).isEqualTo("image/jpeg");
         assertThat(file.getDisplayOrder()).isEqualTo(1);
     }
 

@@ -31,11 +31,7 @@ public class GeocodingApi {
 
         GeocodingResult result = reverseGeocoding.getAddress(coordinate);
 
-        GeocodingAddressResponse response = new GeocodingAddressResponse(
-                result.address(),
-                result.city(),
-                result.countryCode()
-        );
+        GeocodingAddressResponse response = GeocodingAddressResponse.from(result);
 
         return SuccessResponse.of(response);
     }

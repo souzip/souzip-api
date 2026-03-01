@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class GeocodingService implements ReverseGeocoding {
+public class ReverseGeocodingService implements ReverseGeocoding {
 
     private final AddressProvider addressProvider;
 

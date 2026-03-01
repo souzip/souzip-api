@@ -5,7 +5,7 @@
                     https://hibernate.org/xsd/orm/mapping/mapping-3.1.0.xsd">
   <access>FIELD</access>
 
-  <mapped-superclass class="com.souzip.api.domain.shared.BaseEntity">
+  <mapped-superclass class="com.souzip.domain.shared.BaseEntity">
     <attributes>
       <id name="id">
         <column name="id"/>
@@ -20,7 +20,7 @@
     </attributes>
   </mapped-superclass>
 
-  <entity class="com.souzip.api.domain.location.Location">
+  <entity class="com.souzip.domain.location.Location">
     <table name="location">
       <unique-constraint name="UK_LOCATION_NAME_ADDRESS">
         <column-name>name</column-name>
@@ -38,7 +38,40 @@
     </attributes>
   </entity>
 
-  <embeddable class="com.souzip.api.domain.shared.Coordinate">
+  <entity class="com.souzip.domain.file.File">
+    <table name="file">
+      <unique-constraint name="uq_file_entity_order">
+        <column-name>entity_type</column-name>
+        <column-name>entity_id</column-name>
+        <column-name>display_order</column-name>
+      </unique-constraint>
+    </table>
+    <attributes>
+      <basic name="entityType">
+        <column name="entity_type" nullable="false"/>
+      </basic>
+      <basic name="entityId">
+        <column name="entity_id" nullable="false"/>
+      </basic>
+      <basic name="storageKey">
+        <column name="storage_key" nullable="false"/>
+      </basic>
+      <basic name="originalName">
+        <column name="original_name" nullable="false"/>
+      </basic>
+      <basic name="fileSize">
+        <column name="file_size" nullable="false"/>
+      </basic>
+      <basic name="contentType">
+        <column name="content_type" nullable="false"/>
+      </basic>
+      <basic name="displayOrder">
+        <column name="display_order" nullable="false"/>
+      </basic>
+    </attributes>
+  </entity>
+
+  <embeddable class="com.souzip.domain.shared.Coordinate">
     <attributes>
       <basic name="latitude">
         <column name="latitude" nullable="false" precision="10" scale="7"/>
@@ -50,4 +83,3 @@
   </embeddable>
 
 </entity-mappings>
-

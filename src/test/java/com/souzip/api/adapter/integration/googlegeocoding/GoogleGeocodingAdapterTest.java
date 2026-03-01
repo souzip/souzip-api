@@ -28,7 +28,7 @@ class GoogleGeocodingAdapterTest {
     private RestTemplate restTemplate;
 
     @InjectMocks
-    private GoogleGeocodingAdapter adapter;
+    private GoogleGeocoding adapter;
 
     @BeforeEach
     void setUp() {

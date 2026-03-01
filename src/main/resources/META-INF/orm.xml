@@ -38,6 +38,39 @@
     </attributes>
   </entity>
 
+  <entity class="com.souzip.api.domain.file.File">
+    <table name="file">
+      <unique-constraint name="uq_file_entity_order">
+        <column-name>entity_type</column-name>
+        <column-name>entity_id</column-name>
+        <column-name>display_order</column-name>
+      </unique-constraint>
+    </table>
+    <attributes>
+      <basic name="entityType">
+        <column name="entity_type" nullable="false"/>
+      </basic>
+      <basic name="entityId">
+        <column name="entity_id" nullable="false"/>
+      </basic>
+      <basic name="storageKey">
+        <column name="storage_key" nullable="false"/>
+      </basic>
+      <basic name="originalName">
+        <column name="original_name" nullable="false"/>
+      </basic>
+      <basic name="fileSize">
+        <column name="file_size" nullable="false"/>
+      </basic>
+      <basic name="contentType">
+        <column name="content_type" nullable="false"/>
+      </basic>
+      <basic name="displayOrder">
+        <column name="display_order" nullable="false"/>
+      </basic>
+    </attributes>
+  </entity>
+
   <embeddable class="com.souzip.api.domain.shared.Coordinate">
     <attributes>
       <basic name="latitude">
@@ -50,4 +83,3 @@
   </embeddable>
 
 </entity-mappings>
-

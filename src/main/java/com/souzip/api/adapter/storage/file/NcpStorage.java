@@ -1,13 +1,14 @@
-package com.souzip.api.domain.file.service;
+package com.souzip.api.adapter.storage.file;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.souzip.api.application.file.required.FileStorage;
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
-import com.souzip.api.global.storage.ObjectStorageProperties;
+import com.souzip.api.adapter.config.ObjectStorageProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,17 +19,19 @@ import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
-@Service
-public class FileStorageService {
+@Component
+public class NcpStorage implements FileStorage {
 
     private final AmazonS3 s3Client;
+
     private final ObjectStorageProperties properties;
 
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp");
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
     private static final int URL_EXPIRATION_MS = 3600000;
 
-    public String uploadFile(String userId, MultipartFile file) {
+    @Override
+    public String upload(String userId, MultipartFile file) {
         validateFile(file);
         String storageKey = generateStorageKey(userId, file.getOriginalFilename());
 
@@ -42,7 +45,8 @@ public class FileStorageService {
         }
     }
 
-    public void deleteFile(String storageKey) {
+    @Override
+    public void delete(String storageKey) {
         try {
             s3Client.deleteObject(properties.getBucket(), storageKey);
             log.info("NCP 삭제 완료: {}", storageKey);
@@ -52,7 +56,8 @@ public class FileStorageService {
         }
     }
 
-    public String generatePresignedUrl(String storageKey) {
+    @Override
+    public String generateUrl(String storageKey) {
         Date expiration = new Date(System.currentTimeMillis() + URL_EXPIRATION_MS);
         return s3Client.generatePresignedUrl(properties.getBucket(), storageKey, expiration).toString();
     }
@@ -60,10 +65,10 @@ public class FileStorageService {
     private void uploadToNcp(MultipartFile file, String storageKey) throws IOException {
         ObjectMetadata metadata = createMetadata(file);
         s3Client.putObject(
-            properties.getBucket(),
-            storageKey,
-            file.getInputStream(),
-            metadata
+                properties.getBucket(),
+                storageKey,
+                file.getInputStream(),
+                metadata
         );
     }
 
@@ -100,10 +105,7 @@ public class FileStorageService {
     }
 
     private boolean isInvalidFile(MultipartFile file) {
-        if (file == null) {
-            return true;
-        }
-        return file.isEmpty();
+        return file == null || file.isEmpty();
     }
 
     private boolean isFileSizeExceeded(MultipartFile file) {
@@ -115,16 +117,13 @@ public class FileStorageService {
         if (filename == null) {
             return true;
         }
-
-        boolean hasValidExtension = hasAllowedExtension(filename);
-
-        return !hasValidExtension;
+        return !hasAllowedExtension(filename);
     }
 
     private boolean hasAllowedExtension(String filename) {
         String lowerFilename = filename.toLowerCase();
         return ALLOWED_EXTENSIONS.stream()
-            .anyMatch(lowerFilename::endsWith);
+                .anyMatch(lowerFilename::endsWith);
     }
 
     private String generateStorageKey(String userId, String originalFilename) {

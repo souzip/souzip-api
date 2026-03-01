@@ -1,11 +1,13 @@
 package com.souzip.api.domain.user.service;
 
+import com.souzip.api.application.file.FileQueryService;
+import com.souzip.api.application.file.dto.FileResponse;
+import com.souzip.api.application.file.required.FileStorage;
 import com.souzip.api.domain.audit.entity.AuditAction;
 import com.souzip.api.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.api.domain.category.dto.CategoryDto;
 import com.souzip.api.domain.category.entity.Category;
-import com.souzip.api.domain.file.dto.FileResponse;
-import com.souzip.api.domain.file.service.FileService;
+import com.souzip.api.domain.file.File;
 import com.souzip.api.domain.souvenir.dto.MySouvenirListResponse;
 import com.souzip.api.domain.souvenir.dto.MySouvenirResponse;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
@@ -46,7 +48,8 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ProfileImageService profileImageService;
     private final SouvenirRepository souvenirRepository;
-    private final FileService fileService;
+    private final FileQueryService fileQueryService;
+    private final FileStorage fileStorage;
 
     public NicknameCheckResponse checkNickname(String nickname) {
         if (userRepository.existsByNickname(nickname)) {
@@ -68,7 +71,7 @@ public class UserService {
         UserAgreement agreement = saveUserAgreement(user, request);
 
         String profileImageUrl = profileImageService.resolveProfileImageUrl(
-            request.profileImageColor()
+                request.profileImageColor()
         );
         Set<Category> categories = convertToCategories(request.categories());
         user.completeOnboarding(request.nickname(), profileImageUrl, categories);
@@ -99,16 +102,15 @@ public class UserService {
         Page<Souvenir> souvenirPage = souvenirRepository.findByUserWithUser(user, pageable);
 
         List<Long> souvenirIds = souvenirPage.getContent().stream()
-            .map(Souvenir::getId)
-            .toList();
+                .map(Souvenir::getId)
+                .toList();
 
-        Map<Long, FileResponse> thumbnailMap = fileService
-            .getThumbnailsByEntityIds("Souvenir", souvenirIds);
+        Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
 
         Page<MySouvenirResponse> responsePage = souvenirPage.map(souvenir -> {
             String thumbnailUrl = Optional.ofNullable(thumbnailMap.get(souvenir.getId()))
-                .map(FileResponse::url)
-                .orElse(null);
+                    .map(FileResponse::url)
+                    .orElse(null);
             return MySouvenirResponse.of(souvenir, thumbnailUrl);
         });
 
@@ -117,7 +119,7 @@ public class UserService {
 
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private void validateOnboardingNotCompleted(User user) {
@@ -149,35 +151,48 @@ public class UserService {
 
     private Set<Category> convertToCategories(List<String> categoryNames) {
         return categoryNames.stream()
-            .map(this::convertToCategory)
-            .collect(Collectors.toSet());
+                .map(this::convertToCategory)
+                .collect(Collectors.toSet());
     }
 
     private Category convertToCategory(String categoryName) {
         return Category.from(categoryName)
-            .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CATEGORY));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CATEGORY));
     }
 
     private List<CategoryDto> convertToCategoryDto(Set<Category> categories) {
         return categories.stream()
-            .map(CategoryDto::from)
-            .toList();
+                .map(CategoryDto::from)
+                .toList();
     }
 
     private boolean isRequiredAgreementNotAccepted(OnboardingRequest request) {
         return !request.ageVerified()
-            || !request.serviceTerms()
-            || !request.privacyRequired()
-            || !request.locationService();
+                || !request.serviceTerms()
+                || !request.privacyRequired()
+                || !request.locationService();
     }
 
     private void deleteRefreshTokenIfExists(User user) {
         refreshTokenRepository.findByUser(user)
-            .ifPresent(refreshTokenRepository::delete);
+                .ifPresent(refreshTokenRepository::delete);
     }
 
     private void deleteUserAgreementIfExists(User user) {
         userAgreementRepository.findByUser(user)
-            .ifPresent(userAgreementRepository::delete);
+                .ifPresent(userAgreementRepository::delete);
+    }
+
+    private Map<Long, FileResponse> getThumbnails(List<Long> souvenirIds) {
+        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds("Souvenir", souvenirIds);
+
+        return fileMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> FileResponse.of(
+                                entry.getValue(),
+                                fileStorage.generateUrl(entry.getValue().getStorageKey())
+                        )
+                ));
     }
 }

@@ -2,7 +2,7 @@ package com.souzip.api.domain.souvenir.controller;
 
 import com.souzip.api.docs.RestDocsSupport;
 import com.souzip.api.domain.category.entity.Category;
-import com.souzip.api.domain.file.dto.FileResponse;
+import com.souzip.api.application.file.dto.FileResponse;
 import com.souzip.api.domain.souvenir.dto.*;
 import com.souzip.api.domain.souvenir.entity.Purpose;
 import com.souzip.api.domain.souvenir.service.SouvenirService;

@@ -1,7 +1,9 @@
 package com.souzip.api.domain.recommend.general.service;
 
-import com.souzip.api.domain.file.dto.FileResponse;
-import com.souzip.api.domain.file.service.FileService;
+import com.souzip.api.application.file.FileQueryService;
+import com.souzip.api.application.file.dto.FileResponse;
+import com.souzip.api.application.file.required.FileStorage;
+import com.souzip.api.domain.file.File;
 import com.souzip.api.domain.recommend.general.dto.CountryRecommendationDto;
 import com.souzip.api.domain.recommend.general.dto.GeneralRecommendationDto;
 import com.souzip.api.domain.recommend.general.dto.GeneralRecommendationStatsDto;
@@ -20,7 +22,8 @@ import java.util.stream.Collectors;
 public class GeneralRecommendationService {
 
     private final GeneralRecommendationRepositoryCustom generalRecommendationRepository;
-    private final FileService fileService;
+    private final FileQueryService fileQueryService;
+    private final FileStorage fileStorage;
 
     public List<GeneralRecommendationDto> getTop10ByCategory(String categoryName) {
         List<Souvenir> souvenirs = generalRecommendationRepository
@@ -30,8 +33,7 @@ public class GeneralRecommendationService {
                 .map(Souvenir::getId)
                 .toList();
 
-        Map<Long, FileResponse> thumbnailMap = fileService
-                .getThumbnailsByEntityIds("Souvenir", souvenirIds);
+        Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
 
         return souvenirs.stream()
                 .map(s -> new GeneralRecommendationDto(
@@ -71,8 +73,8 @@ public class GeneralRecommendationService {
                 .toList();
 
         Map<Long, FileResponse> thumbnailMap = allSouvenirIds.isEmpty()
-                ? Map.of()
-                : fileService.getThumbnailsByEntityIds("Souvenir", allSouvenirIds);
+                                               ? Map.of()
+                                               : getThumbnails(allSouvenirIds);
 
         Map<String, GeneralRecommendationStatsDto> statsMap = topCountries.stream()
                 .collect(Collectors.toMap(
@@ -115,8 +117,7 @@ public class GeneralRecommendationService {
                 .map(Souvenir::getId)
                 .toList();
 
-        Map<Long, FileResponse> thumbnailMap = fileService
-                .getThumbnailsByEntityIds("Souvenir", souvenirIds);
+        Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
 
         return souvenirs.stream()
                 .map(s -> new GeneralRecommendationDto(
@@ -133,5 +134,18 @@ public class GeneralRecommendationService {
 
     public List<GeneralRecommendationStatsDto> getTop3CountriesBySouvenirCount() {
         return generalRecommendationRepository.findTop3CountriesBySouvenirCount();
+    }
+
+    private Map<Long, FileResponse> getThumbnails(List<Long> souvenirIds) {
+        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds("Souvenir", souvenirIds);
+
+        return fileMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> FileResponse.of(
+                                entry.getValue(),
+                                fileStorage.generateUrl(entry.getValue().getStorageKey())
+                        )
+                ));
     }
 }

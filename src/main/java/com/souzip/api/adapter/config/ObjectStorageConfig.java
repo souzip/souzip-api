@@ -1,11 +1,10 @@
-package com.souzip.api.global.config;
+package com.souzip.api.adapter.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.souzip.api.global.storage.ObjectStorageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,7 @@ public class ObjectStorageConfig {
                     properties.getRegion()
                 )
             )
-            .withCredentials(new AWSStaticCredentialsProvider(credentials))
-            .build();
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .build();
     }
 }

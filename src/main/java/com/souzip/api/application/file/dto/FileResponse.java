@@ -1,6 +1,6 @@
-package com.souzip.api.domain.file.dto;
+package com.souzip.api.application.file.dto;
 
-import com.souzip.api.domain.file.entity.File;
+import com.souzip.api.domain.file.File;
 
 public record FileResponse(
     Long id,

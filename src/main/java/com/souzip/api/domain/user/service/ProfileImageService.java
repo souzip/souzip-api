@@ -2,7 +2,7 @@ package com.souzip.api.domain.user.service;
 
 import com.souzip.api.global.exception.BusinessException;
 import com.souzip.api.global.exception.ErrorCode;
-import com.souzip.api.global.storage.ObjectStorageProperties;
+import com.souzip.api.adapter.config.ObjectStorageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

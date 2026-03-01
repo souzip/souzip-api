@@ -1,4 +1,4 @@
-package com.souzip.api.global.storage;
+package com.souzip.api.adapter.config;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class GooglePlacesAdapter implements PlaceSearchProvider {
+public class GooglePlaces implements PlaceSearchProvider {
 
     private static final int MAX_RESULTS = 10;
 

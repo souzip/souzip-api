@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class GoogleGeocodingAdapter implements AddressProvider {
+public class GoogleGeocoding implements AddressProvider {
 
     private static final String TYPE_COUNTRY = "country";
     private static final String TYPE_LOCALITY = "locality";

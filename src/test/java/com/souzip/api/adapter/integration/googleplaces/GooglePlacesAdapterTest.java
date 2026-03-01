@@ -28,7 +28,7 @@ class GooglePlacesAdapterTest {
     private RestTemplate restTemplate;
 
     @InjectMocks
-    private GooglePlacesAdapter adapter;
+    private GooglePlaces adapter;
 
     @BeforeEach
     void setUp() {

@@ -2,16 +2,16 @@ package com.souzip.api.domain.recommend.ai.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.souzip.api.application.file.FileQueryService;
+import com.souzip.api.application.file.dto.FileResponse;
+import com.souzip.api.application.file.required.FileStorage;
 import com.souzip.api.domain.category.entity.Category;
-import com.souzip.api.domain.file.dto.FileResponse;
-import com.souzip.api.domain.file.service.FileService;
+import com.souzip.api.domain.file.File;
 import com.souzip.api.domain.recommend.ai.dto.AiRecommendationResponse;
 import com.souzip.api.domain.recommend.ai.repository.AiRecommendationRepositoryCustom;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.global.clova.ClovaStudioClient;
 import com.souzip.api.global.clova.PromptLoader;
-import com.souzip.api.global.exception.BusinessException;
-import com.souzip.api.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -30,7 +30,8 @@ public class AiRecommendationService {
     private final ClovaStudioClient clovaStudioClient;
     private final PromptLoader promptLoader;
     private final ObjectMapper objectMapper;
-    private final FileService fileService;
+    private final FileQueryService fileQueryService;
+    private final FileStorage fileStorage;
 
     public AiRecommendationResponse getCategoryRecommendationsForUser(Long userId) {
         log.info("getCategoryRecommendationsForUser 시작, userId={}", userId);
@@ -143,9 +144,9 @@ public class AiRecommendationService {
     }
 
     private String buildPromptForRecentSouvenir(List<Souvenir> candidateSouvenirs,
-                               List<String> recentNames,
-                               List<String> userCategories,
-                               String countryCode) {
+                                                List<String> recentNames,
+                                                List<String> userCategories,
+                                                String countryCode) {
         StringBuilder sb = new StringBuilder();
         candidateSouvenirs.forEach(s -> sb.append(" - ").append(s.getName()).append("\n"));
 
@@ -181,36 +182,49 @@ public class AiRecommendationService {
     }
 
     private List<AiRecommendationResponse.RecommendedSouvenir> mapToRecommendedSouvenirs(
-        Map<String, List<String>> recommendedNamesByCategory
+            Map<String, List<String>> recommendedNamesByCategory
     ) {
         List<Souvenir> souvenirs = recommendedNamesByCategory.values().stream()
-            .flatMap(List::stream)
-            .map(aiRecommendationRepository::findByName)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .toList();
+                .flatMap(List::stream)
+                .map(aiRecommendationRepository::findByName)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
 
         List<Long> souvenirIds = souvenirs.stream()
-            .map(Souvenir::getId)
-            .toList();
+                .map(Souvenir::getId)
+                .toList();
 
-        Map<Long, FileResponse> thumbnailMap = fileService
-            .getThumbnailsByEntityIds("Souvenir", souvenirIds);
+        Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
 
         return souvenirs.stream()
-            .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
-                s.getId(),
-                s.getName(),
-                s.getCategory().name(),
-                s.getCountryCode(),
-                Optional.ofNullable(thumbnailMap.get(s.getId()))
-                    .map(FileResponse::url)
-                    .orElse(null)
-            ))
-            .collect(Collectors.toList());
+                .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
+                        s.getId(),
+                        s.getName(),
+                        s.getCategory().name(),
+                        s.getCountryCode(),
+                        Optional.ofNullable(thumbnailMap.get(s.getId()))
+                                .map(FileResponse::url)
+                                .orElse(null)
+                ))
+                .collect(Collectors.toList());
     }
 
     private String getThumbnailUrl(Long souvenirId) {
-        return fileService.getFirstFile("Souvenir", souvenirId).url();
+        File file = fileQueryService.findFirst("Souvenir", souvenirId);
+        return fileStorage.generateUrl(file.getStorageKey());
+    }
+
+    private Map<Long, FileResponse> getThumbnails(List<Long> souvenirIds) {
+        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds("Souvenir", souvenirIds);
+
+        return fileMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> FileResponse.of(
+                                entry.getValue(),
+                                fileStorage.generateUrl(entry.getValue().getStorageKey())
+                        )
+                ));
     }
 }

@@ -1,11 +1,14 @@
 package com.souzip.api.domain.souvenir.service;
 
+import com.souzip.api.adapter.storage.file.NcpStorage;
+import com.souzip.api.application.file.FileModifyService;
+import com.souzip.api.application.file.FileQueryService;
+import com.souzip.api.application.file.dto.FileResponse;
+import com.souzip.api.application.file.required.FileStorage;
 import com.souzip.api.domain.audit.entity.AuditAction;
 import com.souzip.api.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.api.domain.exchangerate.service.ExchangeRateService;
-import com.souzip.api.domain.file.dto.FileResponse;
-import com.souzip.api.domain.file.service.FileService;
-import com.souzip.api.domain.file.service.FileStorageService;
+import com.souzip.api.domain.file.File;
 import com.souzip.api.domain.souvenir.dto.*;
 import com.souzip.api.domain.souvenir.entity.Souvenir;
 import com.souzip.api.domain.souvenir.repository.SouvenirRepository;
@@ -37,35 +40,37 @@ public class SouvenirService {
 
     private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
-    private final FileService fileService;
+    private final FileModifyService fileModifyService;
+    private final FileQueryService fileQueryService;
+    private final FileStorage fileStorage;
     private final ExchangeRateService exchangeRateService;
-    private final FileStorageService fileStorageService;
+    private final NcpStorage ncpStorage;
     private final JwtTokenProvider jwtTokenProvider;
 
     public SouvenirNearbyListResponse getNearbySouvenirs(
-        double latitude,
-        double longitude,
-        double radiusMeter
+            double latitude,
+            double longitude,
+            double radiusMeter
     ) {
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(
-            latitude,
-            longitude,
-            radiusMeter
+                latitude,
+                longitude,
+                radiusMeter
         );
 
         List<SouvenirNearbyResponse> list = results.stream()
-            .map(row -> SouvenirNearbyResponse.fromObjectArray(
-                row,
-                fileStorageService::generatePresignedUrl
-            ))
-            .toList();
+                .map(row -> SouvenirNearbyResponse.fromObjectArray(
+                        row,
+                        ncpStorage::generateUrl
+                ))
+                .toList();
 
         return SouvenirNearbyListResponse.from(list);
     }
 
     public SouvenirDetailResponse getSouvenir(
-        Long souvenirId,
-        @Nullable String authorizationHeader
+            Long souvenirId,
+            @Nullable String authorizationHeader
     ) {
         String userId = extractUserId(authorizationHeader);
 
@@ -84,31 +89,31 @@ public class SouvenirService {
 
         Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
 
-        fileService.deleteFilesByEntity(ENTITY_TYPE_SOUVENIR, id);
+        fileModifyService.deleteByEntity(ENTITY_TYPE_SOUVENIR, id);
         souvenir.delete();
     }
 
     @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
     public SouvenirResponse createSouvenir(
-        SouvenirCreateRequest request,
-        Long userId,
-        List<MultipartFile> files
+            SouvenirCreateRequest request,
+            Long userId,
+            List<MultipartFile> files
     ) {
         requireUserId(userId);
         User user = findUserById(userId);
 
         ExchangeCalculatedPrice price = exchangeRateService.calculatePrice(
-            request.countryCode(),
-            request.localPrice(),
-            request.krwPrice()
+                request.countryCode(),
+                request.localPrice(),
+                request.krwPrice()
         );
 
         Souvenir souvenir = Souvenir.of(
-            request,
-            user,
-            price.localPrice(),
-            price.krwPrice()
+                request,
+                user,
+                price.localPrice(),
+                price.krwPrice()
         );
 
         souvenirRepository.save(souvenir);
@@ -120,18 +125,18 @@ public class SouvenirService {
     @Audit(action = AuditAction.SOUVENIR_UPDATED)
     @Transactional
     public SouvenirResponse updateSouvenir(
-        Long id,
-        SouvenirUpdateRequest request,
-        Long userId
+            Long id,
+            SouvenirUpdateRequest request,
+            Long userId
     ) {
         requireUserId(userId);
 
         Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
 
         ExchangeCalculatedPrice price = exchangeRateService.calculatePrice(
-            request.countryCode(),
-            request.localPrice(),
-            request.krwPrice()
+                request.countryCode(),
+                request.localPrice(),
+                request.krwPrice()
         );
 
         souvenir.update(request, price.localPrice(), price.krwPrice());
@@ -142,26 +147,26 @@ public class SouvenirService {
     @Audit(action = AuditAction.SOUVENIR_CREATED)
     @Transactional
     public SouvenirResponse createSouvenirV2(
-        SouvenirRequest request,
-        Long userId,
-        List<MultipartFile> files
+            SouvenirRequest request,
+            Long userId,
+            List<MultipartFile> files
     ) {
         requireUserId(userId);
         User user = findUserById(userId);
 
         PriceData priceData = exchangeRateService.calculatePriceData(
-            request.price(),
-            request.currency(),
-            request.countryCode()
+                request.price(),
+                request.currency(),
+                request.countryCode()
         );
 
         Souvenir souvenir = Souvenir.ofV2(
-            request,
-            user,
-            priceData.originalPrice(),
-            priceData.exchangeAmount(),
-            priceData.currencySymbol(),
-            priceData.convertedPrice()
+                request,
+                user,
+                priceData.originalPrice(),
+                priceData.exchangeAmount(),
+                priceData.currencySymbol(),
+                priceData.convertedPrice()
         );
         souvenirRepository.save(souvenir);
 
@@ -174,26 +179,26 @@ public class SouvenirService {
     @Audit(action = AuditAction.SOUVENIR_UPDATED)
     @Transactional
     public SouvenirResponse updateSouvenirV2(
-        Long id,
-        SouvenirRequest request,
-        Long userId
+            Long id,
+            SouvenirRequest request,
+            Long userId
     ) {
         requireUserId(userId);
 
         Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
 
         PriceData priceData = exchangeRateService.calculatePriceData(
-            request.price(),
-            request.currency(),
-            request.countryCode()
+                request.price(),
+                request.currency(),
+                request.countryCode()
         );
 
         souvenir.updateV2(
-            request,
-            priceData.originalPrice(),
-            priceData.exchangeAmount(),
-            priceData.currencySymbol(),
-            priceData.convertedPrice()
+                request,
+                priceData.originalPrice(),
+                priceData.exchangeAmount(),
+                priceData.currencySymbol(),
+                priceData.convertedPrice()
         );
 
         PriceResponse priceResponse = createPriceResponse(souvenir);
@@ -202,8 +207,8 @@ public class SouvenirService {
 
     private PriceResponse createPriceResponse(Souvenir souvenir) {
         return exchangeRateService.createPriceResponse(
-            souvenir.getOriginalPrice(),
-            souvenir.getConvertedPrice()
+                souvenir.getOriginalPrice(),
+                souvenir.getConvertedPrice()
         );
     }
 
@@ -264,7 +269,7 @@ public class SouvenirService {
 
     private Souvenir findSouvenirById(Long souvenirId) {
         return souvenirRepository.findByIdWithUser(souvenirId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SOUVENIR_NOT_FOUND));
     }
 
     private Souvenir findSouvenirWithOwnershipCheck(Long id, Long userId) {
@@ -284,13 +289,17 @@ public class SouvenirService {
     }
 
     private List<FileResponse> getFiles(Long souvenirId) {
-        return fileService.getFilesByEntity(ENTITY_TYPE_SOUVENIR, souvenirId);
+        List<File> files = fileQueryService.findByEntity(ENTITY_TYPE_SOUVENIR, souvenirId);
+
+        return files.stream()
+                .map(file -> FileResponse.of(file, fileStorage.generateUrl(file.getStorageKey())))
+                .toList();
     }
 
     private List<FileResponse> uploadFiles(
-        Long souvenirId,
-        Long userId,
-        List<MultipartFile> files
+            Long souvenirId,
+            Long userId,
+            List<MultipartFile> files
     ) {
         if (hasNoFiles(files)) {
             return Collections.emptyList();
@@ -299,8 +308,8 @@ public class SouvenirService {
         String userUuid = getUserUuid(userId);
 
         return files.stream()
-            .map(file -> uploadSingleFile(userUuid, souvenirId, file))
-            .toList();
+                .map(file -> uploadSingleFile(userUuid, souvenirId, file))
+                .toList();
     }
 
     private boolean hasNoFiles(List<MultipartFile> files) {
@@ -313,21 +322,24 @@ public class SouvenirService {
     }
 
     private FileResponse uploadSingleFile(
-        String userUuid,
-        Long souvenirId,
-        MultipartFile file
+            String userUuid,
+            Long souvenirId,
+            MultipartFile file
     ) {
-        return fileService.uploadFile(
-            userUuid,
-            ENTITY_TYPE_SOUVENIR,
-            souvenirId,
-            file,
-            null
+        File uploadedFile = fileModifyService.register(
+                userUuid,
+                ENTITY_TYPE_SOUVENIR,
+                souvenirId,
+                file,
+                null
         );
+
+        String url = fileStorage.generateUrl(uploadedFile.getStorageKey());
+        return FileResponse.of(uploadedFile, url);
     }
 
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }

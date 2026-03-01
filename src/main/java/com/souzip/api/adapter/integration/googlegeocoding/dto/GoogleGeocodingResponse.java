@@ -1,4 +1,4 @@
-package com.souzip.api.domain.geocoding.dto;
+package com.souzip.api.adapter.integration.googlegeocoding.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record GeocodingExternalDto(
+public record GoogleGeocodingResponse(
         List<Result> results,
         String status
 ) {

@@ -50,8 +50,12 @@ external:
   api:
     countries-base-url: https://restcountries.com/v3.1
     exchange-rate-base-url: https://v6.exchangerate-api.com/v6/6bb64d753d5d604c571e963d/latest
+
+google:
+  maps:
+    api-key: ${GOOGLE_MAPS_API_KEY}
+    language: ko
     geocoding-base-url: https://maps.googleapis.com/maps/api/geocode/json
-    geocoding-key: ${GEOCODING_API_KEY}
 
 oauth:
   kakao:

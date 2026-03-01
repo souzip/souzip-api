@@ -2,7 +2,6 @@ package com.souzip.application.file;
 
 import com.souzip.application.file.required.FileRepository;
 import com.souzip.domain.file.File;
-import com.souzip.domain.file.FileNotFoundException;
 import com.souzip.domain.file.FileRegisterRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -4,7 +4,6 @@ import com.souzip.application.file.provided.FileModifier;
 import com.souzip.application.file.required.FileRepository;
 import com.souzip.application.file.required.FileStorage;
 import com.souzip.domain.file.File;
-import com.souzip.domain.file.FileNotFoundException;
 import com.souzip.domain.file.FileRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

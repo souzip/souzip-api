@@ -1,4 +1,4 @@
-package com.souzip.domain.file;
+package com.souzip.application.file;
 
 public class FileNotFoundException extends RuntimeException {
 

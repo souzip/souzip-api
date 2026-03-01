@@ -3,7 +3,6 @@ package com.souzip.application.file;
 import com.souzip.application.file.provided.FileFinder;
 import com.souzip.application.file.required.FileRepository;
 import com.souzip.domain.file.File;
-import com.souzip.domain.file.FileNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

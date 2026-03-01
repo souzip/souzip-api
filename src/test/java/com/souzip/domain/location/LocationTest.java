@@ -22,8 +22,8 @@ class LocationTest {
         assertThat(location.getName()).isEqualTo("강남역");
         assertThat(location.getAddress()).isEqualTo("서울특별시 강남구 역삼동 825");
         assertThat(location.getCoordinate()).isNotNull();
-        assertThat(location.getCoordinate().latitude()).isEqualTo(BigDecimal.valueOf(37.4979));
-        assertThat(location.getCoordinate().longitude()).isEqualTo(BigDecimal.valueOf(127.0276));
+        assertThat(location.getCoordinate().getLatitude()).isEqualTo(BigDecimal.valueOf(37.4979));
+        assertThat(location.getCoordinate().getLongitude()).isEqualTo(BigDecimal.valueOf(127.0276));
     }
 
     @Test

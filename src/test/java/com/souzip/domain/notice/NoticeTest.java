@@ -38,7 +38,7 @@ class NoticeTest {
     @DisplayName("필수 값이 null이면 예외가 발생한다")
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideNullFieldCases")
-    void register_fail_required_field_null(
+    void requiredFieldNull(
             String description,
             NoticeRegisterRequest request,
             String expectedMessage

@@ -54,8 +54,8 @@ class GooglePlacesTest {
         assertThat(places).hasSize(1);
         assertThat(places.getFirst().name()).isEqualTo("에펠탑 기념품샵");
         assertThat(places.getFirst().address()).isEqualTo("프랑스 파리 샹드마르스 에펠탑");
-        assertThat(places.getFirst().coordinate().latitude()).isEqualTo(BigDecimal.valueOf(48.8584));
-        assertThat(places.getFirst().coordinate().longitude()).isEqualTo(BigDecimal.valueOf(2.2945));
+        assertThat(places.getFirst().coordinate().getLatitude()).isEqualTo(BigDecimal.valueOf(48.8584));
+        assertThat(places.getFirst().coordinate().getLongitude()).isEqualTo(BigDecimal.valueOf(2.2945));
     }
 
     @DisplayName("상위 10개만 반환한다")

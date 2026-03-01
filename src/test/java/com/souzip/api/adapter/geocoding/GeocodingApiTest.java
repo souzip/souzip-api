@@ -55,7 +55,7 @@ class GeocodingApiTest extends RestDocsSupport {
                         .param("longitude", String.valueOf(longitude)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.address").value("110 Sejong-daero, Jung District, Seoul, South Korea"))
+                .andExpect(jsonPath("$.data.formattedAddress").value("110 Sejong-daero, Jung District, Seoul, South Korea"))
                 .andExpect(jsonPath("$.data.city").value("Seoul"))
                 .andExpect(jsonPath("$.data.countryCode").value("KR"))
                 .andDo(document("geocoding/get-address",
@@ -93,7 +93,7 @@ class GeocodingApiTest extends RestDocsSupport {
                         .param("longitude", String.valueOf(longitude)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.address").isEmpty())
+                .andExpect(jsonPath("$.data.formattedAddress").isEmpty())
                 .andExpect(jsonPath("$.data.city").isEmpty())
                 .andExpect(jsonPath("$.data.countryCode").isEmpty());
     }

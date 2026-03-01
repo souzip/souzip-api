@@ -23,8 +23,10 @@ public record GoogleGeocodingResponse(
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record AddressComponent(
             List<String> types,
+
             @JsonProperty("long_name")
             String longName,
+
             @JsonProperty("short_name")
             String shortName
     ) {}

@@ -20,6 +20,6 @@ public enum EntityType {
         return Arrays.stream(values())
                 .filter(type -> type.value.equals(value))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown EntityType: " + value));
+                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 엔티티 타입입니다."));
     }
 }

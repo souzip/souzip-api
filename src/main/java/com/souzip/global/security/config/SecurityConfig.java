@@ -50,19 +50,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/login/**",
-                                "/api/admin/auth/login",
-                                "/api/admin/auth/refresh",
                                 "/api/auth/refresh",
-                                "/docs/**",
-                                "/api/test/**",
+                                "/api/notices/**",
                                 "/api/location/search",
                                 "/api/countries/**",
                                 "/api/categories",
                                 "/api/search/**",
                                 "/api/souvenirs/nearby",
                                 "/api/discovery/**",
+                                "/api/admin/auth/login",
+                                "/api/admin/auth/refresh",
+                                "/api/migration/apple/prepare",
+                                "/api/test/**",
                                 "/actuator/**",
-                                "/api/migration/apple/prepare"
+                                "/docs/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/souvenirs/*").permitAll()
                         .anyRequest().authenticated()

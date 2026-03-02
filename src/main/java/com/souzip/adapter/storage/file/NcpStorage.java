@@ -25,7 +25,7 @@ public class NcpStorage implements FileStorage {
     private final AmazonS3 s3Client;
     private final ObjectStorageProperties properties;
 
-    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp");
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg");
     private static final long MAX_FILE_SIZE = 50 * 1024 * 1024;
     private static final int URL_EXPIRATION_MS = 3600000;
 

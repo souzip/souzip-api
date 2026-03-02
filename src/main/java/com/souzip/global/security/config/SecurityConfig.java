@@ -58,6 +58,7 @@ public class SecurityConfig {
                                 "/api/search/**",
                                 "/api/souvenirs/nearby",
                                 "/api/discovery/**",
+                                "/actuator/health",
                                 "/api/admin/auth/login",
                                 "/api/admin/auth/refresh",
                                 "/docs/**"

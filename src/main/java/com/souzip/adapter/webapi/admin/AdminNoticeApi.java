@@ -9,6 +9,7 @@ import com.souzip.domain.admin.infrastructure.security.annotation.CurrentAdminId
 import com.souzip.domain.admin.infrastructure.security.annotation.ViewerAccess;
 import com.souzip.domain.notice.Notice;
 import com.souzip.global.common.dto.SuccessResponse;
+import jakarta.validation.Valid;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +30,7 @@ public class AdminNoticeApi {
     @PostMapping
     public SuccessResponse<NoticeResponse> register(
             @CurrentAdminId UUID adminId,
-            @RequestPart("notice") NoticeRequest request,
+            @Valid @RequestPart("notice") NoticeRequest request,
             @RequestPart(value = "files", required = false) Optional<List<MultipartFile>> files
     ) {
         Notice notice = noticeRegister.register(
@@ -46,7 +47,7 @@ public class AdminNoticeApi {
     @PutMapping("/{noticeId}")
     public SuccessResponse<NoticeResponse> update(
             @PathVariable Long noticeId,
-            @RequestPart("notice") NoticeRequest request,
+            @Valid @RequestPart("notice") NoticeRequest request,
             @RequestPart(value = "deleteFileIds", required = false) Optional<List<Long>> deleteFileIds,
             @RequestPart(value = "newFiles", required = false) Optional<List<MultipartFile>> newFiles
     ) {

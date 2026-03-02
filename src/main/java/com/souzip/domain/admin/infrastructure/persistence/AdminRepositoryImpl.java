@@ -64,4 +64,15 @@ public class AdminRepositoryImpl implements AdminRepository {
     public void delete(Admin admin) {
         jpaRepository.delete(mapper.toEntity(admin));
     }
+
+    @Override
+    public List<Admin> findAllByIds(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
+        return jpaRepository.findAllByIdIn(ids).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
 }

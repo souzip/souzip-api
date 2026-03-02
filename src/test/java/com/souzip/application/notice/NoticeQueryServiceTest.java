@@ -1,15 +1,13 @@
 package com.souzip.application.notice;
 
-import com.souzip.application.file.dto.FileResponse;
-import com.souzip.application.file.provided.FileFinder;
+import com.souzip.application.notice.assembler.NoticeResponseAssembler;
+import com.souzip.application.notice.dto.NoticeAuthorResponse;
 import com.souzip.application.notice.dto.NoticeResponse;
 import com.souzip.application.notice.required.NoticeRepository;
-import com.souzip.domain.file.EntityType;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeStatus;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +20,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +31,7 @@ class NoticeQueryServiceTest {
     private NoticeRepository noticeRepository;
 
     @Mock
-    private FileFinder fileFinder;
+    private NoticeResponseAssembler assembler;
 
     @InjectMocks
     private NoticeQueryService noticeQueryService;
@@ -68,10 +65,9 @@ class NoticeQueryServiceTest {
     void findAllActive() {
         Notice notice1 = createNotice(1L, "제목1", "내용1", NoticeStatus.ACTIVE);
         Notice notice2 = createNotice(2L, "제목2", "내용2", NoticeStatus.ACTIVE);
-        List<Notice> notices = List.of(notice1, notice2);
 
         given(noticeRepository.findByStatusOrderByCreatedAtDesc(NoticeStatus.ACTIVE))
-                .willReturn(notices);
+                .willReturn(List.of(notice1, notice2));
 
         List<Notice> result = noticeQueryService.findAllActive();
 
@@ -85,9 +81,8 @@ class NoticeQueryServiceTest {
     void findAll() {
         Notice notice1 = createNotice(1L, "제목1", "내용1", NoticeStatus.ACTIVE);
         Notice notice2 = createNotice(2L, "제목2", "내용2", NoticeStatus.INACTIVE);
-        List<Notice> notices = List.of(notice1, notice2);
 
-        given(noticeRepository.findAllByOrderByCreatedAtDesc()).willReturn(notices);
+        given(noticeRepository.findAllByOrderByCreatedAtDesc()).willReturn(List.of(notice1, notice2));
 
         List<Notice> result = noticeQueryService.findAll();
 
@@ -96,61 +91,43 @@ class NoticeQueryServiceTest {
         assertThat(result.get(1).getId()).isEqualTo(2L);
     }
 
-    @DisplayName("파일과 함께 공지사항을 조회한다")
+    @DisplayName("파일/작성자 포함 공지사항을 조회한다 - assembler에 위임한다")
     @Test
-    void findByIdWithFiles() {
+    void findByIdWithFiles_delegatesToAssembler() {
         Notice notice = createNotice(1L, "제목", "내용", NoticeStatus.ACTIVE);
-        List<FileResponse> files = List.of(
-                new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1),
-                new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 2)
+
+        NoticeResponse assembled = NoticeResponse.from(
+                notice,
+                NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin"),
+                List.of()
         );
 
         given(noticeRepository.findById(1L)).willReturn(Optional.of(notice));
-        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
-                .willReturn(files);
+        given(assembler.assemble(notice)).willReturn(assembled);
 
         NoticeResponse result = noticeQueryService.findByIdWithFiles(1L);
 
-        assertThat(result.id()).isEqualTo(1L);
-        assertThat(result.title()).isEqualTo("제목");
-        assertThat(result.files()).hasSize(2);
-        assertThat(result.files().get(0).id()).isEqualTo(1L);
-        assertThat(result.files().get(1).id()).isEqualTo(2L);
+        assertThat(result).isSameAs(assembled);
     }
 
-    @DisplayName("파일이 없는 공지사항을 조회한다")
+    @DisplayName("활성 상태의 공지사항만 파일/작성자와 함께 조회한다 - assembler에 위임한다")
     @Test
-    void findByIdWithFiles_noFiles() {
+    void findActiveByIdWithFiles_active_delegatesToAssembler() {
         Notice notice = createNotice(1L, "제목", "내용", NoticeStatus.ACTIVE);
 
-        given(noticeRepository.findById(1L)).willReturn(Optional.of(notice));
-        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
-                .willReturn(List.of());
-
-        NoticeResponse result = noticeQueryService.findByIdWithFiles(1L);
-
-        assertThat(result.id()).isEqualTo(1L);
-        assertThat(result.files()).isEmpty();
-    }
-
-    @DisplayName("활성 상태의 공지사항만 파일과 함께 조회한다")
-    @Test
-    void findActiveByIdWithFiles() {
-        Notice notice = createNotice(1L, "제목", "내용", NoticeStatus.ACTIVE);
-        List<FileResponse> files = List.of(
-                new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1)
+        NoticeResponse assembled = NoticeResponse.from(
+                notice,
+                NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin"),
+                List.of()
         );
 
         given(noticeRepository.findById(1L)).willReturn(Optional.of(notice));
-        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
-                .willReturn(files);
+        given(assembler.assemble(notice)).willReturn(assembled);
 
         NoticeResponse result = noticeQueryService.findActiveByIdWithFiles(1L);
 
-        assertThat(result.id()).isEqualTo(1L);
-        assertThat(result.title()).isEqualTo("제목");
+        assertThat(result).isSameAs(assembled);
         assertThat(result.status()).isEqualTo(NoticeStatus.ACTIVE);
-        assertThat(result.files()).hasSize(1);
     }
 
     @DisplayName("비활성 상태의 공지사항 조회 시 예외가 발생한다")
@@ -165,64 +142,44 @@ class NoticeQueryServiceTest {
                 .hasMessageContaining("1");
     }
 
-    @DisplayName("파일과 함께 활성화된 공지사항 목록을 조회한다")
+    @DisplayName("파일/작성자 포함 활성 공지 목록을 조회한다 - assembler에 위임한다")
     @Test
-    void findAllActiveWithFiles() {
+    void findAllActiveWithFiles_delegatesToAssembler() {
         Notice notice1 = createNotice(1L, "제목1", "내용1", NoticeStatus.ACTIVE);
         Notice notice2 = createNotice(2L, "제목2", "내용2", NoticeStatus.ACTIVE);
         List<Notice> notices = List.of(notice1, notice2);
 
-        List<FileResponse> files1 = List.of(
-                new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1)
-        );
-        Map<Long, List<FileResponse>> filesMap = Map.of(
-                1L, files1,
-                2L, List.of()
+        List<NoticeResponse> assembled = List.of(
+                NoticeResponse.from(notice1, NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin"), List.of()),
+                NoticeResponse.from(notice2, NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin"), List.of())
         );
 
-        given(noticeRepository.findByStatusOrderByCreatedAtDesc(NoticeStatus.ACTIVE))
-                .willReturn(notices);
-        given(fileFinder.findFilesByEntityIds(eq(EntityType.NOTICE), eq(List.of(1L, 2L))))
-                .willReturn(filesMap);
+        given(noticeRepository.findByStatusOrderByCreatedAtDesc(NoticeStatus.ACTIVE)).willReturn(notices);
+        given(assembler.assembleAll(notices)).willReturn(assembled);
 
         List<NoticeResponse> result = noticeQueryService.findAllActiveWithFiles();
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).id()).isEqualTo(1L);
-        assertThat(result.get(0).files()).hasSize(1);
-        assertThat(result.get(1).id()).isEqualTo(2L);
-        assertThat(result.get(1).files()).isEmpty();
+        assertThat(result).isSameAs(assembled);
     }
 
-    @DisplayName("파일과 함께 전체 공지사항 목록을 조회한다")
+    @DisplayName("파일/작성자 포함 전체 공지 목록을 조회한다 - assembler에 위임한다")
     @Test
-    void findAllWithFiles() {
+    void findAllWithFiles_delegatesToAssembler() {
         Notice notice1 = createNotice(1L, "제목1", "내용1", NoticeStatus.ACTIVE);
         Notice notice2 = createNotice(2L, "제목2", "내용2", NoticeStatus.INACTIVE);
         List<Notice> notices = List.of(notice1, notice2);
 
-        List<FileResponse> files1 = List.of(
-                new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1)
-        );
-        List<FileResponse> files2 = List.of(
-                new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 1)
-        );
-        Map<Long, List<FileResponse>> filesMap = Map.of(
-                1L, files1,
-                2L, files2
+        List<NoticeResponse> assembled = List.of(
+                NoticeResponse.from(notice1, NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin"), List.of()),
+                NoticeResponse.from(notice2, NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin"), List.of())
         );
 
         given(noticeRepository.findAllByOrderByCreatedAtDesc()).willReturn(notices);
-        given(fileFinder.findFilesByEntityIds(eq(EntityType.NOTICE), eq(List.of(1L, 2L))))
-                .willReturn(filesMap);
+        given(assembler.assembleAll(notices)).willReturn(assembled);
 
         List<NoticeResponse> result = noticeQueryService.findAllWithFiles();
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).id()).isEqualTo(1L);
-        assertThat(result.get(0).files()).hasSize(1);
-        assertThat(result.get(1).id()).isEqualTo(2L);
-        assertThat(result.get(1).files()).hasSize(1);
+        assertThat(result).isSameAs(assembled);
     }
 
     @DisplayName("공지사항 목록이 비어있으면 빈 리스트를 반환한다")

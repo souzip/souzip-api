@@ -49,8 +49,6 @@ class AdminNoticeApiTest extends RestDocsSupport {
     private final NoticeFinder noticeFinder = mock(NoticeFinder.class);
     private final NoticeRegister noticeRegister = mock(NoticeRegister.class);
 
-    private static final UUID TEST_ADMIN_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-
     @Override
     protected Object initController() {
         return new AdminNoticeApi(noticeRegister, noticeFinder);

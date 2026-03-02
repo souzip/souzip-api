@@ -60,9 +60,6 @@ public class SecurityConfig {
                                 "/api/discovery/**",
                                 "/api/admin/auth/login",
                                 "/api/admin/auth/refresh",
-                                "/api/migration/apple/prepare",
-                                "/api/test/**",
-                                "/actuator/**",
                                 "/docs/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/souvenirs/*").permitAll()

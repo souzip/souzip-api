@@ -9,6 +9,7 @@ import com.souzip.domain.file.EntityType;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeStatus;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,29 +41,48 @@ public class NoticeQueryService implements NoticeFinder {
     @Override
     public NoticeResponse findByIdWithFiles(Long noticeId) {
         Notice notice = findById(noticeId);
-
         List<FileResponse> files = fileFinder.findFileResponsesByEntity(EntityType.NOTICE, noticeId);
-
         return NoticeResponse.from(notice, files);
     }
 
     @Override
     public List<NoticeResponse> findAllActiveWithFiles() {
-        return findAllActive().stream()
-                .map(this::toResponseWithFiles)
-                .toList();
+        return findNoticesWithFiles(findAllActive());
     }
 
     @Override
     public List<NoticeResponse> findAllWithFiles() {
-        return findAll().stream()
-                .map(this::toResponseWithFiles)
+        return findNoticesWithFiles(findAll());
+    }
+
+    private List<NoticeResponse> findNoticesWithFiles(List<Notice> notices) {
+        if (notices.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, List<FileResponse>> filesMap = fetchFilesForNotices(notices);
+
+        return combineNoticesWithFiles(notices, filesMap);
+    }
+
+    private Map<Long, List<FileResponse>> fetchFilesForNotices(List<Notice> notices) {
+        List<Long> noticeIds = extractNoticeIds(notices);
+
+        return fileFinder.findFilesByEntityIds(EntityType.NOTICE, noticeIds);
+    }
+
+    private List<Long> extractNoticeIds(List<Notice> notices) {
+        return notices.stream()
+                .map(Notice::getId)
                 .toList();
     }
 
-    private NoticeResponse toResponseWithFiles(Notice notice) {
-        List<FileResponse> files = fileFinder.findFileResponsesByEntity(EntityType.NOTICE, notice.getId());
-
-        return NoticeResponse.from(notice, files);
+    private List<NoticeResponse> combineNoticesWithFiles(
+            List<Notice> notices,
+            Map<Long, List<FileResponse>> filesMap
+    ) {
+        return notices.stream()
+                .map(notice -> NoticeResponse.from(notice, filesMap.getOrDefault(notice.getId(), List.of())))
+                .toList();
     }
 }

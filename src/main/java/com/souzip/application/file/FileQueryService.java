@@ -6,9 +6,10 @@ import com.souzip.application.file.required.FileRepository;
 import com.souzip.application.file.required.FileStorage;
 import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,27 +46,59 @@ public class FileQueryService implements FileFinder {
                 1
         );
 
-        return files.stream().collect(
-                Collectors.toMap(
-                        File::getEntityId,
-                        file -> file,
-                        (existing, replacement) -> existing
-                )
-        );
+        return mapThumbnailsByEntityId(files);
     }
 
     @Override
     public List<FileResponse> findFileResponsesByEntity(EntityType entityType, Long entityId) {
         List<File> files = findByEntity(entityType, entityId);
+        return convertToFileResponses(files);
+    }
 
-        return files.stream()
-                .map(this::toFileResponse)
-                .toList();
+    @Override
+    public Map<Long, List<FileResponse>> findFilesByEntityIds(EntityType entityType, List<Long> entityIds) {
+        if (isEmptyEntityIds(entityIds)) {
+            return Map.of();
+        }
+
+        List<File> files = fileRepository.findByEntityTypeAndEntityIdIn(entityType, entityIds);
+        return groupFilesByEntityId(files);
+    }
+
+    private Map<Long, File> mapThumbnailsByEntityId(List<File> files) {
+        Map<Long, File> thumbnails = new HashMap<>();
+
+        for (File file : files) {
+            thumbnails.putIfAbsent(file.getEntityId(), file);
+        }
+
+        return thumbnails;
+    }
+
+    private List<FileResponse> convertToFileResponses(List<File> files) {
+        List<FileResponse> responses = new ArrayList<>();
+
+        for (File file : files) {
+            responses.add(toFileResponse(file));
+        }
+
+        return responses;
+    }
+
+    private Map<Long, List<FileResponse>> groupFilesByEntityId(List<File> files) {
+        Map<Long, List<FileResponse>> result = new HashMap<>();
+
+        for (File file : files) {
+            FileResponse response = toFileResponse(file);
+            result.computeIfAbsent(file.getEntityId(), k -> new ArrayList<>())
+                    .add(response);
+        }
+
+        return result;
     }
 
     private FileResponse toFileResponse(File file) {
         String url = fileStorage.generateUrl(file.getStorageKey());
-
         return FileResponse.of(file, url);
     }
 

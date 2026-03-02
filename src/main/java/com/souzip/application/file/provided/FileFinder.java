@@ -15,4 +15,6 @@ public interface FileFinder {
     Map<Long, File> findThumbnailsByEntityIds(EntityType entityType, List<Long> entityIds);
 
     List<FileResponse> findFileResponsesByEntity(EntityType entityType, Long entityId);
+
+    Map<Long, List<FileResponse>> findFilesByEntityIds(EntityType entityType, List<Long> entityIds);
 }

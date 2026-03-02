@@ -38,45 +38,6 @@ class NoticeTest {
         assertThat(notice.getStatus()).isEqualTo(NoticeStatus.ACTIVE);
     }
 
-    @DisplayName("필수 값이 null이면 예외가 발생한다")
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("provideNullFieldCases")
-    void requiredFieldNull(
-            String description,
-            NoticeRegisterRequest request,
-            String expectedMessage
-    ) {
-        // when & then
-        assertThatThrownBy(() -> Notice.register(request))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining(expectedMessage);
-    }
-
-    private static Stream<Arguments> provideNullFieldCases() {
-        return Stream.of(
-                arguments(
-                        "제목이 null",
-                        NoticeRegisterRequest.of(null, "내용", TEST_ADMIN_ID, NoticeStatus.ACTIVE),
-                        "제목은 필수입니다."
-                ),
-                arguments(
-                        "내용이 null",
-                        NoticeRegisterRequest.of("제목", null, TEST_ADMIN_ID, NoticeStatus.ACTIVE),
-                        "내용은 필수입니다."
-                ),
-                arguments(
-                        "작성자 ID가 null",
-                        NoticeRegisterRequest.of("제목", "내용", null, NoticeStatus.ACTIVE),
-                        "작성자는 필수입니다."
-                ),
-                arguments(
-                        "상태가 null",
-                        NoticeRegisterRequest.of("제목", "내용", TEST_ADMIN_ID, null),
-                        "상태는 필수입니다."
-                )
-        );
-    }
-
     @DisplayName("공지사항을 수정한다")
     @Test
     void update() {

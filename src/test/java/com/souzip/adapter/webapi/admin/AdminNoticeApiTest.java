@@ -2,10 +2,12 @@ package com.souzip.adapter.webapi.admin;
 
 import com.souzip.adapter.webapi.admin.dto.NoticeRequest;
 import com.souzip.application.file.dto.FileResponse;
+import com.souzip.application.notice.dto.NoticeAuthorResponse;
 import com.souzip.application.notice.dto.NoticeResponse;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.application.notice.provided.NoticeRegister;
 import com.souzip.docs.RestDocsSupport;
+import com.souzip.domain.admin.model.AdminRole;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeStatus;
@@ -46,6 +48,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class AdminNoticeApiTest extends RestDocsSupport {
 
+    private static final UUID TEST_ADMIN_ID =
+            UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+
     private final NoticeFinder noticeFinder = mock(NoticeFinder.class);
     private final NoticeRegister noticeRegister = mock(NoticeRegister.class);
 
@@ -84,9 +89,17 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 new FileResponse(1L, "https://example.com/file1.jpg", "test.jpg", 1)
         );
 
+        NoticeAuthorResponse author = NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin");
+
         NoticeResponse mockResponse = new NoticeResponse(
-                1L, "공지사항 제목", "공지사항 내용", TEST_ADMIN_ID, NoticeStatus.ACTIVE,
-                LocalDateTime.now(), LocalDateTime.now(), mockFiles
+                1L,
+                "공지사항 제목",
+                "공지사항 내용",
+                author,
+                NoticeStatus.ACTIVE,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                mockFiles
         );
 
         given(noticeRegister.register(any(NoticeRegisterRequest.class), anyList()))
@@ -104,6 +117,8 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.title").value("공지사항 제목"))
                 .andExpect(jsonPath("$.data.content").value("공지사항 내용"))
+                .andExpect(jsonPath("$.data.author.authorId").value(TEST_ADMIN_ID.toString()))
+                .andExpect(jsonPath("$.data.author.username").value("admin"))
                 .andExpect(jsonPath("$.data.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.message").value("공지사항이 등록되었습니다."))
                 .andDo(document("admin/notice/register",
@@ -123,7 +138,11 @@ class AdminNoticeApiTest extends RestDocsSupport {
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("공지사항 ID"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("data.authorId").type(JsonFieldType.STRING).description("작성자 ID (UUID)"),
+
+                                fieldWithPath("data.author").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("data.author.authorId").type(JsonFieldType.STRING).description("작성자 ID (UUID)"),
+                                fieldWithPath("data.author.username").type(JsonFieldType.STRING).description("작성자 이름"),
+
                                 fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태 (ACTIVE/INACTIVE)"),
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성일시"),
                                 fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정일시"),
@@ -174,9 +193,17 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 new FileResponse(3L, "https://example.com/new.jpg", "new.jpg", 1)
         );
 
+        NoticeAuthorResponse author = NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin");
+
         NoticeResponse mockResponse = new NoticeResponse(
-                1L, "수정된 제목", "수정된 내용", TEST_ADMIN_ID, NoticeStatus.INACTIVE,
-                LocalDateTime.now(), LocalDateTime.now(), mockFiles
+                1L,
+                "수정된 제목",
+                "수정된 내용",
+                author,
+                NoticeStatus.INACTIVE,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                mockFiles
         );
 
         given(noticeRegister.update(anyLong(), any(), anyList(), anyList()))
@@ -198,6 +225,8 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("수정된 제목"))
                 .andExpect(jsonPath("$.data.content").value("수정된 내용"))
+                .andExpect(jsonPath("$.data.author.authorId").value(TEST_ADMIN_ID.toString()))
+                .andExpect(jsonPath("$.data.author.username").value("admin"))
                 .andExpect(jsonPath("$.data.status").value("INACTIVE"))
                 .andExpect(jsonPath("$.message").value("공지사항이 수정되었습니다."))
                 .andDo(document("admin/notice/update",
@@ -221,7 +250,11 @@ class AdminNoticeApiTest extends RestDocsSupport {
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("공지사항 ID"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("data.authorId").type(JsonFieldType.STRING).description("작성자 ID (UUID)"),
+
+                                fieldWithPath("data.author").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("data.author.authorId").type(JsonFieldType.STRING).description("작성자 ID (UUID)"),
+                                fieldWithPath("data.author.username").type(JsonFieldType.STRING).description("작성자 이름"),
+
                                 fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태 (ACTIVE/INACTIVE)"),
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성일시"),
                                 fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정일시"),
@@ -313,10 +346,13 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 new FileResponse(2L, "https://example.com/file2.jpg", "file2.jpg", 2)
         );
 
+        NoticeAuthorResponse author1 = NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin");
+        NoticeAuthorResponse author2 = NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin");
+
         List<NoticeResponse> mockResponses = List.of(
-                new NoticeResponse(1L, "공지사항 1", "내용 1", TEST_ADMIN_ID, NoticeStatus.ACTIVE,
+                new NoticeResponse(1L, "공지사항 1", "내용 1", author1, NoticeStatus.ACTIVE,
                         LocalDateTime.now(), LocalDateTime.now(), mockFiles),
-                new NoticeResponse(2L, "공지사항 2", "내용 2", TEST_ADMIN_ID, NoticeStatus.INACTIVE,
+                new NoticeResponse(2L, "공지사항 2", "내용 2", author2, NoticeStatus.INACTIVE,
                         LocalDateTime.now(), LocalDateTime.now(), List.of())
         );
 
@@ -330,7 +366,9 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.length()").value(2))
                 .andExpect(jsonPath("$.data[0].id").value(1))
                 .andExpect(jsonPath("$.data[0].title").value("공지사항 1"))
+                .andExpect(jsonPath("$.data[0].author.authorId").value(TEST_ADMIN_ID.toString()))
                 .andExpect(jsonPath("$.data[1].id").value(2))
+                .andExpect(jsonPath("$.data[1].author.authorId").value(TEST_ADMIN_ID.toString()))
                 .andDo(document("admin/notice/get-all",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -339,10 +377,12 @@ class AdminNoticeApiTest extends RestDocsSupport {
                                 fieldWithPath("data[].id").type(JsonFieldType.NUMBER).description("공지사항 ID"),
                                 fieldWithPath("data[].title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("data[].content").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("data[].authorId").type(JsonFieldType.STRING)
-                                        .description("작성자 ID (UUID)"),
-                                fieldWithPath("data[].status").type(JsonFieldType.STRING)
-                                        .description("상태 (ACTIVE/INACTIVE)"),
+
+                                fieldWithPath("data[].author").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("data[].author.authorId").type(JsonFieldType.STRING).description("작성자 ID (UUID)"),
+                                fieldWithPath("data[].author.username").type(JsonFieldType.STRING).description("작성자 이름"),
+
+                                fieldWithPath("data[].status").type(JsonFieldType.STRING).description("상태 (ACTIVE/INACTIVE)"),
                                 fieldWithPath("data[].createdAt").type(JsonFieldType.STRING).description("생성일시"),
                                 fieldWithPath("data[].updatedAt").type(JsonFieldType.STRING).description("수정일시"),
                                 fieldWithPath("data[].files").type(JsonFieldType.ARRAY).description("첨부 파일 목록"),
@@ -363,9 +403,17 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1)
         );
 
+        NoticeAuthorResponse author = NoticeAuthorResponse.of(TEST_ADMIN_ID, "admin");
+
         NoticeResponse mockResponse = new NoticeResponse(
-                1L, "공지사항 제목", "공지사항 내용", TEST_ADMIN_ID, NoticeStatus.ACTIVE,
-                LocalDateTime.now(), LocalDateTime.now(), mockFiles
+                1L,
+                "공지사항 제목",
+                "공지사항 내용",
+                author,
+                NoticeStatus.ACTIVE,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                mockFiles
         );
 
         given(noticeFinder.findByIdWithFiles(anyLong())).willReturn(mockResponse);
@@ -377,6 +425,8 @@ class AdminNoticeApiTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.title").value("공지사항 제목"))
                 .andExpect(jsonPath("$.data.content").value("공지사항 내용"))
+                .andExpect(jsonPath("$.data.author.authorId").value(TEST_ADMIN_ID.toString()))
+                .andExpect(jsonPath("$.data.author.username").value("admin"))
                 .andDo(document("admin/notice/get-by-id",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -388,9 +438,12 @@ class AdminNoticeApiTest extends RestDocsSupport {
                                 fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("공지사항 ID"),
                                 fieldWithPath("data.title").type(JsonFieldType.STRING).description("제목"),
                                 fieldWithPath("data.content").type(JsonFieldType.STRING).description("내용"),
-                                fieldWithPath("data.authorId").type(JsonFieldType.STRING).description("작성자 ID (UUID)"),
-                                fieldWithPath("data.status").type(JsonFieldType.STRING)
-                                        .description("상태 (ACTIVE/INACTIVE)"),
+
+                                fieldWithPath("data.author").type(JsonFieldType.OBJECT).description("작성자 정보"),
+                                fieldWithPath("data.author.authorId").type(JsonFieldType.STRING).description("작성자 ID (UUID)"),
+                                fieldWithPath("data.author.username").type(JsonFieldType.STRING).description("작성자 이름"),
+
+                                fieldWithPath("data.status").type(JsonFieldType.STRING).description("상태 (ACTIVE/INACTIVE)"),
                                 fieldWithPath("data.createdAt").type(JsonFieldType.STRING).description("생성일시"),
                                 fieldWithPath("data.updatedAt").type(JsonFieldType.STRING).description("수정일시"),
                                 fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("첨부 파일 목록"),

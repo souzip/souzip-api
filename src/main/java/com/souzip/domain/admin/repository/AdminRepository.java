@@ -21,4 +21,6 @@ public interface AdminRepository {
     long countExcludingSuperAdmin();
 
     void delete(Admin admin);
+
+    List<Admin> findAllByIds(List<UUID> ids);
 }

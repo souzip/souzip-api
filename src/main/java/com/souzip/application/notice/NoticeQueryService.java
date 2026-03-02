@@ -1,15 +1,12 @@
 package com.souzip.application.notice;
 
-import com.souzip.application.file.dto.FileResponse;
-import com.souzip.application.file.provided.FileFinder;
 import com.souzip.application.notice.dto.NoticeResponse;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.application.notice.required.NoticeRepository;
-import com.souzip.domain.file.EntityType;
+import com.souzip.application.notice.assembler.NoticeResponseAssembler;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeStatus;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NoticeQueryService implements NoticeFinder {
 
     private final NoticeRepository noticeRepository;
-    private final FileFinder fileFinder;
+    private final NoticeResponseAssembler assembler;
 
     @Override
     public Notice findById(Long noticeId) {
@@ -41,8 +38,8 @@ public class NoticeQueryService implements NoticeFinder {
     @Override
     public NoticeResponse findByIdWithFiles(Long noticeId) {
         Notice notice = findById(noticeId);
-        List<FileResponse> files = fileFinder.findFileResponsesByEntity(EntityType.NOTICE, noticeId);
-        return NoticeResponse.from(notice, files);
+
+        return assembler.assemble(notice);
     }
 
     @Override
@@ -53,46 +50,16 @@ public class NoticeQueryService implements NoticeFinder {
             throw new NoticeNotFoundException(noticeId);
         }
 
-        List<FileResponse> files = fileFinder.findFileResponsesByEntity(EntityType.NOTICE, noticeId);
-        return NoticeResponse.from(notice, files);
+        return assembler.assemble(notice);
     }
 
     @Override
     public List<NoticeResponse> findAllActiveWithFiles() {
-        return findNoticesWithFiles(findAllActive());
+        return assembler.assembleAll(findAllActive());
     }
 
     @Override
     public List<NoticeResponse> findAllWithFiles() {
-        return findNoticesWithFiles(findAll());
-    }
-
-    private List<NoticeResponse> findNoticesWithFiles(List<Notice> notices) {
-        if (notices.isEmpty()) {
-            return List.of();
-        }
-
-        Map<Long, List<FileResponse>> filesMap = fetchFilesForNotices(notices);
-        return combineNoticesWithFiles(notices, filesMap);
-    }
-
-    private Map<Long, List<FileResponse>> fetchFilesForNotices(List<Notice> notices) {
-        List<Long> noticeIds = extractNoticeIds(notices);
-        return fileFinder.findFilesByEntityIds(EntityType.NOTICE, noticeIds);
-    }
-
-    private List<Long> extractNoticeIds(List<Notice> notices) {
-        return notices.stream()
-                .map(Notice::getId)
-                .toList();
-    }
-
-    private List<NoticeResponse> combineNoticesWithFiles(
-            List<Notice> notices,
-            Map<Long, List<FileResponse>> filesMap
-    ) {
-        return notices.stream()
-                .map(notice -> NoticeResponse.from(notice, filesMap.getOrDefault(notice.getId(), List.of())))
-                .toList();
+        return assembler.assembleAll(findAll());
     }
 }

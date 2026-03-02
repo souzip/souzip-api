@@ -2,6 +2,7 @@ package com.souzip.domain.admin.infrastructure.persistence;
 
 import com.souzip.domain.admin.infrastructure.entity.AdminEntity;
 import com.souzip.domain.admin.model.AdminRole;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -19,4 +20,6 @@ public interface AdminJpaRepository extends JpaRepository<AdminEntity, UUID> {
     Page<AdminEntity> findByRoleNot(AdminRole role, Pageable pageable);
 
     long countByRoleNot(AdminRole role);
+
+    List<AdminEntity> findAllByIdIn(List<UUID> ids);
 }

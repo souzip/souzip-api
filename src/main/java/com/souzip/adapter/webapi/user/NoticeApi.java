@@ -24,7 +24,7 @@ public class NoticeApi {
 
     @GetMapping("/{noticeId}")
     public SuccessResponse<NoticeResponse> getById(@PathVariable Long noticeId) {
-        NoticeResponse response = noticeFinder.findByIdWithFiles(noticeId);
+        NoticeResponse response = noticeFinder.findActiveByIdWithFiles(noticeId);
 
         return SuccessResponse.of(response);
     }

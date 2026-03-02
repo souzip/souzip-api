@@ -133,6 +133,38 @@ class NoticeQueryServiceTest {
         assertThat(result.files()).isEmpty();
     }
 
+    @DisplayName("활성 상태의 공지사항만 파일과 함께 조회한다")
+    @Test
+    void findActiveByIdWithFiles() {
+        Notice notice = createNotice(1L, "제목", "내용", NoticeStatus.ACTIVE);
+        List<FileResponse> files = List.of(
+                new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1)
+        );
+
+        given(noticeRepository.findById(1L)).willReturn(Optional.of(notice));
+        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
+                .willReturn(files);
+
+        NoticeResponse result = noticeQueryService.findActiveByIdWithFiles(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.title()).isEqualTo("제목");
+        assertThat(result.status()).isEqualTo(NoticeStatus.ACTIVE);
+        assertThat(result.files()).hasSize(1);
+    }
+
+    @DisplayName("비활성 상태의 공지사항 조회 시 예외가 발생한다")
+    @Test
+    void findActiveByIdWithFiles_inactiveNotice() {
+        Notice notice = createNotice(1L, "제목", "내용", NoticeStatus.INACTIVE);
+
+        given(noticeRepository.findById(1L)).willReturn(Optional.of(notice));
+
+        assertThatThrownBy(() -> noticeQueryService.findActiveByIdWithFiles(1L))
+                .isInstanceOf(NoticeNotFoundException.class)
+                .hasMessageContaining("1");
+    }
+
     @DisplayName("파일과 함께 활성화된 공지사항 목록을 조회한다")
     @Test
     void findAllActiveWithFiles() {

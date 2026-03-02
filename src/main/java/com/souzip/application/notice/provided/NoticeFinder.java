@@ -14,6 +14,8 @@ public interface NoticeFinder {
 
     NoticeResponse findByIdWithFiles(Long noticeId);
 
+    NoticeResponse findActiveByIdWithFiles(Long noticeId);
+
     List<NoticeResponse> findAllActiveWithFiles();
 
     List<NoticeResponse> findAllWithFiles();

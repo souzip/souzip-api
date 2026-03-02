@@ -46,6 +46,18 @@ public class NoticeQueryService implements NoticeFinder {
     }
 
     @Override
+    public NoticeResponse findActiveByIdWithFiles(Long noticeId) {
+        Notice notice = findById(noticeId);
+
+        if (!notice.isActive()) {
+            throw new NoticeNotFoundException(noticeId);
+        }
+
+        List<FileResponse> files = fileFinder.findFileResponsesByEntity(EntityType.NOTICE, noticeId);
+        return NoticeResponse.from(notice, files);
+    }
+
+    @Override
     public List<NoticeResponse> findAllActiveWithFiles() {
         return findNoticesWithFiles(findAllActive());
     }
@@ -61,13 +73,11 @@ public class NoticeQueryService implements NoticeFinder {
         }
 
         Map<Long, List<FileResponse>> filesMap = fetchFilesForNotices(notices);
-
         return combineNoticesWithFiles(notices, filesMap);
     }
 
     private Map<Long, List<FileResponse>> fetchFilesForNotices(List<Notice> notices) {
         List<Long> noticeIds = extractNoticeIds(notices);
-
         return fileFinder.findFilesByEntityIds(EntityType.NOTICE, noticeIds);
     }
 

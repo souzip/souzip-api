@@ -5,13 +5,11 @@ import com.souzip.application.notice.dto.NoticeResponse;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.docs.RestDocsSupport;
 import com.souzip.domain.notice.NoticeStatus;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 import static com.souzip.docs.ApiDocumentUtils.getDocumentRequest;
 import static com.souzip.docs.ApiDocumentUtils.getDocumentResponse;
@@ -32,8 +30,6 @@ class NoticeApiTest extends RestDocsSupport {
 
     private final NoticeFinder noticeFinder = mock(NoticeFinder.class);
 
-    private static final UUID TEST_ADMIN_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-
     @Override
     protected Object initController() {
         return new NoticeApi(noticeFinder);
@@ -42,7 +38,6 @@ class NoticeApiTest extends RestDocsSupport {
     @DisplayName("활성화된 공지사항 목록을 조회할 수 있다")
     @Test
     void getAllActive() throws Exception {
-        // given
         List<FileResponse> mockFiles = List.of(
                 new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1)
         );
@@ -56,7 +51,6 @@ class NoticeApiTest extends RestDocsSupport {
 
         given(noticeFinder.findAllActiveWithFiles()).willReturn(mockResponses);
 
-        // when & then
         mockMvc.perform(get("/api/notices"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -89,7 +83,6 @@ class NoticeApiTest extends RestDocsSupport {
     @DisplayName("공지사항 상세 정보를 조회할 수 있다")
     @Test
     void getById() throws Exception {
-        // given
         List<FileResponse> mockFiles = List.of(
                 new FileResponse(1L, "https://example.com/file1.jpg", "file1.jpg", 1)
         );
@@ -99,9 +92,8 @@ class NoticeApiTest extends RestDocsSupport {
                 LocalDateTime.now(), LocalDateTime.now(), mockFiles
         );
 
-        given(noticeFinder.findByIdWithFiles(anyLong())).willReturn(mockResponse);
+        given(noticeFinder.findActiveByIdWithFiles(anyLong())).willReturn(mockResponse);
 
-        // when & then
         mockMvc.perform(get("/api/notices/{noticeId}", 1L))
                 .andDo(print())
                 .andExpect(status().isOk())

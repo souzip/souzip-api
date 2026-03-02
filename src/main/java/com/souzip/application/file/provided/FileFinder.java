@@ -4,9 +4,6 @@ import com.souzip.domain.file.File;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 파일을 조회한다
- */
 public interface FileFinder {
 
     List<File> findByEntity(String entityType, Long entityId);

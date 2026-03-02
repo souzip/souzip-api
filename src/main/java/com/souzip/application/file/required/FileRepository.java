@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.Repository;
 
-/**
- * 파일 정보를 저장하거나 조회한다
- */
 public interface FileRepository extends Repository<File, Long> {
 
     File save(File file);

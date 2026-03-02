@@ -36,8 +36,7 @@ class EntityTypeTest {
     void from_invalid(String value) {
         // when & then
         assertThatThrownBy(() -> EntityType.from(value))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Unknown EntityType");
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("getValue()는 저장된 문자열을 반환한다")

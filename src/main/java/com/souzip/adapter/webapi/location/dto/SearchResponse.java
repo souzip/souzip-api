@@ -52,8 +52,8 @@ public record SearchResponse(
                 place.name(),
                 null,
                 place.address(),
-                place.coordinate().latitude(),
-                place.coordinate().longitude()
+                place.coordinate().getLatitude(),
+                place.coordinate().getLongitude()
         );
     }
 }

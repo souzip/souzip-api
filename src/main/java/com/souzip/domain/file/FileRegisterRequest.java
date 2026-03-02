@@ -1,7 +1,7 @@
 package com.souzip.domain.file;
 
 public record FileRegisterRequest(
-        String entityType,
+        EntityType entityType,
         Long entityId,
         String storageKey,
         String originalName,
@@ -10,7 +10,7 @@ public record FileRegisterRequest(
         Integer displayOrder
 ) {
     public static FileRegisterRequest of(
-            String entityType,
+            EntityType entityType,
             Long entityId,
             String storageKey,
             String originalName,

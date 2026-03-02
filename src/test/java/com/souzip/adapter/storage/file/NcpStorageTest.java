@@ -4,7 +4,6 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.souzip.adapter.config.ObjectStorageProperties;
-import com.souzip.domain.file.InvalidFileException;
 import com.souzip.global.exception.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

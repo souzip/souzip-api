@@ -24,7 +24,7 @@ class FileTest {
         File file = File.register(request);
 
         // then
-        assertThat(file.getEntityType()).isEqualTo("NOTICE");
+        assertThat(file.getEntityType()).isEqualTo(EntityType.NOTICE);
         assertThat(file.getEntityId()).isEqualTo(1L);
         assertThat(file.getStorageKey()).isEqualTo("user123/uuid-1234.jpg");
         assertThat(file.getOriginalName()).isEqualTo("photo.jpg");
@@ -56,32 +56,32 @@ class FileTest {
                 ),
                 arguments(
                         "엔티티 ID가 null",
-                        FileRegisterRequest.of("NOTICE", null, "key", "name", 1024L, "type", 1),
+                        FileRegisterRequest.of(EntityType.NOTICE, null, "key", "name", 1024L, "type", 1),
                         "엔티티 ID는 필수입니다."
                 ),
                 arguments(
                         "스토리지 키가 null",
-                        FileRegisterRequest.of("NOTICE", 1L, null, "name", 1024L, "type", 1),
+                        FileRegisterRequest.of(EntityType.NOTICE, 1L, null, "name", 1024L, "type", 1),
                         "스토리지 키는 필수입니다."
                 ),
                 arguments(
                         "파일명이 null",
-                        FileRegisterRequest.of("NOTICE", 1L, "key", null, 1024L, "type", 1),
+                        FileRegisterRequest.of(EntityType.NOTICE, 1L, "key", null, 1024L, "type", 1),
                         "파일명은 필수입니다."
                 ),
                 arguments(
                         "파일 크기가 null",
-                        FileRegisterRequest.of("NOTICE", 1L, "key", "name", null, "type", 1),
+                        FileRegisterRequest.of(EntityType.NOTICE, 1L, "key", "name", null, "type", 1),
                         "파일 크기는 필수입니다."
                 ),
                 arguments(
                         "파일 타입이 null",
-                        FileRegisterRequest.of("NOTICE", 1L, "key", "name", 1024L, null, 1),
+                        FileRegisterRequest.of(EntityType.NOTICE, 1L, "key", "name", 1024L, null, 1),
                         "파일 타입은 필수입니다."
                 ),
                 arguments(
                         "정렬 순서가 null",
-                        FileRegisterRequest.of("NOTICE", 1L, "key", "name", 1024L, "type", null),
+                        FileRegisterRequest.of(EntityType.NOTICE, 1L, "key", "name", 1024L, "type", null),
                         "정렬 순서는 필수입니다."
                 )
         );
@@ -89,7 +89,7 @@ class FileTest {
 
     private FileRegisterRequest createValidRequest() {
         return FileRegisterRequest.of(
-                "NOTICE",
+                EntityType.NOTICE,
                 1L,
                 "user123/uuid-1234.jpg",
                 "photo.jpg",

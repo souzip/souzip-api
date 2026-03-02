@@ -62,8 +62,8 @@ public class GoogleGeocoding implements AddressProvider {
         return String.format(
                 "%s?latlng=%s,%s&language=%s&key=%s",
                 baseUrl,
-                coordinate.latitude().doubleValue(),
-                coordinate.longitude().doubleValue(),
+                coordinate.getLatitude().doubleValue(),
+                coordinate.getLongitude().doubleValue(),
                 language,
                 apiKey
         );

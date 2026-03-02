@@ -1,21 +1,32 @@
 package com.souzip.domain.shared;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
 import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
-public record Coordinate(
-        BigDecimal latitude,
-        BigDecimal longitude
-) {
+@Getter
+@EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Coordinate {
 
-    public Coordinate {
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+
+    private Coordinate(BigDecimal latitude, BigDecimal longitude) {
         requireNonNull(latitude, "위도는 필수입니다.");
         requireNonNull(longitude, "경도는 필수입니다.");
 
         validateLatitude(latitude);
         validateLongitude(longitude);
+
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public static Coordinate of(BigDecimal latitude, BigDecimal longitude) {

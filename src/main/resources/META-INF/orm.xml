@@ -48,7 +48,8 @@
     </table>
     <attributes>
       <basic name="entityType">
-        <column name="entity_type" nullable="false"/>
+        <column name="entity_type" nullable="false" length="20"/>
+        <convert converter="com.souzip.domain.file.EntityTypeConverter"/>
       </basic>
       <basic name="entityId">
         <column name="entity_id" nullable="false"/>
@@ -67,6 +68,25 @@
       </basic>
       <basic name="displayOrder">
         <column name="display_order" nullable="false"/>
+      </basic>
+    </attributes>
+  </entity>
+
+  <entity class="com.souzip.domain.notice.Notice">
+    <table name="notice"/>
+    <attributes>
+      <basic name="title">
+        <column name="title" nullable="false" length="200"/>
+      </basic>
+      <basic name="content">
+        <column name="content" nullable="false" column-definition="TEXT"/>
+      </basic>
+      <basic name="authorId">
+        <column name="author_id" nullable="false"/>
+      </basic>
+      <basic name="status">
+        <column name="status" nullable="false" length="20"/>
+        <enumerated>STRING</enumerated>
       </basic>
     </attributes>
   </entity>

@@ -7,6 +7,7 @@ import com.souzip.domain.audit.entity.AuditAction;
 import com.souzip.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.domain.category.dto.CategoryDto;
 import com.souzip.domain.category.entity.Category;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.souvenir.dto.MySouvenirListResponse;
 import com.souzip.domain.souvenir.dto.MySouvenirResponse;
@@ -184,7 +185,7 @@ public class UserService {
     }
 
     private Map<Long, FileResponse> getThumbnails(List<Long> souvenirIds) {
-        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds("Souvenir", souvenirIds);
+        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds(EntityType.SOUVENIR, souvenirIds);
 
         return fileMap.entrySet().stream()
                 .collect(Collectors.toMap(

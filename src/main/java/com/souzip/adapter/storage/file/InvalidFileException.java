@@ -1,4 +1,4 @@
-package com.souzip.domain.file;
+package com.souzip.adapter.storage.file;
 
 public class InvalidFileException extends RuntimeException {
 

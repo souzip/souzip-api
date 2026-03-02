@@ -2,8 +2,8 @@ package com.souzip.application.file;
 
 import com.souzip.application.file.required.FileRepository;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
-import com.souzip.domain.file.FileNotFoundException;
 import com.souzip.domain.file.FileRegisterRequest;
 import java.util.List;
 import java.util.Optional;
@@ -46,10 +46,10 @@ class FileModifyServiceTest {
         given(fileRepository.save(any(File.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        File result = fileModifyService.register("user123", "NOTICE", 1L, multipartFile, 5);
+        File result = fileModifyService.register("user123", EntityType.NOTICE, 1L, multipartFile, 5);
 
         // then
-        assertThat(result.getEntityType()).isEqualTo("NOTICE");
+        assertThat(result.getEntityType()).isEqualTo(EntityType.NOTICE);
         assertThat(result.getEntityId()).isEqualTo(1L);
         assertThat(result.getStorageKey()).isEqualTo(storageKey);
         assertThat(result.getDisplayOrder()).isEqualTo(5);
@@ -66,12 +66,12 @@ class FileModifyServiceTest {
         String storageKey = "user123/uuid.jpg";
 
         given(fileStorage.upload("user123", multipartFile)).willReturn(storageKey);
-        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(List.of());
         given(fileRepository.save(any(File.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        File result = fileModifyService.register("user123", "NOTICE", 1L, multipartFile, null);
+        File result = fileModifyService.register("user123", EntityType.NOTICE, 1L, multipartFile, null);
 
         // then
         assertThat(result.getDisplayOrder()).isEqualTo(1);
@@ -83,15 +83,15 @@ class FileModifyServiceTest {
         // given
         MultipartFile multipartFile = createMockMultipartFile();
         String storageKey = "user123/uuid.jpg";
-        File existingFile = createFile(1L, "NOTICE", 1L, 3);
+        File existingFile = createFile(1L, EntityType.NOTICE, 1L, 3);
 
         given(fileStorage.upload("user123", multipartFile)).willReturn(storageKey);
-        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(List.of(existingFile));
         given(fileRepository.save(any(File.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        File result = fileModifyService.register("user123", "NOTICE", 1L, multipartFile, null);
+        File result = fileModifyService.register("user123", EntityType.NOTICE, 1L, multipartFile, null);
 
         // then
         assertThat(result.getDisplayOrder()).isEqualTo(4);
@@ -101,7 +101,7 @@ class FileModifyServiceTest {
     @Test
     void delete() {
         // given
-        File file = createFile(1L, "NOTICE", 1L, 1);
+        File file = createFile(1L, EntityType.NOTICE, 1L, 1);
 
         given(fileRepository.findById(1L)).willReturn(Optional.of(file));
 
@@ -129,15 +129,15 @@ class FileModifyServiceTest {
     @Test
     void deleteByEntity() {
         // given
-        File file1 = createFile(1L, "NOTICE", 1L, 1);
-        File file2 = createFile(2L, "NOTICE", 1L, 2);
+        File file1 = createFile(1L, EntityType.NOTICE, 1L, 1);
+        File file2 = createFile(2L, EntityType.NOTICE, 1L, 2);
         List<File> files = List.of(file1, file2);
 
-        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(files);
 
         // when
-        fileModifyService.deleteByEntity("NOTICE", 1L);
+        fileModifyService.deleteByEntity(EntityType.NOTICE, 1L);
 
         // then
         then(fileStorage).should().delete(file1.getStorageKey());
@@ -153,7 +153,7 @@ class FileModifyServiceTest {
         return file;
     }
 
-    private File createFile(Long id, String entityType, Long entityId, Integer displayOrder) {
+    private File createFile(Long id, EntityType entityType, Long entityId, Integer displayOrder) {
         FileRegisterRequest request = FileRegisterRequest.of(
                 entityType,
                 entityId,

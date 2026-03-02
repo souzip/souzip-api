@@ -4,7 +4,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.souzip.adapter.config.ObjectStorageProperties;
 import com.souzip.application.file.required.FileStorage;
-import com.souzip.domain.file.InvalidFileException;
 import com.souzip.global.exception.BusinessException;
 import com.souzip.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

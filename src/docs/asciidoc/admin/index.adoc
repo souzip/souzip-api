@@ -12,4 +12,7 @@ endif::[]
 
 include::../shared/overview.adoc[]
 
-include::admin.adoc[]
+include::auth.adoc[]
+include::management.adoc[]
+include::location.adoc[]
+include::notice.adoc[]

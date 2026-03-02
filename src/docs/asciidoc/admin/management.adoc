@@ -1,0 +1,34 @@
+[[admin-management]]
+== 관리자 관리
+
+[[admin-invite]]
+=== 관리자 초대
+
+새로운 관리자를 초대합니다.
+
+* SUPER_ADMIN 권한이 필요합니다.
+* ADMIN 또는 VIEWER 역할만 초대 가능합니다.
+* SUPER_ADMIN 역할은 초대할 수 없습니다.
+
+operation::admin/invite-admin[snippets='http-request,request-headers,request-fields,http-response,response-fields']
+
+[[admin-list]]
+=== 관리자 목록 조회
+
+관리자 목록을 페이징하여 조회합니다.
+
+* SUPER_ADMIN 권한이 필요합니다.
+* SUPER_ADMIN 역할은 목록에 표시되지 않습니다.
+* 페이지 번호는 1부터 시작합니다.
+* 기본 페이지 크기는 10이며, 최대 30까지 가능합니다.
+
+operation::admin/get-admins[snippets='http-request,request-headers,query-parameters,http-response,response-fields']
+
+[[admin-delete]]
+=== 관리자 삭제
+
+관리자를 삭제합니다.
+
+* SUPER_ADMIN 권한이 필요합니다.
+
+operation::admin/delete-admin[snippets='http-request,request-headers,path-parameters,http-response,response-fields']

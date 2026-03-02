@@ -1,8 +1,13 @@
 package com.souzip.application.file;
 
+import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileRepository;
+import com.souzip.application.file.required.FileStorage;
 import com.souzip.domain.file.File;
 import com.souzip.domain.file.FileRegisterRequest;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,10 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -25,6 +26,9 @@ class FileQueryServiceTest {
 
     @Mock
     private FileRepository fileRepository;
+
+    @Mock
+    private FileStorage fileStorage;
 
     @InjectMocks
     private FileQueryService fileQueryService;
@@ -118,6 +122,51 @@ class FileQueryServiceTest {
     void findThumbnailsByEntityIds_nullList() {
         // when
         Map<Long, File> result = fileQueryService.findThumbnailsByEntityIds("NOTICE", null);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @DisplayName("URL과 함께 파일 응답 목록을 조회한다")
+    @Test
+    void findFileResponsesByEntity() {
+        // given
+        File file1 = createFile(1L, "NOTICE", 1L, 1);
+        File file2 = createFile(2L, "NOTICE", 1L, 2);
+        List<File> files = List.of(file1, file2);
+
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+                .willReturn(files);
+        given(fileStorage.generateUrl("storage-key-1"))
+                .willReturn("https://example.com/file1.jpg");
+        given(fileStorage.generateUrl("storage-key-2"))
+                .willReturn("https://example.com/file2.jpg");
+
+        // when
+        List<FileResponse> result = fileQueryService.findFileResponsesByEntity("NOTICE", 1L);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.getFirst().id()).isEqualTo(1L);
+        assertThat(result.getFirst().url()).isEqualTo("https://example.com/file1.jpg");
+        assertThat(result.get(0).originalName()).isEqualTo("file1.jpg");
+        assertThat(result.get(0).displayOrder()).isEqualTo(1);
+
+        assertThat(result.get(1).id()).isEqualTo(2L);
+        assertThat(result.get(1).url()).isEqualTo("https://example.com/file2.jpg");
+        assertThat(result.get(1).originalName()).isEqualTo("file2.jpg");
+        assertThat(result.get(1).displayOrder()).isEqualTo(2);
+    }
+
+    @DisplayName("파일이 없으면 빈 응답 목록을 반환한다")
+    @Test
+    void findFileResponsesByEntity_emptyFiles() {
+        // given
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+                .willReturn(List.of());
+
+        // when
+        List<FileResponse> result = fileQueryService.findFileResponsesByEntity("NOTICE", 1L);
 
         // then
         assertThat(result).isEmpty();

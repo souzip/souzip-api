@@ -1,0 +1,39 @@
+[[admin-api]]
+== Admin API
+
+[[admin-login]]
+=== 어드민 로그인
+
+어드민 계정으로 로그인합니다.
+
+operation::admin/login[snippets='http-request,request-fields,http-response,response-fields']
+
+[[admin-refresh]]
+=== 어드민 토큰 갱신
+
+Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.
+
+==== 유효한 토큰
+
+operation::admin/refresh-valid-token[snippets='http-request,request-fields,http-response,response-fields']
+
+==== 만료 임박 토큰
+
+operation::admin/refresh-expiring-soon[snippets='http-request,request-fields,http-response,response-fields']
+
+==== 만료된 토큰
+
+operation::admin/refresh-expired-token[snippets='http-request,request-fields,http-response,response-fields']
+
+==== 유효하지 않은 토큰
+
+operation::admin/refresh-invalid-token[snippets='http-request,request-fields,http-response,response-fields']
+
+[[admin-logout]]
+=== 어드민 로그아웃
+
+어드민 계정을 로그아웃하고 Refresh Token을 삭제합니다.
+
+* Authorization 헤더에 Access Token이 필요합니다.
+
+operation::admin/logout[snippets='http-request,request-headers,http-response,response-fields']

@@ -1,5 +1,6 @@
 package com.souzip.domain.notice;
 
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +15,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class NoticeTest {
 
+    private static final UUID TEST_ADMIN_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+
     @DisplayName("공지사항을 정상적으로 등록한다")
     @Test
     void register() {
@@ -21,7 +24,7 @@ class NoticeTest {
         NoticeRegisterRequest request = NoticeRegisterRequest.of(
                 "공지사항 제목",
                 "공지사항 내용",
-                1L,
+                TEST_ADMIN_ID,
                 NoticeStatus.ACTIVE
         );
 
@@ -31,7 +34,7 @@ class NoticeTest {
         // then
         assertThat(notice.getTitle()).isEqualTo("공지사항 제목");
         assertThat(notice.getContent()).isEqualTo("공지사항 내용");
-        assertThat(notice.getAuthorId()).isEqualTo(1L);
+        assertThat(notice.getAuthorId()).isEqualTo(TEST_ADMIN_ID);
         assertThat(notice.getStatus()).isEqualTo(NoticeStatus.ACTIVE);
     }
 
@@ -53,12 +56,12 @@ class NoticeTest {
         return Stream.of(
                 arguments(
                         "제목이 null",
-                        NoticeRegisterRequest.of(null, "내용", 1L, NoticeStatus.ACTIVE),
+                        NoticeRegisterRequest.of(null, "내용", TEST_ADMIN_ID, NoticeStatus.ACTIVE),
                         "제목은 필수입니다."
                 ),
                 arguments(
                         "내용이 null",
-                        NoticeRegisterRequest.of("제목", null, 1L, NoticeStatus.ACTIVE),
+                        NoticeRegisterRequest.of("제목", null, TEST_ADMIN_ID, NoticeStatus.ACTIVE),
                         "내용은 필수입니다."
                 ),
                 arguments(
@@ -68,7 +71,7 @@ class NoticeTest {
                 ),
                 arguments(
                         "상태가 null",
-                        NoticeRegisterRequest.of("제목", "내용", 1L, null),
+                        NoticeRegisterRequest.of("제목", "내용", TEST_ADMIN_ID, null),
                         "상태는 필수입니다."
                 )
         );
@@ -127,7 +130,7 @@ class NoticeTest {
         NoticeRegisterRequest request = NoticeRegisterRequest.of(
                 "공지사항 제목",
                 "공지사항 내용",
-                1L,
+                TEST_ADMIN_ID,
                 NoticeStatus.INACTIVE
         );
         return Notice.register(request);

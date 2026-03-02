@@ -1,6 +1,7 @@
 package com.souzip.domain.notice;
 
 import com.souzip.domain.shared.BaseEntity;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ public class Notice extends BaseEntity {
 
     private String content;
 
-    private Long authorId;
+    private UUID authorId;
 
     private NoticeStatus status;
 

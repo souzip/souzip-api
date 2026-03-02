@@ -1,0 +1,72 @@
+[[admin-notice-api]]
+== 공지사항 관리
+
+[[admin-notice-register]]
+=== 공지사항 등록
+
+공지사항을 등록합니다.
+
+* ADMIN 권한이 필요합니다.
+* multipart/form-data 형식으로 전송됩니다.
+* 파일은 선택사항입니다.
+
+operation::admin/notice/register[snippets='http-request,request-parts,request-part-notice-fields,http-response,response-fields']
+
+[[admin-notice-update]]
+=== 공지사항 수정
+
+공지사항을 수정합니다.
+
+* ADMIN 권한이 필요합니다.
+* multipart/form-data 형식으로 전송됩니다.
+* deleteFileIds: 삭제할 파일 ID 목록 (JSON array)
+* newFiles: 새로 추가할 파일
+
+operation::admin/notice/update[snippets='http-request,path-parameters,request-parts,request-part-notice-fields,http-response,response-fields']
+
+[[admin-notice-activate]]
+=== 공지사항 활성화
+
+공지사항을 활성화합니다.
+
+* ADMIN 권한이 필요합니다.
+
+operation::admin/notice/activate[snippets='http-request,path-parameters,http-response,response-fields']
+
+[[admin-notice-deactivate]]
+=== 공지사항 비활성화
+
+공지사항을 비활성화합니다.
+
+* ADMIN 권한이 필요합니다.
+
+operation::admin/notice/deactivate[snippets='http-request,path-parameters,http-response,response-fields']
+
+[[admin-notice-delete]]
+=== 공지사항 삭제
+
+공지사항을 삭제합니다.
+
+* ADMIN 권한이 필요합니다.
+* 공지사항과 관련된 모든 파일도 함께 삭제됩니다.
+
+operation::admin/notice/delete[snippets='http-request,path-parameters,http-response,response-fields']
+
+[[admin-notice-get-all]]
+=== 전체 공지사항 목록 조회
+
+전체 공지사항 목록을 조회합니다.
+
+* VIEWER 이상의 권한이 필요합니다.
+* ACTIVE, INACTIVE 상태 모두 조회됩니다.
+
+operation::admin/notice/get-all[snippets='http-request,http-response,response-fields']
+
+[[admin-notice-get-by-id]]
+=== 공지사항 상세 조회
+
+공지사항 상세 정보를 조회합니다.
+
+* VIEWER 이상의 권한이 필요합니다.
+
+operation::admin/notice/get-by-id[snippets='http-request,path-parameters,http-response,response-fields']

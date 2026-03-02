@@ -19,7 +19,7 @@ import java.util.List;
 @Service
 public class NoticeModifyService implements NoticeRegister {
 
-    private static final String ENTITY_TYPE_NOTICE = "NOTICE";
+    public static final String ENTITY_TYPE_NOTICE = "NOTICE";
 
     private final NoticeRepository noticeRepository;
     private final NoticeFinder noticeFinder;
@@ -44,9 +44,11 @@ public class NoticeModifyService implements NoticeRegister {
             List<MultipartFile> newFiles
     ) {
         Notice notice = noticeFinder.findById(noticeId);
+
         notice.update(updateRequest);
 
         deleteFiles(deleteFileIds);
+
         uploadFiles(noticeId, notice.getAuthorId().toString(), newFiles);
 
         return noticeRepository.save(notice);
@@ -55,14 +57,18 @@ public class NoticeModifyService implements NoticeRegister {
     @Override
     public void activate(Long noticeId) {
         Notice notice = findNoticeById(noticeId);
+
         notice.activate();
+
         noticeRepository.save(notice);
     }
 
     @Override
     public void deactivate(Long noticeId) {
         Notice notice = findNoticeById(noticeId);
+
         notice.deactivate();
+
         noticeRepository.save(notice);
     }
 

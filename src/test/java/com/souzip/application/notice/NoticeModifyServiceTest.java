@@ -7,6 +7,7 @@ import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeStatus;
 import com.souzip.domain.notice.NoticeUpdateRequest;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 class NoticeModifyServiceTest {
 
+    private static final UUID TEST_ADMIN_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+
     @Mock
     private NoticeRepository noticeRepository;
 
@@ -48,7 +51,7 @@ class NoticeModifyServiceTest {
         NoticeRegisterRequest request = NoticeRegisterRequest.of(
                 "제목",
                 "내용",
-                1L,
+                TEST_ADMIN_ID,
                 NoticeStatus.ACTIVE
         );
 
@@ -75,7 +78,13 @@ class NoticeModifyServiceTest {
         assertThat(result.getStatus()).isEqualTo(NoticeStatus.ACTIVE);
 
         then(fileModifier).should(times(1))
-                .register(eq("1"), eq("NOTICE"), eq(1L), eq(file), eq(null));
+                .register(
+                        eq(TEST_ADMIN_ID.toString()),
+                        eq("NOTICE"),
+                        eq(1L),
+                        eq(file),
+                        eq(null)
+                );
     }
 
     @DisplayName("파일 없이 공지사항을 등록한다")
@@ -85,7 +94,7 @@ class NoticeModifyServiceTest {
         NoticeRegisterRequest request = NoticeRegisterRequest.of(
                 "제목",
                 "내용",
-                1L,
+                TEST_ADMIN_ID,
                 NoticeStatus.ACTIVE
         );
 
@@ -154,7 +163,13 @@ class NoticeModifyServiceTest {
         then(fileModifier).should(times(1)).delete(10L);
         then(fileModifier).should(times(1)).delete(20L);
         then(fileModifier).should(times(1))
-                .register(eq("1"), eq("NOTICE"), eq(1L), eq(newFile), eq(null));
+                .register(
+                        eq(TEST_ADMIN_ID.toString()),
+                        eq("NOTICE"),
+                        eq(1L),
+                        eq(newFile),
+                        eq(null)
+                );
     }
 
     @DisplayName("공지사항을 활성화한다")
@@ -213,7 +228,7 @@ class NoticeModifyServiceTest {
         NoticeRegisterRequest request = NoticeRegisterRequest.of(
                 "제목",
                 "내용",
-                1L,
+                TEST_ADMIN_ID,
                 status
         );
         Notice notice = Notice.register(request);

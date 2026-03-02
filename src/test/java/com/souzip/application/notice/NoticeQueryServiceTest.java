@@ -4,9 +4,12 @@ import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.provided.FileFinder;
 import com.souzip.application.notice.dto.NoticeResponse;
 import com.souzip.application.notice.required.NoticeRepository;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeStatus;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,9 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -28,7 +28,6 @@ import static org.mockito.BDDMockito.given;
 class NoticeQueryServiceTest {
 
     private static final UUID TEST_ADMIN_ID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
-    private static final String ENTITY_TYPE_NOTICE = "NOTICE";
 
     @Mock
     private NoticeRepository noticeRepository;
@@ -118,7 +117,7 @@ class NoticeQueryServiceTest {
         );
 
         given(noticeRepository.findById(1L)).willReturn(Optional.of(notice));
-        given(fileFinder.findFileResponsesByEntity(eq(ENTITY_TYPE_NOTICE), eq(1L)))
+        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
                 .willReturn(files);
 
         // when
@@ -139,7 +138,7 @@ class NoticeQueryServiceTest {
         Notice notice = createNotice(1L, "제목", "내용", NoticeStatus.ACTIVE);
 
         given(noticeRepository.findById(1L)).willReturn(Optional.of(notice));
-        given(fileFinder.findFileResponsesByEntity(eq(ENTITY_TYPE_NOTICE), eq(1L)))
+        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
                 .willReturn(List.of());
 
         // when
@@ -165,9 +164,9 @@ class NoticeQueryServiceTest {
 
         given(noticeRepository.findByStatusOrderByCreatedAtDesc(NoticeStatus.ACTIVE))
                 .willReturn(notices);
-        given(fileFinder.findFileResponsesByEntity(eq(ENTITY_TYPE_NOTICE), eq(1L)))
+        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
                 .willReturn(files1);
-        given(fileFinder.findFileResponsesByEntity(eq(ENTITY_TYPE_NOTICE), eq(2L)))
+        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(2L)))
                 .willReturn(files2);
 
         // when
@@ -197,9 +196,9 @@ class NoticeQueryServiceTest {
         );
 
         given(noticeRepository.findAllByOrderByCreatedAtDesc()).willReturn(notices);
-        given(fileFinder.findFileResponsesByEntity(eq(ENTITY_TYPE_NOTICE), eq(1L)))
+        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(1L)))
                 .willReturn(files1);
-        given(fileFinder.findFileResponsesByEntity(eq(ENTITY_TYPE_NOTICE), eq(2L)))
+        given(fileFinder.findFileResponsesByEntity(eq(EntityType.NOTICE), eq(2L)))
                 .willReturn(files2);
 
         // when

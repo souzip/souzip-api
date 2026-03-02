@@ -6,6 +6,7 @@ import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
 import com.souzip.domain.category.entity.Category;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.recommend.ai.dto.AiRecommendationResponse;
 import com.souzip.domain.recommend.ai.repository.AiRecommendationRepositoryCustom;
@@ -211,12 +212,12 @@ public class AiRecommendationService {
     }
 
     private String getThumbnailUrl(Long souvenirId) {
-        File file = fileQueryService.findFirst("Souvenir", souvenirId);
+        File file = fileQueryService.findFirst(EntityType.SOUVENIR, souvenirId);
         return fileStorage.generateUrl(file.getStorageKey());
     }
 
     private Map<Long, FileResponse> getThumbnails(List<Long> souvenirIds) {
-        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds("Souvenir", souvenirIds);
+        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds(EntityType.SOUVENIR, souvenirIds);
 
         return fileMap.entrySet().stream()
                 .collect(Collectors.toMap(

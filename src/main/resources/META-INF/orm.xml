@@ -48,7 +48,8 @@
     </table>
     <attributes>
       <basic name="entityType">
-        <column name="entity_type" nullable="false"/>
+        <column name="entity_type" nullable="false" length="20"/>
+        <convert converter="com.souzip.domain.file.EntityTypeConverter"/>
       </basic>
       <basic name="entityId">
         <column name="entity_id" nullable="false"/>

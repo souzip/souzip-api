@@ -3,6 +3,7 @@ package com.souzip.application.file;
 import com.souzip.application.file.provided.FileModifier;
 import com.souzip.application.file.required.FileRepository;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.file.FileRegisterRequest;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class FileModifyService implements FileModifier {
     @Override
     public File register(
             String userId,
-            String entityType,
+            EntityType entityType,
             Long entityId,
             MultipartFile file,
             Integer displayOrder
@@ -53,7 +54,7 @@ public class FileModifyService implements FileModifier {
     }
 
     @Override
-    public void deleteByEntity(String entityType, Long entityId) {
+    public void deleteByEntity(EntityType entityType, Long entityId) {
         List<File> files = fileRepository
                 .findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(entityType, entityId);
 
@@ -70,7 +71,7 @@ public class FileModifyService implements FileModifier {
         fileRepository.delete(file);
     }
 
-    private Integer resolveDisplayOrder(String entityType, Long entityId, Integer displayOrder) {
+    private Integer resolveDisplayOrder(EntityType entityType, Long entityId, Integer displayOrder) {
         if (displayOrder != null) {
             return displayOrder;
         }

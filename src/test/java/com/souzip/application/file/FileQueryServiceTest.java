@@ -3,6 +3,7 @@ package com.souzip.application.file;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileRepository;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.file.FileRegisterRequest;
 import java.util.List;
@@ -37,15 +38,15 @@ class FileQueryServiceTest {
     @Test
     void findByEntity() {
         // given
-        File file1 = createFile(1L, "NOTICE", 1L, 1);
-        File file2 = createFile(2L, "NOTICE", 1L, 2);
+        File file1 = createFile(1L, EntityType.NOTICE, 1L, 1);
+        File file2 = createFile(2L, EntityType.NOTICE, 1L, 2);
         List<File> files = List.of(file1, file2);
 
-        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(files);
 
         // when
-        List<File> result = fileQueryService.findByEntity("NOTICE", 1L);
+        List<File> result = fileQueryService.findByEntity(EntityType.NOTICE, 1L);
 
         // then
         assertThat(result).hasSize(2);
@@ -58,13 +59,13 @@ class FileQueryServiceTest {
     @Test
     void findFirst() {
         // given
-        File file = createFile(1L, "NOTICE", 1L, 1);
+        File file = createFile(1L, EntityType.NOTICE, 1L, 1);
 
-        given(fileRepository.findFirstByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findFirstByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(Optional.of(file));
 
         // when
-        File result = fileQueryService.findFirst("NOTICE", 1L);
+        File result = fileQueryService.findFirst(EntityType.NOTICE, 1L);
 
         // then
         assertThat(result.getId()).isEqualTo(1L);
@@ -75,11 +76,11 @@ class FileQueryServiceTest {
     @Test
     void findFirst_notFound() {
         // given
-        given(fileRepository.findFirstByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findFirstByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> fileQueryService.findFirst("NOTICE", 1L))
+        assertThatThrownBy(() -> fileQueryService.findFirst(EntityType.NOTICE, 1L))
                 .isInstanceOf(FileNotFoundException.class)
                 .hasMessageContaining("NOTICE")
                 .hasMessageContaining("1");
@@ -89,17 +90,17 @@ class FileQueryServiceTest {
     @Test
     void findThumbnailsByEntityIds() {
         // given
-        File file1 = createFile(1L, "NOTICE", 1L, 1);
-        File file2 = createFile(2L, "NOTICE", 2L, 1);
+        File file1 = createFile(1L, EntityType.NOTICE, 1L, 1);
+        File file2 = createFile(2L, EntityType.NOTICE, 2L, 1);
         List<File> files = List.of(file1, file2);
         List<Long> entityIds = List.of(1L, 2L);
 
         given(fileRepository.findByEntityTypeAndEntityIdInAndDisplayOrderOrderByDisplayOrder(
-                eq("NOTICE"), eq(entityIds), eq(1)
+                eq(EntityType.NOTICE), eq(entityIds), eq(1)
         )).willReturn(files);
 
         // when
-        Map<Long, File> result = fileQueryService.findThumbnailsByEntityIds("NOTICE", entityIds);
+        Map<Long, File> result = fileQueryService.findThumbnailsByEntityIds(EntityType.NOTICE, entityIds);
 
         // then
         assertThat(result).hasSize(2);
@@ -111,7 +112,7 @@ class FileQueryServiceTest {
     @Test
     void findThumbnailsByEntityIds_emptyList() {
         // when
-        Map<Long, File> result = fileQueryService.findThumbnailsByEntityIds("NOTICE", List.of());
+        Map<Long, File> result = fileQueryService.findThumbnailsByEntityIds(EntityType.NOTICE, List.of());
 
         // then
         assertThat(result).isEmpty();
@@ -121,7 +122,7 @@ class FileQueryServiceTest {
     @Test
     void findThumbnailsByEntityIds_nullList() {
         // when
-        Map<Long, File> result = fileQueryService.findThumbnailsByEntityIds("NOTICE", null);
+        Map<Long, File> result = fileQueryService.findThumbnailsByEntityIds(EntityType.NOTICE, null);
 
         // then
         assertThat(result).isEmpty();
@@ -131,11 +132,11 @@ class FileQueryServiceTest {
     @Test
     void findFileResponsesByEntity() {
         // given
-        File file1 = createFile(1L, "NOTICE", 1L, 1);
-        File file2 = createFile(2L, "NOTICE", 1L, 2);
+        File file1 = createFile(1L, EntityType.NOTICE, 1L, 1);
+        File file2 = createFile(2L, EntityType.NOTICE, 1L, 2);
         List<File> files = List.of(file1, file2);
 
-        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(files);
         given(fileStorage.generateUrl("storage-key-1"))
                 .willReturn("https://example.com/file1.jpg");
@@ -143,7 +144,7 @@ class FileQueryServiceTest {
                 .willReturn("https://example.com/file2.jpg");
 
         // when
-        List<FileResponse> result = fileQueryService.findFileResponsesByEntity("NOTICE", 1L);
+        List<FileResponse> result = fileQueryService.findFileResponsesByEntity(EntityType.NOTICE, 1L);
 
         // then
         assertThat(result).hasSize(2);
@@ -162,17 +163,17 @@ class FileQueryServiceTest {
     @Test
     void findFileResponsesByEntity_emptyFiles() {
         // given
-        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc("NOTICE", 1L))
+        given(fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(EntityType.NOTICE, 1L))
                 .willReturn(List.of());
 
         // when
-        List<FileResponse> result = fileQueryService.findFileResponsesByEntity("NOTICE", 1L);
+        List<FileResponse> result = fileQueryService.findFileResponsesByEntity(EntityType.NOTICE, 1L);
 
         // then
         assertThat(result).isEmpty();
     }
 
-    private File createFile(Long id, String entityType, Long entityId, Integer displayOrder) {
+    private File createFile(Long id, EntityType entityType, Long entityId, Integer displayOrder) {
         FileRegisterRequest request = FileRegisterRequest.of(
                 entityType,
                 entityId,

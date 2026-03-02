@@ -3,6 +3,7 @@ package com.souzip.domain.recommend.general.service;
 import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.recommend.general.dto.CountryRecommendationDto;
 import com.souzip.domain.recommend.general.dto.GeneralRecommendationDto;
@@ -137,7 +138,7 @@ public class GeneralRecommendationService {
     }
 
     private Map<Long, FileResponse> getThumbnails(List<Long> souvenirIds) {
-        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds("Souvenir", souvenirIds);
+        Map<Long, File> fileMap = fileQueryService.findThumbnailsByEntityIds(EntityType.SOUVENIR, souvenirIds);
 
         return fileMap.entrySet().stream()
                 .collect(Collectors.toMap(

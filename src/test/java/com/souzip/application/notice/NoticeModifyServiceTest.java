@@ -3,6 +3,7 @@ package com.souzip.application.notice;
 import com.souzip.application.file.provided.FileModifier;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.application.notice.required.NoticeRepository;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeStatus;
@@ -80,7 +81,7 @@ class NoticeModifyServiceTest {
         then(fileModifier).should(times(1))
                 .register(
                         eq(TEST_ADMIN_ID.toString()),
-                        eq("NOTICE"),
+                        eq(EntityType.NOTICE),
                         eq(1L),
                         eq(file),
                         eq(null)
@@ -165,7 +166,7 @@ class NoticeModifyServiceTest {
         then(fileModifier).should(times(1))
                 .register(
                         eq(TEST_ADMIN_ID.toString()),
-                        eq("NOTICE"),
+                        eq(EntityType.NOTICE),
                         eq(1L),
                         eq(newFile),
                         eq(null)
@@ -220,7 +221,7 @@ class NoticeModifyServiceTest {
         noticeModifyService.delete(1L);
 
         // then
-        then(fileModifier).should(times(1)).deleteByEntity("NOTICE", 1L);
+        then(fileModifier).should(times(1)).deleteByEntity(EntityType.NOTICE, 1L);
         then(noticeRepository).should(times(1)).delete(notice);
     }
 

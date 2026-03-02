@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class File extends BaseEntity {
 
-    private String entityType;
+    private EntityType entityType;
 
     private Long entityId;
 

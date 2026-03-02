@@ -4,6 +4,7 @@ import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.provided.FileFinder;
 import com.souzip.application.file.required.FileRepository;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import java.util.List;
 import java.util.Map;
@@ -21,19 +22,19 @@ public class FileQueryService implements FileFinder {
     private final FileStorage fileStorage;
 
     @Override
-    public List<File> findByEntity(String entityType, Long entityId) {
+    public List<File> findByEntity(EntityType entityType, Long entityId) {
         return fileRepository.findByEntityTypeAndEntityIdOrderByDisplayOrderAsc(entityType, entityId);
     }
 
     @Override
-    public File findFirst(String entityType, Long entityId) {
+    public File findFirst(EntityType entityType, Long entityId) {
         return fileRepository
                 .findFirstByEntityTypeAndEntityIdOrderByDisplayOrderAsc(entityType, entityId)
                 .orElseThrow(() -> new FileNotFoundException(entityType, entityId));
     }
 
     @Override
-    public Map<Long, File> findThumbnailsByEntityIds(String entityType, List<Long> entityIds) {
+    public Map<Long, File> findThumbnailsByEntityIds(EntityType entityType, List<Long> entityIds) {
         if (isEmptyEntityIds(entityIds)) {
             return Map.of();
         }
@@ -54,7 +55,7 @@ public class FileQueryService implements FileFinder {
     }
 
     @Override
-    public List<FileResponse> findFileResponsesByEntity(String entityType, Long entityId) {
+    public List<FileResponse> findFileResponsesByEntity(EntityType entityType, Long entityId) {
         List<File> files = findByEntity(entityType, entityId);
 
         return files.stream()

@@ -8,6 +8,7 @@ import com.souzip.application.file.required.FileStorage;
 import com.souzip.domain.audit.entity.AuditAction;
 import com.souzip.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.domain.exchangerate.service.ExchangeRateService;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.souvenir.dto.PriceData;
 import com.souzip.domain.souvenir.dto.PriceResponse;
@@ -42,7 +43,6 @@ import java.util.List;
 @Service
 public class SouvenirService {
 
-    public static final String ENTITY_TYPE_SOUVENIR = "Souvenir";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final int BEARER_PREFIX_LENGTH = 7;
 
@@ -97,7 +97,7 @@ public class SouvenirService {
 
         Souvenir souvenir = findSouvenirWithOwnershipCheck(id, userId);
 
-        fileModifyService.deleteByEntity(ENTITY_TYPE_SOUVENIR, id);
+        fileModifyService.deleteByEntity(EntityType.SOUVENIR, id);
         souvenir.delete();
     }
 
@@ -297,7 +297,7 @@ public class SouvenirService {
     }
 
     private List<FileResponse> getFiles(Long souvenirId) {
-        List<File> files = fileQueryService.findByEntity(ENTITY_TYPE_SOUVENIR, souvenirId);
+        List<File> files = fileQueryService.findByEntity(EntityType.SOUVENIR, souvenirId);
 
         return files.stream()
                 .map(file -> FileResponse.of(file, fileStorage.generateUrl(file.getStorageKey())))
@@ -336,7 +336,7 @@ public class SouvenirService {
     ) {
         File uploadedFile = fileModifyService.register(
                 userUuid,
-                ENTITY_TYPE_SOUVENIR,
+                EntityType.SOUVENIR,
                 souvenirId,
                 file,
                 null

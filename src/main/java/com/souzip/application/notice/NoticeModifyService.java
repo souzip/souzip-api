@@ -4,6 +4,7 @@ import com.souzip.application.file.provided.FileModifier;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.application.notice.provided.NoticeRegister;
 import com.souzip.application.notice.required.NoticeRepository;
+import com.souzip.domain.file.EntityType;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeUpdateRequest;
@@ -18,8 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class NoticeModifyService implements NoticeRegister {
-
-    public static final String ENTITY_TYPE_NOTICE = "NOTICE";
 
     private final NoticeRepository noticeRepository;
     private final NoticeFinder noticeFinder;
@@ -76,7 +75,7 @@ public class NoticeModifyService implements NoticeRegister {
     public void delete(Long noticeId) {
         Notice notice = findNoticeById(noticeId);
 
-        fileModifier.deleteByEntity(ENTITY_TYPE_NOTICE, noticeId);
+        fileModifier.deleteByEntity(EntityType.NOTICE, noticeId);
 
         noticeRepository.delete(notice);
     }
@@ -99,7 +98,7 @@ public class NoticeModifyService implements NoticeRegister {
         }
 
         files.forEach(file ->
-                fileModifier.register(userId, ENTITY_TYPE_NOTICE, noticeId, file, null)
+                fileModifier.register(userId, EntityType.NOTICE, noticeId, file, null)
         );
     }
 }

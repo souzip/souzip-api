@@ -9,7 +9,7 @@ public class FileNotFoundException extends RuntimeException {
     }
 
     public FileNotFoundException(EntityType entityType, Long entityId) {
-        super(String.format("파일을 찾을 수 없습니다. entityType: %s, entityId: %d",
+        super(String.format("파일을 찾을 수 없습니다. entityType: %s, entityId: %s",
                 entityType, entityId));
     }
 }

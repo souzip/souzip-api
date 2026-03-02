@@ -1,14 +1,18 @@
 package com.souzip.application.notice;
 
+import com.souzip.application.file.provided.FileFinder;
 import com.souzip.application.file.provided.FileModifier;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.application.notice.provided.NoticeRegister;
 import com.souzip.application.notice.required.NoticeRepository;
 import com.souzip.domain.file.EntityType;
+import com.souzip.domain.file.File;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeUpdateRequest;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +26,7 @@ public class NoticeModifyService implements NoticeRegister {
     private final NoticeRepository noticeRepository;
     private final NoticeFinder noticeFinder;
     private final FileModifier fileModifier;
+    private final FileFinder fileFinder;
 
     @Override
     public Notice register(NoticeRegisterRequest registerRequest, List<MultipartFile> files) {
@@ -43,7 +48,7 @@ public class NoticeModifyService implements NoticeRegister {
         Notice notice = noticeFinder.findById(noticeId);
         notice.update(updateRequest);
 
-        deleteFiles(deleteFileIds);
+        deleteFiles(noticeId, deleteFileIds);
         uploadFiles(noticeId, notice.getAuthorId().toString(), newFiles);
 
         return notice;
@@ -69,12 +74,19 @@ public class NoticeModifyService implements NoticeRegister {
         noticeRepository.delete(notice);
     }
 
-    private void deleteFiles(List<Long> deleteFileIds) {
+    private void deleteFiles(Long noticeId, List<Long> deleteFileIds) {
         if (isEmpty(deleteFileIds)) {
             return;
         }
 
-        deleteFileIds.forEach(fileModifier::delete);
+        List<File> noticeFiles = fileFinder.findByEntity(EntityType.NOTICE, noticeId);
+        Set<Long> validFileIds = noticeFiles.stream()
+                .map(File::getId)
+                .collect(Collectors.toSet());
+
+        deleteFileIds.stream()
+                .filter(validFileIds::contains)
+                .forEach(fileModifier::delete);
     }
 
     private void uploadFiles(Long noticeId, String userId, List<MultipartFile> files) {

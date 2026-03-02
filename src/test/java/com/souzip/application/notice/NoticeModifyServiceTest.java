@@ -1,13 +1,17 @@
 package com.souzip.application.notice;
 
+import com.souzip.application.file.provided.FileFinder;
 import com.souzip.application.file.provided.FileModifier;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.application.notice.required.NoticeRepository;
 import com.souzip.domain.file.EntityType;
+import com.souzip.domain.file.File;
+import com.souzip.domain.file.FileRegisterRequest;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeStatus;
 import com.souzip.domain.notice.NoticeUpdateRequest;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,13 +23,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,13 +45,15 @@ class NoticeModifyServiceTest {
     @Mock
     private FileModifier fileModifier;
 
+    @Mock
+    private FileFinder fileFinder;
+
     @InjectMocks
     private NoticeModifyService noticeModifyService;
 
     @DisplayName("공지사항을 등록한다")
     @Test
     void register() {
-        // given
         NoticeRegisterRequest request = NoticeRegisterRequest.of(
                 "제목",
                 "내용",
@@ -70,10 +75,8 @@ class NoticeModifyServiceTest {
                     return notice;
                 });
 
-        // when
         Notice result = noticeModifyService.register(request, List.of(file));
 
-        // then
         assertThat(result.getTitle()).isEqualTo("제목");
         assertThat(result.getContent()).isEqualTo("내용");
         assertThat(result.getStatus()).isEqualTo(NoticeStatus.ACTIVE);
@@ -91,7 +94,6 @@ class NoticeModifyServiceTest {
     @DisplayName("파일 없이 공지사항을 등록한다")
     @Test
     void registerWithoutFiles() {
-        // given
         NoticeRegisterRequest request = NoticeRegisterRequest.of(
                 "제목",
                 "내용",
@@ -102,10 +104,8 @@ class NoticeModifyServiceTest {
         given(noticeRepository.save(any(Notice.class)))
                 .willAnswer(invocation -> invocation.getArgument(0));
 
-        // when
         Notice result = noticeModifyService.register(request, null);
 
-        // then
         assertThat(result.getTitle()).isEqualTo("제목");
         then(fileModifier).shouldHaveNoInteractions();
     }
@@ -113,7 +113,6 @@ class NoticeModifyServiceTest {
     @DisplayName("공지사항을 수정한다")
     @Test
     void update() {
-        // given
         Notice notice = createNotice(NoticeStatus.INACTIVE);
         NoticeUpdateRequest request = NoticeUpdateRequest.of(
                 "수정된 제목",
@@ -122,13 +121,9 @@ class NoticeModifyServiceTest {
         );
 
         given(noticeFinder.findById(1L)).willReturn(notice);
-        given(noticeRepository.save(any(Notice.class)))
-                .willAnswer(invocation -> invocation.getArgument(0));
 
-        // when
         Notice result = noticeModifyService.update(1L, request, null, null);
 
-        // then
         assertThat(result.getTitle()).isEqualTo("수정된 제목");
         assertThat(result.getContent()).isEqualTo("수정된 내용");
         assertThat(result.getStatus()).isEqualTo(NoticeStatus.ACTIVE);
@@ -137,7 +132,6 @@ class NoticeModifyServiceTest {
     @DisplayName("공지사항 수정 시 파일을 삭제하고 추가한다")
     @Test
     void updateWithFiles() {
-        // given
         Notice notice = createNotice(NoticeStatus.ACTIVE);
         NoticeUpdateRequest request = NoticeUpdateRequest.of(
                 "수정된 제목",
@@ -153,14 +147,15 @@ class NoticeModifyServiceTest {
                 "new".getBytes()
         );
 
-        given(noticeFinder.findById(1L)).willReturn(notice);
-        given(noticeRepository.save(any(Notice.class)))
-                .willAnswer(invocation -> invocation.getArgument(0));
+        File file1 = createFile(10L, 1L);
+        File file2 = createFile(20L, 1L);
 
-        // when
+        given(noticeFinder.findById(1L)).willReturn(notice);
+        given(fileFinder.findByEntity(EntityType.NOTICE, 1L))
+                .willReturn(List.of(file1, file2));  // ← 추가
+
         noticeModifyService.update(1L, request, deleteFileIds, List.of(newFile));
 
-        // then
         then(fileModifier).should(times(1)).delete(10L);
         then(fileModifier).should(times(1)).delete(20L);
         then(fileModifier).should(times(1))
@@ -173,20 +168,87 @@ class NoticeModifyServiceTest {
                 );
     }
 
+    @DisplayName("공지사항에 속한 파일만 삭제한다")
+    @Test
+    void updateWithFiles_onlyDeleteOwnFiles() {
+        Notice notice = createNotice(NoticeStatus.ACTIVE);
+        NoticeUpdateRequest request = NoticeUpdateRequest.of(
+                "수정된 제목",
+                "수정된 내용",
+                NoticeStatus.ACTIVE
+        );
+
+        List<Long> deleteFileIds = List.of(10L, 20L, 30L);
+
+        File file1 = createFile(10L, 1L);
+        File file2 = createFile(20L, 1L);
+
+        given(noticeFinder.findById(1L)).willReturn(notice);
+        given(fileFinder.findByEntity(EntityType.NOTICE, 1L))
+                .willReturn(List.of(file1, file2));
+
+        noticeModifyService.update(1L, request, deleteFileIds, null);
+
+        then(fileModifier).should(times(1)).delete(10L);
+        then(fileModifier).should(times(1)).delete(20L);
+        then(fileModifier).should(never()).delete(30L);
+    }
+
+    @DisplayName("다른 공지사항의 파일은 삭제하지 않는다")
+    @Test
+    void updateWithFiles_doNotDeleteOtherNoticeFiles() {
+        Notice notice = createNotice(NoticeStatus.ACTIVE);
+        NoticeUpdateRequest request = NoticeUpdateRequest.of(
+                "수정된 제목",
+                "수정된 내용",
+                NoticeStatus.ACTIVE
+        );
+
+        List<Long> deleteFileIds = List.of(10L, 99L);
+
+        File file1 = createFile(10L, 1L);
+
+        given(noticeFinder.findById(1L)).willReturn(notice);
+        given(fileFinder.findByEntity(EntityType.NOTICE, 1L))
+                .willReturn(List.of(file1));
+
+        noticeModifyService.update(1L, request, deleteFileIds, null);
+
+        then(fileModifier).should(times(1)).delete(10L);
+        then(fileModifier).should(never()).delete(99L);
+    }
+
+    @DisplayName("파일이 없는 공지사항 수정 시 파일 삭제 요청을 무시한다")
+    @Test
+    void updateWithFiles_noFilesToDelete() {
+        Notice notice = createNotice(NoticeStatus.ACTIVE);
+        NoticeUpdateRequest request = NoticeUpdateRequest.of(
+                "수정된 제목",
+                "수정된 내용",
+                NoticeStatus.ACTIVE
+        );
+
+        List<Long> deleteFileIds = List.of(10L, 20L);
+
+        given(noticeFinder.findById(1L)).willReturn(notice);
+        given(fileFinder.findByEntity(EntityType.NOTICE, 1L))
+                .willReturn(List.of());
+
+        noticeModifyService.update(1L, request, deleteFileIds, null);
+
+        then(fileModifier).should(never()).delete(10L);
+        then(fileModifier).should(never()).delete(20L);
+    }
+
     @DisplayName("공지사항을 활성화한다")
     @Test
     void activate() {
-        // given
         Notice notice = createNotice(NoticeStatus.INACTIVE);
 
         given(noticeFinder.findById(1L)).willReturn(notice);
-        given(noticeRepository.save(any(Notice.class)))
-                .willAnswer(invocation -> invocation.getArgument(0));
 
-        // when
         noticeModifyService.activate(1L);
 
-        // then
         assertThat(notice.getStatus()).isEqualTo(NoticeStatus.ACTIVE);
         assertThat(notice.isActive()).isTrue();
     }
@@ -194,17 +256,12 @@ class NoticeModifyServiceTest {
     @DisplayName("공지사항을 비활성화한다")
     @Test
     void deactivate() {
-        // given
         Notice notice = createNotice(NoticeStatus.ACTIVE);
 
         given(noticeFinder.findById(1L)).willReturn(notice);
-        given(noticeRepository.save(any(Notice.class)))
-                .willAnswer(invocation -> invocation.getArgument(0));
 
-        // when
         noticeModifyService.deactivate(1L);
 
-        // then
         assertThat(notice.getStatus()).isEqualTo(NoticeStatus.INACTIVE);
         assertThat(notice.isActive()).isFalse();
     }
@@ -212,15 +269,12 @@ class NoticeModifyServiceTest {
     @DisplayName("공지사항을 삭제한다")
     @Test
     void delete() {
-        // given
         Notice notice = createNotice(NoticeStatus.ACTIVE);
 
         given(noticeFinder.findById(1L)).willReturn(notice);
 
-        // when
         noticeModifyService.delete(1L);
 
-        // then
         then(fileModifier).should(times(1)).deleteByEntity(EntityType.NOTICE, 1L);
         then(noticeRepository).should(times(1)).delete(notice);
     }
@@ -235,5 +289,20 @@ class NoticeModifyServiceTest {
         Notice notice = Notice.register(request);
         ReflectionTestUtils.setField(notice, "id", 1L);
         return notice;
+    }
+
+    private File createFile(Long fileId, Long noticeId) {
+        FileRegisterRequest request = FileRegisterRequest.of(
+                EntityType.NOTICE,
+                noticeId,
+                "storage-key-" + fileId,
+                "file.jpg",
+                1024L,
+                "image/jpeg",
+                1
+        );
+        File file = File.register(request);
+        ReflectionTestUtils.setField(file, "id", fileId);
+        return file;
     }
 }

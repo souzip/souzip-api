@@ -1,7 +1,9 @@
 name: prod
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - feat/SOU-421-prod-script
 
 env:
   IMAGE_NAME: asia-northeast3-docker.pkg.dev/souzip-488211/souzip-prod-repo/souzip-api:latest

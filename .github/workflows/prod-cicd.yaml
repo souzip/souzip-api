@@ -121,6 +121,11 @@ jobs:
             PROD_API_DOCS_URL=${{ secrets.PROD_API_DOCS_URL }}
             ADMIN_INITIAL_USERNAME=${{ secrets.ADMIN_INITIAL_USERNAME }}
             ADMIN_INITIAL_PASSWORD=${{ secrets.ADMIN_INITIAL_PASSWORD }}
+            NCP_ENDPOINT=${{ secrets.NCP_ENDPOINT }}
+            NCP_REGION=${{ secrets.NCP_REGION }}
+            NCP_BUCKET=${{ secrets.NCP_BUCKET }}
+            NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }}
+            NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/prod/.env

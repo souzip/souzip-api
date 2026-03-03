@@ -57,7 +57,8 @@ fi
 echo -e "${GREEN}[INFO] 현재:$CURRENT_PORT → 배포:$TARGET($TARGET_PORT)${NC}"
 
 echo -e "${YELLOW}[3/7] $TARGET 컨테이너 실행${NC}"
-docker-compose -f "$COMPOSE_FILE" up -d --pull always
+docker-compose -f "$COMPOSE_FILE" pull
+docker-compose -f "$COMPOSE_FILE" up -d
 
 echo -e "${YELLOW}[4/7] 헬스체크 시작${NC}"
 

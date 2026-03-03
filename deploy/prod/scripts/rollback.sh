@@ -70,7 +70,7 @@ fi
 echo -e "${GREEN}[INFO] active=${ACTIVE} → rollback=${PREV}${NC}"
 
 echo -e "${YELLOW}[2/7] 롤백 대상 컨테이너 실행${NC}"
-docker-compose -f "$PREV_COMPOSE" up -d
+docker compose -f "$PREV_COMPOSE" up -d
 
 echo -e "${YELLOW}[3/7] 헬스체크${NC}"
 
@@ -89,7 +89,7 @@ done
 
 if [[ "$HEALTH_OK" != "true" ]]; then
   echo -e "${RED}[ERROR] 롤백 실패${NC}"
-  docker-compose -f "$PREV_COMPOSE" down || true
+  docker compose -f "$PREV_COMPOSE" down || true
   exit 1
 fi
 
@@ -105,7 +105,7 @@ sudo nginx -t
 sudo nginx -s reload
 
 echo -e "${YELLOW}[5/7] 기존 컨테이너 종료${NC}"
-docker-compose -f "$ACTIVE_COMPOSE" down || true
+docker compose -f "$ACTIVE_COMPOSE" down || true
 
 echo -e "${YELLOW}[6/7] 상태 확인${NC}"
 docker ps | grep souzip || true

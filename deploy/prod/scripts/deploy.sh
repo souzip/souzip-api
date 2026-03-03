@@ -57,8 +57,8 @@ fi
 echo -e "${GREEN}[INFO] 현재:$CURRENT_PORT → 배포:$TARGET($TARGET_PORT)${NC}"
 
 echo -e "${YELLOW}[3/7] $TARGET 컨테이너 실행${NC}"
-docker-compose -f "$COMPOSE_FILE" pull
-docker-compose -f "$COMPOSE_FILE" up -d
+docker compose -f "$COMPOSE_FILE" pull
+docker compose -f "$COMPOSE_FILE" up -d
 
 echo -e "${YELLOW}[4/7] 헬스체크 시작${NC}"
 
@@ -79,7 +79,7 @@ done
 
 if [ "$HEALTH_OK" = false ]; then
   echo -e "${RED}[ERROR] 헬스체크 실패${NC}"
-  docker-compose -f "$COMPOSE_FILE" down
+  docker compose -f "$COMPOSE_FILE" down
   exit 1
 fi
 
@@ -99,9 +99,9 @@ echo -e "${GREEN}[SUCCESS] nginx 전환 완료${NC}"
 echo -e "${YELLOW}[6/7] 이전 컨테이너 종료 ($STOP)${NC}"
 
 if [ "$STOP" == "blue" ]; then
-  docker-compose -f "$BLUE_COMPOSE" down
+  docker compose -f "$BLUE_COMPOSE" down
 else
-  docker-compose -f "$GREEN_COMPOSE" down
+  docker compose -f "$GREEN_COMPOSE" down
 fi
 
 echo -e "${YELLOW}[7/7] 이미지 정리${NC}"

@@ -36,7 +36,7 @@ CREATE SCHEMA IF NOT EXISTS cdb_admin;
 -- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
+-- COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
 
 
 

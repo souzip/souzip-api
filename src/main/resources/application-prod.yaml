@@ -1,4 +1,8 @@
 spring:
+  docker:
+    compose:
+      enabled: false
+
   datasource:
     url: ${PROD_DB_URL}
     username: ${PROD_POSTGRES_USER}

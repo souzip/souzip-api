@@ -29,7 +29,7 @@ CREATE SCHEMA IF NOT EXISTS cdb_admin;
 -- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA cdb_admin;
+-- CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA cdb_admin;
 
 
 --

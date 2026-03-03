@@ -40,7 +40,12 @@ cd "$DEPLOY_DIR" || exit 1
 
 echo -e "${YELLOW}[2/7] 현재 active 포트 확인${NC}"
 
-CURRENT_PORT=$(grep -oE 'server[[:space:]]+127\.0\.0\.1:([0-9]+)' "$NGINX_UPSTREAM_FILE" | grep -oE '[0-9]+' | head -n 1 || true)
+CURRENT_PORT=$(grep -oE '127\.0\.0\.1:[0-9]+' "$NGINX_UPSTREAM_FILE" | cut -d: -f2 | head -n 1 || true)
+
+if [ -z "$CURRENT_PORT" ]; then
+  echo -e "${YELLOW}[WARN] upstream 없음 → 최초 배포 (blue=8081)${NC}"
+  CURRENT_PORT="none"
+fi
 
 if [ "$CURRENT_PORT" == "$BLUE_PORT" ]; then
   TARGET="green"
@@ -57,6 +62,8 @@ fi
 echo -e "${GREEN}[INFO] 현재:$CURRENT_PORT → 배포:$TARGET($TARGET_PORT)${NC}"
 
 echo -e "${YELLOW}[3/7] $TARGET 컨테이너 실행${NC}"
+
+docker compose -f "$COMPOSE_FILE" down || true
 docker compose -f "$COMPOSE_FILE" pull
 docker compose -f "$COMPOSE_FILE" up -d
 
@@ -99,12 +106,12 @@ echo -e "${GREEN}[SUCCESS] nginx 전환 완료${NC}"
 echo -e "${YELLOW}[6/7] 이전 컨테이너 종료 ($STOP)${NC}"
 
 if [ "$STOP" == "blue" ]; then
-  docker compose -f "$BLUE_COMPOSE" down
+  docker compose -f "$BLUE_COMPOSE" down || true
 else
-  docker compose -f "$GREEN_COMPOSE" down
+  docker compose -f "$GREEN_COMPOSE" down || true
 fi
 
 echo -e "${YELLOW}[7/7] 이미지 정리${NC}"
-docker image prune -f
+docker image prune -f || true
 
 echo -e "${GREEN}[DEPLOY SUCCESS] 완료${NC}"

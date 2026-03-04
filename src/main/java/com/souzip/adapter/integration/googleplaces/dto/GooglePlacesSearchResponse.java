@@ -16,7 +16,12 @@ public record GooglePlacesSearchResponse(
             @JsonProperty("formatted_address")
             String formattedAddress,
 
-            Geometry geometry
+            Geometry geometry,
+
+            List<String> types,
+
+            @JsonProperty("plus_code")
+            PlusCode plusCode
     ) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,5 +33,11 @@ public record GooglePlacesSearchResponse(
     public record Location(
             double lat,
             double lng
+    ) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record PlusCode(
+            @JsonProperty("compound_code")
+            String compoundCode
     ) {}
 }

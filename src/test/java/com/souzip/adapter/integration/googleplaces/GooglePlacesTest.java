@@ -54,8 +54,42 @@ class GooglePlacesTest {
         assertThat(places).hasSize(1);
         assertThat(places.getFirst().name()).isEqualTo("에펠탑 기념품샵");
         assertThat(places.getFirst().address()).isEqualTo("프랑스 파리 샹드마르스 에펠탑");
+        assertThat(places.getFirst().region()).isEqualTo("프랑스 파리 1구");
+        assertThat(places.getFirst().category()).isEqualTo("store");
         assertThat(places.getFirst().coordinate().getLatitude()).isEqualTo(BigDecimal.valueOf(48.8584));
         assertThat(places.getFirst().coordinate().getLongitude()).isEqualTo(BigDecimal.valueOf(2.2945));
+    }
+
+    @DisplayName("types가 null이면 category는 null로 반환한다")
+    @Test
+    void searchByKeyword_NullTypes() {
+        // given
+        GooglePlacesSearchResponse mockResponse = createMockResponseWithNullTypes();
+
+        when(restTemplate.getForObject(anyString(), eq(GooglePlacesSearchResponse.class)))
+                .thenReturn(mockResponse);
+
+        // when
+        List<SearchPlace> places = adapter.searchByKeyword("test");
+
+        // then
+        assertThat(places.getFirst().category()).isNull();
+    }
+
+    @DisplayName("plus_code가 null이면 region은 null로 반환한다")
+    @Test
+    void searchByKeyword_NullPlusCode() {
+        // given
+        GooglePlacesSearchResponse mockResponse = createMockResponseWithNullPlusCode();
+
+        when(restTemplate.getForObject(anyString(), eq(GooglePlacesSearchResponse.class)))
+                .thenReturn(mockResponse);
+
+        // when
+        List<SearchPlace> places = adapter.searchByKeyword("test");
+
+        // then
+        assertThat(places.getFirst().region()).isNull();
     }
 
     @DisplayName("상위 10개만 반환한다")
@@ -79,13 +113,11 @@ class GooglePlacesTest {
     @Test
     void searchByKeyword_NullResponse() {
         // given
-        String keyword = "test";
-
         when(restTemplate.getForObject(anyString(), eq(GooglePlacesSearchResponse.class)))
                 .thenReturn(null);
 
         // when
-        List<SearchPlace> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword("test");
 
         // then
         assertThat(places).isEmpty();
@@ -95,14 +127,13 @@ class GooglePlacesTest {
     @Test
     void searchByKeyword_EmptyResults() {
         // given
-        String keyword = "존재하지않는장소12345";
         GooglePlacesSearchResponse emptyResponse = new GooglePlacesSearchResponse(List.of(), "ZERO_RESULTS");
 
         when(restTemplate.getForObject(anyString(), eq(GooglePlacesSearchResponse.class)))
                 .thenReturn(emptyResponse);
 
         // when
-        List<SearchPlace> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword("존재하지않는장소12345");
 
         // then
         assertThat(places).isEmpty();
@@ -112,13 +143,11 @@ class GooglePlacesTest {
     @Test
     void searchByKeyword_ApiCallFails() {
         // given
-        String keyword = "test";
-
         when(restTemplate.getForObject(anyString(), eq(GooglePlacesSearchResponse.class)))
                 .thenThrow(new RuntimeException("API Error"));
 
         // when
-        List<SearchPlace> places = adapter.searchByKeyword(keyword);
+        List<SearchPlace> places = adapter.searchByKeyword("test");
 
         // then
         assertThat(places).isEmpty();
@@ -127,15 +156,53 @@ class GooglePlacesTest {
     private GooglePlacesSearchResponse createMockResponse() {
         GooglePlacesSearchResponse.Location location =
                 new GooglePlacesSearchResponse.Location(48.8584, 2.2945);
-
         GooglePlacesSearchResponse.Geometry geometry =
                 new GooglePlacesSearchResponse.Geometry(location);
-
+        GooglePlacesSearchResponse.PlusCode plusCode =
+                new GooglePlacesSearchResponse.PlusCode("8FW4V75Q+GH 프랑스 파리 1구");
         GooglePlacesSearchResponse.Result result =
                 new GooglePlacesSearchResponse.Result(
                         "에펠탑 기념품샵",
                         "프랑스 파리 샹드마르스 에펠탑",
-                        geometry
+                        geometry,
+                        List.of("store", "point_of_interest", "establishment"),
+                        plusCode
+                );
+
+        return new GooglePlacesSearchResponse(List.of(result), "OK");
+    }
+
+    private GooglePlacesSearchResponse createMockResponseWithNullTypes() {
+        GooglePlacesSearchResponse.Location location =
+                new GooglePlacesSearchResponse.Location(48.8584, 2.2945);
+        GooglePlacesSearchResponse.Geometry geometry =
+                new GooglePlacesSearchResponse.Geometry(location);
+        GooglePlacesSearchResponse.PlusCode plusCode =
+                new GooglePlacesSearchResponse.PlusCode("8FW4V75Q+GH 프랑스 파리 1구");
+        GooglePlacesSearchResponse.Result result =
+                new GooglePlacesSearchResponse.Result(
+                        "테스트 장소",
+                        "테스트 주소",
+                        geometry,
+                        null,
+                        plusCode
+                );
+
+        return new GooglePlacesSearchResponse(List.of(result), "OK");
+    }
+
+    private GooglePlacesSearchResponse createMockResponseWithNullPlusCode() {
+        GooglePlacesSearchResponse.Location location =
+                new GooglePlacesSearchResponse.Location(48.8584, 2.2945);
+        GooglePlacesSearchResponse.Geometry geometry =
+                new GooglePlacesSearchResponse.Geometry(location);
+        GooglePlacesSearchResponse.Result result =
+                new GooglePlacesSearchResponse.Result(
+                        "테스트 장소",
+                        "테스트 주소",
+                        geometry,
+                        List.of("cafe"),
+                        null
                 );
 
         return new GooglePlacesSearchResponse(List.of(result), "OK");
@@ -146,14 +213,17 @@ class GooglePlacesTest {
                 .mapToObj(i -> {
                     GooglePlacesSearchResponse.Location location =
                             new GooglePlacesSearchResponse.Location(37.498 + i * 0.001, 127.028 + i * 0.001);
-
                     GooglePlacesSearchResponse.Geometry geometry =
                             new GooglePlacesSearchResponse.Geometry(location);
+                    GooglePlacesSearchResponse.PlusCode plusCode =
+                            new GooglePlacesSearchResponse.PlusCode("GG3V+" + i + " 서울특별시 강남구");
 
                     return new GooglePlacesSearchResponse.Result(
                             "카페 " + (i + 1),
                             "서울 강남구 테헤란로 " + (i + 1),
-                            geometry
+                            geometry,
+                            List.of("cafe", "establishment"),
+                            plusCode
                     );
                 })
                 .toList();

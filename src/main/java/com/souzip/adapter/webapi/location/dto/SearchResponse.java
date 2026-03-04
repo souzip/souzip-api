@@ -2,12 +2,11 @@ package com.souzip.adapter.webapi.location.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.souzip.application.location.dto.CitySearchResult;
-import com.souzip.application.location.dto.SearchPlace;
 import com.souzip.application.location.dto.PlaceSearchResult;
+import com.souzip.application.location.dto.SearchPlace;
 import com.souzip.application.location.dto.SearchResult;
 import com.souzip.domain.city.entity.City;
-
-import java.math.BigDecimal;
+import com.souzip.domain.shared.Coordinate;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -16,9 +15,11 @@ public record SearchResponse(
         String name,
         String country,
         String address,
-        BigDecimal latitude,
-        BigDecimal longitude
+        String region,
+        String category,
+        Coordinate coordinate
 ) {
+
     public static List<SearchResponse> from(SearchResult result) {
         if (result instanceof CitySearchResult(List<City> cities)) {
             return cities.stream()
@@ -41,8 +42,9 @@ public record SearchResponse(
                 city.getNameKr(),
                 city.getCountry().getNameKr(),
                 null,
-                city.getLatitude(),
-                city.getLongitude()
+                null,
+                null,
+                Coordinate.of(city.getLatitude(), city.getLongitude())
         );
     }
 
@@ -52,8 +54,9 @@ public record SearchResponse(
                 place.name(),
                 null,
                 place.address(),
-                place.coordinate().getLatitude(),
-                place.coordinate().getLongitude()
+                place.region(),
+                place.category(),
+                place.coordinate()
         );
     }
 }

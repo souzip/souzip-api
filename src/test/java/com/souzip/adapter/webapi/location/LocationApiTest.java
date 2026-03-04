@@ -80,8 +80,7 @@ class LocationApiTest extends RestDocsSupport {
                                 fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
                                 fieldWithPath("data.formattedAddress").type(JsonFieldType.STRING)
                                         .description("전체 주소 (Deprecated: address 필드 사용 권장)"),
-                                fieldWithPath("data.address").type(JsonFieldType.STRING)
-                                        .description("전체 주소"),
+                                fieldWithPath("data.address").type(JsonFieldType.STRING).description("전체 주소"),
                                 fieldWithPath("data.city").type(JsonFieldType.STRING).description("도시 이름"),
                                 fieldWithPath("data.countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
@@ -141,8 +140,8 @@ class LocationApiTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data[0].type").value("city"))
                 .andExpect(jsonPath("$.data[0].name").value("서울"))
                 .andExpect(jsonPath("$.data[0].country").value("대한민국"))
-                .andExpect(jsonPath("$.data[0].latitude").value(37.5665))
-                .andExpect(jsonPath("$.data[0].longitude").value(126.9780))
+                .andExpect(jsonPath("$.data[0].coordinate.latitude").value(37.5665))
+                .andExpect(jsonPath("$.data[0].coordinate.longitude").value(126.9780))
                 .andDo(document("location/search-city",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -155,8 +154,9 @@ class LocationApiTest extends RestDocsSupport {
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("도시명 또는 장소명"),
                                 fieldWithPath("data[].country").type(JsonFieldType.STRING).description("국가명 (도시 검색 시)").optional(),
                                 fieldWithPath("data[].address").type(JsonFieldType.STRING).description("주소 (장소 검색 시)").optional(),
-                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("위도"),
-                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                                fieldWithPath("data[].coordinate").type(JsonFieldType.OBJECT).description("좌표"),
+                                fieldWithPath("data[].coordinate.latitude").type(JsonFieldType.NUMBER).description("위도"),
+                                fieldWithPath("data[].coordinate.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )
                 ));
@@ -171,6 +171,8 @@ class LocationApiTest extends RestDocsSupport {
         SearchPlace eiffelTower = new SearchPlace(
                 "Eiffel Tower",
                 "Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France",
+                "프랑스 파리",
+                "tourist_attraction",
                 Coordinate.of(BigDecimal.valueOf(48.8584), BigDecimal.valueOf(2.2945))
         );
 
@@ -188,8 +190,10 @@ class LocationApiTest extends RestDocsSupport {
                 .andExpect(jsonPath("$.data[0].type").value("place"))
                 .andExpect(jsonPath("$.data[0].name").value("Eiffel Tower"))
                 .andExpect(jsonPath("$.data[0].address").value("Champ de Mars, 5 Avenue Anatole France, 75007 Paris, France"))
-                .andExpect(jsonPath("$.data[0].latitude").value(48.8584))
-                .andExpect(jsonPath("$.data[0].longitude").value(2.2945))
+                .andExpect(jsonPath("$.data[0].region").value("프랑스 파리"))
+                .andExpect(jsonPath("$.data[0].category").value("tourist_attraction"))
+                .andExpect(jsonPath("$.data[0].coordinate.latitude").value(48.8584))
+                .andExpect(jsonPath("$.data[0].coordinate.longitude").value(2.2945))
                 .andDo(document("location/search-place",
                         getDocumentRequest(),
                         getDocumentResponse(),
@@ -202,8 +206,11 @@ class LocationApiTest extends RestDocsSupport {
                                 fieldWithPath("data[].name").type(JsonFieldType.STRING).description("도시명 또는 장소명"),
                                 fieldWithPath("data[].country").type(JsonFieldType.STRING).description("국가명 (도시 검색 시)").optional(),
                                 fieldWithPath("data[].address").type(JsonFieldType.STRING).description("주소 (장소 검색 시)").optional(),
-                                fieldWithPath("data[].latitude").type(JsonFieldType.NUMBER).description("위도"),
-                                fieldWithPath("data[].longitude").type(JsonFieldType.NUMBER).description("경도"),
+                                fieldWithPath("data[].region").type(JsonFieldType.STRING).description("지역명 (장소 검색 시)").optional(),
+                                fieldWithPath("data[].category").type(JsonFieldType.STRING).description("카테고리 (장소 검색 시)").optional(),
+                                fieldWithPath("data[].coordinate").type(JsonFieldType.OBJECT).description("좌표"),
+                                fieldWithPath("data[].coordinate.latitude").type(JsonFieldType.NUMBER).description("위도"),
+                                fieldWithPath("data[].coordinate.longitude").type(JsonFieldType.NUMBER).description("경도"),
                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                         )
                 ));

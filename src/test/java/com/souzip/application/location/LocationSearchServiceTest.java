@@ -181,7 +181,7 @@ class LocationSearchServiceTest {
     }
 
     private City createCity(String nameKr, String nameEn) {
-        Country country = createCountry("일본", "Japan");
+        Country country = createCountry();
 
         return City.create(
                 nameEn,
@@ -192,10 +192,10 @@ class LocationSearchServiceTest {
         );
     }
 
-    private Country createCountry(String nameKr, String nameEn) {
+    private Country createCountry() {
         return Country.of(
-                nameEn,
-                nameKr,
+                "Japan",
+                "일본",
                 "JP",
                 "Tokyo",
                 Region.ASIA,
@@ -210,6 +210,8 @@ class LocationSearchServiceTest {
         return new SearchPlace(
                 name,
                 address,
+                null,
+                null,
                 Coordinate.of(
                         BigDecimal.valueOf(48.8584),
                         BigDecimal.valueOf(2.2945)

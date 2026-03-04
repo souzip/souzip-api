@@ -5,6 +5,7 @@ import com.souzip.adapter.integration.googleplaces.dto.GooglePlacesSearchRespons
 import com.souzip.application.location.dto.SearchPlace;
 import com.souzip.application.location.required.PlaceSearchProvider;
 import com.souzip.domain.shared.Coordinate;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,10 +82,27 @@ public class GooglePlaces implements PlaceSearchProvider {
         return new SearchPlace(
                 result.name(),
                 result.formattedAddress(),
+                extractRegion(result.plusCode()),
+                extractCategory(result.types()),
                 Coordinate.of(
                         BigDecimal.valueOf(result.geometry().location().lat()),
                         BigDecimal.valueOf(result.geometry().location().lng())
                 )
         );
+    }
+
+    private String extractCategory(List<String> types) {
+        return Optional.ofNullable(types)
+                .filter(t -> !t.isEmpty())
+                .map(List::getFirst)
+                .orElse(null);
+    }
+
+    private String extractRegion(GooglePlacesSearchResponse.PlusCode plusCode) {
+        return Optional.ofNullable(plusCode)
+                .map(GooglePlacesSearchResponse.PlusCode::compoundCode)
+                .filter(code -> code.contains(" "))
+                .map(code -> code.substring(code.indexOf(" ") + 1))
+                .orElse(null);
     }
 }

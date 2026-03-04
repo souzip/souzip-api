@@ -11,10 +11,10 @@
 -- Name: cdb_admin; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
-CREATE SCHEMA cdb_admin;
+CREATE SCHEMA IF NOT EXISTS cdb_admin;
 
 
-ALTER SCHEMA cdb_admin OWNER TO postgres;
+-- ALTER SCHEMA cdb_admin OWNER TO postgres;
 
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
@@ -23,20 +23,20 @@ ALTER SCHEMA cdb_admin OWNER TO postgres;
 -- *not* creating schema, since initdb creates it
 
 
-ALTER SCHEMA public OWNER TO postgres;
+-- ALTER SCHEMA public OWNER TO postgres;
 
 --
 -- Name: postgis; Type: EXTENSION; Schema: -; Owner: -
 --
 
-CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA cdb_admin;
+-- CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA cdb_admin;
 
 
 --
 -- Name: EXTENSION postgis; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
+-- COMMENT ON EXTENSION postgis IS 'PostGIS geometry and geography spatial types and functions';
 
 
 

@@ -1,9 +1,12 @@
 name: prod
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
-      - feat/SOU-421-prod-script
+      - main
 
 env:
   IMAGE_NAME: asia-northeast3-docker.pkg.dev/souzip-488211/souzip-prod-repo/souzip-api:latest

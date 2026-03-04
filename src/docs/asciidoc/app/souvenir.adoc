@@ -1,0 +1,118 @@
+[[souvenir-api]]
+== Souvenir API
+
+[[souvenir-get]]
+=== 기념품 조회
+
+기념품 상세 정보를 조회하는 API입니다.
+
+* 인증 불필요 (Public API)
+* 삭제된(soft delete) 기념품은 조회할 수 없습니다.
+* 인증 불필요하지만, 로그인한 사용자가 조회하면 내 기념품 여부(isOwned) 함께 반환
+
+operation::souvenirs/get-souvenir[snippets='http-request,path-parameters,http-response,response-fields']
+
+NOTE: 기념품에는 위치 정보(위도/경도)와 업로드된 파일 목록이 함께 반환됩니다.
+
+NOTE: v2 응답 구조 - `price` 필드에 원본 가격(original)과 등록 시점 환율로 변환된 가격(converted)이 포함됩니다. 환율은 등록 시점에 고정되어 이후 환율 변동에 영향받지 않습니다.
+
+WARNING: 응답의 `localPrice`, `currencySymbol`, `krwPrice` 필드는 v1 호환성을 위해 임시로 제공되며, 향후 제거될 예정입니다. `price` 객체(`price.original.amount`, `price.original.symbol`, `price.converted.amount`) 사용을 권장합니다.
+
+[[souvenir-create]]
+=== 기념품 생성 (New)
+
+사용자가 새로운 기념품을 등록하는 v2 API입니다.
+
+* 엔드포인트: `POST /api/v2/souvenirs`
+* 인증 필요
+* multipart/form-data 요청
+* 기념품 정보(JSON) + 이미지 파일 업로드 가능
+* 기념품 업로드 시 이미지 파일은 필수입니다.
+
+**v2 주요 개선사항:**
+
+* **자동 환율 계산**: 사용자는 금액과 통화만 입력, 서버에서 자동으로 환율 적용
+* **등록 시점 환율 고정**: 등록 시점의 환율로 변환 금액이 고정되어 일관성 보장
+
+operation::souvenirs/create-souvenir-v2[snippets='http-request,request-parts,request-part-souvenir-fields,http-response,response-fields']
+
+NOTE: v1의 `localPrice`, `currencySymbol`, `krwPrice` 대신 `price`, `currency` 사용
+
+NOTE: 환율은 등록 시점에 고정되므로, 이후 환율이 변동해도 기념품의 변환 가격은 변하지 않습니다.
+
+WARNING: 응답의 `localPrice`, `currencySymbol`, `krwPrice` 필드는 v1 호환성을 위해 임시로 제공되며, 향후 제거될 예정입니다. `price` 객체 사용을 권장합니다.
+
+==== 기념품 생성 (Deprecated)
+
+v1 API를 사용한 기념품 등록입니다.
+
+CAUTION: 이 API는 Deprecated되었습니다. v2 API(`POST /api/v2/souvenirs`) 사용을 권장합니다.
+
+* 엔드포인트: `POST /api/souvenirs`
+* 인증 필요
+* multipart/form-data 요청
+* 기념품 정보(JSON) + 이미지 파일 업로드 가능
+* 기념품 업로드 시 이미지 파일은 필수입니다.
+
+operation::souvenirs/create-souvenir[snippets='http-request,request-parts,request-part-souvenir-fields,http-response,response-fields']
+
+NOTE: 기념품 가격은 현지 통화 또는 원화 기준으로 입력할 수 있으며, 서버에서 환율이 자동 적용됩니다.
+
+[[souvenir-update]]
+=== 기념품 수정 (New)
+
+v2 API를 사용한 기념품 수정입니다.
+
+* 엔드포인트: `PUT /api/v2/souvenirs/{id}`
+* 인증 필요
+* 본인이 등록한 기념품만 수정 가능
+* multipart/form-data 요청
+* 현재는 이미지 파일 수정이 불가하여 `files` 파트는 전달받지 않습니다.
+
+operation::souvenirs/update-souvenir-v2[snippets='http-request,path-parameters,request-parts,request-part-souvenir-fields,http-response,response-fields']
+
+NOTE: 가격 수정 시 현재 환율로 재계산되어 `converted` 값이 변경됩니다.
+
+WARNING: 응답의 `localPrice`, `currencySymbol`, `krwPrice` 필드는 v1 호환성을 위해 임시로 제공되며, 향후 제거될 예정입니다. `price` 객체 사용을 권장합니다.
+
+==== 기념품 수정 (Deprecated)
+
+v1 API를 사용한 기념품 수정입니다.
+
+CAUTION: 이 API는 Deprecated되었습니다. v2 API(`PUT /api/v2/souvenirs/{id}`) 사용을 권장합니다.
+
+* 엔드포인트: `PUT /api/souvenirs/{id}`
+* 인증 필요
+* 본인이 등록한 기념품만 수정 가능
+* multipart/form-data 요청
+* 현재는 이미지 파일 수정이 불가하여 `files` 파트는 전달받지 않습니다.
+
+operation::souvenirs/update-souvenir[snippets='http-request,path-parameters,request-parts,request-part-souvenir-fields,http-response,response-fields']
+
+NOTE: 기념품 가격은 현지 통화 또는 원화 기준으로 입력할 수 있으며, 서버에서 환율이 자동 적용됩니다.
+
+[[souvenir-delete]]
+=== 기념품 삭제
+
+기념품을 삭제하는 API입니다.
+
+* 엔드포인트: `DELETE /api/souvenirs/{id}`
+* 인증 필요
+* Soft delete 방식으로 처리됩니다.
+* 실제 데이터는 삭제되지 않으며, 조회 대상에서만 제외됩니다.
+
+operation::souvenirs/delete-souvenir[snippets='http-request,path-parameters,http-response,response-fields']
+
+NOTE: 삭제 성공 시 `data`는 반환되지 않으며, 메시지만 전달됩니다.
+
+[[souvenir-nearby]]
+=== 근처 기념품 조회
+
+위도/경도를 통해 특정 반경 내 근처 기념품을 조회하는 API입니다.
+
+* 엔드포인트: `GET /api/souvenirs/nearby`
+* 인증 불필요 (Public API)
+* 삭제된(soft delete) 기념품은 조회할 수 없습니다.
+* 조회 반경 단위는 미터(m)
+
+operation::souvenirs/get-nearby-souvenirs[snippets='http-request,query-parameters,http-response,response-fields']

@@ -1,6 +1,39 @@
 spring:
   application:
     name: souzip-api
+  profiles:
+    default: local
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+        jdbc:
+          time_zone: Asia/Seoul
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 logging:
   pattern:
@@ -8,3 +41,49 @@ logging:
   level:
     root: INFO
     com.souzip.api: DEBUG
+
+jwt:
+  expiration: 3600000
+  refresh-expiration: 2592000000
+
+external:
+  api:
+    countries-base-url: https://restcountries.com/v3.1
+    exchange-rate-base-url: https://v6.exchangerate-api.com/v6/6bb64d753d5d604c571e963d/latest
+
+google:
+  maps:
+    api-key: ${GOOGLE_MAPS_API_KEY}
+    language: ko
+    geocoding-base-url: https://maps.googleapis.com/maps/api/geocode/json
+    places-text-search-url: https://maps.googleapis.com/maps/api/place/textsearch/json
+
+oauth:
+  kakao:
+    user-info-url: https://kapi.kakao.com/v2/user/me
+  google:
+    user-info-url: https://www.googleapis.com/oauth2/v2/userinfo
+  apple:
+    client-id: ${APPLE_CLIENT_ID}
+    team-id: ${APPLE_TEAM_ID}
+    key-id: ${APPLE_KEY_ID}
+    private-key: ${APPLE_PRIVATE_KEY}
+    old-team-id: ${APPLE_OLD_TEAM_ID}
+    old-key-id: ${APPLE_OLD_KEY_ID}
+    old-private-key: ${APPLE_OLD_PRIVATE_KEY}
+
+ncp:
+  object-storage:
+    access-key: ${NCP_ACCESS_KEY}
+    secret-key: ${NCP_SECRET_KEY}
+    endpoint: ${NCP_ENDPOINT}
+    bucket: ${NCP_BUCKET}
+    region: ${NCP_REGION}
+  clova-studio:
+    api-key: ${CLOVA_STUDIO_API_KEY}
+    api-url: ${CLOVA_STUDIO_API_URL}
+
+admin:
+  initial:
+    username: ${ADMIN_INITIAL_USERNAME}
+    password: ${ADMIN_INITIAL_PASSWORD}

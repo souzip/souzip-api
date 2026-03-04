@@ -1,0 +1,17 @@
+[[geocoding-api]]
+== Geocoding API (Deprecated)
+
+[WARNING]
+====
+이 API는 2026-03-15 삭제 예정입니다.
+`/api/location/search`로 마이그레이션하세요.
+====
+
+[[geocoding-get-address]]
+=== 위도/경도 기준 주소 조회 (기념품 업로드 시 사용)
+
+* 인증 필요
+
+operation::geocoding/get-address[snippets='http-request,query-parameters,http-response,response-fields']
+
+NOTE: `formattedAddress` 필드는 deprecated 되었습니다. `address` 필드를 사용해주세요.

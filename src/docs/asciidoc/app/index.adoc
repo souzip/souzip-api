@@ -1,0 +1,25 @@
+ifndef::snippets[]
+:snippets: ../../build/generated-snippets
+endif::[]
+= souzip REST API 문서 (APP)
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toc-title: 목차
+:toclevels: 2
+:sectlinks:
+
+include::../shared/overview.adoc[]
+
+include::auth.adoc[]
+include::user.adoc[]
+include::souvenir.adoc[]
+include::category.adoc[]
+include::country.adoc[]
+include::discovery.adoc[]
+include::ai.adoc[]
+include::location.adoc[]
+include::geocoding.adoc[]
+include::search.adoc[]
+include::notice.adoc[]

@@ -1,0 +1,43 @@
+[[location-api]]
+== Location API
+
+위치 정보 관련 API입니다.
+
+[[location-get-address]]
+=== 주소 조회
+
+선택한 좌표의 상세 주소를 조회합니다.
+
+* 인증 필요
+
+operation::location/get-address[snippets='http-request,query-parameters,http-response,response-fields']
+
+NOTE: `formattedAddress` 필드는 deprecated 되었습니다. `address` 필드를 사용해주세요.
+
+[[location-search]]
+=== 키워드 검색
+
+키워드로 도시 또는 장소를 검색합니다.
+도시 검색 결과가 우선 반환되며, 도시 결과가 없을 경우 Google Places API를 통해 장소를 검색합니다.
+
+==== 요청
+
+operation::location/search-city[snippets='http-request,query-parameters']
+
+==== 응답 예시
+
+**도시 검색 결과**
+
+operation::location/search-city[snippets='http-response']
+
+**장소 검색 결과**
+
+operation::location/search-place[snippets='http-response']
+
+**검색 결과 없음**
+
+operation::location/search-empty[snippets='http-response']
+
+==== 응답 필드
+
+operation::location/search-city[snippets='response-fields']

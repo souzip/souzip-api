@@ -1,0 +1,28 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+      lifecycle-management: start_only
+
+  jpa:
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+
+  flyway:
+    enabled: false
+
+jwt:
+  secret: ${JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "loggers,env"
+  endpoint:
+    health:
+      show-details: always

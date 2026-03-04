@@ -32,21 +32,42 @@ ext {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+	runtimeOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+	runtimeOnly 'org.postgresql:postgresql'
+
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 
 	implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
 	annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
 	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.529'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testImplementation 'com.h2database:h2'
+	testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'
+
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
@@ -59,7 +80,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 sourceSets {
-	main.java.srcDirs += [ generatedDir ]
+	main.java.srcDirs += [generatedDir]
 }
 
 clean {
@@ -71,31 +92,64 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-tasks.named('asciidoctor') {
+def appDocsOutDir = file("$buildDir/docs/app")
+def adminDocsOutDir = file("$buildDir/docs/admin")
+
+tasks.register('asciidoctorApp', org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+	group = 'documentation'
+	description = 'Generate App API docs (Asciidoctor)'
+
 	inputs.dir snippetsDir
 	configurations 'asciidoctorExt'
-	dependsOn test
+	dependsOn tasks.named('test')
 
 	baseDirFollowsSourceFile()
 
-	sources {
-		include '**/index.adoc'
-	}
+	sourceDir = file('src/docs/asciidoc/app')
+	sources { include 'index.adoc' }
+
+	outputDir = appDocsOutDir
+}
+
+tasks.register('asciidoctorAdmin', org.asciidoctor.gradle.jvm.AsciidoctorTask) {
+	group = 'documentation'
+	description = 'Generate Admin API docs (Asciidoctor)'
+
+	inputs.dir snippetsDir
+	configurations 'asciidoctorExt'
+	dependsOn tasks.named('test')
+
+	baseDirFollowsSourceFile()
+
+	sourceDir = file('src/docs/asciidoc/admin')
+	sources { include 'index.adoc' }
+
+	outputDir = adminDocsOutDir
 }
 
 tasks.named('bootJar') {
-	dependsOn asciidoctor
-	from("${asciidoctor.outputDir}") {
-		into 'static/docs'
+	dependsOn tasks.named('asciidoctorApp'), tasks.named('asciidoctorAdmin')
+
+	from(appDocsOutDir) {
+		into 'static/docs/app'
+	}
+	from(adminDocsOutDir) {
+		into 'static/docs/admin'
 	}
 }
 
-tasks.register('copyDocument', Copy) {
-	dependsOn asciidoctor
-	from file("${asciidoctor.outputDir}")
-	into file("src/main/resources/static/docs")
+tasks.register('copyDocsApp', Copy) {
+	group = 'documentation'
+	description = 'Copy App docs to src/main/resources/static/docs/app'
+	dependsOn tasks.named('asciidoctorApp')
+	from appDocsOutDir
+	into file("src/main/resources/static/docs/app")
 }
 
-tasks.named('build') {
-	dependsOn copyDocument
+tasks.register('copyDocsAdmin', Copy) {
+	group = 'documentation'
+	description = 'Copy Admin docs to src/main/resources/static/docs/admin'
+	dependsOn tasks.named('asciidoctorAdmin')
+	from adminDocsOutDir
+	into file("src/main/resources/static/docs/admin")
 }

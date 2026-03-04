@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  souzip-api:
+    image: souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
+    container_name: souzip-api
+    restart: always
+    networks:
+      - souzip-network
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8080:8080"
+
+networks:
+  souzip-network:
+    external: true

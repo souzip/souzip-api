@@ -5,6 +5,8 @@ import com.souzip.domain.shared.Coordinate;
 public record SearchPlace(
         String name,
         String address,
+        String region,
+        String category,
         Coordinate coordinate
 ) {
 }

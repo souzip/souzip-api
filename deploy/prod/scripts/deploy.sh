@@ -8,7 +8,7 @@ NC='\033[0m'
 
 REGISTRY="asia-northeast3-docker.pkg.dev/souzip-488211/souzip-prod-repo/souzip-api"
 
-WORK_DIR="/home/kgb581818/souzip"
+WORK_DIR="/home/souzip-prod/souzip"
 DEPLOY_DIR="$WORK_DIR/deploy/prod"
 
 BLUE_COMPOSE="docker-compose.blue.yaml"

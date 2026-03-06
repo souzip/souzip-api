@@ -6,8 +6,8 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-REGISTRY="souzip.kr.ncr.ntruss.com/souzip/souzip-api"
-WORK_DIR="/home/ubuntu/souzip"
+REGISTRY="asia-northeast3-docker.pkg.dev/souzip-488211/souzip-dev-repo/souzip-api"
+WORK_DIR="/home/souzip-dev/souzip"
 DEPLOY_DIR="$WORK_DIR/deploy/dev"
 
 APP_COMPOSE="docker-compose.app.yaml"
@@ -68,7 +68,7 @@ fi
 
 echo -e "${YELLOW}[4/9] DB 컨테이너 확인(없으면 시작)${NC}"
 if ! docker ps --format '{{.Names}}' | grep -q '^souzip-dev-db$'; then
-  docker-compose -f "$DB_COMPOSE" up -d
+  docker compose -f "$DB_COMPOSE" up -d
   if [ $? -ne 0 ]; then
     echo -e "${RED}[ERROR] DB 컨테이너 시작 실패${NC}"
     exit 1
@@ -79,11 +79,11 @@ else
 fi
 
 echo -e "${YELLOW}[5/9] 기존 APP 컨테이너 중지${NC}"
-docker-compose -f "$APP_COMPOSE" down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
+docker compose -f "$APP_COMPOSE" down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
 echo -e "${GREEN}[SUCCESS] 기존 APP 컨테이너 중지 완료${NC}"
 
 echo -e "${YELLOW}[6/9] 새 APP 컨테이너 시작${NC}"
-docker-compose -f "$APP_COMPOSE" up -d
+docker compose -f "$APP_COMPOSE" up -d
 if [ $? -ne 0 ]; then
   echo -e "${RED}[ERROR] APP 컨테이너 시작 실패${NC}"
   echo -e "${YELLOW}[INFO] 롤백을 시작합니다${NC}"

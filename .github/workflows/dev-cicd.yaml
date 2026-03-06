@@ -9,7 +9,7 @@ on:
       - develop
 
 env:
-  IMAGE_NAME: souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
+  IMAGE_NAME: asia-northeast3-docker.pkg.dev/souzip-488211/souzip-dev-repo/souzip-api:latest
 
 jobs:
   build:
@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
       - name: Cache Gradle
         uses: actions/cache@v3
@@ -62,18 +62,22 @@ jobs:
           name: app-jar
           path: build/libs/
 
-      - name: NCP Container Registry Login
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for Artifact Registry
         run: |
-          echo ${{ secrets.NCP_SECRET_KEY }} | docker login souzip.kr.ncr.ntruss.com \
-            -u ${{ secrets.NCP_ACCESS_KEY }} --password-stdin
+          gcloud auth configure-docker asia-northeast3-docker.pkg.dev
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ env.IMAGE_NAME }} .
+          docker build -t $IMAGE_NAME .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ env.IMAGE_NAME }}
+          docker push $IMAGE_NAME
 
   deploy:
     needs: docker-build
@@ -84,26 +88,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Copy deploy scripts to server
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Copy deploy scripts to GCP dev server
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.NCP_SERVER_HOST }}
-          username: ${{ secrets.NCP_SERVER_USER }}
-          key: ${{ secrets.NCP_SERVER_SSH_KEY }}
+          host: ${{ secrets.GCP_DEV_HOST }}
+          username: ${{ secrets.GCP_DEV_USER }}
+          key: ${{ secrets.GCP_DEV_SSH_KEY }}
           source: "deploy/*"
-          target: "/home/ubuntu/souzip"
+          target: "/home/${{ secrets.GCP_DEV_USER }}/souzip"
 
-      - name: Deploy to Server
+      - name: Deploy to dev server
         uses: appleboy/ssh-action@v0.1.6
         env:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
         with:
-          host: ${{ secrets.NCP_SERVER_HOST }}
-          username: ${{ secrets.NCP_SERVER_USER }}
-          key: ${{ secrets.NCP_SERVER_SSH_KEY }}
+          host: ${{ secrets.GCP_DEV_HOST }}
+          username: ${{ secrets.GCP_DEV_USER }}
+          key: ${{ secrets.GCP_DEV_SSH_KEY }}
           envs: COMMIT_MSG
           script: |
-            cd /home/ubuntu/souzip
+            cd /home/${{ secrets.GCP_DEV_USER }}/souzip
 
             chmod +x deploy/dev/scripts/*.sh
             chmod +x deploy/shared/*.sh
@@ -134,7 +143,6 @@ jobs:
 
             chmod 600 deploy/dev/.env
 
-            echo "${{ secrets.NCP_SECRET_KEY }}" | docker login souzip.kr.ncr.ntruss.com \
-              -u "${{ secrets.NCP_ACCESS_KEY }}" --password-stdin
+            gcloud auth configure-docker asia-northeast3-docker.pkg.dev
 
             ./deploy/dev/scripts/deploy.sh

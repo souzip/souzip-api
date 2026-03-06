@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   souzip-api:
-    image: souzip.kr.ncr.ntruss.com/souzip/souzip-api:latest
+    image: asia-northeast3-docker.pkg.dev/souzip-488211/souzip-dev-repo/souzip-api:latest
     container_name: souzip-api
     restart: always
     networks:

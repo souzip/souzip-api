@@ -40,6 +40,7 @@ jobs:
         run: ./gradlew clean build -Dspring.profiles.active=test --no-build-cache
 
       - name: Upload JAR
+        if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
@@ -48,6 +49,7 @@ jobs:
 
   docker-build:
     needs: build
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
@@ -79,6 +81,7 @@ jobs:
 
   deploy:
     needs: docker-build
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:

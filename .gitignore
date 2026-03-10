@@ -7,7 +7,7 @@ build/
 !**/src/test/**/build/
 src/main/resources/static/docs/
 
-.env
+src/main/resources/.env
 
 ### STS ###
 .apt_generated

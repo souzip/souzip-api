@@ -32,15 +32,6 @@ operation::admin/get-cities[snippets='http-request,request-headers,query-paramet
 
 operation::admin/create-city[snippets='http-request,request-headers,request-fields,http-response,response-fields']
 
-[[city-update]]
-=== 도시 수정
-
-도시 정보를 수정합니다.
-
-* SUPER_ADMIN 또는 ADMIN 권한이 필요합니다.
-
-operation::admin/update-city[snippets='http-request,request-headers,path-parameters,request-fields,http-response,response-fields']
-
 [[city-delete]]
 === 도시 삭제
 
@@ -61,3 +52,12 @@ operation::admin/delete-city[snippets='http-request,request-headers,path-paramet
 * 같은 국가 내에서 우선순위가 중복되지 않도록 자동으로 조정됩니다.
 
 operation::admin/update-city-priority[snippets='http-request,request-headers,path-parameters,query-parameters,http-response,response-fields']
+
+[[city-priority-reset]]
+=== 도시 우선순위 초기화
+
+도시의 검색 우선순위를 초기화합니다.
+
+* SUPER_ADMIN 또는 ADMIN 권한이 필요합니다.
+
+operation::admin/reset-city-priority[snippets='http-request,request-headers,path-parameters,http-response,response-fields']

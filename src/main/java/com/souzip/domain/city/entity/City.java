@@ -62,11 +62,9 @@ public class City extends BaseEntity {
         this.priority = priority;
     }
 
-    public void update(String nameEn, String nameKr, BigDecimal latitude, BigDecimal longitude) {
+    public void updateName(String nameEn, String nameKr) {
         this.nameEn = nameEn;
         this.nameKr = nameKr;
-        this.latitude = latitude;
-        this.longitude = longitude;
     }
 
     private void validatePriority(Integer priority) {

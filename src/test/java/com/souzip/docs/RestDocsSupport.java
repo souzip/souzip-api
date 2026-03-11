@@ -3,7 +3,7 @@ package com.souzip.docs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.souzip.adapter.security.admin.annotation.CurrentAdminId;
+import com.souzip.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.global.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;

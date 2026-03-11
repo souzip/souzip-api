@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
-@EnableConfigurationProperties(AdminProperties.class)
 @Component
 public class AdminInitializer implements ApplicationRunner {
 

@@ -59,7 +59,6 @@ public class AdminLocationApi {
     @PostMapping("/cities")
     public SuccessResponse<Void> createCity(@Valid @RequestBody CityCreateRequest request) {
         adminLocationModifier.createCity(request);
-
         return SuccessResponse.of("도시가 추가되었습니다.");
     }
 
@@ -70,7 +69,6 @@ public class AdminLocationApi {
             @Valid @RequestBody CityUpdateRequest request
     ) {
         adminLocationModifier.updateCity(cityId, request);
-
         return SuccessResponse.of("도시 정보가 수정되었습니다.");
     }
 
@@ -78,7 +76,6 @@ public class AdminLocationApi {
     @DeleteMapping("/cities/{cityId}")
     public SuccessResponse<Void> deleteCity(@PathVariable Long cityId) {
         adminLocationModifier.deleteCity(cityId);
-
         return SuccessResponse.of("도시가 삭제되었습니다.");
     }
 

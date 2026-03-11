@@ -1,10 +1,10 @@
 package com.souzip.application.admin;
 
 import com.souzip.application.admin.provided.AdminLocationFinder;
-import com.souzip.application.admin.required.CityQueryPort;
-import com.souzip.application.admin.required.CountryQueryPort;
 import com.souzip.domain.city.entity.City;
+import com.souzip.domain.city.repository.CityRepository;
 import com.souzip.domain.country.entity.Country;
+import com.souzip.domain.country.repository.CountryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,16 +18,22 @@ import java.util.List;
 @Service
 public class AdminLocationQueryService implements AdminLocationFinder {
 
-    private final CityQueryPort cityQueryPort;
-    private final CountryQueryPort countryQueryPort;
+    private final CityRepository cityRepository;
+    private final CountryRepository countryRepository;
 
     @Override
     public Page<City> getCities(Long countryId, String keyword, Pageable pageable) {
-        return cityQueryPort.getCities(countryId, keyword, pageable);
+        if (keyword == null || keyword.isBlank()) {
+            return cityRepository.findByCountryIdWithPaging(countryId, pageable);
+        }
+        return cityRepository.searchByKeyword(countryId, keyword, pageable);
     }
 
     @Override
     public List<Country> getCountries(String keyword) {
-        return countryQueryPort.getCountries(keyword);
+        if (keyword == null || keyword.isBlank()) {
+            return countryRepository.findAllByOrderByNameKrAsc();
+        }
+        return countryRepository.findByKeywordOrderByNameKrAsc(keyword);
     }
 }

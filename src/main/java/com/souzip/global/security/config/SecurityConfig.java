@@ -1,10 +1,10 @@
 package com.souzip.global.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.souzip.adapter.security.admin.jwt.AdminJwtAuthenticationFilter;
 import com.souzip.global.common.dto.ErrorResponse;
-import com.souzip.global.exception.ErrorCode;
 import com.souzip.global.config.CorsProperties;
-import com.souzip.domain.admin.infrastructure.security.jwt.AdminJwtAuthenticationFilter;
+import com.souzip.global.exception.ErrorCode;
 import com.souzip.global.security.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

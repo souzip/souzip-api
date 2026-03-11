@@ -1,21 +1,22 @@
 package com.souzip.application.notice.assembler;
 
+import com.souzip.application.admin.required.AdminRepository;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.provided.FileFinder;
 import com.souzip.application.notice.dto.NoticeAuthorResponse;
 import com.souzip.application.notice.dto.NoticeResponse;
-import com.souzip.domain.admin.model.Admin;
-import com.souzip.domain.admin.repository.AdminRepository;
+import com.souzip.domain.admin.Admin;
 import com.souzip.domain.file.EntityType;
 import com.souzip.domain.notice.Notice;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
@@ -82,7 +83,7 @@ public class NoticeResponseAssembler {
     private NoticeAuthorResponse toAuthorResponse(Admin admin) {
         return NoticeAuthorResponse.of(
                 admin.getId(),
-                admin.getUsername().value()
+                admin.getUsername()
         );
     }
 }

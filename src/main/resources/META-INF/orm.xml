@@ -119,6 +119,27 @@
         </attributes>
     </entity>
 
+    <entity class="com.souzip.domain.admin.AdminRefreshToken">
+        <table name="admin_refresh_token"/>
+        <attributes>
+            <id name="id">
+                <column name="id" column-definition="uuid" updatable="false" nullable="false"/>
+            </id>
+            <basic name="adminId">
+                <column name="admin_id" column-definition="uuid" nullable="false"/>
+            </basic>
+            <basic name="token">
+                <column name="token" nullable="false"/>
+            </basic>
+            <basic name="expiresAt">
+                <column name="expires_at" nullable="false"/>
+            </basic>
+            <basic name="createdAt">
+                <column name="created_at" nullable="false" updatable="false"/>
+            </basic>
+        </attributes>
+    </entity>
+
     <embeddable class="com.souzip.domain.shared.Coordinate">
         <attributes>
             <basic name="latitude">

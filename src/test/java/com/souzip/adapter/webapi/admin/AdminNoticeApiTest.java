@@ -7,14 +7,13 @@ import com.souzip.application.notice.dto.NoticeResponse;
 import com.souzip.application.notice.provided.NoticeFinder;
 import com.souzip.application.notice.provided.NoticeRegister;
 import com.souzip.docs.RestDocsSupport;
+import com.souzip.domain.admin.model.AdminRole;
 import com.souzip.domain.notice.Notice;
 import com.souzip.domain.notice.NoticeRegisterRequest;
 import com.souzip.domain.notice.NoticeStatus;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

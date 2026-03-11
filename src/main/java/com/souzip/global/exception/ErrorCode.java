@@ -52,6 +52,12 @@ public enum ErrorCode implements BaseErrorCode {
 
     INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리입니다."),
 
+    SEARCH_INDEX_NOT_READY(HttpStatus.SERVICE_UNAVAILABLE, "검색 인덱스가 준비되지 않았습니다."),
+    SEARCH_INDEX_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "검색 인덱스 생성에 실패했습니다."),
+    SEARCH_INDEX_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "검색 인덱스 삭제에 실패했습니다."),
+    SEARCH_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "검색 데이터 저장에 실패했습니다."),
+    SEARCH_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "검색 서비스에 오류가 발생했습니다."),
+
     AI_RECOMMENDATION_NOT_READY(HttpStatus.BAD_REQUEST, "추천 시스템을 위해 기념품 업로드 이력이 있어야 합니다."),
 
     APPLE_MIGRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 마이그레이션 준비 중 오류가 발생했습니다."),

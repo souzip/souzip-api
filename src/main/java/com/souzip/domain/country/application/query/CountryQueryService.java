@@ -1,6 +1,6 @@
 package com.souzip.domain.country.application.query;
 
-import com.souzip.domain.country.application.port.CountryAdminPort;
+import com.souzip.domain.country.application.port.CountryAdminPort.CountryAdminResult;
 import com.souzip.domain.country.entity.Country;
 import com.souzip.domain.country.repository.CountryRepository;
 import java.util.List;
@@ -11,11 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class CountryQueryService implements CountryAdminPort {
+public class CountryQueryService {
 
     private final CountryRepository countryRepository;
 
-    @Override
     public List<CountryAdminResult> getCountries(String keyword) {
         if (hasNoKeyword(keyword)) {
             return toResults(countryRepository.findAllByOrderByNameKrAsc());

@@ -5,7 +5,7 @@ services:
     image: asia-northeast3-docker.pkg.dev/souzip-488211/souzip-prod-repo/souzip-api:latest
     container_name: souzip-api-green
     ports:
-      - "8082:8080"
+      - "127.0.0.1:8082:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - TZ=Asia/Seoul

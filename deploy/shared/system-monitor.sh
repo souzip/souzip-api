@@ -18,6 +18,12 @@ if [ -f "$DEPLOY_DIR/.env" ]; then
     export DISCORD_WEBHOOK_URL=$(grep '^DISCORD_WEBHOOK_URL=' "$DEPLOY_DIR/.env" | cut -d= -f2-)
 fi
 
+if [ "$ENV" = "prod" ]; then
+    export PROD_DISCORD_WEBHOOK_URL="$DISCORD_WEBHOOK_URL"
+else
+    export DEVELOP_DISCORD_WEBHOOK_URL="$DISCORD_WEBHOOK_URL"
+fi
+
 if [ -f "$WORK_DIR/deploy/shared/discord-notify.sh" ]; then
     source "$WORK_DIR/deploy/shared/discord-notify.sh"
 fi

@@ -1,12 +1,7 @@
 name: prod
 
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 env:
   IMAGE_NAME: asia-northeast3-docker.pkg.dev/souzip-488211/souzip-prod-repo/souzip-api:latest

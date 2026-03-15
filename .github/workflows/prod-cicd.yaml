@@ -1,7 +1,12 @@
 name: prod
 
 on:
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - feat/SOU-551-update-secrets
+  push:
+    branches:
+      - feat/SOU-551-update-secrets
 
 env:
   IMAGE_NAME: asia-northeast3-docker.pkg.dev/souzip-488211/souzip-prod-repo/souzip-api:latest

@@ -3,8 +3,9 @@ package com.souzip.application.notification.required;
 import com.souzip.domain.notification.FcmToken;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.Repository;
 
-public interface FcmTokenRepository {
+public interface FcmTokenRepository extends Repository<FcmToken, Long> {
 
     FcmToken save(FcmToken fcmToken);
 
@@ -14,9 +15,9 @@ public interface FcmTokenRepository {
 
     Optional<FcmToken> findByUserIdAndDeviceId(Long userId, String deviceId);
 
-    List<FcmToken> findActiveTokensByUserId(Long userId);
+    List<FcmToken> findByUserIdAndIsActiveTrue(Long userId);
 
-    List<FcmToken> findAllActiveTokens();
+    List<FcmToken> findAllByIsActiveTrue();
 
     void delete(FcmToken fcmToken);
 

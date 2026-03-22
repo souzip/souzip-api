@@ -136,6 +136,8 @@ jobs:
             DEV_API_DOCS_URL=${{ secrets.DEV_API_DOCS_URL }}
             ADMIN_INITIAL_USERNAME=${{ secrets.ADMIN_INITIAL_USERNAME }}
             ADMIN_INITIAL_PASSWORD=${{ secrets.ADMIN_INITIAL_PASSWORD }}
+            GRAFANA_ADMIN_USER=${{ secrets.DEVELOP_GRAFANA_ADMIN_USER }}
+            GRAFANA_ADMIN_PASSWORD=${{ secrets.DEVELOP_GRAFANA_ADMIN_PASSWORD }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/dev/.env

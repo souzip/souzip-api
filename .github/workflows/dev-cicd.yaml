@@ -84,6 +84,10 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
+    environment:
+      name: Development
+      url: https://api-dev.souzip.com
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -136,6 +140,8 @@ jobs:
             DEV_API_DOCS_URL=${{ secrets.DEV_API_DOCS_URL }}
             ADMIN_INITIAL_USERNAME=${{ secrets.ADMIN_INITIAL_USERNAME }}
             ADMIN_INITIAL_PASSWORD=${{ secrets.ADMIN_INITIAL_PASSWORD }}
+            GRAFANA_ADMIN_USER=${{ secrets.DEV_GRAFANA_ADMIN_USER }}
+            GRAFANA_ADMIN_PASSWORD=${{ secrets.DEV_GRAFANA_ADMIN_PASSWORD }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/dev/.env

@@ -79,6 +79,10 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
+    environment:
+      name: Production
+      url: https://api.souzip.com
+
     steps:
       - uses: actions/checkout@v3
 
@@ -130,6 +134,8 @@ jobs:
             NCP_BUCKET=${{ secrets.NCP_BUCKET }}
             NCP_ACCESS_KEY=${{ secrets.NCP_ACCESS_KEY }}
             NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }}
+            GRAFANA_ADMIN_USER=${{ secrets.PROD_GRAFANA_ADMIN_USER }}
+            GRAFANA_ADMIN_PASSWORD=${{ secrets.PROD_GRAFANA_ADMIN_PASSWORD }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/prod/.env

@@ -12,6 +12,7 @@ DEPLOY_DIR="$WORK_DIR/deploy/dev"
 
 APP_COMPOSE="docker-compose.app.yaml"
 DB_COMPOSE="docker-compose.db.yaml"
+MONITORING_COMPOSE="docker-compose.monitoring.yaml"
 
 HEALTH_CHECK_URL="http://localhost:8080/actuator/health"
 MAX_RETRY=6
@@ -31,7 +32,7 @@ fi
 
 cd "$WORK_DIR" || exit 1
 
-echo -e "${YELLOW}[1/9] 현재 이미지를 롤백용으로 보관${NC}"
+echo -e "${YELLOW}[1/10] 현재 이미지를 롤백용으로 보관${NC}"
 CURRENT_IMAGE=$(docker images ${REGISTRY}:latest -q || true)
 if [ ! -z "${CURRENT_IMAGE:-}" ]; then
   docker rmi ${REGISTRY}:previous 2>/dev/null || true
@@ -41,7 +42,7 @@ else
   echo -e "${YELLOW}[INFO] 기존 이미지 없음 (첫 배포)${NC}"
 fi
 
-echo -e "${YELLOW}[2/9] 오래된 이미지 정리${NC}"
+echo -e "${YELLOW}[2/10] 오래된 이미지 정리${NC}"
 OLD_IMAGES=$(docker images ${REGISTRY} -q | tail -n +3 || true)
 if [ ! -z "${OLD_IMAGES:-}" ]; then
   echo "$OLD_IMAGES" | xargs docker rmi -f 2>/dev/null || true
@@ -50,7 +51,7 @@ else
   echo -e "${YELLOW}[INFO] 삭제할 오래된 이미지 없음${NC}"
 fi
 
-echo -e "${YELLOW}[3/9] 최신 이미지 다운로드${NC}"
+echo -e "${YELLOW}[3/10] 최신 이미지 다운로드${NC}"
 docker pull ${REGISTRY}:latest
 NEW_IMAGE=$(docker images ${REGISTRY}:latest -q || true)
 if [ -z "${NEW_IMAGE:-}" ]; then
@@ -66,7 +67,7 @@ if [ ! -f ".env" ]; then
   exit 1
 fi
 
-echo -e "${YELLOW}[4/9] DB 컨테이너 확인(없으면 시작)${NC}"
+echo -e "${YELLOW}[4/10] DB 컨테이너 확인${NC}"
 if ! docker ps --format '{{.Names}}' | grep -q '^souzip-dev-db$'; then
   docker compose -f "$DB_COMPOSE" up -d
   if [ $? -ne 0 ]; then
@@ -78,11 +79,31 @@ else
   echo -e "${GREEN}[SUCCESS] DB 컨테이너 이미 실행 중${NC}"
 fi
 
-echo -e "${YELLOW}[5/9] 기존 APP 컨테이너 중지${NC}"
+echo -e "${YELLOW}[5/10] 모니터링 스택 확인${NC}"
+PROMETHEUS_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-prometheus-dev$' && echo "true" || echo "false")
+GRAFANA_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-grafana-dev$' && echo "true" || echo "false")
+
+if [ "$PROMETHEUS_RUNNING" = "false" ] || [ "$GRAFANA_RUNNING" = "false" ]; then
+  if [ -f "$MONITORING_COMPOSE" ]; then
+    echo -e "${YELLOW}[INFO] 모니터링 스택 시작 중...${NC}"
+    docker compose -f "$MONITORING_COMPOSE" up -d
+    if [ $? -ne 0 ]; then
+      echo -e "${RED}[WARNING] 모니터링 스택 시작 실패 (계속 진행)${NC}"
+    else
+      echo -e "${GREEN}[SUCCESS] 모니터링 스택 시작 완료${NC}"
+    fi
+  else
+    echo -e "${YELLOW}[INFO] 모니터링 설정 파일 없음 ($MONITORING_COMPOSE)${NC}"
+  fi
+else
+  echo -e "${GREEN}[SUCCESS] 모니터링 스택 이미 실행 중${NC}"
+fi
+
+echo -e "${YELLOW}[6/10] 기존 APP 컨테이너 중지${NC}"
 docker compose -f "$APP_COMPOSE" down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
 echo -e "${GREEN}[SUCCESS] 기존 APP 컨테이너 중지 완료${NC}"
 
-echo -e "${YELLOW}[6/9] 새 APP 컨테이너 시작${NC}"
+echo -e "${YELLOW}[7/10] 새 APP 컨테이너 시작${NC}"
 docker compose -f "$APP_COMPOSE" up -d
 if [ $? -ne 0 ]; then
   echo -e "${RED}[ERROR] APP 컨테이너 시작 실패${NC}"
@@ -92,10 +113,10 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "${GREEN}[SUCCESS] 새 컨테이너 시작 완료${NC}"
 
-echo -e "${YELLOW}[7/9] 애플리케이션 시작 대기${NC}"
+echo -e "${YELLOW}[8/10] 애플리케이션 시작 대기${NC}"
 sleep 10
 
-echo -e "${YELLOW}[8/9] 헬스체크 (최대 ${MAX_RETRY}번 시도)${NC}"
+echo -e "${YELLOW}[9/10] 헬스체크 (최대 ${MAX_RETRY}번 시도)${NC}"
 RETRY_COUNT=0
 HEALTH_OK=false
 
@@ -125,7 +146,7 @@ if [ "$HEALTH_OK" = false ]; then
   exit 1
 fi
 
-echo -e "${YELLOW}[9/9] 정리${NC}"
+echo -e "${YELLOW}[10/10] 정리${NC}"
 docker image prune -f || true
 
 if [ ! -z "${DEVELOP_DISCORD_WEBHOOK_URL:-}" ] && [ -f "$WORK_DIR/deploy/shared/discord-notify.sh" ]; then

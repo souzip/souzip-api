@@ -7,7 +7,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus-dev.yaml:/etc/prometheus/prometheus.yaml
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'

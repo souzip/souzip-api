@@ -94,7 +94,7 @@ if [ "$PROMETHEUS_RUNNING" = "false" ] || [ "$GRAFANA_RUNNING" = "false" ]; then
     fi
   else
     echo -e "${YELLOW}[INFO] 모니터링 설정 파일 없음 ($MONITORING_COMPOSE)${NC}"
-  fi택
+  fi
 else
   echo -e "${GREEN}[SUCCESS] 모니터링 스택 이미 실행 중${NC}"
 fi

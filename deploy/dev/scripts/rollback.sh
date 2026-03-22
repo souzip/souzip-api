@@ -36,7 +36,8 @@ echo -e "${GREEN}[SUCCESS] 롤백 이미지 발견: ${PREVIOUS_IMAGE}${NC}"
 
 echo -e "${YELLOW}[2/6] 현재 APP 컨테이너 중지${NC}"
 cd "$DEPLOY_DIR" || exit 1
-docker-compose -f "$APP_COMPOSE" down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
+
+docker compose -f "$APP_COMPOSE" down 2>/dev/null || docker rm -f souzip-api 2>/dev/null || true
 echo -e "${GREEN}[SUCCESS] APP 컨테이너 중지 완료${NC}"
 
 echo -e "${YELLOW}[3/6] 이전 버전으로 태그 변경${NC}"
@@ -44,7 +45,8 @@ docker tag ${REGISTRY}:previous ${REGISTRY}:latest
 echo -e "${GREEN}[SUCCESS] 태그 변경 완료${NC}"
 
 echo -e "${YELLOW}[4/6] 이전 버전 APP 컨테이너 시작${NC}"
-docker-compose -f "$APP_COMPOSE" up -d
+
+docker compose -f "$APP_COMPOSE" up -d
 echo -e "${GREEN}[SUCCESS] 이전 버전 컨테이너 시작 완료${NC}"
 
 echo -e "${YELLOW}[5/6] 애플리케이션 시작 대기${NC}"
@@ -80,7 +82,7 @@ if [ "$HEALTH_OK" = true ]; then
 
   if [ ! -z "${DISCORD_WEBHOOK_URL:-}" ] && [ -f "$WORK_DIR/deploy/shared/discord-notify.sh" ]; then
     source "$WORK_DIR/deploy/shared/discord-notify.sh"
-    notify_rollback_success
+    notify_rollback_success "dev"
   fi
   exit 0
 else
@@ -90,4 +92,8 @@ else
   docker logs --tail 50 souzip-api || true
 
   if [ ! -z "${DISCORD_WEBHOOK_URL:-}" ] && [ -f "$WORK_DIR/deploy/shared/discord-notify.sh" ]; then
-    source "$WORK_DIR/d
+    source "$WORK_DIR/deploy/shared/discord-notify.sh"
+    notify_rollback_failed "dev"
+  fi
+  exit 1
+fi

@@ -39,20 +39,31 @@ else
     CONTAINER_WARNING_SENT=false
 fi
 
+NGINX_UPSTREAM_FILE="/etc/nginx/conf.d/upstream-souzip.conf"
+
 if [ "$ENV" = "dev" ]; then
     HEALTH_CHECK_URL="http://localhost:8080/actuator/health"
     CONTAINER_NAME="souzip-api"
 else
-    CONTAINER_NAME="souzip-api-${CONTAINER_COLOR:-blue}"
-    case "$CONTAINER_COLOR" in
-        blue)
+    if [ -f "$NGINX_UPSTREAM_FILE" ]; then
+        ACTIVE_PORT=$(grep -oE '127\.0\.0\.1:[0-9]+' "$NGINX_UPSTREAM_FILE" | cut -d: -f2 | head -n 1 || true)
+    else
+        ACTIVE_PORT=""
+    fi
+
+    case "$ACTIVE_PORT" in
+        8081)
             HEALTH_CHECK_URL="http://localhost:8081/actuator/health"
+            CONTAINER_NAME="souzip-api-blue"
             ;;
-        green)
+        8082)
             HEALTH_CHECK_URL="http://localhost:8082/actuator/health"
+            CONTAINER_NAME="souzip-api-green"
             ;;
         *)
+            echo "[WARN] nginx upstream에서 active 포트를 읽지 못했습니다. blue(8081)로 fallback합니다."
             HEALTH_CHECK_URL="http://localhost:8081/actuator/health"
+            CONTAINER_NAME="souzip-api-blue"
             ;;
     esac
 fi
@@ -65,7 +76,7 @@ if curl -f -s --max-time 5 $HEALTH_CHECK_URL > /dev/null 2>&1; then
             DOWN_DURATION=$(( UP_TIMESTAMP - DOWN_TIMESTAMP ))
             DOWNTIME_MIN=$(( DOWN_DURATION / 60 ))
             if [ ! -z "$DISCORD_WEBHOOK_URL" ]; then
-                notify_server_up "${DOWNTIME_MIN}분" "$ENV"
+                notify_server_up "$ENV" "${DOWNTIME_MIN}분"
             fi
         fi
         HEALTH_STATUS="up"
@@ -90,7 +101,7 @@ DISK_PERCENT=$(df / | awk 'NR==2 {print int($5)}')
 if [ $DISK_PERCENT -ge $DISK_THRESHOLD ]; then
     if [ "$DISK_WARNING_SENT" = "false" ]; then
         if [ ! -z "$DISCORD_WEBHOOK_URL" ]; then
-            notify_disk_warning "$DISK_USAGE" "$DISK_PERCENT" "$ENV"
+            notify_disk_warning "$ENV" "$DISK_USAGE" "$DISK_PERCENT"
         fi
         DISK_WARNING_SENT=true
     fi
@@ -103,7 +114,7 @@ MEMORY_PERCENT=$(free | awk 'NR==2 {print int($3/$2 * 100)}')
 if [ $MEMORY_PERCENT -ge $MEMORY_THRESHOLD ]; then
     if [ "$MEMORY_WARNING_SENT" = "false" ]; then
         if [ ! -z "$DISCORD_WEBHOOK_URL" ]; then
-            notify_memory_warning "$MEMORY_USAGE" "$MEMORY_PERCENT" "$ENV"
+            notify_memory_warning "$ENV" "$MEMORY_USAGE" "$MEMORY_PERCENT"
         fi
         MEMORY_WARNING_SENT=true
     fi
@@ -123,7 +134,8 @@ else
     CONTAINER_WARNING_SENT=false
 fi
 
-cat > "$STATUS_FILE" << EOF
+TEMP_STATUS_FILE=$(mktemp "${STATUS_FILE}.tmp.XXXXXX")
+cat > "$TEMP_STATUS_FILE" << EOF
 HEALTH_STATUS="$HEALTH_STATUS"
 HEALTH_FAILURE_COUNT=$HEALTH_FAILURE_COUNT
 HEALTH_DOWN_SINCE="$HEALTH_DOWN_SINCE"
@@ -131,3 +143,4 @@ DISK_WARNING_SENT=$DISK_WARNING_SENT
 MEMORY_WARNING_SENT=$MEMORY_WARNING_SENT
 CONTAINER_WARNING_SENT=$CONTAINER_WARNING_SENT
 EOF
+mv "$TEMP_STATUS_FILE" "$STATUS_FILE"

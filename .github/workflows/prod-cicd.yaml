@@ -79,6 +79,10 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
+    environment:
+      name: Production
+      url: https://api.souzip.com
+
     steps:
       - uses: actions/checkout@v3
 

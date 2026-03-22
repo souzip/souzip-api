@@ -84,6 +84,10 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
+    environment:
+      name: Development
+      url: https://api-dev.souzip.com
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3

@@ -26,6 +26,17 @@ GREEN_PORT=8082
 MAX_RETRY=6
 RETRY_INTERVAL=10
 
+ENV_FILE="$DEPLOY_DIR/.env"
+if [ -f "$ENV_FILE" ]; then
+  while IFS='=' read -r key value; do
+    case "$key" in
+      DISCORD_WEBHOOK_URL|PROD_DISCORD_WEBHOOK_URL|PROD_API_DOCS_URL|COMMIT_MESSAGE|DEPLOYER)
+        export "$key=$value"
+        ;;
+    esac
+  done < "$ENV_FILE"
+fi
+
 cd "$WORK_DIR" || exit 1
 
 echo -e "${YELLOW}[1/8] 최신 이미지 다운로드${NC}"
@@ -65,7 +76,6 @@ if [ "$CURRENT_PORT" == "$BLUE_PORT" ]; then
 
   STOP_PROJECT=$BLUE_PROJECT
   STOP_COMPOSE=$BLUE_COMPOSE
-
 else
   TARGET="blue"
   TARGET_PORT=$BLUE_PORT
@@ -123,8 +133,13 @@ while [ $RETRY_COUNT -lt $MAX_RETRY ]; do
 done
 
 if [ "$HEALTH_OK" = false ]; then
-  echo -e "${RED}[ERROR] 헬스체크 실패${NC}"
+  echo -e "${RED}[ERROR] 헬스체크 실패 - 자동 롤백 완료 (nginx 전환 없음)${NC}"
   docker compose -p "$TARGET_PROJECT" -f "$TARGET_COMPOSE" down
+
+  if [ ! -z "${PROD_DISCORD_WEBHOOK_URL:-}" ] && [ -f "$WORK_DIR/deploy/shared/discord-notify.sh" ]; then
+    source "$WORK_DIR/deploy/shared/discord-notify.sh"
+    notify_rollback_success "prod"
+  fi
   exit 1
 fi
 
@@ -150,3 +165,8 @@ echo -e "${YELLOW}[8/8] 이미지 정리${NC}"
 docker image prune -f || true
 
 echo -e "${GREEN}[DEPLOY SUCCESS] 완료${NC}"
+
+if [ ! -z "${PROD_DISCORD_WEBHOOK_URL:-}" ] && [ -f "$WORK_DIR/deploy/shared/discord-notify.sh" ]; then
+  source "$WORK_DIR/deploy/shared/discord-notify.sh"
+  notify_deploy_success "$NEW_IMAGE" "${PROD_API_DOCS_URL:-}" "${COMMIT_MESSAGE:-}" "${DEPLOYER:-}" "prod"
+fi

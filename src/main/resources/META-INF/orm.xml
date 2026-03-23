@@ -133,6 +133,25 @@
     </attributes>
   </entity>
 
+  <entity class="com.souzip.domain.wishlist.entity.Wishlist">
+    <table name="wishlist">
+      <unique-constraint name="idx_wishlist_user_souvenir">
+        <column-name>user_id</column-name>
+        <column-name>souvenir_id</column-name>
+      </unique-constraint>
+    </table>
+    <attributes>
+      <many-to-one name="user" fetch="LAZY">
+        <join-column name="user_id" nullable="false"/>
+        <foreign-key constraint-mode="NO_CONSTRAINT"/>
+      </many-to-one>
+      <many-to-one name="souvenir" fetch="LAZY">
+        <join-column name="souvenir_id" nullable="false"/>
+        <foreign-key constraint-mode="NO_CONSTRAINT"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+
   <embeddable class="com.souzip.domain.shared.Coordinate">
     <attributes>
       <basic name="latitude">

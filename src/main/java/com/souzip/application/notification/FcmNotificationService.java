@@ -59,8 +59,30 @@ public class FcmNotificationService {
     // 사용자의 활성 토큰 전부에 동일 알림을 보냅니다.
     public void sendToUser(Long userId, String title, String body) {
         List<FcmToken> tokens = fcmTokenRepository.findByUserIdAndActiveTrue(userId);
+        if (tokens.isEmpty()) {
+            return;
+        }
+        int successCount = 0;
+        int failCount = 0;
         for (FcmToken token : tokens) {
-            sendToToken(token.getToken(), title, body);
+            try {
+                sendToToken(token.getToken(), title, body);
+                successCount++;
+            } catch (BusinessException e) {
+                failCount++;
+                log.warn(
+                        "FCM 전송 실패(다음 토큰으로 계속) userId={}, fcmTokenId={}, errorCode={}",
+                        userId,
+                        token.getId(),
+                        e.getErrorCode()
+                );
+            }
+        }
+        if (failCount > 0 && successCount == 0) {
+            throw new BusinessException(ErrorCode.FCM_SEND_FAILED, "활성 토큰 전송이 모두 실패했습니다.");
+        }
+        if (failCount > 0) {
+            log.warn("FCM 일부 토큰 실패 userId={}, 성공={}, 실패={}", userId, successCount, failCount);
         }
     }
 

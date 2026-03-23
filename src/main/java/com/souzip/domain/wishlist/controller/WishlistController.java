@@ -1,11 +1,13 @@
 package com.souzip.domain.wishlist.controller;
 
+import com.souzip.domain.wishlist.dto.MyWishlistListResponse;
 import com.souzip.domain.wishlist.dto.WishlistResponse;
 import com.souzip.domain.wishlist.service.WishlistService;
 import com.souzip.global.common.dto.SuccessResponse;
 import com.souzip.global.security.annotation.CurrentUserId;
 import com.souzip.global.security.annotation.RequireAuth;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -30,5 +32,14 @@ public class WishlistController {
         @PathVariable Long souvenirId
     ) {
         return SuccessResponse.of(wishlistService.removeWishlist(currentUserId, souvenirId));
+    }
+
+    @GetMapping("/api/users/me/wishlists")
+    @RequireAuth
+    public SuccessResponse<MyWishlistListResponse> getMyWishlist(
+        @CurrentUserId Long currentUserId,
+        Pageable pageable
+    ) {
+        return SuccessResponse.of(wishlistService.getMyWishlist(currentUserId, pageable));
     }
 }

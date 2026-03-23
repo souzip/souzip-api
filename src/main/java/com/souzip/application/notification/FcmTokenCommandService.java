@@ -25,6 +25,7 @@ public class FcmTokenCommandService {
 
     private FcmToken syncExistingToken(FcmToken existing, Long userId, FcmTokenRegisterRequest request) {
         existing.linkUser(userId);
+        existing.syncDeviceIdentity(request.deviceType(), request.deviceId());
         existing.updateDeviceInfo(request.deviceModel(), request.osVersion(), request.appVersion());
         existing.activate();
         return fcmTokenRepository.save(existing);
@@ -32,6 +33,7 @@ public class FcmTokenCommandService {
 
     private FcmToken updateExistingDeviceRow(FcmToken existing, FcmTokenRegisterRequest request, Long userId) {
         existing.updateToken(request.fcmToken());
+        existing.syncDeviceIdentity(request.deviceType(), request.deviceId());
         existing.updateDeviceInfo(request.deviceModel(), request.osVersion(), request.appVersion());
         existing.linkUser(userId);
         existing.activate();

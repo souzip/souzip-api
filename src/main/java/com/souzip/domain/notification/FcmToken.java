@@ -68,6 +68,12 @@ public class FcmToken extends BaseEntity {
         this.lastUsedAt = LocalDateTime.now();
     }
 
+    public void syncDeviceIdentity(DeviceType deviceType, String deviceId) {
+        this.deviceType = requireNonNull(deviceType, "디바이스 타입은 필수입니다.");
+        this.deviceId = requireNonNull(deviceId, "디바이스 ID는 필수입니다.");
+        this.lastUsedAt = LocalDateTime.now();
+    }
+
     public void deactivate() {
         this.active = false;
     }

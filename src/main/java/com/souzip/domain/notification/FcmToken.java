@@ -27,7 +27,7 @@ public class FcmToken extends BaseEntity {
 
     private String appVersion;
 
-    private boolean isActive;
+    private boolean active;
 
     private LocalDateTime lastUsedAt;
 
@@ -40,7 +40,7 @@ public class FcmToken extends BaseEntity {
         fcmToken.deviceModel = request.deviceModel();
         fcmToken.osVersion = request.osVersion();
         fcmToken.appVersion = request.appVersion();
-        fcmToken.isActive = true;
+        fcmToken.active = true;
         fcmToken.lastUsedAt = LocalDateTime.now();
 
         return fcmToken;
@@ -68,17 +68,23 @@ public class FcmToken extends BaseEntity {
         this.lastUsedAt = LocalDateTime.now();
     }
 
+    public void syncDeviceIdentity(DeviceType deviceType, String deviceId) {
+        this.deviceType = requireNonNull(deviceType, "디바이스 타입은 필수입니다.");
+        this.deviceId = requireNonNull(deviceId, "디바이스 ID는 필수입니다.");
+        this.lastUsedAt = LocalDateTime.now();
+    }
+
     public void deactivate() {
-        this.isActive = false;
+        this.active = false;
     }
 
     public void activate() {
-        this.isActive = true;
+        this.active = true;
         this.lastUsedAt = LocalDateTime.now();
     }
 
     public boolean isActive() {
-        return this.isActive;
+        return this.active;
     }
 
     public boolean isLoggedIn() {

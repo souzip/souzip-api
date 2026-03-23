@@ -124,7 +124,7 @@
       <basic name="appVersion">
         <column name="app_version" length="50"/>
       </basic>
-      <basic name="isActive">
+      <basic name="active">
         <column name="is_active" nullable="false"/>
       </basic>
       <basic name="lastUsedAt">

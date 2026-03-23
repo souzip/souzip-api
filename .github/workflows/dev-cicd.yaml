@@ -142,6 +142,8 @@ jobs:
             ADMIN_INITIAL_PASSWORD=${{ secrets.ADMIN_INITIAL_PASSWORD }}
             GRAFANA_ADMIN_USER=${{ secrets.DEV_GRAFANA_ADMIN_USER }}
             GRAFANA_ADMIN_PASSWORD=${{ secrets.DEV_GRAFANA_ADMIN_PASSWORD }}
+            FIREBASE_ENABLED=${{ secrets.FIREBASE_ENABLED }}
+            FIREBASE_CREDENTIALS_PATH=${{ secrets.DEV_FIREBASE_CREDENTIALS_PATH }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/dev/.env

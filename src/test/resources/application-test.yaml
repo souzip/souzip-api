@@ -17,3 +17,6 @@ logging:
   level:
     root: INFO
     org.springframework.test.context: DEBUG
+
+firebase:
+  enabled: false

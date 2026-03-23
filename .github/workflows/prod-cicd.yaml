@@ -136,6 +136,8 @@ jobs:
             NCP_SECRET_KEY=${{ secrets.NCP_SECRET_KEY }}
             GRAFANA_ADMIN_USER=${{ secrets.PROD_GRAFANA_ADMIN_USER }}
             GRAFANA_ADMIN_PASSWORD=${{ secrets.PROD_GRAFANA_ADMIN_PASSWORD }}
+            FIREBASE_ENABLED=${{ secrets.FIREBASE_ENABLED }}
+            FIREBASE_CREDENTIALS_PATH=${{ secrets.PROD_FIREBASE_CREDENTIALS_PATH }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/prod/.env

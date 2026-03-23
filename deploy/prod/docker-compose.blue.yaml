@@ -11,6 +11,8 @@ services:
       - TZ=Asia/Seoul
     env_file:
       - .env
+    volumes:
+      - /home/souzip-prod/secrets:/home/souzip-prod/secrets:ro
     restart: always
 
 networks:

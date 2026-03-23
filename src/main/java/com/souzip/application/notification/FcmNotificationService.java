@@ -1,0 +1,73 @@
+package com.souzip.application.notification;
+
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
+import com.souzip.application.notification.required.FcmTokenRepository;
+import com.souzip.domain.notification.FcmToken;
+import com.souzip.global.exception.BusinessException;
+import com.souzip.global.exception.ErrorCode;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class FcmNotificationService {
+
+    private final FcmTokenRepository fcmTokenRepository;
+    private final ObjectProvider<FirebaseMessaging> firebaseMessaging;
+
+    // 단일 기기 토큰으로 알림(제목·본문)을 전송합니다.
+    public void sendToToken(String registrationToken, String title, String body) {
+        sendToToken(registrationToken, title, body, Map.of());
+    }
+
+    // 데이터 페이로드를 포함해 전송합니다.
+    public void sendToToken(String registrationToken, String title, String body, Map<String, String> data) {
+        FirebaseMessaging messaging = firebaseMessaging.getIfAvailable();
+        if (messaging == null) {
+            log.warn("FirebaseMessaging 빈이 없습니다. firebase.enabled 와 credentials 를 확인하세요. 전송을 건너뜁니다.");
+            return;
+        }
+        try {
+            Notification notification = Notification.builder()
+                    .setTitle(title)
+                    .setBody(body)
+                    .build();
+            Message.Builder messageBuilder = Message.builder()
+                    .setToken(registrationToken)
+                    .setNotification(notification);
+            if (data != null && !data.isEmpty()) {
+                messageBuilder.putAllData(new HashMap<>(data));
+            }
+            messaging.send(messageBuilder.build());
+        } catch (FirebaseMessagingException e) {
+            log.error("FCM 전송 실패 tokenPrefix={} error={}", maskToken(registrationToken), e.getMessagingErrorCode(), e);
+            throw new BusinessException(ErrorCode.FCM_SEND_FAILED, e.getMessage());
+        }
+    }
+
+    // 사용자의 활성 토큰 전부에 동일 알림을 보냅니다.
+    public void sendToUser(Long userId, String title, String body) {
+        List<FcmToken> tokens = fcmTokenRepository.findByUserIdAndActiveTrue(userId);
+        for (FcmToken token : tokens) {
+            sendToToken(token.getToken(), title, body);
+        }
+    }
+
+    private static String maskToken(String token) {
+        if (token == null || token.length() < 12) {
+            return "***";
+        }
+        return token.substring(0, 6) + "..." + token.substring(token.length() - 4);
+    }
+}

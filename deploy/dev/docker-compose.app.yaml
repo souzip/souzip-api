@@ -9,6 +9,8 @@ services:
       - souzip-network
     env_file:
       - .env
+    volumes:
+      - /home/souzip-dev/secrets:/home/souzip-dev/secrets:ro
     ports:
       - "127.0.0.1:8080:8080"
 

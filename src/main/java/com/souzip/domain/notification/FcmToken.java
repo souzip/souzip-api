@@ -27,7 +27,7 @@ public class FcmToken extends BaseEntity {
 
     private String appVersion;
 
-    private boolean isActive;
+    private boolean active;
 
     private LocalDateTime lastUsedAt;
 
@@ -40,7 +40,7 @@ public class FcmToken extends BaseEntity {
         fcmToken.deviceModel = request.deviceModel();
         fcmToken.osVersion = request.osVersion();
         fcmToken.appVersion = request.appVersion();
-        fcmToken.isActive = true;
+        fcmToken.active = true;
         fcmToken.lastUsedAt = LocalDateTime.now();
 
         return fcmToken;
@@ -69,16 +69,16 @@ public class FcmToken extends BaseEntity {
     }
 
     public void deactivate() {
-        this.isActive = false;
+        this.active = false;
     }
 
     public void activate() {
-        this.isActive = true;
+        this.active = true;
         this.lastUsedAt = LocalDateTime.now();
     }
 
     public boolean isActive() {
-        return this.isActive;
+        return this.active;
     }
 
     public boolean isLoggedIn() {

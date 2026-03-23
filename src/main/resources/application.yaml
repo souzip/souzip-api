@@ -87,3 +87,7 @@ admin:
   initial:
     username: ${ADMIN_INITIAL_USERNAME}
     password: ${ADMIN_INITIAL_PASSWORD}
+
+firebase:
+  enabled: ${FIREBASE_ENABLED:false}
+  credentials-path: ${FIREBASE_CREDENTIALS_PATH:}

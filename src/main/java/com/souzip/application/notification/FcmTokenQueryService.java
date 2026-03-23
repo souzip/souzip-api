@@ -31,11 +31,11 @@ public class FcmTokenQueryService implements FcmTokenFinder {
 
     @Override
     public List<FcmToken> getActiveTokensByUserId(Long userId) {
-        return fcmTokenRepository.findByUserIdAndIsActiveTrue(userId);
+        return fcmTokenRepository.findByUserIdAndActiveTrue(userId);
     }
 
     @Override
     public List<FcmToken> getAllActiveTokens() {
-        return fcmTokenRepository.findAllByIsActiveTrue();
+        return fcmTokenRepository.findAllByActiveTrue();
     }
 }

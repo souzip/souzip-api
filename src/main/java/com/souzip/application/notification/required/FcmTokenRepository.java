@@ -15,9 +15,9 @@ public interface FcmTokenRepository extends Repository<FcmToken, Long> {
 
     Optional<FcmToken> findByUserIdAndDeviceId(Long userId, String deviceId);
 
-    List<FcmToken> findByUserIdAndIsActiveTrue(Long userId);
+    List<FcmToken> findByUserIdAndActiveTrue(Long userId);
 
-    List<FcmToken> findAllByIsActiveTrue();
+    List<FcmToken> findAllByActiveTrue();
 
     void delete(FcmToken fcmToken);
 

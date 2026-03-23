@@ -62,7 +62,9 @@ public enum ErrorCode implements BaseErrorCode {
 
     APPLE_MIGRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 마이그레이션 준비 중 오류가 발생했습니다."),
     APPLE_TRANSFER_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "App Transfer가 아직 완료되지 않았습니다."),
-    NO_APPLE_USERS_FOUND(HttpStatus.NOT_FOUND, "마이그레이션할 Apple 사용자가 없습니다.")
+    NO_APPLE_USERS_FOUND(HttpStatus.NOT_FOUND, "마이그레이션할 Apple 사용자가 없습니다."),
+
+    FCM_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 푸시 전송에 실패했습니다.")
     ;
 
     private final HttpStatus status;

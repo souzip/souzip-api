@@ -5,7 +5,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.souzip.application.notification.dto.PushBroadcastResult;
-import com.souzip.application.notification.required.FcmTokenRepository;
+import com.souzip.application.notification.provided.FcmTokenFinder;
 import com.souzip.domain.notification.FcmToken;
 import com.souzip.global.exception.BusinessException;
 import com.souzip.global.exception.ErrorCode;
@@ -16,15 +16,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class FcmNotificationService {
 
-    private final FcmTokenRepository fcmTokenRepository;
+    private final FcmTokenFinder fcmTokenFinder;
     private final ObjectProvider<FirebaseMessaging> firebaseMessaging;
 
     // 단일 기기 토큰으로 알림(제목·본문)을 전송합니다.
@@ -57,9 +55,9 @@ public class FcmNotificationService {
         }
     }
 
-    // 사용자의 활성 토큰 전부에 동일 알림을 보냅니다.
+    // DB 조회는 FcmTokenFinder(짧은 readOnly 트랜잭션)에서만 하고, FCM 전송은 트랜잭션 밖에서 수행합니다.
     public void sendToUser(Long userId, String title, String body) {
-        List<FcmToken> tokens = fcmTokenRepository.findByUserIdAndActiveTrue(userId);
+        List<FcmToken> tokens = fcmTokenFinder.getActiveTokensByUserId(userId);
         if (tokens.isEmpty()) {
             return;
         }
@@ -87,9 +85,9 @@ public class FcmNotificationService {
         }
     }
 
-    // 활성 FCM 토큰이 등록된 모든 기기로 동일 알림을 보냅니다.
+    // DB 조회는 FcmTokenFinder(짧은 readOnly 트랜잭션)에서만 하고, FCM 전송 루프는 트랜잭션 밖에서 수행합니다.
     public PushBroadcastResult broadcastToAllActiveTokens(String title, String body) {
-        List<FcmToken> tokens = fcmTokenRepository.findAllByActiveTrue();
+        List<FcmToken> tokens = fcmTokenFinder.getAllActiveTokens();
         if (tokens.isEmpty()) {
             return new PushBroadcastResult(0, 0, 0, true);
         }

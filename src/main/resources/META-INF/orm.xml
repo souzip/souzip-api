@@ -133,6 +133,33 @@
     </attributes>
   </entity>
 
+  <entity class="com.souzip.domain.notification.PushBroadcastHistory">
+    <table name="push_broadcast_histories"/>
+    <attributes>
+      <basic name="adminId">
+        <column name="admin_id" nullable="false"/>
+      </basic>
+      <basic name="title">
+        <column name="title" nullable="false" length="200"/>
+      </basic>
+      <basic name="body">
+        <column name="body" nullable="false" length="1000"/>
+      </basic>
+      <basic name="totalTargets">
+        <column name="total_targets" nullable="false"/>
+      </basic>
+      <basic name="successCount">
+        <column name="success_count" nullable="false"/>
+      </basic>
+      <basic name="failCount">
+        <column name="fail_count" nullable="false"/>
+      </basic>
+      <basic name="firebaseConfigured">
+        <column name="firebase_configured" nullable="false"/>
+      </basic>
+    </attributes>
+  </entity>
+
   <entity class="com.souzip.domain.wishlist.entity.Wishlist">
     <table name="wishlist">
       <unique-constraint name="idx_wishlist_user_souvenir">

@@ -41,6 +41,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
@@ -97,6 +98,7 @@ clean {
 tasks.named('test') {
     outputs.dir snippetsDir
     useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
 }
 
 def appDocsOutDir = file("$buildDir/docs/app")

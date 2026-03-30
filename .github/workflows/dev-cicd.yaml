@@ -144,6 +144,12 @@ jobs:
             GRAFANA_ADMIN_PASSWORD=${{ secrets.DEV_GRAFANA_ADMIN_PASSWORD }}
             FIREBASE_ENABLED=${{ secrets.FIREBASE_ENABLED }}
             FIREBASE_CREDENTIALS_PATH=${{ secrets.DEV_FIREBASE_CREDENTIALS_PATH }}
+            MAIL_SMTP_ENABLED=${{ secrets.MAIL_SMTP_ENABLED }}
+            MAIL_SMTP_HOST=${{ secrets.MAIL_SMTP_HOST }}
+            MAIL_SMTP_PORT=${{ secrets.MAIL_SMTP_PORT }}
+            MAIL_SMTP_USERNAME=${{ secrets.MAIL_SMTP_USERNAME }}
+            MAIL_SMTP_PASSWORD=${{ secrets.MAIL_SMTP_PASSWORD }}
+            MAIL_SMTP_FROM=${{ secrets.MAIL_SMTP_FROM }}
             EOF
 
             echo "DEPLOYER=${{ github.actor }}" >> deploy/dev/.env

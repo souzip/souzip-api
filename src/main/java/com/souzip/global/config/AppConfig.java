@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Configuration;
     ObjectStorageProperties.class,
     ClovaStudioProperties.class,
     AppleMigrationConfig.class,
-    CorsProperties.class
+    CorsProperties.class,
+    MailSmtpProperties.class
 })
 public class AppConfig {
 }

@@ -92,15 +92,16 @@ echo -e "${GREEN}[INFO] 현재:$CURRENT_PORT → 배포:$TARGET($TARGET_PORT)${N
 echo -e "${YELLOW}[3/8] 모니터링 스택 확인${NC}"
 PROMETHEUS_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-prometheus-prod$' && echo "true" || echo "false")
 GRAFANA_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-grafana-prod$' && echo "true" || echo "false")
+NODE_EXPORTER_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-node-exporter$' && echo "true" || echo "false")
+CADVISOR_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-cadvisor$' && echo "true" || echo "false")
 
-if [ "$PROMETHEUS_RUNNING" = "false" ] || [ "$GRAFANA_RUNNING" = "false" ]; then
+if [ "$PROMETHEUS_RUNNING" = "false" ] || [ "$GRAFANA_RUNNING" = "false" ] || [ "$NODE_EXPORTER_RUNNING" = "false" ] || [ "$CADVISOR_RUNNING" = "false" ]; then
   if [ -f "$MONITORING_COMPOSE" ]; then
     echo -e "${YELLOW}[INFO] 모니터링 스택 시작 중...${NC}"
-    docker compose -f "$MONITORING_COMPOSE" up -d
-    if [ $? -ne 0 ]; then
-      echo -e "${RED}[WARNING] 모니터링 스택 시작 실패 (계속 진행)${NC}"
-    else
+    if docker compose -f "$MONITORING_COMPOSE" up -d; then
       echo -e "${GREEN}[SUCCESS] 모니터링 스택 시작 완료${NC}"
+    else
+      echo -e "${RED}[WARNING] 모니터링 스택 시작 실패 (계속 진행)${NC}"
     fi
   else
     echo -e "${YELLOW}[INFO] 모니터링 설정 파일 없음 ($MONITORING_COMPOSE)${NC}"
@@ -116,11 +117,10 @@ PROMTAIL_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-promtail-p
 if [ "$LOKI_RUNNING" = "false" ] || [ "$PROMTAIL_RUNNING" = "false" ]; then
   if [ -f "$LOGGING_COMPOSE" ]; then
     echo -e "${YELLOW}[INFO] 로그 수집 스택 시작 중...${NC}"
-    docker compose -f "$LOGGING_COMPOSE" up -d
-    if [ $? -ne 0 ]; then
-      echo -e "${RED}[WARNING] 로그 수집 스택 시작 실패 (계속 진행)${NC}"
-    else
+    if docker compose -f "$LOGGING_COMPOSE" up -d; then
       echo -e "${GREEN}[SUCCESS] 로그 수집 스택 시작 완료${NC}"
+    else
+      echo -e "${RED}[WARNING] 로그 수집 스택 시작 실패 (계속 진행)${NC}"
     fi
   else
     echo -e "${YELLOW}[INFO] 로그 수집 설정 파일 없음 ($LOGGING_COMPOSE)${NC}"

@@ -11,6 +11,7 @@ services:
       - .env
     volumes:
       - /home/souzip-dev/secrets:/home/souzip-dev/secrets:ro
+      - /home/souzip-dev/logs/souzip-api:/home/souzip-dev/logs/souzip-api
     ports:
       - "127.0.0.1:8080:8080"
 

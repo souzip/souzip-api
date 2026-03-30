@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: souzip-loki-prod
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - loki-data:/loki
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - souzip-network
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: souzip-promtail-prod
+    volumes:
+      - /home/souzip-prod/logs:/logs:ro
+      - ./promtail.yaml:/etc/promtail/config.yaml:ro
+      - promtail-positions:/promtail
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - souzip-network
+    restart: unless-stopped
+    depends_on:
+      - loki
+
+networks:
+  souzip-network:
+    external: true
+
+volumes:
+  loki-data:
+  promtail-positions:

@@ -35,13 +35,6 @@ management:
     tags:
       application: ${spring.application.name}
 
-logging:
-  pattern:
-    console: "[%d{yyyy-MM-dd HH:mm:ss}] [%X{traceId}] [%-5level] %logger{36} - %msg%n"
-  level:
-    root: INFO
-    com.souzip.api: DEBUG
-
 jwt:
   expiration: 3600000
   refresh-expiration: 2592000000

@@ -20,6 +20,7 @@ services:
     volumes:
       - /home/souzip-prod/logs:/logs:ro
       - ./promtail.yaml:/etc/promtail/config.yaml:ro
+      - promtail-positions:/promtail
     command: -config.file=/etc/promtail/config.yaml
     networks:
       - souzip-network
@@ -33,3 +34,4 @@ networks:
 
 volumes:
   loki-data:
+  promtail-positions:

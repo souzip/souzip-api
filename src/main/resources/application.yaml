@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         default_batch_fetch_size: 100
@@ -91,3 +91,12 @@ admin:
 firebase:
   enabled: ${FIREBASE_ENABLED:false}
   credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
+
+mail:
+  smtp:
+    enabled: ${MAIL_SMTP_ENABLED:false}
+    host: ${MAIL_SMTP_HOST:smtp.gmail.com}
+    port: ${MAIL_SMTP_PORT:587}
+    username: ${MAIL_SMTP_USERNAME:}
+    password: ${MAIL_SMTP_PASSWORD:}
+    from: ${MAIL_SMTP_FROM:}

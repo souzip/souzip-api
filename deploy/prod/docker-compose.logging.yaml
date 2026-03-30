@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.0.0
     container_name: souzip-loki-prod
     ports:
       - "127.0.0.1:3100:3100"
@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
 
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail:3.0.0
     container_name: souzip-promtail-prod
     volumes:
       - /home/souzip-prod/logs:/logs:ro

@@ -54,3 +54,6 @@ management:
     metrics:
       export:
         enabled: true
+
+logging:
+  config: classpath:logback-dev.xml

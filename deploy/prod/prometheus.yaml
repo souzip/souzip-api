@@ -24,3 +24,15 @@ scrape_configs:
           application: 'souzip-api'
           environment: 'prod'
           deployment: 'green'
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['souzip-node-exporter:9100']
+        labels:
+          environment: 'prod'
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['souzip-cadvisor:8080']
+        labels:
+          environment: 'prod'

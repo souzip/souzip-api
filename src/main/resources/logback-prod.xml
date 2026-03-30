@@ -1,0 +1,55 @@
+<configuration>
+  <property name="LOG_PATH" value="/home/souzip-prod/logs/souzip-api"/>
+  <property name="LOG_FILE" value="${LOG_PATH}/souzip-api"/>
+
+  <!-- 전체 로그 파일 (INFO 이상, 60일) -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_FILE}.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>60</maxHistory>
+    </rollingPolicy>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+  </appender>
+
+  <!-- 경고 로그 파일 (WARN 이상, 90일) -->
+  <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/souzip-api-warn.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/souzip-api-warn.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>90</maxHistory>
+    </rollingPolicy>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+  </appender>
+
+  <!-- 에러 로그 파일 (ERROR/FATAL, 180일) -->
+  <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_PATH}/souzip-api-error.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_PATH}/souzip-api-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>180</maxHistory>
+    </rollingPolicy>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+  </appender>
+
+  <!-- 패키지별 로그 레벨 -->
+  <logger name="com.souzip" level="INFO"/>
+  <logger name="org.springframework" level="WARN"/>
+  <logger name="org.hibernate.SQL" level="WARN"/>
+
+  <!-- 기본 로그 레벨 -->
+  <root level="INFO">
+    <appender-ref ref="FILE"/>
+    <appender-ref ref="WARN_FILE"/>
+    <appender-ref ref="ERROR_FILE"/>
+  </root>
+</configuration>

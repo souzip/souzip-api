@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,7 @@ public class EmailBroadcastService {
         try {
             sendPlain(from, to, subject, body, sender);
             return new EmailBroadcastResult(1, 1, 0, true);
-        } catch (MessagingException e) {
+        } catch (MessagingException | MailException e) {
             log.warn("테스트 이메일 발송 실패 toMasked={} error={}", maskEmail(to), e.getMessage());
             return new EmailBroadcastResult(1, 0, 1, true);
         }
@@ -60,7 +61,7 @@ public class EmailBroadcastService {
             try {
                 sendPlain(from, to, subject, body, sender);
                 success++;
-            } catch (MessagingException e) {
+            } catch (MessagingException | MailException e) {
                 fail++;
                 log.warn("이메일 발송 실패(다음 주소로 계속) toDomain={} error={}", maskEmail(to), e.getMessage());
             }

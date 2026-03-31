@@ -94,24 +94,28 @@ class SouvenirControllerTest extends RestDocsSupport {
         int radiusMeter = 4000;
 
         List<SouvenirNearbyResponse> nearbySouvenirs = List.of(
-            SouvenirNearbyResponse.from(
-                1L, "Souvenir A", Category.SOUVENIR_BASIC, Purpose.GIFT,
-                10000, 120000, "$",
-                "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
-                new BigDecimal("40.7128123"), new BigDecimal("-74.0060123"),
-                "Some address A"
-            ),
-            SouvenirNearbyResponse.from(
-                2L, "Souvenir B", Category.FOOD_SNACK, Purpose.GIFT,
-                20000, 240000, "$",
-                "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd123.png",
-                new BigDecimal("40.7228123"), new BigDecimal("-74.0010123"),
-                "Some address B"
-            )
+                SouvenirNearbyResponse.from(
+                        1L, "Souvenir A", Category.SOUVENIR_BASIC, Purpose.GIFT,
+                        10000, 120000, "$",
+                        "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd335.png",
+                        new BigDecimal("40.7128123"), new BigDecimal("-74.0060123"),
+                        "Some address A",
+                        5L,
+                        null
+                ),
+                SouvenirNearbyResponse.from(
+                        2L, "Souvenir B", Category.FOOD_SNACK, Purpose.GIFT,
+                        20000, 240000, "$",
+                        "https://test-dev-images.kr.object.ncloudstorage.com/1234ab123456/1234a123-e1f2-345b-aa12-d123456dd123.png",
+                        new BigDecimal("40.7228123"), new BigDecimal("-74.0010123"),
+                        "Some address B",
+                        3L,
+                        null
+                )
         );
 
-        given(souvenirService.getNearbySouvenirs(userLatitude, userLongitude, radiusMeter))
-            .willReturn(SouvenirNearbyListResponse.from(nearbySouvenirs));
+        given(souvenirService.getNearbySouvenirs(userLatitude, userLongitude, radiusMeter, null))
+                .willReturn(SouvenirNearbyListResponse.from(nearbySouvenirs));
 
         mockMvc.perform(get("/api/souvenirs/nearby")
                 .param("latitude", String.valueOf(userLatitude))
@@ -143,6 +147,8 @@ class SouvenirControllerTest extends RestDocsSupport {
                     fieldWithPath("data.souvenirs[].latitude").type(JsonFieldType.NUMBER).description("위도 (decimal, 소수점 7자리까지)"),
                     fieldWithPath("data.souvenirs[].longitude").type(JsonFieldType.NUMBER).description("경도 (decimal, 소수점 7자리까지)"),
                     fieldWithPath("data.souvenirs[].address").type(JsonFieldType.STRING).description("기념품 주소"),
+                    fieldWithPath("data.souvenirs[].wishlistCount").type(JsonFieldType.NUMBER).description("찜 수"),
+                    fieldWithPath("data.souvenirs[].isWishlisted").type(JsonFieldType.BOOLEAN).description("찜 여부").optional(),
                     fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
                 )
             ));
@@ -182,6 +188,8 @@ class SouvenirControllerTest extends RestDocsSupport {
             "닉네임",
             "https://example.com/profile.jpg",
             true,
+            true,
+            15,
             filesResponse
         );
 
@@ -223,6 +231,8 @@ class SouvenirControllerTest extends RestDocsSupport {
                     fieldWithPath("data.isOwned").type(JsonFieldType.BOOLEAN).description("조회자가 소유자인지 여부"),
                     fieldWithPath("data.userNickname").type(JsonFieldType.STRING).description("기념품 소유자 닉네임"),
                     fieldWithPath("data.userProfileImageUrl").type(JsonFieldType.STRING).description("기념품 소유자 프로필 이미지 URL"),
+                    fieldWithPath("data.isWishlisted").type(JsonFieldType.BOOLEAN).description("찜 여부").optional(),
+                    fieldWithPath("data.wishlistCount").type(JsonFieldType.NUMBER).description("찜 수"),
                     fieldWithPath("data.files").type(JsonFieldType.ARRAY).description("업로드된 파일 리스트"),
                     fieldWithPath("data.files[].id").type(JsonFieldType.NUMBER).description("파일 ID (integer)"),
                     fieldWithPath("data.files[].url").type(JsonFieldType.STRING).description("파일 URL"),

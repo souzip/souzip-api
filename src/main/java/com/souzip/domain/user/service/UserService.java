@@ -21,6 +21,7 @@ import com.souzip.domain.user.entity.User;
 import com.souzip.domain.user.entity.UserAgreement;
 import com.souzip.domain.user.repository.UserAgreementRepository;
 import com.souzip.domain.user.repository.UserRepository;
+import com.souzip.domain.wishlist.repository.WishlistRepository;
 import com.souzip.global.audit.annotation.Audit;
 import com.souzip.global.exception.BusinessException;
 import com.souzip.global.exception.ErrorCode;
@@ -49,6 +50,7 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ProfileImageService profileImageService;
     private final SouvenirRepository souvenirRepository;
+    private final WishlistRepository wishlistRepository;
     private final FileQueryService fileQueryService;
     private final FileStorage fileStorage;
 
@@ -107,12 +109,16 @@ public class UserService {
                 .toList();
 
         Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
+        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserId(userId);
+        Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
 
         Page<MySouvenirResponse> responsePage = souvenirPage.map(souvenir -> {
             String thumbnailUrl = Optional.ofNullable(thumbnailMap.get(souvenir.getId()))
                     .map(FileResponse::url)
                     .orElse(null);
-            return MySouvenirResponse.of(souvenir, thumbnailUrl);
+            boolean isWishlisted = wishlistedIds.contains(souvenir.getId());
+            long wishlistCount = wishlistCountMap.getOrDefault(souvenir.getId(), 0L);
+            return MySouvenirResponse.of(souvenir, thumbnailUrl, isWishlisted, wishlistCount);
         });
 
         return MySouvenirListResponse.from(responsePage);

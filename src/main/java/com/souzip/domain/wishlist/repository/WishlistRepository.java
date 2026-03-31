@@ -23,4 +23,7 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
             countQuery = "SELECT COUNT(w) FROM Wishlist w WHERE w.user.id = :userId"
     )
     Page<Wishlist> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT COUNT(w) FROM Wishlist w WHERE w.souvenir.id = :souvenirId")
+    long countBySouvenirId(@Param("souvenirId") Long souvenirId);
 }

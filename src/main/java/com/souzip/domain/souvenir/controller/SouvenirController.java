@@ -25,11 +25,12 @@ public class SouvenirController {
 
     @GetMapping("/api/souvenirs/nearby")
     public SuccessResponse<SouvenirNearbyListResponse> getNearbySouvenirs(
-        @RequestParam double latitude,
-        @RequestParam double longitude,
-        @RequestParam(required = false, defaultValue = "5000") double radiusMeter
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(required = false, defaultValue = "5000") double radiusMeter,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
     ) {
-        return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude, radiusMeter));
+        return SuccessResponse.of(souvenirService.getNearbySouvenirs(latitude, longitude, radiusMeter, authorizationHeader));
     }
 
     @GetMapping("/api/souvenirs/{id}")

@@ -9,80 +9,87 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record SouvenirDetailResponse(
-    Long id,
-    String name,
-
-    Integer localPrice,
-    String currencySymbol,
-    Integer krwPrice,
-
-    PriceResponse price,
-
-    String description,
-    String address,
-    String locationDetail,
-    BigDecimal latitude,
-    BigDecimal longitude,
-    Category category,
-    Purpose purpose,
-    String countryCode,
-    String userNickname,
-    String userProfileImageUrl,
-    Boolean isOwned,
-    List<FileResponse> files
+        Long id,
+        String name,
+        Integer localPrice,
+        String currencySymbol,
+        Integer krwPrice,
+        PriceResponse price,
+        String description,
+        String address,
+        String locationDetail,
+        BigDecimal latitude,
+        BigDecimal longitude,
+        Category category,
+        Purpose purpose,
+        String countryCode,
+        String userNickname,
+        String userProfileImageUrl,
+        Boolean isOwned,
+        Boolean isWishlisted,
+        long wishlistCount,
+        List<FileResponse> files
 ) {
     public static SouvenirDetailResponse of(
-        Souvenir souvenir,
-        List<FileResponse> files,
-        Boolean isOwned
+            Souvenir souvenir,
+            List<FileResponse> files,
+            Boolean isOwned,
+            Boolean isWishlisted,
+            long wishlistCount
     ) {
         return new SouvenirDetailResponse(
-            souvenir.getId(),
-            souvenir.getName(),
-            souvenir.getLocalPrice(),
-            souvenir.getCurrencySymbol(),
-            souvenir.getKrwPrice(),
-            null,
-            souvenir.getDescription(),
-            souvenir.getAddress(),
-            souvenir.getLocationDetail(),
-            souvenir.getLatitude(),
-            souvenir.getLongitude(),
-            souvenir.getCategory(),
-            souvenir.getPurpose(),
-            souvenir.getCountryCode(),
-            souvenir.getUser().getNickname(),
-            souvenir.getUser().getProfileImageUrl(),
-            isOwned,
-            files
+                souvenir.getId(),
+                souvenir.getName(),
+                souvenir.getLocalPrice(),
+                souvenir.getCurrencySymbol(),
+                souvenir.getKrwPrice(),
+                null,
+                souvenir.getDescription(),
+                souvenir.getAddress(),
+                souvenir.getLocationDetail(),
+                souvenir.getLatitude(),
+                souvenir.getLongitude(),
+                souvenir.getCategory(),
+                souvenir.getPurpose(),
+                souvenir.getCountryCode(),
+                souvenir.getUser().getNickname(),
+                souvenir.getUser().getProfileImageUrl(),
+                isOwned,
+                isWishlisted,
+                wishlistCount,
+                files
         );
     }
 
     public static SouvenirDetailResponse of(
-        Souvenir souvenir,
-        List<FileResponse> files,
-        Boolean isOwned,
-        PriceResponse priceResponse
+            Souvenir souvenir,
+            List<FileResponse> files,
+            Boolean isOwned,
+            Boolean isWishlisted,
+            long wishlistCount,
+            PriceResponse priceResponse
     ) {
         return new SouvenirDetailResponse(
-            souvenir.getId(),
-            souvenir.getName(),
-            souvenir.getLocalPrice(),
-            souvenir.getCurrencySymbol(),
-            souvenir.getKrwPrice(),
-            priceResponse,
-            souvenir.getDescription(),
-            souvenir.getAddress(),
-            souvenir.getLocationDetail(),
-            souvenir.getLatitude(),
-            souvenir.getLongitude(),
-            souvenir.getCategory(),
-            souvenir.getPurpose(),
-            souvenir.getCountryCode(),
-            souvenir.getUser().getNickname(),
-            souvenir.getUser().getProfileImageUrl(),
-            isOwned,
-            files
+                souvenir.getId(),
+                souvenir.getName(),
+                souvenir.getLocalPrice(),
+                souvenir.getCurrencySymbol(),
+                souvenir.getKrwPrice(),
+                priceResponse,
+                souvenir.getDescription(),
+                souvenir.getAddress(),
+                souvenir.getLocationDetail(),
+                souvenir.getLatitude(),
+                souvenir.getLongitude(),
+                souvenir.getCategory(),
+                souvenir.getPurpose(),
+                souvenir.getCountryCode(),
+                souvenir.getUser().getNickname(),
+                souvenir.getUser().getProfileImageUrl(),
+                isOwned,
+                isWishlisted,
+                wishlistCount,
+                files
         );
     }
 }

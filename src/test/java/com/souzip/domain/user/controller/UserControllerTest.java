@@ -469,120 +469,126 @@ class UserControllerTest extends RestDocsSupport {
     @Test
     @DisplayName("내가 등록한 기념품 목록을 조회한다.")
     void getMySouvenirs_success() throws Exception {
-        // given
         List<MySouvenirResponse> content = List.of(
-            new MySouvenirResponse(
-                1L,
-                "https://example.com/image1.jpg",
-                "KR",
-                LocalDateTime.of(2024, 1, 15, 10, 30),
-                LocalDateTime.of(2024, 1, 20, 15, 0)
-            ),
-            new MySouvenirResponse(
-                2L,
-                "https://example.com/image2.jpg",
-                "FR",
-                LocalDateTime.of(2024, 1, 10, 9, 0),
-                LocalDateTime.of(2024, 1, 10, 9, 0)
-            )
+                new MySouvenirResponse(
+                        1L,
+                        "https://example.com/image1.jpg",
+                        "KR",
+                        LocalDateTime.of(2024, 1, 15, 10, 30),
+                        LocalDateTime.of(2024, 1, 20, 15, 0),
+                        5L,
+                        true
+                ),
+                new MySouvenirResponse(
+                        2L,
+                        "https://example.com/image2.jpg",
+                        "FR",
+                        LocalDateTime.of(2024, 1, 10, 9, 0),
+                        LocalDateTime.of(2024, 1, 10, 9, 0),
+                        0L,
+                        false
+                )
         );
 
         MySouvenirListResponse response = createMockMySouvenirListResponse(
-            content, 1, 1, 2L, 12, true, true, false, false
+                content, 1, 1, 2L, 12, true, true, false, false
         );
 
         given(userService.getMySouvenirs(any(), eq(1), eq(12))).willReturn(response);
 
-        // when & then
         mockMvc.perform(get("/api/users/me/souvenirs")
-                .header("Authorization", "Bearer valid_access_token")
-                .param("page", "1")
-                .param("size", "12"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andDo(document("user/my-souvenirs",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                queryParameters(
-                    parameterWithName("page").description("페이지 번호 (기본값: 1)").optional(),
-                    parameterWithName("size").description("페이지 크기 (기본값: 12)").optional()
-                ),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("기념품 목록 응답"),
-                    fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("기념품 목록"),
-                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
-                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
-                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
-                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일시"),
-                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일시"),
-                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
-                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
-                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
-                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 기념품 개수"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
-                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
-                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
-                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
-                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
-                )
-            ));
+                        .header("Authorization", "Bearer valid_access_token")
+                        .param("page", "1")
+                        .param("size", "12"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("user/my-souvenirs",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호 (기본값: 1)").optional(),
+                                parameterWithName("size").description("페이지 크기 (기본값: 12)").optional()
+                        ),
+                        apiResponseFields(
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("기념품 목록 응답"),
+                                fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("기념품 목록"),
+                                fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.STRING).description("썸네일 이미지 URL"),
+                                fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
+                                fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일시"),
+                                fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일시"),
+                                fieldWithPath("data.content[].wishlistCount").type(JsonFieldType.NUMBER).description("찜 수"),
+                                fieldWithPath("data.content[].isWishlisted").type(JsonFieldType.BOOLEAN).description("찜 여부"),
+                                fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
+                                fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                                fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                                fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 기념품 개수"),
+                                fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                                fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
+                                fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                                fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+                                fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                        )
+                ));
     }
 
     @Test
     @DisplayName("기념품 목록 조회 시 페이지 번호를 지정할 수 있다.")
     void getMySouvenirs_withPage() throws Exception {
-        // given
         List<MySouvenirResponse> content = List.of(
-            new MySouvenirResponse(
-                3L,
-                null,
-                "KR",
-                LocalDateTime.of(2024, 1, 5, 10, 0),
-                LocalDateTime.of(2024, 1, 5, 10, 0)
-            )
+                new MySouvenirResponse(
+                        3L,
+                        null,
+                        "KR",
+                        LocalDateTime.of(2024, 1, 5, 10, 0),
+                        LocalDateTime.of(2024, 1, 5, 10, 0),
+                        0L,
+                        false
+                )
         );
 
         MySouvenirListResponse response = createMockMySouvenirListResponse(
-            content, 2, 3, 25L, 12, false, false, true, true
+                content, 2, 3, 25L, 12, false, false, true, true
         );
 
         given(userService.getMySouvenirs(any(), eq(2), eq(12))).willReturn(response);
 
-        // when & then
         mockMvc.perform(get("/api/users/me/souvenirs")
-                .header("Authorization", "Bearer valid_access_token")
-                .param("page", "2")
-                .param("size", "12"))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andDo(document("user/my-souvenirs-page-2",
-                getDocumentRequest(),
-                getDocumentResponse(),
-                queryParameters(
-                    parameterWithName("page").description("페이지 번호"),
-                    parameterWithName("size").description("페이지 크기")
-                ),
-                apiResponseFields(
-                    fieldWithPath("data").type(JsonFieldType.OBJECT).description("기념품 목록 응답"),
-                    fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("기념품 목록"),
-                    fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
-                    fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.NULL).description("썸네일 이미지 URL").optional(),
-                    fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
-                    fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일시"),
-                    fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일시"),
-                    fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
-                    fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
-                    fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
-                    fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 기념품 개수"),
-                    fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
-                    fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
-                    fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
-                    fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
-                    fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
-                    fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
-                )
-            ));
+                        .header("Authorization", "Bearer valid_access_token")
+                        .param("page", "2")
+                        .param("size", "12"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andDo(document("user/my-souvenirs-page-2",
+                        getDocumentRequest(),
+                        getDocumentResponse(),
+                        queryParameters(
+                                parameterWithName("page").description("페이지 번호"),
+                                parameterWithName("size").description("페이지 크기")
+                        ),
+                        apiResponseFields(
+                                fieldWithPath("data").type(JsonFieldType.OBJECT).description("기념품 목록 응답"),
+                                fieldWithPath("data.content").type(JsonFieldType.ARRAY).description("기념품 목록"),
+                                fieldWithPath("data.content[].id").type(JsonFieldType.NUMBER).description("기념품 ID"),
+                                fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.NULL).description("썸네일 이미지 URL").optional(),
+                                fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("기념품 국가 코드"),
+                                fieldWithPath("data.content[].createdAt").type(JsonFieldType.STRING).description("생성일시"),
+                                fieldWithPath("data.content[].updatedAt").type(JsonFieldType.STRING).description("수정일시"),
+                                fieldWithPath("data.content[].wishlistCount").type(JsonFieldType.NUMBER).description("찜 수"),
+                                fieldWithPath("data.content[].isWishlisted").type(JsonFieldType.BOOLEAN).description("찜 여부"),
+                                fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
+                                fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                                fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                                fieldWithPath("data.pagination.totalItems").type(JsonFieldType.NUMBER).description("전체 기념품 개수"),
+                                fieldWithPath("data.pagination.pageSize").type(JsonFieldType.NUMBER).description("페이지 크기"),
+                                fieldWithPath("data.pagination.first").type(JsonFieldType.BOOLEAN).description("첫 번째 페이지 여부"),
+                                fieldWithPath("data.pagination.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지 여부"),
+                                fieldWithPath("data.pagination.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부"),
+                                fieldWithPath("data.pagination.hasPrevious").type(JsonFieldType.BOOLEAN).description("이전 페이지 존재 여부"),
+                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지").optional()
+                        )
+                ));
     }
 
     @Test

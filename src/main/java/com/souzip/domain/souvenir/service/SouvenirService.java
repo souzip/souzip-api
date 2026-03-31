@@ -23,6 +23,7 @@ import com.souzip.domain.souvenir.entity.Souvenir;
 import com.souzip.domain.souvenir.repository.SouvenirRepository;
 import com.souzip.domain.user.entity.User;
 import com.souzip.domain.user.repository.UserRepository;
+import com.souzip.domain.wishlist.repository.WishlistRepository;
 import com.souzip.global.audit.annotation.Audit;
 import com.souzip.global.exception.BusinessException;
 import com.souzip.global.exception.ErrorCode;
@@ -36,6 +37,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Transactional(readOnly = true)
@@ -48,6 +51,7 @@ public class SouvenirService {
 
     private final SouvenirRepository souvenirRepository;
     private final UserRepository userRepository;
+    private final WishlistRepository wishlistRepository;
     private final FileModifyService fileModifyService;
     private final FileQueryService fileQueryService;
     private final FileStorage fileStorage;
@@ -58,18 +62,22 @@ public class SouvenirService {
     public SouvenirNearbyListResponse getNearbySouvenirs(
             double latitude,
             double longitude,
-            double radiusMeter
+            double radiusMeter,
+            @Nullable String authorizationHeader
     ) {
-        List<Object[]> results = souvenirRepository.findNearbySouvenirs(
-                latitude,
-                longitude,
-                radiusMeter
-        );
+        String userId = extractUserId(authorizationHeader);
+
+        List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
+
+        Set<Long> wishlistedIds = userId != null
+                ? wishlistRepository.findSouvenirIdsByUserId(Long.valueOf(userId))
+                : Collections.emptySet();
 
         List<SouvenirNearbyResponse> list = results.stream()
                 .map(row -> SouvenirNearbyResponse.fromObjectArray(
                         row,
-                        ncpStorage::generateUrl
+                        ncpStorage::generateUrl,
+                        wishlistedIds
                 ))
                 .toList();
 
@@ -81,13 +89,13 @@ public class SouvenirService {
             @Nullable String authorizationHeader
     ) {
         String userId = extractUserId(authorizationHeader);
-
         Souvenir souvenir = findSouvenirById(souvenirId);
         List<FileResponse> files = getFiles(souvenirId);
         boolean isOwned = souvenir.isOwnedBy(userId);
+        boolean isWishlisted = userId != null && wishlistRepository.existsByUserIdAndSouvenirId(Long.valueOf(userId), souvenirId);
+        long wishlistCount = wishlistRepository.countBySouvenirId(souvenirId);
         PriceResponse priceResponse = createPriceResponse(souvenir);
-
-        return SouvenirDetailResponse.of(souvenir, files, isOwned, priceResponse);
+        return SouvenirDetailResponse.of(souvenir, files, isOwned, isWishlisted, wishlistCount, priceResponse);
     }
 
     @Audit(action = AuditAction.SOUVENIR_DELETED)

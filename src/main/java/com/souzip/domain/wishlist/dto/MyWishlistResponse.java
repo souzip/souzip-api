@@ -10,7 +10,8 @@ public record MyWishlistResponse(
         String name,
         String countryCode,
         String thumbnailUrl,
-        LocalDateTime wishedAt
+        LocalDateTime wishedAt,
+        boolean isWishlisted
 ) {
     public static MyWishlistResponse of(Wishlist wishlist, String thumbnailUrl) {
         Souvenir s = wishlist.getSouvenir();
@@ -19,7 +20,8 @@ public record MyWishlistResponse(
                 s.getName(),
                 s.getCountryCode(),
                 thumbnailUrl,
-                wishlist.getCreatedAt()
+                wishlist.getCreatedAt(),
+                true
         );
     }
 }

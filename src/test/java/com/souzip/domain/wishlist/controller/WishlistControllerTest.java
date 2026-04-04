@@ -165,14 +165,16 @@ class WishlistControllerTest extends RestDocsSupport {
                         "글로시에 립밤",
                         "US",
                         "https://example.com/image1.jpg",
-                        LocalDateTime.of(2024, 1, 15, 10, 30)
+                        LocalDateTime.of(2024, 1, 15, 10, 30),
+                        true
                 ),
                 new MyWishlistResponse(
                         2L,
                         "말차초콜릿",
                         "JP",
                         "https://example.com/image2.jpg",
-                        LocalDateTime.of(2024, 1, 10, 9, 0)
+                        LocalDateTime.of(2024, 1, 10, 9, 0),
+                        true
                 )
         );
 
@@ -203,6 +205,7 @@ class WishlistControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.STRING).description("썸네일 이미지 URL").optional(),
                                 fieldWithPath("data.content[].wishedAt").type(JsonFieldType.STRING).description("찜한 시간"),
+                                fieldWithPath("data.content[].isWishlisted").type(JsonFieldType.BOOLEAN).description("찜 여부"),
                                 fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
                                 fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                 fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
@@ -226,7 +229,8 @@ class WishlistControllerTest extends RestDocsSupport {
                         "전통 부채",
                         "KR",
                         null,
-                        LocalDateTime.of(2024, 1, 5, 10, 0)
+                        LocalDateTime.of(2024, 1, 5, 10, 0),
+                        true
                 )
         );
 
@@ -257,6 +261,7 @@ class WishlistControllerTest extends RestDocsSupport {
                                 fieldWithPath("data.content[].countryCode").type(JsonFieldType.STRING).description("국가 코드"),
                                 fieldWithPath("data.content[].thumbnailUrl").type(JsonFieldType.NULL).description("썸네일 이미지 URL").optional(),
                                 fieldWithPath("data.content[].wishedAt").type(JsonFieldType.STRING).description("찜한 시간"),
+                                fieldWithPath("data.content[].isWishlisted").type(JsonFieldType.BOOLEAN).description("찜 여부"),
                                 fieldWithPath("data.pagination").type(JsonFieldType.OBJECT).description("페이지네이션 정보"),
                                 fieldWithPath("data.pagination.currentPage").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                 fieldWithPath("data.pagination.totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),

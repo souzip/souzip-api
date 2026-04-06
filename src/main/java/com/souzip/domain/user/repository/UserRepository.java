@@ -2,6 +2,8 @@ package com.souzip.domain.user.repository;
 
 import com.souzip.domain.user.entity.Provider;
 import com.souzip.domain.user.entity.User;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +26,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             WHERE u.deleted = false AND u.email IS NOT NULL
             """)
     List<String> findDistinctEmailsByActiveUsers();
+
+    long deleteByDeletedTrueAndDeletedAtBefore(LocalDateTime cutoff);
 }

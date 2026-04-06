@@ -25,6 +25,8 @@ import com.souzip.domain.wishlist.repository.WishlistRepository;
 import com.souzip.global.audit.annotation.Audit;
 import com.souzip.global.exception.BusinessException;
 import com.souzip.global.exception.ErrorCode;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,6 +93,12 @@ public class UserService {
         deleteUserAgreementIfExists(user);
         user.anonymize();
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public long deleteWithdrawnUsers() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(30);
+        return userRepository.deleteByDeletedTrueAndDeletedAtBefore(cutoff);
     }
 
     public UserProfileResponse getUserProfile(Long userId) {

@@ -17,6 +17,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -356,5 +357,29 @@ class UserServiceTest {
         verify(userRepository).delete(spyUser);
         verify(refreshTokenRepository, never()).delete(any());
         verify(userAgreementRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("탈퇴 후 30일 지난 유저 삭제 쿼리를 호출하고 삭제 결과를 반환한다")
+    void deleteWithdrawnUsers_callsRepositoryAndReturnsCount() {
+        // given
+        given(userRepository.deleteByDeletedTrueAndDeletedAtBefore(any(LocalDateTime.class)))
+                .willReturn(3L);
+
+        ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
+
+        // when
+        long result = userService.deleteWithdrawnUsers();
+
+        // then
+        verify(userRepository).deleteByDeletedTrueAndDeletedAtBefore(captor.capture());
+
+        LocalDateTime cutoff = captor.getValue();
+
+        assertThat(cutoff)
+                .isBeforeOrEqualTo(LocalDateTime.now().minusDays(30).plusSeconds(1))
+                .isAfterOrEqualTo(LocalDateTime.now().minusDays(30).minusSeconds(1));
+
+        assertThat(result).isEqualTo(3L);
     }
 }

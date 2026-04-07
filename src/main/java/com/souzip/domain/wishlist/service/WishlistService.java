@@ -53,7 +53,8 @@ public class WishlistService {
 
     @Transactional
     public WishlistResponse removeWishlist(Long userId, Long souvenirId) {
-        if (!wishlistRepository.existsByUserIdAndSouvenirId(userId, souvenirId)) {
+        User user = findUserById(userId);
+        if (!wishlistRepository.existsByUserUserIdAndSouvenirId(user.getUserId(), souvenirId)) {
             throw new BusinessException(ErrorCode.WISHLIST_NOT_FOUND);
         }
         wishlistRepository.deleteByUserIdAndSouvenirId(userId, souvenirId);

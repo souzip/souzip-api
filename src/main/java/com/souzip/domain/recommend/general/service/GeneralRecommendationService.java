@@ -70,7 +70,7 @@ public class GeneralRecommendationService {
 
         String userId = extractUserId(authorizationHeader);
         Set<Long> wishlistedIds = userId != null
-                ? wishlistRepository.findSouvenirIdsByUserId(Long.valueOf(userId))
+                ? wishlistRepository.findSouvenirIdsByUserId(userId)
                 : Collections.emptySet();
         Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(allSouvenirIds);
 
@@ -116,7 +116,7 @@ public class GeneralRecommendationService {
 
         String userId = extractUserId(authorizationHeader);
         Set<Long> wishlistedIds = userId != null
-                ? wishlistRepository.findSouvenirIdsByUserId(Long.valueOf(userId))
+                ? wishlistRepository.findSouvenirIdsByUserId(userId)
                 : Collections.emptySet();
         Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
 

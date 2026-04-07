@@ -70,7 +70,7 @@ public class SouvenirService {
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
 
         Set<Long> wishlistedIds = userId != null
-                ? wishlistRepository.findSouvenirIdsByUserId(Long.valueOf(userId))
+                ? wishlistRepository.findSouvenirIdsByUserId(userId)
                 : Collections.emptySet();
 
         List<SouvenirNearbyResponse> list = results.stream()
@@ -92,7 +92,7 @@ public class SouvenirService {
         Souvenir souvenir = findSouvenirById(souvenirId);
         List<FileResponse> files = getFiles(souvenirId);
         boolean isOwned = souvenir.isOwnedBy(userId);
-        boolean isWishlisted = userId != null && wishlistRepository.existsByUserIdAndSouvenirId(Long.valueOf(userId), souvenirId);
+        boolean isWishlisted = userId != null && wishlistRepository.existsByUserUserIdAndSouvenirId(userId, souvenirId);
         long wishlistCount = wishlistRepository.countBySouvenirId(souvenirId);
         PriceResponse priceResponse = createPriceResponse(souvenir);
         return SouvenirDetailResponse.of(souvenir, files, isOwned, isWishlisted, wishlistCount, priceResponse);

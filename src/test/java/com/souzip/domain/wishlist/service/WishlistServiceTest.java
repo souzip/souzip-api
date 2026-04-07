@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -47,8 +48,8 @@ class WishlistServiceTest {
         Long userId = 1L;
         Long souvenirId = 1L;
 
-        User user = org.mockito.Mockito.mock(User.class);
-        Souvenir souvenir = org.mockito.Mockito.mock(Souvenir.class);
+        User user = mock(User.class);
+        Souvenir souvenir = mock(Souvenir.class);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(souvenirRepository.findByIdAndDeletedFalse(souvenirId)).willReturn(Optional.of(souvenir));
@@ -70,8 +71,8 @@ class WishlistServiceTest {
         Long userId = 1L;
         Long souvenirId = 1L;
 
-        User user = org.mockito.Mockito.mock(User.class);
-        Souvenir souvenir = org.mockito.Mockito.mock(Souvenir.class);
+        User user = mock(User.class);
+        Souvenir souvenir = mock(Souvenir.class);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(souvenirRepository.findByIdAndDeletedFalse(souvenirId)).willReturn(Optional.of(souvenir));
@@ -91,7 +92,7 @@ class WishlistServiceTest {
         Long userId = 1L;
         Long souvenirId = 999L;
 
-        User user = org.mockito.Mockito.mock(User.class);
+        User user = mock(User.class);
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
         given(souvenirRepository.findByIdAndDeletedFalse(souvenirId)).willReturn(Optional.empty());
@@ -109,8 +110,12 @@ class WishlistServiceTest {
         // given
         Long userId = 1L;
         Long souvenirId = 1L;
+        String userUuid = "1ffc89fd-bb85-489e-9218-63c4f9680b27";
 
-        given(wishlistRepository.existsByUserIdAndSouvenirId(userId, souvenirId)).willReturn(true);
+        User user = mock(User.class);
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(user.getUserId()).willReturn(userUuid);
+        given(wishlistRepository.existsByUserUserIdAndSouvenirId(userUuid, souvenirId)).willReturn(true);
 
         // when
         WishlistResponse response = wishlistService.removeWishlist(userId, souvenirId);
@@ -127,8 +132,12 @@ class WishlistServiceTest {
         // given
         Long userId = 1L;
         Long souvenirId = 1L;
+        String userUuid = "1ffc89fd-bb85-489e-9218-63c4f9680b27";
 
-        given(wishlistRepository.existsByUserIdAndSouvenirId(userId, souvenirId)).willReturn(false);
+        User user = mock(User.class);
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(user.getUserId()).willReturn(userUuid);
+        given(wishlistRepository.existsByUserUserIdAndSouvenirId(userUuid, souvenirId)).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> wishlistService.removeWishlist(userId, souvenirId))

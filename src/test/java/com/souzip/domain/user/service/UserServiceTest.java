@@ -360,26 +360,17 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("탈퇴 후 30일 지난 유저 삭제 쿼리를 호출하고 삭제 결과를 반환한다")
+    @DisplayName("탈퇴된 유저 삭제 쿼리를 호출하고 삭제 결과를 반환한다")
     void deleteWithdrawnUsers_callsRepositoryAndReturnsCount() {
         // given
-        given(userRepository.deleteByDeletedTrueAndDeletedAtBefore(any(LocalDateTime.class)))
+        given(userRepository.deleteByDeletedTrue())
                 .willReturn(3L);
-
-        ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
 
         // when
         long result = userService.deleteWithdrawnUsers();
 
         // then
-        verify(userRepository).deleteByDeletedTrueAndDeletedAtBefore(captor.capture());
-
-        LocalDateTime cutoff = captor.getValue();
-
-        assertThat(cutoff)
-                .isBeforeOrEqualTo(LocalDateTime.now().minusDays(30).plusSeconds(1))
-                .isAfterOrEqualTo(LocalDateTime.now().minusDays(30).minusSeconds(1));
-
+        verify(userRepository).deleteByDeletedTrue();
         assertThat(result).isEqualTo(3L);
     }
 }

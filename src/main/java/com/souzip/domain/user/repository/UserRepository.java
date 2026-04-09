@@ -27,5 +27,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """)
     List<String> findDistinctEmailsByActiveUsers();
 
-    long deleteByDeletedTrueAndDeletedAtBefore(LocalDateTime cutoff);
+    long deleteByDeletedTrue();
 }

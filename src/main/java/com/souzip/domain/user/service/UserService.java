@@ -97,8 +97,7 @@ public class UserService {
 
     @Transactional
     public long deleteWithdrawnUsers() {
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(30);
-        return userRepository.deleteByDeletedTrueAndDeletedAtBefore(cutoff);
+        return userRepository.deleteByDeletedTrue();
     }
 
     public UserProfileResponse getUserProfile(Long userId) {

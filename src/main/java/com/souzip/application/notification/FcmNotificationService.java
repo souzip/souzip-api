@@ -85,9 +85,19 @@ public class FcmNotificationService {
         }
     }
 
-    // DB 조회는 FcmTokenFinder(짧은 readOnly 트랜잭션)에서만 하고, FCM 전송 루프는 트랜잭션 밖에서 수행합니다.
+    // 마케팅 수신 동의한 사용자의 활성 토큰에만 푸시를 발송합니다.
+    public PushBroadcastResult broadcastToMarketingConsentedTokens(String title, String body) {
+        List<FcmToken> tokens = fcmTokenFinder.getAllActiveTokensWithMarketingConsent();
+        return doBroadcast(tokens, title, body);
+    }
+
+    // 활성 토큰 전체에 푸시를 발송합니다.
     public PushBroadcastResult broadcastToAllActiveTokens(String title, String body) {
         List<FcmToken> tokens = fcmTokenFinder.getAllActiveTokens();
+        return doBroadcast(tokens, title, body);
+    }
+
+    private PushBroadcastResult doBroadcast(List<FcmToken> tokens, String title, String body) {
         if (tokens.isEmpty()) {
             return new PushBroadcastResult(0, 0, 0, true);
         }

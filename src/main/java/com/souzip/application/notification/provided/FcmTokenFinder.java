@@ -12,4 +12,6 @@ public interface FcmTokenFinder {
     List<FcmToken> getActiveTokensByUserId(Long userId);
 
     List<FcmToken> getAllActiveTokens();
+
+    List<FcmToken> getAllActiveTokensWithMarketingConsent();
 }

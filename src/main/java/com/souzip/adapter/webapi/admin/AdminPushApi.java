@@ -6,9 +6,11 @@ import com.souzip.application.notification.PushBroadcastHistoryCommandService;
 import com.souzip.application.notification.PushBroadcastHistoryQueryService;
 import com.souzip.application.notification.dto.PushBroadcastHistoryResponse;
 import com.souzip.application.notification.dto.PushBroadcastResult;
+import com.souzip.application.notification.dto.MarketingConsentStats;
 import com.souzip.domain.admin.infrastructure.security.annotation.AdminAccess;
 import com.souzip.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.domain.admin.infrastructure.security.annotation.ViewerAccess;
+import com.souzip.domain.user.repository.UserAgreementRepository;
 import com.souzip.global.common.dto.SuccessResponse;
 import com.souzip.global.common.dto.pagination.PaginationRequest;
 import com.souzip.global.common.dto.pagination.PaginationResponse;
@@ -30,21 +32,31 @@ public class AdminPushApi {
     private final FcmNotificationService fcmNotificationService;
     private final PushBroadcastHistoryCommandService pushBroadcastHistoryCommandService;
     private final PushBroadcastHistoryQueryService pushBroadcastHistoryQueryService;
+    private final UserAgreementRepository userAgreementRepository;
 
-    // 관리자가 입력한 제목·본문으로 활성 FCM 토큰 전체에 푸시를 발송합니다.
+    // 마케팅 수신 동의한 사용자에게만 푸시를 발송합니다.
     @AdminAccess
     @PostMapping("/broadcast")
     public SuccessResponse<PushBroadcastResult> broadcast(
             @CurrentAdminId UUID adminId,
             @Valid @RequestBody PushBroadcastRequest request
     ) {
-        PushBroadcastResult result = fcmNotificationService.broadcastToAllActiveTokens(
+        PushBroadcastResult result = fcmNotificationService.broadcastToMarketingConsentedTokens(
                 request.title(),
                 request.body()
         );
         pushBroadcastHistoryCommandService.record(adminId, request.title(), request.body(), result);
         String message = buildMessage(result);
         return SuccessResponse.of(result, message);
+    }
+
+    // 마케팅 수신 동의 현황을 조회합니다.
+    @ViewerAccess
+    @GetMapping("/marketing-consent/stats")
+    public SuccessResponse<MarketingConsentStats> marketingConsentStats() {
+        long total = userAgreementRepository.count();
+        long consented = userAgreementRepository.countByMarketingConsentTrue();
+        return SuccessResponse.of(new MarketingConsentStats(total, consented, total - consented));
     }
 
     // 푸시 브로드캐스트 발송 이력을 최신순으로 페이지 조회합니다.

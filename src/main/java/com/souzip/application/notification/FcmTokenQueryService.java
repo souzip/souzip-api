@@ -38,4 +38,9 @@ public class FcmTokenQueryService implements FcmTokenFinder {
     public List<FcmToken> getAllActiveTokens() {
         return fcmTokenRepository.findAllByActiveTrue();
     }
+
+    @Override
+    public List<FcmToken> getAllActiveTokensWithMarketingConsent() {
+        return fcmTokenRepository.findAllActiveWithMarketingConsent();
+    }
 }

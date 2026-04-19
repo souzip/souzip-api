@@ -1,4 +1,4 @@
-package com.souzip.domain.shared;
+package com.souzip.shared.domain;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

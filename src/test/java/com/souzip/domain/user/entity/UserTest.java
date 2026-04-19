@@ -1,6 +1,6 @@
 package com.souzip.domain.user.entity;
 
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

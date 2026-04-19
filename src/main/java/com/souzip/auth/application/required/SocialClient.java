@@ -1,7 +1,7 @@
 package com.souzip.auth.application.required;
 
 import com.souzip.auth.application.dto.SocialUserInfo;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 
 public interface SocialClient {
     SocialUserInfo getUserInfo(String accessToken);

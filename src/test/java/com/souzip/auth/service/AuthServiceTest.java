@@ -12,7 +12,7 @@ import com.souzip.auth.application.required.SocialClient;
 import com.souzip.auth.application.required.TokenProvider;
 import com.souzip.auth.application.required.UserPort;
 import com.souzip.auth.domain.RefreshToken;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

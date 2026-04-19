@@ -9,7 +9,7 @@ import com.souzip.auth.application.required.RefreshTokenRepository;
 import com.souzip.auth.application.required.TokenProvider;
 import com.souzip.auth.application.required.UserPort;
 import com.souzip.auth.domain.RefreshToken;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

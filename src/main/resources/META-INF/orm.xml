@@ -5,7 +5,7 @@
                     https://hibernate.org/xsd/orm/mapping/mapping-3.1.0.xsd">
     <access>FIELD</access>
 
-    <mapped-superclass class="com.souzip.domain.shared.BaseEntity">
+    <mapped-superclass class="com.souzip.shared.domain.BaseEntity">
         <attributes>
             <id name="id">
                 <column name="id"/>
@@ -197,7 +197,7 @@
         </attributes>
     </entity>
 
-    <embeddable class="com.souzip.domain.shared.Coordinate">
+    <embeddable class="com.souzip.shared.domain.Coordinate">
         <attributes>
             <basic name="latitude">
                 <column name="latitude" nullable="false" precision="10" scale="7"/>

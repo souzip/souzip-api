@@ -1,7 +1,7 @@
 package com.souzip.domain.user.service;
 
 import com.souzip.auth.application.required.RefreshTokenRepository;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import com.souzip.domain.user.dto.NicknameCheckResponse;
 import com.souzip.domain.user.dto.OnboardingRequest;
 import com.souzip.domain.user.dto.OnboardingResponse;

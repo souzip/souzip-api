@@ -1,4 +1,4 @@
-package com.souzip.domain.shared;
+package com.souzip.shared.domain;
 
 import com.souzip.shared.exception.BusinessException;
 import com.souzip.shared.exception.ErrorCode;

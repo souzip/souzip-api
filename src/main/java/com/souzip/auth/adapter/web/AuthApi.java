@@ -9,8 +9,8 @@ import com.souzip.auth.adapter.web.dto.RefreshResponse;
 import com.souzip.auth.application.dto.LoginInfo;
 import com.souzip.auth.application.dto.RefreshInfo;
 import com.souzip.auth.application.provided.Auth;
-import com.souzip.domain.shared.Provider;
 import com.souzip.shared.common.dto.SuccessResponse;
+import com.souzip.shared.domain.Provider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

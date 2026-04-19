@@ -1,6 +1,6 @@
 package com.souzip.domain.notification;
 
-import com.souzip.domain.shared.BaseEntity;
+import com.souzip.shared.domain.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

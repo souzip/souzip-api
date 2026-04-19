@@ -1,7 +1,7 @@
 package com.souzip.domain.audit.entity;
 
-import com.souzip.domain.shared.BaseEntity;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.BaseEntity;
+import com.souzip.shared.domain.Provider;
 import jakarta.persistence.*;
 import lombok.*;
 

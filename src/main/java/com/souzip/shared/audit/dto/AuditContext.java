@@ -1,7 +1,7 @@
 package com.souzip.shared.audit.dto;
 
 import com.souzip.domain.audit.entity.AuditAction;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import lombok.Builder;
 import lombok.Getter;
 

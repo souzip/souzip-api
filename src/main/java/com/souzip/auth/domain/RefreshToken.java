@@ -1,6 +1,6 @@
 package com.souzip.auth.domain;
 
-import com.souzip.domain.shared.BaseEntity;
+import com.souzip.shared.domain.BaseEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

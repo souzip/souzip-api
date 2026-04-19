@@ -9,7 +9,7 @@ import com.souzip.auth.application.exception.AuthException;
 import com.souzip.auth.application.provided.Auth;
 import com.souzip.docs.CommonDocumentation;
 import com.souzip.docs.RestDocsSupport;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

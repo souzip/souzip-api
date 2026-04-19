@@ -2,7 +2,7 @@ package com.souzip.auth.application;
 
 import com.souzip.auth.application.exception.AuthException;
 import com.souzip.auth.application.required.SocialClient;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

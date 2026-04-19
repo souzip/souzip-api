@@ -2,7 +2,7 @@ package com.souzip.application.location;
 
 import com.souzip.application.location.dto.AddressResult;
 import com.souzip.application.location.required.AddressProvider;
-import com.souzip.domain.shared.Coordinate;
+import com.souzip.shared.domain.Coordinate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

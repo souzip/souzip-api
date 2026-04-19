@@ -14,15 +14,10 @@ import com.souzip.domain.souvenir.entity.Souvenir;
 import com.souzip.domain.user.entity.User;
 import com.souzip.domain.user.repository.UserRepository;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
-<<<<<<< Updated upstream
-import com.souzip.global.clova.ClovaStudioClient;
-import com.souzip.global.clova.PromptLoader;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
-=======
 import com.souzip.shared.clova.ClovaStudioClient;
 import com.souzip.shared.clova.PromptLoader;
->>>>>>> Stashed changes
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;

@@ -3,7 +3,7 @@ package com.souzip.auth.adapter.social;
 import com.souzip.auth.application.dto.SocialUserInfo;
 import com.souzip.auth.application.exception.AuthException;
 import com.souzip.auth.application.required.SocialClient;
-import com.souzip.domain.shared.Provider;
+import com.souzip.shared.domain.Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;

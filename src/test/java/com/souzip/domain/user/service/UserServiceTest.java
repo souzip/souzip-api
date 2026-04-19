@@ -1,7 +1,6 @@
 package com.souzip.domain.user.service;
 
 import com.souzip.auth.application.required.RefreshTokenRepository;
-import com.souzip.shared.domain.Provider;
 import com.souzip.domain.user.dto.NicknameCheckResponse;
 import com.souzip.domain.user.dto.OnboardingRequest;
 import com.souzip.domain.user.dto.OnboardingResponse;
@@ -9,16 +8,15 @@ import com.souzip.domain.user.entity.User;
 import com.souzip.domain.user.entity.UserAgreement;
 import com.souzip.domain.user.repository.UserAgreementRepository;
 import com.souzip.domain.user.repository.UserRepository;
+import com.souzip.shared.domain.Provider;
 import com.souzip.shared.exception.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -283,7 +281,6 @@ class UserServiceTest {
     @Test
     @DisplayName("탈퇴된 유저 삭제 쿼리를 호출하고 삭제 결과를 반환한다")
     void deleteWithdrawnUsers_callsRepositoryAndReturnsCount() {
-<<<<<<< Updated upstream
         // given
         given(userRepository.deleteByDeletedTrue())
                 .willReturn(3L);
@@ -293,22 +290,6 @@ class UserServiceTest {
 
         // then
         verify(userRepository).deleteByDeletedTrue();
-=======
-        given(userRepository.deleteByDeletedTrueAndDeletedAtBefore(any(LocalDateTime.class)))
-                .willReturn(3L);
-
-        ArgumentCaptor<LocalDateTime> captor = ArgumentCaptor.forClass(LocalDateTime.class);
-
-        long result = userService.deleteWithdrawnUsers();
-
-        verify(userRepository).deleteByDeletedTrueAndDeletedAtBefore(captor.capture());
-
-        LocalDateTime cutoff = captor.getValue();
-        assertThat(cutoff)
-                .isBeforeOrEqualTo(LocalDateTime.now().minusDays(30).plusSeconds(1))
-                .isAfterOrEqualTo(LocalDateTime.now().minusDays(30).minusSeconds(1));
-
->>>>>>> Stashed changes
         assertThat(result).isEqualTo(3L);
     }
 }

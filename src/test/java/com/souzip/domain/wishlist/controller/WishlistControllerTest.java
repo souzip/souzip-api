@@ -1,12 +1,12 @@
 package com.souzip.domain.wishlist.controller;
 
+import com.souzip.auth.adapter.security.annotation.CurrentUserId;
 import com.souzip.docs.RestDocsSupport;
 import com.souzip.domain.wishlist.dto.MyWishlistListResponse;
 import com.souzip.domain.wishlist.dto.MyWishlistResponse;
 import com.souzip.domain.wishlist.dto.WishlistResponse;
 import com.souzip.domain.wishlist.service.WishlistService;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
-import com.souzip.global.security.annotation.CurrentUserId;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,10 +33,8 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

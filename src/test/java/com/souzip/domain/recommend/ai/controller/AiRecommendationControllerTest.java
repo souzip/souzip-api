@@ -1,9 +1,9 @@
 package com.souzip.domain.recommend.ai.controller;
 
+import com.souzip.auth.adapter.security.annotation.CurrentUserId;
 import com.souzip.docs.RestDocsSupport;
 import com.souzip.domain.recommend.ai.dto.AiRecommendationResponse;
 import com.souzip.domain.recommend.ai.service.AiRecommendationService;
-import com.souzip.global.security.annotation.CurrentUserId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,8 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class AiRecommendationControllerTest extends RestDocsSupport {
 

@@ -1,24 +1,14 @@
 package com.souzip.domain.user.controller;
 
+import com.souzip.auth.adapter.security.annotation.CurrentUserId;
+import com.souzip.auth.adapter.security.annotation.RequireAuth;
 import com.souzip.domain.souvenir.dto.MySouvenirListResponse;
-import com.souzip.domain.user.dto.NicknameCheckRequest;
-import com.souzip.domain.user.dto.NicknameCheckResponse;
-import com.souzip.domain.user.dto.OnboardingRequest;
-import com.souzip.domain.user.dto.OnboardingResponse;
-import com.souzip.domain.user.dto.UserProfileResponse;
+import com.souzip.domain.user.dto.*;
 import com.souzip.domain.user.service.UserService;
-import com.souzip.global.common.dto.SuccessResponse;
-import com.souzip.global.security.annotation.CurrentUserId;
-import com.souzip.global.security.annotation.RequireAuth;
+import com.souzip.shared.common.dto.SuccessResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -30,7 +20,7 @@ public class UserController {
     @PostMapping("/check-nickname")
     @RequireAuth
     public SuccessResponse<NicknameCheckResponse> checkNickname(
-        @Valid @RequestBody NicknameCheckRequest request
+            @Valid @RequestBody NicknameCheckRequest request
     ) {
         NicknameCheckResponse response = userService.checkNickname(request.nickname());
         return SuccessResponse.of(response);
@@ -39,8 +29,8 @@ public class UserController {
     @PostMapping("/onboarding")
     @RequireAuth
     public SuccessResponse<OnboardingResponse> completeOnboarding(
-        @CurrentUserId Long currentUserId,
-        @Valid @RequestBody OnboardingRequest request
+            @CurrentUserId Long currentUserId,
+            @Valid @RequestBody OnboardingRequest request
     ) {
         OnboardingResponse response = userService.completeOnboarding(currentUserId, request);
         return SuccessResponse.of(response);
@@ -49,7 +39,7 @@ public class UserController {
     @GetMapping("/me")
     @RequireAuth
     public SuccessResponse<UserProfileResponse> getMyProfile(
-        @CurrentUserId Long currentUserId
+            @CurrentUserId Long currentUserId
     ) {
         UserProfileResponse profile = userService.getUserProfile(currentUserId);
         return SuccessResponse.of(profile);
@@ -58,9 +48,9 @@ public class UserController {
     @GetMapping("/me/souvenirs")
     @RequireAuth
     public SuccessResponse<MySouvenirListResponse> getMySouvenirs(
-        @CurrentUserId Long currentUserId,
-        @RequestParam int page,
-        @RequestParam int size
+            @CurrentUserId Long currentUserId,
+            @RequestParam int page,
+            @RequestParam int size
     ) {
         MySouvenirListResponse souvenirs = userService.getMySouvenirs(currentUserId, page, size);
         return SuccessResponse.of(souvenirs);

@@ -10,12 +10,20 @@ import com.souzip.application.notification.dto.MarketingConsentStats;
 import com.souzip.domain.admin.infrastructure.security.annotation.AdminAccess;
 import com.souzip.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.domain.admin.infrastructure.security.annotation.ViewerAccess;
+<<<<<<< Updated upstream
 import com.souzip.domain.user.repository.UserAgreementRepository;
 import com.souzip.global.common.dto.SuccessResponse;
 import com.souzip.global.common.dto.pagination.PaginationRequest;
 import com.souzip.global.common.dto.pagination.PaginationResponse;
+=======
+import com.souzip.shared.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.pagination.PaginationRequest;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
+>>>>>>> Stashed changes
 import jakarta.validation.Valid;
+
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;

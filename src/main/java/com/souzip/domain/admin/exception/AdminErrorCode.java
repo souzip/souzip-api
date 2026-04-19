@@ -1,6 +1,6 @@
 package com.souzip.domain.admin.exception;
 
-import com.souzip.global.exception.BaseErrorCode;
+import com.souzip.shared.exception.BaseErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum AdminErrorCode implements BaseErrorCode {

@@ -1,7 +1,7 @@
 package com.souzip.domain.user.service;
 
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import com.souzip.adapter.config.ObjectStorageProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,11 +21,11 @@ class ProfileImageServiceTest {
     @BeforeEach
     void setUp() {
         properties = new ObjectStorageProperties(
-            "https://kr.object.ncloudstorage.com",
-            "kr-standard",
-            "souzip-dev-images",
-            "test-access-key",
-            "test-secret-key"
+                "https://kr.object.ncloudstorage.com",
+                "kr-standard",
+                "souzip-dev-images",
+                "test-access-key",
+                "test-secret-key"
         );
         profileImageService = new ProfileImageService(properties);
     }
@@ -49,8 +49,8 @@ class ProfileImageServiceTest {
 
         // then
         assertThat(url)
-            .startsWith("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/")
-            .endsWith(color + ".png");
+                .startsWith("https://kr.object.ncloudstorage.com/souzip-dev-images/profile/")
+                .endsWith(color + ".png");
     }
 
     @ParameterizedTest
@@ -82,9 +82,9 @@ class ProfileImageServiceTest {
     void resolveProfileImageUrl_withInvalidColor_throwsException(String invalidColor) {
         // when & then
         assertThatThrownBy(() -> profileImageService.resolveProfileImageUrl(invalidColor))
-            .isInstanceOf(BusinessException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_PROFILE_IMAGE_COLOR)
-            .hasMessageContaining("유효하지 않은 프로필 이미지 색상입니다.");
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_PROFILE_IMAGE_COLOR)
+                .hasMessageContaining("유효하지 않은 프로필 이미지 색상입니다.");
     }
 
     @Test
@@ -95,7 +95,7 @@ class ProfileImageServiceTest {
 
         // then
         assertThat(url)
-            .matches("https://.*\\.ncloudstorage\\.com/.*/profile/[a-z]+\\.png");
+                .matches("https://.*\\.ncloudstorage\\.com/.*/profile/[a-z]+\\.png");
     }
 
     @Test
@@ -106,7 +106,7 @@ class ProfileImageServiceTest {
 
         // then
         assertThat(colors)
-            .containsExactlyInAnyOrder("red", "blue", "yellow", "purple")
-            .hasSize(4);
+                .containsExactlyInAnyOrder("red", "blue", "yellow", "purple")
+                .hasSize(4);
     }
 }

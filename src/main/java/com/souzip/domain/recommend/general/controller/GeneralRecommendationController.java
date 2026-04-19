@@ -4,9 +4,8 @@ import com.souzip.domain.recommend.general.dto.CountryRecommendationDto;
 import com.souzip.domain.recommend.general.dto.GeneralRecommendationDto;
 import com.souzip.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.domain.recommend.general.service.GeneralRecommendationService;
-import com.souzip.global.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

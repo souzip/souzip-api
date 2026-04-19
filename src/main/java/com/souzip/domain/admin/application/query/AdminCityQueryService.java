@@ -3,7 +3,7 @@ package com.souzip.domain.admin.application.query;
 import com.souzip.domain.admin.application.AdminCityQueryUseCase;
 import com.souzip.domain.admin.application.port.CityQueryPort;
 import com.souzip.domain.admin.application.port.CityQueryPort.CityQueryResult;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,7 @@ public class AdminCityQueryService implements AdminCityQueryUseCase {
     @Override
     public PaginationResponse<CityQueryResult> getCities(CitySearchQuery query) {
         return cityQueryPort.getCities(
-            query.countryId(), query.keyword(), query.pageNo(), query.pageSize()
+                query.countryId(), query.keyword(), query.pageNo(), query.pageSize()
         );
     }
 }

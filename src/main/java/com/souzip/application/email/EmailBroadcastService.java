@@ -2,12 +2,14 @@ package com.souzip.application.email;
 
 import com.souzip.application.email.dto.EmailBroadcastResult;
 import com.souzip.application.email.provided.UserEmailFinder;
-import com.souzip.global.config.MailSmtpProperties;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.config.MailSmtpProperties;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;

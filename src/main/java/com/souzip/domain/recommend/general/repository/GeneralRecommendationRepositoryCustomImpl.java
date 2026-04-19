@@ -7,8 +7,8 @@ import com.souzip.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.domain.souvenir.entity.QSouvenir;
 import com.souzip.domain.souvenir.entity.Souvenir;
 import com.souzip.domain.user.entity.QUser;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -25,15 +25,15 @@ public class GeneralRecommendationRepositoryCustomImpl implements GeneralRecomme
         QUser u = QUser.user;
 
         Category category = Category.from(categoryName)
-            .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CATEGORY));
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CATEGORY));
 
         return queryFactory.selectFrom(s)
-            .leftJoin(s.user, u).fetchJoin()
-            .where(s.category.eq(category)
-                .and(s.deleted.eq(false)))
-            .orderBy(s.createdAt.desc())
-            .limit(10)
-            .fetch();
+                .leftJoin(s.user, u).fetchJoin()
+                .where(s.category.eq(category)
+                        .and(s.deleted.eq(false)))
+                .orderBy(s.createdAt.desc())
+                .limit(10)
+                .fetch();
     }
 
     @Override
@@ -42,12 +42,12 @@ public class GeneralRecommendationRepositoryCustomImpl implements GeneralRecomme
         QUser u = QUser.user;
 
         return queryFactory.selectFrom(s)
-            .leftJoin(s.user, u).fetchJoin()
-            .where(s.countryCode.eq(countryCode)
-                .and(s.deleted.eq(false)))
-            .orderBy(s.createdAt.desc())
-            .limit(10)
-            .fetch();
+                .leftJoin(s.user, u).fetchJoin()
+                .where(s.countryCode.eq(countryCode)
+                        .and(s.deleted.eq(false)))
+                .orderBy(s.createdAt.desc())
+                .limit(10)
+                .fetch();
     }
 
     @Override

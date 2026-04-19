@@ -1,7 +1,7 @@
 package com.souzip.domain.user.service;
 
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import com.souzip.adapter.config.ObjectStorageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class ProfileImageService {
     private static final String URL_FORMAT = "%s/%s/%s/%s%s";
 
     private static final Set<String> AVAILABLE_COLORS = Set.of(
-        "red", "blue", "yellow", "purple"
+            "red", "blue", "yellow", "purple"
     );
 
     public String resolveProfileImageUrl(String input) {
@@ -71,12 +71,12 @@ public class ProfileImageService {
 
     private String buildColorUrl(String color) {
         return String.format(
-            URL_FORMAT,
-            storageProperties.getEndpoint(),
-            storageProperties.getBucket(),
-            PROFILE_FOLDER,
-            color,
-            IMAGE_EXTENSION
+                URL_FORMAT,
+                storageProperties.getEndpoint(),
+                storageProperties.getBucket(),
+                PROFILE_FOLDER,
+                color,
+                IMAGE_EXTENSION
         );
     }
 }

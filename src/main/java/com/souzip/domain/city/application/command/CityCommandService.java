@@ -9,9 +9,11 @@ import com.souzip.domain.city.repository.CityRepository;
 import com.souzip.domain.city.service.CityPriorityDomainService;
 import com.souzip.domain.country.entity.Country;
 import com.souzip.domain.country.repository.CountryRepository;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
+
 import java.math.BigDecimal;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

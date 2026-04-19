@@ -2,8 +2,8 @@ package com.souzip.domain.city.entity;
 
 import com.souzip.domain.country.entity.Country;
 import com.souzip.domain.shared.BaseEntity;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,9 +15,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "city", indexes = {
-    @Index(name = "idx_city_country", columnList = "country_id"),
-    @Index(name = "idx_city_name", columnList = "name_en, name_kr"),
-    @Index(name = "idx_city_priority", columnList = "country_id, priority")
+        @Index(name = "idx_city_country", columnList = "country_id"),
+        @Index(name = "idx_city_name", columnList = "name_en, name_kr"),
+        @Index(name = "idx_city_priority", columnList = "country_id, priority")
 })
 public class City extends BaseEntity {
 
@@ -41,20 +41,20 @@ public class City extends BaseEntity {
     private Country country;
 
     public static City create(
-        String nameEn,
-        String nameKr,
-        BigDecimal latitude,
-        BigDecimal longitude,
-        Country country
+            String nameEn,
+            String nameKr,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Country country
     ) {
         return City.builder()
-            .nameEn(nameEn)
-            .nameKr(nameKr)
-            .latitude(latitude)
-            .longitude(longitude)
-            .country(country)
-            .priority(null)
-            .build();
+                .nameEn(nameEn)
+                .nameKr(nameKr)
+                .latitude(latitude)
+                .longitude(longitude)
+                .country(country)
+                .priority(null)
+                .build();
     }
 
     public void updatePriority(Integer priority) {

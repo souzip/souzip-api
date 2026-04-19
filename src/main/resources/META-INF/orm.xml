@@ -1,193 +1,211 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-mappings xmlns="http://www.hibernate.org/xsd/orm/mapping"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.hibernate.org/xsd/orm/mapping
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://www.hibernate.org/xsd/orm/mapping
                     https://hibernate.org/xsd/orm/mapping/mapping-3.1.0.xsd">
-  <access>FIELD</access>
+    <access>FIELD</access>
 
-  <mapped-superclass class="com.souzip.domain.shared.BaseEntity">
-    <attributes>
-      <id name="id">
-        <column name="id"/>
-        <generated-value strategy="IDENTITY"/>
-      </id>
-      <basic name="createdAt">
-        <column name="created_at" nullable="false" updatable="false"/>
-      </basic>
-      <basic name="updatedAt">
-        <column name="updated_at" nullable="false"/>
-      </basic>
-    </attributes>
-  </mapped-superclass>
+    <mapped-superclass class="com.souzip.domain.shared.BaseEntity">
+        <attributes>
+            <id name="id">
+                <column name="id"/>
+                <generated-value strategy="IDENTITY"/>
+            </id>
+            <basic name="createdAt">
+                <column name="created_at" nullable="false" updatable="false"/>
+            </basic>
+            <basic name="updatedAt">
+                <column name="updated_at" nullable="false"/>
+            </basic>
+        </attributes>
+    </mapped-superclass>
 
-  <entity class="com.souzip.domain.location.Location">
-    <table name="location">
-      <unique-constraint name="UK_LOCATION_NAME_ADDRESS">
-        <column-name>name</column-name>
-        <column-name>address</column-name>
-      </unique-constraint>
-    </table>
-    <attributes>
-      <basic name="name">
-        <column name="name" nullable="false"/>
-      </basic>
-      <basic name="address">
-        <column name="address" length="500" nullable="false"/>
-      </basic>
-      <embedded name="coordinate"/>
-    </attributes>
-  </entity>
+    <entity class="com.souzip.auth.domain.RefreshToken">
+        <table name="refresh_token">
+            <index name="idx_refresh_token_user_id" column-list="user_id"/>
+            <index name="idx_refresh_token_token" column-list="token"/>
+        </table>
+        <attributes>
+            <basic name="userId">
+                <column name="user_id" nullable="false"/>
+            </basic>
+            <basic name="token">
+                <column name="token" nullable="false" unique="true"/>
+            </basic>
+            <basic name="expiresAt">
+                <column name="expires_at" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
 
-  <entity class="com.souzip.domain.file.File">
-    <table name="file">
-      <unique-constraint name="uq_file_entity_order">
-        <column-name>entity_type</column-name>
-        <column-name>entity_id</column-name>
-        <column-name>display_order</column-name>
-      </unique-constraint>
-    </table>
-    <attributes>
-      <basic name="entityType">
-        <column name="entity_type" nullable="false" length="20"/>
-        <convert converter="com.souzip.domain.file.EntityTypeConverter"/>
-      </basic>
-      <basic name="entityId">
-        <column name="entity_id" nullable="false"/>
-      </basic>
-      <basic name="storageKey">
-        <column name="storage_key" nullable="false"/>
-      </basic>
-      <basic name="originalName">
-        <column name="original_name" nullable="false"/>
-      </basic>
-      <basic name="fileSize">
-        <column name="file_size" nullable="false"/>
-      </basic>
-      <basic name="contentType">
-        <column name="content_type" nullable="false"/>
-      </basic>
-      <basic name="displayOrder">
-        <column name="display_order" nullable="false"/>
-      </basic>
-    </attributes>
-  </entity>
+    <entity class="com.souzip.domain.location.Location">
+        <table name="location">
+            <unique-constraint name="UK_LOCATION_NAME_ADDRESS">
+                <column-name>name</column-name>
+                <column-name>address</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="name">
+                <column name="name" nullable="false"/>
+            </basic>
+            <basic name="address">
+                <column name="address" length="500" nullable="false"/>
+            </basic>
+            <embedded name="coordinate"/>
+        </attributes>
+    </entity>
 
-  <entity class="com.souzip.domain.notice.Notice">
-    <table name="notice"/>
-    <attributes>
-      <basic name="title">
-        <column name="title" nullable="false" length="200"/>
-      </basic>
-      <basic name="content">
-        <column name="content" nullable="false" column-definition="TEXT"/>
-      </basic>
-      <basic name="authorId">
-        <column name="author_id" nullable="false"/>
-      </basic>
-      <basic name="status">
-        <column name="status" nullable="false" length="20"/>
-        <enumerated>STRING</enumerated>
-      </basic>
-    </attributes>
-  </entity>
+    <entity class="com.souzip.domain.file.File">
+        <table name="file">
+            <unique-constraint name="uq_file_entity_order">
+                <column-name>entity_type</column-name>
+                <column-name>entity_id</column-name>
+                <column-name>display_order</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="entityType">
+                <column name="entity_type" nullable="false" length="20"/>
+                <convert converter="com.souzip.domain.file.EntityTypeConverter"/>
+            </basic>
+            <basic name="entityId">
+                <column name="entity_id" nullable="false"/>
+            </basic>
+            <basic name="storageKey">
+                <column name="storage_key" nullable="false"/>
+            </basic>
+            <basic name="originalName">
+                <column name="original_name" nullable="false"/>
+            </basic>
+            <basic name="fileSize">
+                <column name="file_size" nullable="false"/>
+            </basic>
+            <basic name="contentType">
+                <column name="content_type" nullable="false"/>
+            </basic>
+            <basic name="displayOrder">
+                <column name="display_order" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
 
-  <entity class="com.souzip.domain.notification.FcmToken">
-    <table name="fcm_tokens">
-      <unique-constraint name="idx_fcm_tokens_token">
-        <column-name>token</column-name>
-      </unique-constraint>
-      <unique-constraint name="idx_fcm_tokens_user_device">
-        <column-name>user_id</column-name>
-        <column-name>device_id</column-name>
-      </unique-constraint>
-    </table>
-    <attributes>
-      <basic name="userId">
-        <column name="user_id"/>
-      </basic>
-      <basic name="token">
-        <column name="token" nullable="false" length="255"/>
-      </basic>
-      <basic name="deviceType">
-        <column name="device_type" nullable="false" length="20"/>
-        <enumerated>STRING</enumerated>
-      </basic>
-      <basic name="deviceId">
-        <column name="device_id" nullable="false" length="100"/>
-      </basic>
-      <basic name="deviceModel">
-        <column name="device_model" length="100"/>
-      </basic>
-      <basic name="osVersion">
-        <column name="os_version" length="50"/>
-      </basic>
-      <basic name="appVersion">
-        <column name="app_version" length="50"/>
-      </basic>
-      <basic name="active">
-        <column name="is_active" nullable="false"/>
-      </basic>
-      <basic name="lastUsedAt">
-        <column name="last_used_at"/>
-      </basic>
-    </attributes>
-  </entity>
+    <entity class="com.souzip.domain.notice.Notice">
+        <table name="notice"/>
+        <attributes>
+            <basic name="title">
+                <column name="title" nullable="false" length="200"/>
+            </basic>
+            <basic name="content">
+                <column name="content" nullable="false" column-definition="TEXT"/>
+            </basic>
+            <basic name="authorId">
+                <column name="author_id" nullable="false"/>
+            </basic>
+            <basic name="status">
+                <column name="status" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+        </attributes>
+    </entity>
 
-  <entity class="com.souzip.domain.notification.PushBroadcastHistory">
-    <table name="push_broadcast_histories"/>
-    <attributes>
-      <basic name="adminId">
-        <column name="admin_id" nullable="false"/>
-      </basic>
-      <basic name="title">
-        <column name="title" nullable="false" length="200"/>
-      </basic>
-      <basic name="body">
-        <column name="body" nullable="false" length="1000"/>
-      </basic>
-      <basic name="totalTargets">
-        <column name="total_targets" nullable="false"/>
-      </basic>
-      <basic name="successCount">
-        <column name="success_count" nullable="false"/>
-      </basic>
-      <basic name="failCount">
-        <column name="fail_count" nullable="false"/>
-      </basic>
-      <basic name="firebaseConfigured">
-        <column name="firebase_configured" nullable="false"/>
-      </basic>
-    </attributes>
-  </entity>
+    <entity class="com.souzip.domain.notification.FcmToken">
+        <table name="fcm_tokens">
+            <unique-constraint name="idx_fcm_tokens_token">
+                <column-name>token</column-name>
+            </unique-constraint>
+            <unique-constraint name="idx_fcm_tokens_user_device">
+                <column-name>user_id</column-name>
+                <column-name>device_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <basic name="userId">
+                <column name="user_id"/>
+            </basic>
+            <basic name="token">
+                <column name="token" nullable="false" length="255"/>
+            </basic>
+            <basic name="deviceType">
+                <column name="device_type" nullable="false" length="20"/>
+                <enumerated>STRING</enumerated>
+            </basic>
+            <basic name="deviceId">
+                <column name="device_id" nullable="false" length="100"/>
+            </basic>
+            <basic name="deviceModel">
+                <column name="device_model" length="100"/>
+            </basic>
+            <basic name="osVersion">
+                <column name="os_version" length="50"/>
+            </basic>
+            <basic name="appVersion">
+                <column name="app_version" length="50"/>
+            </basic>
+            <basic name="active">
+                <column name="is_active" nullable="false"/>
+            </basic>
+            <basic name="lastUsedAt">
+                <column name="last_used_at"/>
+            </basic>
+        </attributes>
+    </entity>
 
-  <entity class="com.souzip.domain.wishlist.entity.Wishlist">
-    <table name="wishlist">
-      <unique-constraint name="idx_wishlist_user_souvenir">
-        <column-name>user_id</column-name>
-        <column-name>souvenir_id</column-name>
-      </unique-constraint>
-    </table>
-    <attributes>
-      <many-to-one name="user" fetch="LAZY">
-        <join-column name="user_id" nullable="false"/>
-        <foreign-key constraint-mode="NO_CONSTRAINT"/>
-      </many-to-one>
-      <many-to-one name="souvenir" fetch="LAZY">
-        <join-column name="souvenir_id" nullable="false"/>
-        <foreign-key constraint-mode="NO_CONSTRAINT"/>
-      </many-to-one>
-    </attributes>
-  </entity>
+    <entity class="com.souzip.domain.notification.PushBroadcastHistory">
+        <table name="push_broadcast_histories"/>
+        <attributes>
+            <basic name="adminId">
+                <column name="admin_id" nullable="false"/>
+            </basic>
+            <basic name="title">
+                <column name="title" nullable="false" length="200"/>
+            </basic>
+            <basic name="body">
+                <column name="body" nullable="false" length="1000"/>
+            </basic>
+            <basic name="totalTargets">
+                <column name="total_targets" nullable="false"/>
+            </basic>
+            <basic name="successCount">
+                <column name="success_count" nullable="false"/>
+            </basic>
+            <basic name="failCount">
+                <column name="fail_count" nullable="false"/>
+            </basic>
+            <basic name="firebaseConfigured">
+                <column name="firebase_configured" nullable="false"/>
+            </basic>
+        </attributes>
+    </entity>
 
-  <embeddable class="com.souzip.domain.shared.Coordinate">
-    <attributes>
-      <basic name="latitude">
-        <column name="latitude" nullable="false" precision="10" scale="7"/>
-      </basic>
-      <basic name="longitude">
-        <column name="longitude" nullable="false" precision="10" scale="7"/>
-      </basic>
-    </attributes>
-  </embeddable>
+    <entity class="com.souzip.domain.wishlist.entity.Wishlist">
+        <table name="wishlist">
+            <unique-constraint name="idx_wishlist_user_souvenir">
+                <column-name>user_id</column-name>
+                <column-name>souvenir_id</column-name>
+            </unique-constraint>
+        </table>
+        <attributes>
+            <many-to-one name="user" fetch="LAZY">
+                <join-column name="user_id" nullable="false"/>
+                <foreign-key constraint-mode="NO_CONSTRAINT"/>
+            </many-to-one>
+            <many-to-one name="souvenir" fetch="LAZY">
+                <join-column name="souvenir_id" nullable="false"/>
+                <foreign-key constraint-mode="NO_CONSTRAINT"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <embeddable class="com.souzip.domain.shared.Coordinate">
+        <attributes>
+            <basic name="latitude">
+                <column name="latitude" nullable="false" precision="10" scale="7"/>
+            </basic>
+            <basic name="longitude">
+                <column name="longitude" nullable="false" precision="10" scale="7"/>
+            </basic>
+        </attributes>
+    </embeddable>
 
 </entity-mappings>

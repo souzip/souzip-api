@@ -8,9 +8,11 @@ import com.souzip.domain.city.repository.CityRepository;
 import com.souzip.domain.city.service.CityPriorityDomainService;
 import com.souzip.domain.country.entity.Country;
 import com.souzip.domain.country.repository.CountryRepository;
-import com.souzip.global.exception.BusinessException;
+import com.souzip.shared.exception.BusinessException;
+
 import java.math.BigDecimal;
 import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -7,7 +7,7 @@ import com.souzip.domain.user.repository.UserRepository;
 import com.souzip.domain.wishlist.dto.WishlistResponse;
 import com.souzip.domain.wishlist.entity.Wishlist;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
-import com.souzip.global.exception.BusinessException;
+import com.souzip.shared.exception.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

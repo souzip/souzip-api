@@ -1,6 +1,6 @@
 package com.souzip.domain.wishlist.dto;
 
-import com.souzip.global.common.dto.pagination.PaginationResponse.PageInfo;
+import com.souzip.shared.common.dto.pagination.PaginationResponse.PageInfo;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

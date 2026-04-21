@@ -3,8 +3,8 @@ package com.souzip.domain.user.service;
 import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.auth.application.required.RefreshTokenRepository;
 import com.souzip.domain.audit.entity.AuditAction;
-import com.souzip.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.domain.category.dto.CategoryDto;
 import com.souzip.domain.category.entity.Category;
 import com.souzip.domain.file.EntityType;
@@ -22,16 +22,9 @@ import com.souzip.domain.user.entity.UserAgreement;
 import com.souzip.domain.user.repository.UserAgreementRepository;
 import com.souzip.domain.user.repository.UserRepository;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
-import com.souzip.global.audit.annotation.Audit;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.souzip.shared.audit.annotation.Audit;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,6 +33,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -89,9 +89,12 @@ public class UserService {
     @Transactional
     public void withdraw(Long userId) {
         User user = findUserById(userId);
-        deleteRefreshTokenIfExists(user);
+
+        deleteRefreshTokenIfExists(userId);
         deleteUserAgreementIfExists(user);
+
         user.anonymize();
+
         userRepository.delete(user);
     }
 
@@ -187,9 +190,8 @@ public class UserService {
                 || !request.locationService();
     }
 
-    private void deleteRefreshTokenIfExists(User user) {
-        refreshTokenRepository.findByUser(user)
-                .ifPresent(refreshTokenRepository::delete);
+    private void deleteRefreshTokenIfExists(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
     }
 
     private void deleteUserAgreementIfExists(User user) {

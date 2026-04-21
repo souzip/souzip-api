@@ -1,7 +1,7 @@
 package com.souzip.domain.user.entity;
 
 import com.souzip.domain.user.dto.OnboardingRequest;
-import com.souzip.domain.shared.BaseEntity;
+import com.souzip.shared.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,31 +32,31 @@ public class UserAgreement extends BaseEntity {
     private Boolean marketingConsent;
 
     public static UserAgreement of(
-        User user,
-        Boolean ageVerified,
-        Boolean serviceTerms,
-        Boolean privacyRequired,
-        Boolean locationService,
-        Boolean marketingConsent
+            User user,
+            Boolean ageVerified,
+            Boolean serviceTerms,
+            Boolean privacyRequired,
+            Boolean locationService,
+            Boolean marketingConsent
     ) {
         return UserAgreement.builder()
-            .user(user)
-            .ageVerified(ageVerified)
-            .serviceTerms(serviceTerms)
-            .privacyRequired(privacyRequired)
-            .locationService(locationService)
-            .marketingConsent(marketingConsent)
-            .build();
+                .user(user)
+                .ageVerified(ageVerified)
+                .serviceTerms(serviceTerms)
+                .privacyRequired(privacyRequired)
+                .locationService(locationService)
+                .marketingConsent(marketingConsent)
+                .build();
     }
 
     public static UserAgreement of(User user, OnboardingRequest request) {
         return of(
-            user,
-            request.ageVerified(),
-            request.serviceTerms(),
-            request.privacyRequired(),
-            request.locationService(),
-            request.marketingConsent()
+                user,
+                request.ageVerified(),
+                request.serviceTerms(),
+                request.privacyRequired(),
+                request.locationService(),
+                request.marketingConsent()
         );
     }
 }

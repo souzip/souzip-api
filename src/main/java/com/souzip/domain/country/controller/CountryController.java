@@ -2,7 +2,7 @@ package com.souzip.domain.country.controller;
 
 import com.souzip.domain.country.dto.CountryListResponse;
 import com.souzip.domain.country.service.CountryService;
-import com.souzip.global.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

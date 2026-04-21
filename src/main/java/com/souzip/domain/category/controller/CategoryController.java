@@ -2,7 +2,7 @@ package com.souzip.domain.category.controller;
 
 import com.souzip.domain.category.dto.CategoriesResponse;
 import com.souzip.domain.category.service.CategoryService;
-import com.souzip.global.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

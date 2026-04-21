@@ -4,25 +4,21 @@ import com.souzip.adapter.webapi.admin.dto.PushBroadcastRequest;
 import com.souzip.application.notification.FcmNotificationService;
 import com.souzip.application.notification.PushBroadcastHistoryCommandService;
 import com.souzip.application.notification.PushBroadcastHistoryQueryService;
+import com.souzip.application.notification.dto.MarketingConsentStats;
 import com.souzip.application.notification.dto.PushBroadcastHistoryResponse;
 import com.souzip.application.notification.dto.PushBroadcastResult;
-import com.souzip.application.notification.dto.MarketingConsentStats;
 import com.souzip.domain.admin.infrastructure.security.annotation.AdminAccess;
 import com.souzip.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.domain.admin.infrastructure.security.annotation.ViewerAccess;
 import com.souzip.domain.user.repository.UserAgreementRepository;
-import com.souzip.global.common.dto.SuccessResponse;
-import com.souzip.global.common.dto.pagination.PaginationRequest;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.pagination.PaginationRequest;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RequestMapping("/api/admin/push")
 @RequiredArgsConstructor

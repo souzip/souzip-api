@@ -1,7 +1,7 @@
 package com.souzip.domain.audit.entity;
 
-import com.souzip.domain.user.entity.Provider;
-import com.souzip.domain.shared.BaseEntity;
+import com.souzip.shared.domain.BaseEntity;
+import com.souzip.shared.domain.Provider;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,13 +11,13 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Table(
-    indexes = {
-        @Index(name = "idx_audit_user_id", columnList = "user_id"),
-        @Index(name = "idx_audit_action", columnList = "action, created_at"),
-        @Index(name = "idx_audit_category", columnList = "category, created_at"),
-        @Index(name = "idx_audit_target", columnList = "target_type, target_id"),
-        @Index(name = "idx_audit_created_at", columnList = "created_at DESC")
-    }
+        indexes = {
+                @Index(name = "idx_audit_user_id", columnList = "user_id"),
+                @Index(name = "idx_audit_action", columnList = "action, created_at"),
+                @Index(name = "idx_audit_category", columnList = "category, created_at"),
+                @Index(name = "idx_audit_target", columnList = "target_type, target_id"),
+                @Index(name = "idx_audit_created_at", columnList = "created_at DESC")
+        }
 )
 public class AuditLog extends BaseEntity {
 
@@ -58,45 +58,45 @@ public class AuditLog extends BaseEntity {
     private String metadata;
 
     public static AuditLog success(
-        String userId,
-        AuditAction action,
-        String ipAddress,
-        String userAgent,
-        String appVersion,
-        String metadata
+            String userId,
+            AuditAction action,
+            String ipAddress,
+            String userAgent,
+            String appVersion,
+            String metadata
     ) {
         return AuditLog.builder()
-            .userId(userId)
-            .action(action)
-            .category(action.getCategory())
-            .success(true)
-            .ipAddress(ipAddress)
-            .deviceType(DeviceType.fromUserAgent(userAgent))
-            .appVersion(appVersion)
-            .userAgent(userAgent)
-            .metadata(metadata)
-            .build();
+                .userId(userId)
+                .action(action)
+                .category(action.getCategory())
+                .success(true)
+                .ipAddress(ipAddress)
+                .deviceType(DeviceType.fromUserAgent(userAgent))
+                .appVersion(appVersion)
+                .userAgent(userAgent)
+                .metadata(metadata)
+                .build();
     }
 
     public static AuditLog failure(
-        AuditAction action,
-        String failureReason,
-        String ipAddress,
-        String userAgent,
-        String appVersion,
-        String metadata
+            AuditAction action,
+            String failureReason,
+            String ipAddress,
+            String userAgent,
+            String appVersion,
+            String metadata
     ) {
         return AuditLog.builder()
-            .action(action)
-            .category(action.getCategory())
-            .success(false)
-            .failureReason(failureReason)
-            .ipAddress(ipAddress)
-            .deviceType(DeviceType.fromUserAgent(userAgent))
-            .appVersion(appVersion)
-            .userAgent(userAgent)
-            .metadata(metadata)
-            .build();
+                .action(action)
+                .category(action.getCategory())
+                .success(false)
+                .failureReason(failureReason)
+                .ipAddress(ipAddress)
+                .deviceType(DeviceType.fromUserAgent(userAgent))
+                .appVersion(appVersion)
+                .userAgent(userAgent)
+                .metadata(metadata)
+                .build();
     }
 
     public void setOAuthProvider(Provider provider) {

@@ -8,11 +8,13 @@ import com.souzip.domain.country.entity.Region;
 import com.souzip.domain.country.repository.CountryRepository;
 import com.souzip.domain.currency.entity.Currency;
 import com.souzip.domain.currency.repository.CurrencyRepository;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,15 +43,15 @@ class CountryServiceTest {
 
     private Country createCountry(String nameEn, String nameKr, String code, Currency currency) {
         return Country.of(
-            nameEn,
-            nameKr,
-            code,
-            "Seoul",
-            Region.ASIA,
-            "https://flagcdn.com/w320/kr.png",
-            new BigDecimal("37.0"),
-            new BigDecimal("127.0"),
-            currency
+                nameEn,
+                nameKr,
+                code,
+                "Seoul",
+                Region.ASIA,
+                "https://flagcdn.com/w320/kr.png",
+                new BigDecimal("37.0"),
+                new BigDecimal("127.0"),
+                currency
         );
     }
 
@@ -74,8 +76,8 @@ class CountryServiceTest {
         // then
         assertThat(response.countries()).hasSize(2);
         assertThat(response.countries())
-            .extracting(CountryResponseDto::code)
-            .containsExactly("KR", "JP");
+                .extracting(CountryResponseDto::code)
+                .containsExactly("KR", "JP");
     }
 
     @Test
@@ -104,7 +106,7 @@ class CountryServiceTest {
 
         // when & then
         assertThatThrownBy(() -> countryService.getCountryByCode("INVALID"))
-            .isInstanceOf(BusinessException.class)
-            .hasMessageContaining(ErrorCode.COUNTRY_NOT_FOUND.getMessage());
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.COUNTRY_NOT_FOUND.getMessage());
     }
 }

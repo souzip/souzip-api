@@ -1,6 +1,6 @@
 package com.souzip.domain.search.dto;
 
-import com.souzip.global.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
 
 public class SearchListResponse extends PaginationResponse<SearchResponse> {
 

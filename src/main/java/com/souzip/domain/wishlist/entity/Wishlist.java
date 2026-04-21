@@ -1,8 +1,8 @@
 package com.souzip.domain.wishlist.entity;
 
-import com.souzip.domain.shared.BaseEntity;
 import com.souzip.domain.souvenir.entity.Souvenir;
 import com.souzip.domain.user.entity.User;
+import com.souzip.shared.domain.BaseEntity;
 import jakarta.persistence.Entity;
 import lombok.*;
 

@@ -6,20 +6,11 @@ import com.souzip.domain.souvenir.dto.SouvenirRequest;
 import com.souzip.domain.souvenir.dto.SouvenirUpdateRequest;
 import com.souzip.domain.souvenir.vo.PriceInfo;
 import com.souzip.domain.user.entity.User;
-import com.souzip.domain.shared.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.souzip.shared.domain.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
@@ -89,65 +80,65 @@ public class Souvenir extends BaseEntity {
 
     @Deprecated
     public static Souvenir of(
-        SouvenirCreateRequest request,
-        User user,
-        Integer calculatedLocalPrice,
-        Integer calculatedKrwPrice
+            SouvenirCreateRequest request,
+            User user,
+            Integer calculatedLocalPrice,
+            Integer calculatedKrwPrice
     ) {
         return Souvenir.builder()
-            .name(request.name())
-            .localPrice(calculatedLocalPrice)
-            .currencySymbol(request.currencySymbol())
-            .krwPrice(calculatedKrwPrice)
-            .description(request.description())
-            .address(request.address())
-            .locationDetail(request.locationDetail())
-            .latitude(request.latitude())
-            .longitude(request.longitude())
-            .category(request.category())
-            .purpose(request.purpose())
-            .countryCode(request.countryCode())
-            .user(user)
-            .deleted(false)
-            .build();
+                .name(request.name())
+                .localPrice(calculatedLocalPrice)
+                .currencySymbol(request.currencySymbol())
+                .krwPrice(calculatedKrwPrice)
+                .description(request.description())
+                .address(request.address())
+                .locationDetail(request.locationDetail())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .category(request.category())
+                .purpose(request.purpose())
+                .countryCode(request.countryCode())
+                .user(user)
+                .deleted(false)
+                .build();
     }
 
     public static Souvenir ofV2(
-        SouvenirRequest request,
-        User user,
-        PriceInfo originalPrice,
-        Integer exchangeAmount,
-        String currencySymbol,
-        PriceInfo convertedPrice
+            SouvenirRequest request,
+            User user,
+            PriceInfo originalPrice,
+            Integer exchangeAmount,
+            String currencySymbol,
+            PriceInfo convertedPrice
     ) {
         return Souvenir.builder()
-            .name(request.name())
-            .originalAmount(extractAmount(originalPrice))
-            .originalCurrency(extractCurrency(originalPrice))
-            .exchangeAmount(exchangeAmount)
-            .convertedAmount(extractAmount(convertedPrice))
-            .convertedCurrency(extractCurrency(convertedPrice))
-            .localPrice(extractAmount(originalPrice))
-            .currencySymbol(currencySymbol)
-            .krwPrice(exchangeAmount)
-            .description(request.description())
-            .address(request.address())
-            .locationDetail(request.locationDetail())
-            .latitude(request.latitude())
-            .longitude(request.longitude())
-            .category(request.category())
-            .purpose(request.purpose())
-            .countryCode(request.countryCode())
-            .user(user)
-            .deleted(false)
-            .build();
+                .name(request.name())
+                .originalAmount(extractAmount(originalPrice))
+                .originalCurrency(extractCurrency(originalPrice))
+                .exchangeAmount(exchangeAmount)
+                .convertedAmount(extractAmount(convertedPrice))
+                .convertedCurrency(extractCurrency(convertedPrice))
+                .localPrice(extractAmount(originalPrice))
+                .currencySymbol(currencySymbol)
+                .krwPrice(exchangeAmount)
+                .description(request.description())
+                .address(request.address())
+                .locationDetail(request.locationDetail())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
+                .category(request.category())
+                .purpose(request.purpose())
+                .countryCode(request.countryCode())
+                .user(user)
+                .deleted(false)
+                .build();
     }
 
     @Deprecated
     public void update(
-        SouvenirUpdateRequest request,
-        Integer calculatedLocalPrice,
-        Integer calculatedKrwPrice
+            SouvenirUpdateRequest request,
+            Integer calculatedLocalPrice,
+            Integer calculatedKrwPrice
     ) {
         this.name = request.name();
         this.localPrice = calculatedLocalPrice;
@@ -164,11 +155,11 @@ public class Souvenir extends BaseEntity {
     }
 
     public void updateV2(
-        SouvenirRequest request,
-        PriceInfo originalPrice,
-        Integer exchangeAmount,
-        String currencySymbol,
-        PriceInfo convertedPrice
+            SouvenirRequest request,
+            PriceInfo originalPrice,
+            Integer exchangeAmount,
+            String currencySymbol,
+            PriceInfo convertedPrice
     ) {
         this.name = request.name();
         this.originalAmount = extractAmount(originalPrice);

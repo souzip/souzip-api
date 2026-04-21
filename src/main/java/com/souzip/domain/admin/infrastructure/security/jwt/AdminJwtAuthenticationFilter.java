@@ -1,8 +1,8 @@
 package com.souzip.domain.admin.infrastructure.security.jwt;
 
+import com.souzip.auth.adapter.security.jwt.JwtTokenProvider;
 import com.souzip.domain.admin.model.Admin;
 import com.souzip.domain.admin.repository.AdminRepository;
-import com.souzip.global.security.jwt.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;  // ← 추가
-import org.springframework.security.core.authority.SimpleGrantedAuthority;  // ← 추가
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -19,7 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;  // ← 추가
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -101,8 +101,8 @@ public class AdminJwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private Admin getAdminFromToken(String token) {
-        String adminId = jwtTokenProvider.getUserIdFromToken(token);
-        return adminRepository.findById(UUID.fromString(adminId)).orElse(null);
+        Long adminId = jwtTokenProvider.getUserIdFromToken(token);
+        return adminRepository.findById(UUID.fromString(String.valueOf(adminId))).orElse(null);
     }
 
     private boolean isAdminAbsent(Admin admin) {
@@ -111,11 +111,11 @@ public class AdminJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void setAuthentication(Admin admin) {
         List<GrantedAuthority> authorities = Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_" + admin.getRole().name())
+                new SimpleGrantedAuthority("ROLE_" + admin.getRole().name())
         );
 
         UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(admin, null, authorities);
+                new UsernamePasswordAuthenticationToken(admin, null, authorities);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

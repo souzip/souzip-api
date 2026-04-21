@@ -5,29 +5,21 @@ import com.souzip.application.file.FileModifyService;
 import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.auth.adapter.security.jwt.JwtTokenProvider;
 import com.souzip.domain.audit.entity.AuditAction;
 import com.souzip.domain.exchangerate.dto.ExchangeCalculatedPrice;
 import com.souzip.domain.exchangerate.service.ExchangeRateService;
 import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
-import com.souzip.domain.souvenir.dto.PriceData;
-import com.souzip.domain.souvenir.dto.PriceResponse;
-import com.souzip.domain.souvenir.dto.SouvenirCreateRequest;
-import com.souzip.domain.souvenir.dto.SouvenirDetailResponse;
-import com.souzip.domain.souvenir.dto.SouvenirNearbyListResponse;
-import com.souzip.domain.souvenir.dto.SouvenirNearbyResponse;
-import com.souzip.domain.souvenir.dto.SouvenirRequest;
-import com.souzip.domain.souvenir.dto.SouvenirResponse;
-import com.souzip.domain.souvenir.dto.SouvenirUpdateRequest;
+import com.souzip.domain.souvenir.dto.*;
 import com.souzip.domain.souvenir.entity.Souvenir;
 import com.souzip.domain.souvenir.repository.SouvenirRepository;
 import com.souzip.domain.user.entity.User;
 import com.souzip.domain.user.repository.UserRepository;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
-import com.souzip.global.audit.annotation.Audit;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
-import com.souzip.global.security.jwt.JwtTokenProvider;
+import com.souzip.shared.audit.annotation.Audit;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +29,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -266,7 +257,8 @@ public class SouvenirService {
     @Nullable
     private String parseUserIdFromToken(String token) {
         try {
-            return jwtTokenProvider.getUserIdFromToken(token);
+            Long userId = jwtTokenProvider.getUserIdFromToken(token);
+            return userId != null ? String.valueOf(userId) : null;
         } catch (Exception e) {
             log.debug("Failed to parse token", e);
             return null;

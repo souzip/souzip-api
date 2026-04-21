@@ -3,9 +3,11 @@ package com.souzip.application.notification;
 import com.souzip.application.notification.dto.PushBroadcastHistoryResponse;
 import com.souzip.application.notification.required.PushBroadcastHistoryRepository;
 import com.souzip.domain.notification.PushBroadcastHistory;
-import com.souzip.global.common.dto.pagination.PaginationRequest;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.common.dto.pagination.PaginationRequest;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;

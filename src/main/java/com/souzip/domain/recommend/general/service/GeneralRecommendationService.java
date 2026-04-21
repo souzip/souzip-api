@@ -3,6 +3,7 @@ package com.souzip.domain.recommend.general.service;
 import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.auth.adapter.security.jwt.JwtTokenProvider;
 import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.recommend.general.dto.CountryRecommendationDto;
@@ -11,7 +12,6 @@ import com.souzip.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.domain.recommend.general.repository.GeneralRecommendationRepositoryCustom;
 import com.souzip.domain.souvenir.entity.Souvenir;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
-import com.souzip.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
@@ -170,7 +170,8 @@ public class GeneralRecommendationService {
     @Nullable
     private String parseUserIdFromToken(String token) {
         try {
-            return jwtTokenProvider.getUserIdFromToken(token);
+            Long userId = jwtTokenProvider.getUserIdFromToken(token);
+            return userId != null ? String.valueOf(userId) : null;
         } catch (Exception e) {
             log.debug("Failed to parse token", e);
             return null;

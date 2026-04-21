@@ -7,11 +7,13 @@ import com.google.firebase.messaging.Notification;
 import com.souzip.application.notification.dto.PushBroadcastResult;
 import com.souzip.application.notification.provided.FcmTokenFinder;
 import com.souzip.domain.notification.FcmToken;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;

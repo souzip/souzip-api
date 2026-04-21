@@ -14,10 +14,10 @@ import com.souzip.domain.souvenir.entity.Souvenir;
 import com.souzip.domain.user.entity.User;
 import com.souzip.domain.user.repository.UserRepository;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
-import com.souzip.global.clova.ClovaStudioClient;
-import com.souzip.global.clova.PromptLoader;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.clova.ClovaStudioClient;
+import com.souzip.shared.clova.PromptLoader;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -187,7 +187,8 @@ public class AiRecommendationService {
         try {
             return objectMapper.readValue(
                             clovaResponse,
-                            new TypeReference<Map<String, List<Map<String, String>>>>() {}
+                            new TypeReference<Map<String, List<Map<String, String>>>>() {
+                            }
                     ).entrySet().stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,

@@ -3,7 +3,7 @@ package com.souzip.domain.audit.service;
 import com.souzip.domain.audit.entity.AuditAction;
 import com.souzip.domain.audit.entity.AuditLog;
 import com.souzip.domain.audit.repository.AuditLogRepository;
-import com.souzip.global.audit.dto.AuditContext;
+import com.souzip.shared.audit.dto.AuditContext;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,7 @@ public class AuditService {
                            String ipAddress, String userAgent, String appVersion) {
         try {
             AuditLog auditLog = createFailureLog(action, failureReason,
-                ipAddress, userAgent, appVersion);
+                    ipAddress, userAgent, appVersion);
             saveLog(auditLog);
             incrementFailureMetric(action);
             logFailureWarning(action, failureReason);
@@ -58,12 +58,12 @@ public class AuditService {
 
     private AuditLog createSuccessLog(AuditContext context) {
         AuditLog auditLog = AuditLog.success(
-            context.getUserId(),
-            context.getAction(),
-            context.getIpAddress(),
-            context.getUserAgent(),
-            context.getAppVersion(),
-            context.getMetadata()
+                context.getUserId(),
+                context.getAction(),
+                context.getIpAddress(),
+                context.getUserAgent(),
+                context.getAppVersion(),
+                context.getMetadata()
         );
 
         enrichLogWithOptionalFields(auditLog, context);
@@ -84,12 +84,12 @@ public class AuditService {
     private AuditLog createFailureLog(AuditAction action, String failureReason,
                                       String ipAddress, String userAgent, String appVersion) {
         return AuditLog.failure(
-            action,
-            failureReason,
-            ipAddress,
-            userAgent,
-            appVersion,
-            null
+                action,
+                failureReason,
+                ipAddress,
+                userAgent,
+                appVersion,
+                null
         );
     }
 
@@ -111,24 +111,24 @@ public class AuditService {
 
     private Counter buildCounter(AuditAction action, boolean success) {
         return meterRegistry.counter(
-            METRIC_NAME,
-            TAG_ACTION, action.name(),
-            TAG_CATEGORY, action.getCategory().name(),
-            TAG_SUCCESS, String.valueOf(success)
+                METRIC_NAME,
+                TAG_ACTION, action.name(),
+                TAG_CATEGORY, action.getCategory().name(),
+                TAG_SUCCESS, String.valueOf(success)
         );
     }
 
     private void logSuccessInfo(AuditContext context) {
         log.info("[Audit success] - userId: {}, action: {}, category: {}",
-            context.getUserId(),
-            context.getAction(),
-            context.getAction().getCategory());
+                context.getUserId(),
+                context.getAction(),
+                context.getAction().getCategory());
     }
 
     private void logFailureWarning(AuditAction action, String failureReason) {
         log.warn("[Audit failure] - action: {}, reason: {}",
-            action,
-            failureReason);
+                action,
+                failureReason);
     }
 
     private void logSaveError(Exception e) {

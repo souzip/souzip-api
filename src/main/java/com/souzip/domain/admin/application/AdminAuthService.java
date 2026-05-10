@@ -1,5 +1,6 @@
 package com.souzip.domain.admin.application;
 
+import com.souzip.auth.adapter.security.jwt.JwtTokenProvider;
 import com.souzip.domain.admin.application.command.AdminLoginCommand;
 import com.souzip.domain.admin.exception.AdminExpiredRefreshTokenException;
 import com.souzip.domain.admin.exception.AdminInvalidRefreshTokenException;
@@ -11,7 +12,6 @@ import com.souzip.domain.admin.model.AdminRefreshToken;
 import com.souzip.domain.admin.model.Username;
 import com.souzip.domain.admin.repository.AdminRefreshTokenRepository;
 import com.souzip.domain.admin.repository.AdminRepository;
-import com.souzip.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class AdminAuthService {
     @Transactional
     public AdminLoginResult login(AdminLoginCommand command) {
         Admin admin = adminRepository.findByUsername(new Username(command.username()))
-            .orElseThrow(AdminNotFoundException::new);
+                .orElseThrow(AdminNotFoundException::new);
 
         validatePassword(admin, command.password());
 
@@ -58,7 +58,7 @@ public class AdminAuthService {
         validateRefreshToken(refreshToken);
 
         Admin admin = adminRepository.findById(refreshToken.getAdminId())
-            .orElseThrow(AdminNotFoundException::new);
+                .orElseThrow(AdminNotFoundException::new);
 
         String newAccessToken = jwtTokenProvider.generateToken(admin.getId().toString());
 
@@ -72,7 +72,7 @@ public class AdminAuthService {
     @Transactional
     public void logout(UUID adminId) {
         refreshTokenRepository.findByAdminId(adminId)
-            .ifPresent(refreshTokenRepository::delete);
+                .ifPresent(refreshTokenRepository::delete);
     }
 
     private void validatePassword(Admin admin, String password) {
@@ -85,10 +85,10 @@ public class AdminAuthService {
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(REFRESH_TOKEN_VALIDITY_DAYS);
 
         refreshTokenRepository.findByAdminId(admin.getId())
-            .ifPresentOrElse(
-                token -> updateExistingToken(token, tokenValue, expiresAt),
-                () -> createNewToken(admin.getId(), tokenValue, expiresAt)
-            );
+                .ifPresentOrElse(
+                        token -> updateExistingToken(token, tokenValue, expiresAt),
+                        () -> createNewToken(admin.getId(), tokenValue, expiresAt)
+                );
     }
 
     private void updateExistingToken(AdminRefreshToken token, String tokenValue, LocalDateTime expiresAt) {
@@ -103,7 +103,7 @@ public class AdminAuthService {
 
     private AdminRefreshToken findRefreshToken(String tokenValue) {
         return refreshTokenRepository.findByToken(tokenValue)
-            .orElseThrow(AdminInvalidRefreshTokenException::new);
+                .orElseThrow(AdminInvalidRefreshTokenException::new);
     }
 
     private void validateRefreshToken(AdminRefreshToken refreshToken) {
@@ -133,13 +133,15 @@ public class AdminAuthService {
     }
 
     public record AdminLoginResult(
-        Admin admin,
-        String accessToken,
-        String refreshToken
-    ) {}
+            Admin admin,
+            String accessToken,
+            String refreshToken
+    ) {
+    }
 
     public record RefreshResult(
-        String accessToken,
-        String refreshToken
-    ) {}
+            String accessToken,
+            String refreshToken
+    ) {
+    }
 }

@@ -2,9 +2,9 @@ package com.souzip.domain.search.controller;
 
 import com.souzip.domain.search.dto.SearchResponse;
 import com.souzip.domain.search.service.SearchService;
-import com.souzip.global.common.dto.SuccessResponse;
-import com.souzip.global.common.dto.pagination.PaginationRequest;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.pagination.PaginationRequest;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;

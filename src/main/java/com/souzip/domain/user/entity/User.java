@@ -1,15 +1,15 @@
 package com.souzip.domain.user.entity;
 
-import com.souzip.domain.auth.dto.OAuthUserInfo;
 import com.souzip.domain.category.entity.Category;
-import com.souzip.domain.shared.BaseEntity;
+import com.souzip.shared.domain.BaseEntity;
+import com.souzip.shared.domain.Provider;
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -17,15 +17,15 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "\"user\"",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"provider", "provider_id"})
-    },
-    indexes = {
-        @Index(name = "idx_user_id", columnList = "user_id"),
-        @Index(name = "idx_provider", columnList = "provider, provider_id"),
-        @Index(name = "idx_deleted", columnList = "deleted"),
-        @Index(name = "idx_email", columnList = "email")
-    }
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"provider", "provider_id"})
+        },
+        indexes = {
+                @Index(name = "idx_user_id", columnList = "user_id"),
+                @Index(name = "idx_provider", columnList = "provider, provider_id"),
+                @Index(name = "idx_deleted", columnList = "deleted"),
+                @Index(name = "idx_email", columnList = "email")
+        }
 )
 @SQLDelete(sql = "UPDATE \"user\" SET deleted = true, deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
 @Entity
@@ -61,8 +61,8 @@ public class User extends BaseEntity {
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
-        name = "user_category",
-        joinColumns = @JoinColumn(name = "user_id")
+            name = "user_category",
+            joinColumns = @JoinColumn(name = "user_id")
     )
     @Column(name = "category")
     @Enumerated(EnumType.STRING)
@@ -81,37 +81,18 @@ public class User extends BaseEntity {
         ensureUserId();
     }
 
-    public static User of(
-        Provider provider,
-        String providerId,
-        String name,
-        String nickname,
-        String email,
-        String profileImageUrl
-    ) {
+    public static User of(Provider provider, String providerId, String email) {
         return User.builder()
-            .userId(UUID.randomUUID().toString())
-            .provider(provider)
-            .providerId(providerId)
-            .name(name)
-            .nickname(nickname)
-            .email(email)
-            .profileImageUrl(profileImageUrl)
-            .onboardingCompleted(false)
-            .categories(new HashSet<>())
-            .deleted(false)
-            .build();
-    }
-
-    public static User of(Provider provider, OAuthUserInfo oauthUserInfo) {
-        return User.of(
-            provider,
-            oauthUserInfo.getProviderId(),
-            oauthUserInfo.getName(),
-            "",
-            oauthUserInfo.getEmail(),
-            oauthUserInfo.getProfileImageUrl()
-        );
+                .userId(UUID.randomUUID().toString())
+                .provider(provider)
+                .providerId(providerId)
+                .name("")
+                .nickname("")
+                .email(email)
+                .onboardingCompleted(false)
+                .categories(new HashSet<>())
+                .deleted(false)
+                .build();
     }
 
     private void ensureUserId() {

@@ -5,7 +5,7 @@ import com.souzip.adapter.webapi.admin.dto.EmailTestSendRequest;
 import com.souzip.application.email.EmailBroadcastService;
 import com.souzip.application.email.dto.EmailBroadcastResult;
 import com.souzip.domain.admin.infrastructure.security.annotation.AdminAccess;
-import com.souzip.global.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.SuccessResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

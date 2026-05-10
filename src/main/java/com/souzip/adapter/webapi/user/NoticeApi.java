@@ -2,7 +2,7 @@ package com.souzip.adapter.webapi.user;
 
 import com.souzip.application.notice.dto.NoticeResponse;
 import com.souzip.application.notice.provided.NoticeFinder;
-import com.souzip.global.common.dto.SuccessResponse;
+import com.souzip.shared.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

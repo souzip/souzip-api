@@ -1,0 +1,24 @@
+[[wishlist-api]]
+== Wishlist API
+
+[[wishlist-add]]
+=== 찜 등록 (new)
+
+기념품을 찜 목록에 추가하는 API입니다.
+
+* 엔드포인트: `POST /api/wishlists/{souvenirId}`
+* 인증 필요
+* 이미 찜한 기념품에 다시 찜 요청을 보내면 에러가 반환됩니다.
+
+operation::wishlists/add[snippets='http-request,path-parameters,http-response,response-fields']
+
+[[wishlist-remove]]
+=== 찜 취소 (new)
+
+찜 목록에서 기념품을 제거하는 API입니다.
+
+* 엔드포인트: `DELETE /api/wishlists/{souvenirId}`
+* 인증 필요
+* 찜하지 않은 기념품을 취소하려 하면 에러가 반환됩니다.
+
+operation::wishlists/remove[snippets='http-request,path-parameters,http-response,response-fields']

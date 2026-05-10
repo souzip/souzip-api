@@ -6,9 +6,11 @@ import com.souzip.domain.admin.model.AdminPasswordEncoder;
 import com.souzip.domain.admin.model.AdminRole;
 import com.souzip.domain.admin.model.Username;
 import com.souzip.domain.admin.repository.AdminRepository;
-import com.souzip.global.config.QuerydslConfig;
+import com.souzip.shared.config.QuerydslConfig;
+
 import java.util.List;
 import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

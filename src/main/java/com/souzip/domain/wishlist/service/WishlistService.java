@@ -14,8 +14,8 @@ import com.souzip.domain.wishlist.dto.MyWishlistResponse;
 import com.souzip.domain.wishlist.dto.WishlistResponse;
 import com.souzip.domain.wishlist.entity.Wishlist;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -53,7 +53,8 @@ public class WishlistService {
 
     @Transactional
     public WishlistResponse removeWishlist(Long userId, Long souvenirId) {
-        if (!wishlistRepository.existsByUserIdAndSouvenirId(userId, souvenirId)) {
+        User user = findUserById(userId);
+        if (!wishlistRepository.existsByUserUserIdAndSouvenirId(user.getUserId(), souvenirId)) {
             throw new BusinessException(ErrorCode.WISHLIST_NOT_FOUND);
         }
         wishlistRepository.deleteByUserIdAndSouvenirId(userId, souvenirId);

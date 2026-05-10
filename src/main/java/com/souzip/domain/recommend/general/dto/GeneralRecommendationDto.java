@@ -8,15 +8,19 @@ public record GeneralRecommendationDto(
         String name,
         Category category,
         String countryCode,
-        String thumbnailUrl
+        String thumbnailUrl,
+        long wishlistCount,
+        Boolean isWishlisted
 ) {
-    public static GeneralRecommendationDto of(Souvenir souvenir, String thumbnailUrl) {
+    public static GeneralRecommendationDto of(Souvenir souvenir, String thumbnailUrl, long wishlistCount, Boolean isWishlisted) {
         return new GeneralRecommendationDto(
                 souvenir.getId(),
                 souvenir.getName(),
                 souvenir.getCategory(),
                 souvenir.getCountryCode(),
-                thumbnailUrl
+                thumbnailUrl,
+                wishlistCount,
+                isWishlisted
         );
     }
 }

@@ -6,7 +6,8 @@ import com.souzip.application.location.dto.PlaceSearchResult;
 import com.souzip.application.location.dto.SearchPlace;
 import com.souzip.application.location.dto.SearchResult;
 import com.souzip.domain.city.entity.City;
-import com.souzip.domain.shared.Coordinate;
+import com.souzip.shared.domain.Coordinate;
+
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

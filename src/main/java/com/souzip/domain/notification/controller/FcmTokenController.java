@@ -1,20 +1,15 @@
 package com.souzip.domain.notification.controller;
 
 import com.souzip.application.notification.FcmTokenCommandService;
+import com.souzip.auth.adapter.security.annotation.CurrentUserId;
+import com.souzip.auth.adapter.security.annotation.RequireAuth;
 import com.souzip.domain.notification.FcmToken;
 import com.souzip.domain.notification.FcmTokenRegisterRequest;
 import com.souzip.domain.notification.dto.FcmTokenResponse;
-import com.souzip.global.common.dto.SuccessResponse;
-import com.souzip.global.security.annotation.CurrentUserId;
-import com.souzip.global.security.annotation.RequireAuth;
+import com.souzip.shared.common.dto.SuccessResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/users/me/fcm-tokens")

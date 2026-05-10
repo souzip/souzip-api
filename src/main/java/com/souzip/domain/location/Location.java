@@ -1,7 +1,7 @@
 package com.souzip.domain.location;
 
-import com.souzip.domain.shared.BaseEntity;
-import com.souzip.domain.shared.Coordinate;
+import com.souzip.shared.domain.BaseEntity;
+import com.souzip.shared.domain.Coordinate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

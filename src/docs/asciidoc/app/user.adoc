@@ -94,4 +94,24 @@ operation::user/my-souvenirs-page-2[snippets='http-request,query-parameters,http
 ==== 등록한 기념품이 없는 경우
 operation::user/my-souvenirs-empty[snippets='http-request,query-parameters,http-response,response-fields']
 
-NOTE: 기념품 목록은 생성일시 기준 내림차순으로 정렬됩니다. 찜 탭 기능은 추후 구현 예정입니다.
+NOTE: 기념품 목록은 생성일시 기준 내림차순으로 정렬됩니다.
+
+[[user-my-wishlists]]
+==== 내가 찜한 기념품 목록 조회 (new)
+
+찜 탭에 표시할 기념품 목록을 조회합니다.
+
+* 인증 필요
+* 찜한 순서(최신순)로 정렬됩니다.
+
+operation::user/my-wishlists[snippets='http-request,query-parameters,http-response,response-fields']
+
+==== 페이징 예시
+
+===== 2페이지 조회
+operation::user/my-wishlists-page-2[snippets='http-request,query-parameters,http-response,response-fields']
+
+==== 찜한 기념품이 없는 경우
+operation::user/my-wishlists-empty[snippets='http-request,query-parameters,http-response,response-fields']
+
+NOTE: 기념품 목록은 찜한 시간 기준 내림차순으로 정렬됩니다.

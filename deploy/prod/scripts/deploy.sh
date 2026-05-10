@@ -15,6 +15,7 @@ BLUE_COMPOSE="docker-compose.blue.yaml"
 GREEN_COMPOSE="docker-compose.green.yaml"
 MONITORING_COMPOSE="docker-compose.monitoring.yaml"
 LOGGING_COMPOSE="docker-compose.logging.yaml"
+DB_COMPOSE="docker-compose.db.yaml"
 
 BLUE_PROJECT="souzip-blue"
 GREEN_PROJECT="souzip-green"
@@ -40,7 +41,7 @@ fi
 
 cd "$WORK_DIR" || exit 1
 
-echo -e "${YELLOW}[1/8] 최신 이미지 다운로드${NC}"
+echo -e "${YELLOW}[1/9] 최신 이미지 다운로드${NC}"
 
 docker pull ${REGISTRY}:latest
 
@@ -60,7 +61,7 @@ cd "$DEPLOY_DIR" || exit 1
   exit 1
 }
 
-echo -e "${YELLOW}[2/8] 현재 active 포트 확인${NC}"
+echo -e "${YELLOW}[2/9] 현재 active 포트 확인${NC}"
 
 CURRENT_PORT=$(grep -oE '127\.0\.0\.1:[0-9]+' "$NGINX_UPSTREAM_FILE" | cut -d: -f2 | head -n 1 || true)
 
@@ -89,7 +90,19 @@ fi
 
 echo -e "${GREEN}[INFO] 현재:$CURRENT_PORT → 배포:$TARGET($TARGET_PORT)${NC}"
 
-echo -e "${YELLOW}[3/8] 모니터링 스택 확인${NC}"
+echo -e "${YELLOW}[3/9] DB 컨테이너 확인${NC}"
+if ! docker ps --format '{{.Names}}' | grep -q '^souzip-prod-db$'; then
+  docker compose -f "$DB_COMPOSE" up -d
+  if [ $? -ne 0 ]; then
+    echo -e "${RED}[ERROR] DB 컨테이너 시작 실패${NC}"
+    exit 1
+  fi
+  echo -e "${GREEN}[SUCCESS] DB 컨테이너 시작 완료${NC}"
+else
+  echo -e "${GREEN}[SUCCESS] DB 컨테이너 이미 실행 중${NC}"
+fi
+
+echo -e "${YELLOW}[4/9] 모니터링 스택 확인${NC}"
 PROMETHEUS_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-prometheus-prod$' && echo "true" || echo "false")
 GRAFANA_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-grafana-prod$' && echo "true" || echo "false")
 NODE_EXPORTER_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-node-exporter$' && echo "true" || echo "false")
@@ -110,7 +123,7 @@ else
   echo -e "${GREEN}[SUCCESS] 모니터링 스택 이미 실행 중${NC}"
 fi
 
-echo -e "${YELLOW}[3.5/8] 로그 수집 스택 확인${NC}"
+echo -e "${YELLOW}[4.5/9] 로그 수집 스택 확인${NC}"
 LOKI_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-loki-prod$' && echo "true" || echo "false")
 PROMTAIL_RUNNING=$(docker ps --format '{{.Names}}' | grep -q '^souzip-promtail-prod$' && echo "true" || echo "false")
 
@@ -129,12 +142,12 @@ else
   echo -e "${GREEN}[SUCCESS] 로그 수집 스택 이미 실행 중${NC}"
 fi
 
-echo -e "${YELLOW}[4/8] $TARGET 컨테이너 실행${NC}"
+echo -e "${YELLOW}[5/9] $TARGET 컨테이너 실행${NC}"
 
 docker compose -p "$TARGET_PROJECT" -f "$TARGET_COMPOSE" pull
 docker compose -p "$TARGET_PROJECT" -f "$TARGET_COMPOSE" up -d
 
-echo -e "${YELLOW}[5/8] 헬스체크 시작${NC}"
+echo -e "${YELLOW}[6/9] 헬스체크 시작${NC}"
 
 RETRY_COUNT=0
 HEALTH_OK=false
@@ -164,7 +177,7 @@ if [ "$HEALTH_OK" = false ]; then
   exit 1
 fi
 
-echo -e "${YELLOW}[6/8] nginx upstream 전환${NC}"
+echo -e "${YELLOW}[7/9] nginx upstream 전환${NC}"
 
 sudo tee "$NGINX_UPSTREAM_FILE" > /dev/null <<EOF
 upstream souzip {
@@ -177,11 +190,11 @@ sudo nginx -s reload
 
 echo -e "${GREEN}[SUCCESS] nginx 전환 완료${NC}"
 
-echo -e "${YELLOW}[7/8] 이전 컨테이너 종료${NC}"
+echo -e "${YELLOW}[8/9] 이전 컨테이너 종료${NC}"
 
 docker compose -p "$STOP_PROJECT" -f "$STOP_COMPOSE" down || true
 
-echo -e "${YELLOW}[8/8] 이미지 정리${NC}"
+echo -e "${YELLOW}[9/9] 이미지 정리${NC}"
 
 docker image prune -f || true
 

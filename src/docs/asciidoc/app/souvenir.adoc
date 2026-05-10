@@ -2,13 +2,14 @@
 == Souvenir API
 
 [[souvenir-get]]
-=== 기념품 조회
+=== 기념품 조회 (new)
 
 기념품 상세 정보를 조회하는 API입니다.
 
 * 인증 불필요 (Public API)
 * 삭제된(soft delete) 기념품은 조회할 수 없습니다.
-* 인증 불필요하지만, 로그인한 사용자가 조회하면 내 기념품 여부(isOwned) 함께 반환
+* 인증 불필요하지만, 로그인한 사용자가 조회하면 내 기념품 여부(isOwned), 찜 여부(isWishlisted) 함께 반환
+* 비로그인 사용자의 경우 `isWishlisted` 는 `null` 로 반환
 
 operation::souvenirs/get-souvenir[snippets='http-request,path-parameters,http-response,response-fields']
 
@@ -19,7 +20,7 @@ NOTE: v2 응답 구조 - `price` 필드에 원본 가격(original)과 등록 시
 WARNING: 응답의 `localPrice`, `currencySymbol`, `krwPrice` 필드는 v1 호환성을 위해 임시로 제공되며, 향후 제거될 예정입니다. `price` 객체(`price.original.amount`, `price.original.symbol`, `price.converted.amount`) 사용을 권장합니다.
 
 [[souvenir-create]]
-=== 기념품 생성 (New)
+=== 기념품 생성
 
 사용자가 새로운 기념품을 등록하는 v2 API입니다.
 
@@ -59,7 +60,7 @@ operation::souvenirs/create-souvenir[snippets='http-request,request-parts,reques
 NOTE: 기념품 가격은 현지 통화 또는 원화 기준으로 입력할 수 있으며, 서버에서 환율이 자동 적용됩니다.
 
 [[souvenir-update]]
-=== 기념품 수정 (New)
+=== 기념품 수정
 
 v2 API를 사용한 기념품 수정입니다.
 
@@ -106,7 +107,7 @@ operation::souvenirs/delete-souvenir[snippets='http-request,path-parameters,http
 NOTE: 삭제 성공 시 `data`는 반환되지 않으며, 메시지만 전달됩니다.
 
 [[souvenir-nearby]]
-=== 근처 기념품 조회
+=== 근처 기념품 조회 (new)
 
 위도/경도를 통해 특정 반경 내 근처 기념품을 조회하는 API입니다.
 
@@ -114,5 +115,6 @@ NOTE: 삭제 성공 시 `data`는 반환되지 않으며, 메시지만 전달됩
 * 인증 불필요 (Public API)
 * 삭제된(soft delete) 기념품은 조회할 수 없습니다.
 * 조회 반경 단위는 미터(m)
+* 로그인한 사용자가 조회하면 찜 여부(isWishlisted) 함께 반환, 비로그인 시 `null`
 
 operation::souvenirs/get-nearby-souvenirs[snippets='http-request,query-parameters,http-response,response-fields']

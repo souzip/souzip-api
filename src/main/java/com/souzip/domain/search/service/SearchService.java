@@ -3,11 +3,13 @@ package com.souzip.domain.search.service;
 import com.souzip.domain.city.entity.City;
 import com.souzip.domain.search.dto.SearchResponse;
 import com.souzip.domain.search.repository.LocationSearchRepository;
-import com.souzip.global.common.dto.pagination.PaginationRequest;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.common.dto.pagination.PaginationRequest;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

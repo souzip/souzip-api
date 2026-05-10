@@ -7,6 +7,7 @@ import com.souzip.auth.application.required.SocialClient;
 import com.souzip.shared.domain.Provider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @RequiredArgsConstructor
+@EnableConfigurationProperties(SocialProperties.class)
 @Component
 public class KakaoSocialClient implements SocialClient {
 
@@ -30,7 +32,7 @@ public class KakaoSocialClient implements SocialClient {
     public SocialUserInfo getUserInfo(String accessToken) {
         try {
             KakaoUserResponse response = restTemplate.exchange(
-                    socialProperties.getKakao().getUserInfoUrl(),
+                    socialProperties.kakao().userInfoUrl(),
                     HttpMethod.GET,
                     new HttpEntity<>(createAuthHeaders(accessToken)),
                     KakaoUserResponse.class

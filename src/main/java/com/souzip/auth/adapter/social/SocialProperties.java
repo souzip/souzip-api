@@ -1,26 +1,15 @@
 package com.souzip.auth.adapter.social;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Getter
-@RequiredArgsConstructor
 @ConfigurationProperties(prefix = "oauth")
-public class SocialProperties {
-
-    private final Kakao kakao;
-    private final Google google;
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class Kakao {
-        private final String userInfoUrl;
+public record SocialProperties(
+        Kakao kakao,
+        Google google
+) {
+    public record Kakao(String userInfoUrl) {
     }
 
-    @Getter
-    @RequiredArgsConstructor
-    public static class Google {
-        private final String userInfoUrl;
+    public record Google(String userInfoUrl) {
     }
 }

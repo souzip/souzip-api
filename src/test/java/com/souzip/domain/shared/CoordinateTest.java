@@ -1,10 +1,12 @@
 package com.souzip.domain.shared;
 
+import com.souzip.shared.domain.Coordinate;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CoordinateTest {
 

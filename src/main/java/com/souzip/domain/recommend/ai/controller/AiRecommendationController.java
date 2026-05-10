@@ -1,10 +1,10 @@
 package com.souzip.domain.recommend.ai.controller;
 
+import com.souzip.auth.adapter.security.annotation.CurrentUserId;
+import com.souzip.auth.adapter.security.annotation.RequireAuth;
 import com.souzip.domain.recommend.ai.dto.AiRecommendationResponse;
 import com.souzip.domain.recommend.ai.service.AiRecommendationService;
-import com.souzip.global.common.dto.SuccessResponse;
-import com.souzip.global.security.annotation.CurrentUserId;
-import com.souzip.global.security.annotation.RequireAuth;
+import com.souzip.shared.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

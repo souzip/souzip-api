@@ -2,7 +2,7 @@ package com.souzip.adapter.integration.googlegeocoding;
 
 import com.souzip.adapter.integration.googlegeocoding.dto.GoogleGeocodingResponse;
 import com.souzip.application.location.dto.AddressResult;
-import com.souzip.domain.shared.Coordinate;
+import com.souzip.shared.domain.Coordinate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

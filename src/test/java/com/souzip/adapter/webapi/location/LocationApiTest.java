@@ -9,7 +9,7 @@ import com.souzip.application.location.provided.ReverseGeocoding;
 import com.souzip.docs.RestDocsSupport;
 import com.souzip.domain.city.entity.City;
 import com.souzip.domain.country.entity.Country;
-import com.souzip.domain.shared.Coordinate;
+import com.souzip.shared.domain.Coordinate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;

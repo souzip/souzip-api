@@ -5,7 +5,7 @@ import com.souzip.adapter.integration.googlegeocoding.dto.GoogleGeocodingRespons
 import com.souzip.adapter.integration.googlegeocoding.dto.GoogleGeocodingResponse.Result;
 import com.souzip.application.location.dto.AddressResult;
 import com.souzip.application.location.required.AddressProvider;
-import com.souzip.domain.shared.Coordinate;
+import com.souzip.shared.domain.Coordinate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

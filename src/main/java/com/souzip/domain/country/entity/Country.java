@@ -1,21 +1,11 @@
 package com.souzip.domain.country.entity;
 
 import com.souzip.domain.currency.entity.Currency;
-import com.souzip.domain.shared.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.ConstraintMode;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.souzip.shared.domain.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
@@ -54,26 +44,26 @@ public class Country extends BaseEntity {
     private Currency currency;
 
     public static Country of(
-        String nameEn,
-        String nameKr,
-        String code,
-        String capital,
-        Region region,
-        String imageUrl,
-        BigDecimal latitude,
-        BigDecimal longitude,
-        Currency currency
+            String nameEn,
+            String nameKr,
+            String code,
+            String capital,
+            Region region,
+            String imageUrl,
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Currency currency
     ) {
         return Country.builder()
-            .nameEn(nameEn)
-            .nameKr(nameKr)
-            .code(code)
-            .capital(capital)
-            .region(region)
-            .imageUrl(imageUrl)
-            .latitude(latitude)
-            .longitude(longitude)
-            .currency(currency)
-            .build();
+                .nameEn(nameEn)
+                .nameKr(nameKr)
+                .code(code)
+                .capital(capital)
+                .region(region)
+                .imageUrl(imageUrl)
+                .latitude(latitude)
+                .longitude(longitude)
+                .currency(currency)
+                .build();
     }
 }

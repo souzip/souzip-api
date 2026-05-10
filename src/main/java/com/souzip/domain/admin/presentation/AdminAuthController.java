@@ -1,22 +1,23 @@
 package com.souzip.domain.admin.presentation;
 
+import com.souzip.auth.adapter.security.annotation.RequireAuth;
 import com.souzip.domain.admin.application.AdminAuthService;
 import com.souzip.domain.admin.application.AdminAuthService.AdminLoginResult;
 import com.souzip.domain.admin.application.AdminAuthService.RefreshResult;
+import com.souzip.domain.admin.infrastructure.security.annotation.CurrentAdminId;
 import com.souzip.domain.admin.presentation.request.AdminLoginRequest;
 import com.souzip.domain.admin.presentation.request.AdminRefreshRequest;
 import com.souzip.domain.admin.presentation.response.AdminLoginResponse;
 import com.souzip.domain.admin.presentation.response.AdminRefreshResponse;
-import com.souzip.global.common.dto.SuccessResponse;
-import com.souzip.domain.admin.infrastructure.security.annotation.CurrentAdminId;
-import com.souzip.global.security.annotation.RequireAuth;
+import com.souzip.shared.common.dto.SuccessResponse;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/admin/auth")

@@ -19,11 +19,13 @@ import com.souzip.domain.admin.model.AdminRole;
 import com.souzip.domain.admin.presentation.request.CreateCityRequest;
 import com.souzip.domain.admin.presentation.request.InviteAdminRequest;
 import com.souzip.domain.admin.presentation.request.UpdateCityRequest;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

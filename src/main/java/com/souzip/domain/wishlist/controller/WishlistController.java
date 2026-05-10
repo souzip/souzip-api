@@ -1,11 +1,11 @@
 package com.souzip.domain.wishlist.controller;
 
+import com.souzip.auth.adapter.security.annotation.CurrentUserId;
+import com.souzip.auth.adapter.security.annotation.RequireAuth;
 import com.souzip.domain.wishlist.dto.MyWishlistListResponse;
 import com.souzip.domain.wishlist.dto.WishlistResponse;
 import com.souzip.domain.wishlist.service.WishlistService;
-import com.souzip.global.common.dto.SuccessResponse;
-import com.souzip.global.security.annotation.CurrentUserId;
-import com.souzip.global.security.annotation.RequireAuth;
+import com.souzip.shared.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +19,8 @@ public class WishlistController {
     @PostMapping("/api/wishlists/{souvenirId}")
     @RequireAuth
     public SuccessResponse<WishlistResponse> addWishlist(
-        @CurrentUserId Long currentUserId,
-        @PathVariable Long souvenirId
+            @CurrentUserId Long currentUserId,
+            @PathVariable Long souvenirId
     ) {
         return SuccessResponse.of(wishlistService.addWishlist(currentUserId, souvenirId));
     }
@@ -28,8 +28,8 @@ public class WishlistController {
     @DeleteMapping("/api/wishlists/{souvenirId}")
     @RequireAuth
     public SuccessResponse<WishlistResponse> removeWishlist(
-        @CurrentUserId Long currentUserId,
-        @PathVariable Long souvenirId
+            @CurrentUserId Long currentUserId,
+            @PathVariable Long souvenirId
     ) {
         return SuccessResponse.of(wishlistService.removeWishlist(currentUserId, souvenirId));
     }
@@ -37,8 +37,8 @@ public class WishlistController {
     @GetMapping("/api/users/me/wishlists")
     @RequireAuth
     public SuccessResponse<MyWishlistListResponse> getMyWishlist(
-        @CurrentUserId Long currentUserId,
-        Pageable pageable
+            @CurrentUserId Long currentUserId,
+            Pageable pageable
     ) {
         return SuccessResponse.of(wishlistService.getMyWishlist(currentUserId, pageable));
     }

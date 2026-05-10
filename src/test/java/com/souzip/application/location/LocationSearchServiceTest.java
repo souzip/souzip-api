@@ -1,17 +1,15 @@
 package com.souzip.application.location;
 
 import com.souzip.application.location.dto.CitySearchResult;
-import com.souzip.application.location.dto.SearchPlace;
 import com.souzip.application.location.dto.PlaceSearchResult;
+import com.souzip.application.location.dto.SearchPlace;
 import com.souzip.application.location.dto.SearchResult;
 import com.souzip.application.location.required.CitySearchRepository;
 import com.souzip.application.location.required.PlaceSearchProvider;
 import com.souzip.domain.city.entity.City;
 import com.souzip.domain.country.entity.Country;
 import com.souzip.domain.country.entity.Region;
-import com.souzip.domain.shared.Coordinate;
-import java.math.BigDecimal;
-import java.util.List;
+import com.souzip.shared.domain.Coordinate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

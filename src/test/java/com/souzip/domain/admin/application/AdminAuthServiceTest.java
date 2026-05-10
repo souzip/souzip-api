@@ -1,26 +1,22 @@
 package com.souzip.domain.admin.application;
 
+import com.souzip.auth.adapter.security.jwt.JwtTokenProvider;
 import com.souzip.domain.admin.application.AdminAuthService.AdminLoginResult;
 import com.souzip.domain.admin.application.AdminAuthService.RefreshResult;
 import com.souzip.domain.admin.application.command.AdminLoginCommand;
-import com.souzip.domain.admin.fixture.TestAdminPasswordEncoder;
 import com.souzip.domain.admin.exception.AdminExpiredRefreshTokenException;
 import com.souzip.domain.admin.exception.AdminInvalidRefreshTokenException;
 import com.souzip.domain.admin.exception.AdminLoginFailedException;
 import com.souzip.domain.admin.exception.AdminNotFoundException;
-import com.souzip.domain.admin.model.Admin;
-import com.souzip.domain.admin.model.AdminPasswordEncoder;
-import com.souzip.domain.admin.model.AdminRefreshToken;
-import com.souzip.domain.admin.model.AdminRole;
-import com.souzip.domain.admin.model.Username;
+import com.souzip.domain.admin.fixture.TestAdminPasswordEncoder;
+import com.souzip.domain.admin.model.*;
 import com.souzip.domain.admin.repository.AdminRefreshTokenRepository;
 import com.souzip.domain.admin.repository.AdminRepository;
-import com.souzip.global.security.jwt.JwtTokenProvider;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,7 +50,7 @@ class AdminAuthServiceTest {
         // given
         AdminLoginCommand command = new AdminLoginCommand("admin123", "password123");
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN,
-            new TestAdminPasswordEncoder());
+                new TestAdminPasswordEncoder());
 
         given(adminRepository.findByUsername(any(Username.class))).willReturn(Optional.of(admin));
         given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
@@ -83,7 +79,7 @@ class AdminAuthServiceTest {
 
         // when & then
         assertThatThrownBy(() -> adminAuthService.login(command))
-            .isInstanceOf(AdminNotFoundException.class);
+                .isInstanceOf(AdminNotFoundException.class);
     }
 
     @DisplayName("비밀번호 불일치 시 예외가 발생한다.")
@@ -92,14 +88,14 @@ class AdminAuthServiceTest {
         // given
         AdminLoginCommand command = new AdminLoginCommand("admin123", "wrongpassword");
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN,
-            new TestAdminPasswordEncoder());
+                new TestAdminPasswordEncoder());
 
         given(adminRepository.findByUsername(any(Username.class))).willReturn(Optional.of(admin));
         given(passwordEncoder.matches(anyString(), anyString())).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> adminAuthService.login(command))
-            .isInstanceOf(AdminLoginFailedException.class);
+                .isInstanceOf(AdminLoginFailedException.class);
     }
 
     @DisplayName("리프레시 토큰 갱신에 성공한다.")
@@ -108,7 +104,7 @@ class AdminAuthServiceTest {
         // given
         UUID adminId = UUID.randomUUID();
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN,
-            new TestAdminPasswordEncoder());
+                new TestAdminPasswordEncoder());
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(30);
         AdminRefreshToken refreshToken = AdminRefreshToken.create(adminId, "refresh-token", expiresAt);
 
@@ -132,7 +128,7 @@ class AdminAuthServiceTest {
 
         // when & then
         assertThatThrownBy(() -> adminAuthService.refresh("invalid-token"))
-            .isInstanceOf(AdminInvalidRefreshTokenException.class);
+                .isInstanceOf(AdminInvalidRefreshTokenException.class);
     }
 
     @DisplayName("만료된 리프레시 토큰으로 갱신 시 예외가 발생한다.")
@@ -147,7 +143,7 @@ class AdminAuthServiceTest {
 
         // when & then
         assertThatThrownBy(() -> adminAuthService.refresh("refresh-token"))
-            .isInstanceOf(AdminExpiredRefreshTokenException.class);
+                .isInstanceOf(AdminExpiredRefreshTokenException.class);
 
         verify(refreshTokenRepository, times(1)).delete(refreshToken);
     }
@@ -158,7 +154,7 @@ class AdminAuthServiceTest {
         // given
         UUID adminId = UUID.randomUUID();
         Admin admin = Admin.create("admin123", "password123", AdminRole.SUPER_ADMIN,
-            new TestAdminPasswordEncoder());
+                new TestAdminPasswordEncoder());
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(5); // 10일 미만
         AdminRefreshToken refreshToken = AdminRefreshToken.create(adminId, "old-refresh-token", expiresAt);
 

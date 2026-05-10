@@ -4,9 +4,11 @@ import com.souzip.domain.admin.application.port.CityQueryPort;
 import com.souzip.domain.admin.application.port.CityQueryPort.CityQueryResult;
 import com.souzip.domain.admin.application.query.AdminCityQueryService;
 import com.souzip.domain.admin.application.query.CitySearchQuery;
-import com.souzip.global.common.dto.pagination.PaginationResponse;
+import com.souzip.shared.common.dto.pagination.PaginationResponse;
+
 import java.time.LocalDateTime;
 import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

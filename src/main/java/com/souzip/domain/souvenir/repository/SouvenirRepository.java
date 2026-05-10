@@ -27,18 +27,23 @@ public interface SouvenirRepository extends JpaRepository<Souvenir, Long>, Souve
            f.storage_key,
            s.latitude,
            s.longitude,
-           s.address
+           s.address,
+           COUNT(w.id) AS wishlist_count
     FROM souvenir s
     LEFT JOIN file f
            ON f.entity_type = 'Souvenir'
            AND f.entity_id = s.id
            AND f.display_order = 1
+    LEFT JOIN wishlist w ON w.souvenir_id = s.id
     WHERE s.deleted = false
       AND ST_DWithin(
             ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
             ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography,
             :radiusMeter
       )
+    GROUP BY s.id, s.name, s.category, s.purpose, s.local_price,
+             s.krw_price, s.currency_symbol, f.storage_key,
+             s.latitude, s.longitude, s.address
     ORDER BY ST_Distance(
             ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography,
             ST_SetSRID(ST_MakePoint(s.longitude, s.latitude), 4326)::geography

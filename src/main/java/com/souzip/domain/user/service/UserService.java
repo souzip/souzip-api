@@ -3,8 +3,8 @@ package com.souzip.domain.user.service;
 import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.auth.application.required.RefreshTokenRepository;
 import com.souzip.domain.audit.entity.AuditAction;
-import com.souzip.domain.auth.repository.RefreshTokenRepository;
 import com.souzip.domain.category.dto.CategoryDto;
 import com.souzip.domain.category.entity.Category;
 import com.souzip.domain.file.EntityType;
@@ -21,14 +21,10 @@ import com.souzip.domain.user.entity.User;
 import com.souzip.domain.user.entity.UserAgreement;
 import com.souzip.domain.user.repository.UserAgreementRepository;
 import com.souzip.domain.user.repository.UserRepository;
-import com.souzip.global.audit.annotation.Audit;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.souzip.domain.wishlist.repository.WishlistRepository;
+import com.souzip.shared.audit.annotation.Audit;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +33,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -49,6 +52,7 @@ public class UserService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ProfileImageService profileImageService;
     private final SouvenirRepository souvenirRepository;
+    private final WishlistRepository wishlistRepository;
     private final FileQueryService fileQueryService;
     private final FileStorage fileStorage;
 
@@ -85,10 +89,18 @@ public class UserService {
     @Transactional
     public void withdraw(Long userId) {
         User user = findUserById(userId);
-        deleteRefreshTokenIfExists(user);
+
+        deleteRefreshTokenIfExists(userId);
         deleteUserAgreementIfExists(user);
+
         user.anonymize();
+
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public long deleteWithdrawnUsers() {
+        return userRepository.deleteByDeletedTrue();
     }
 
     public UserProfileResponse getUserProfile(Long userId) {
@@ -107,12 +119,16 @@ public class UserService {
                 .toList();
 
         Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
+        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserId(user.getUserId());
+        Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
 
         Page<MySouvenirResponse> responsePage = souvenirPage.map(souvenir -> {
             String thumbnailUrl = Optional.ofNullable(thumbnailMap.get(souvenir.getId()))
                     .map(FileResponse::url)
                     .orElse(null);
-            return MySouvenirResponse.of(souvenir, thumbnailUrl);
+            boolean isWishlisted = wishlistedIds.contains(souvenir.getId());
+            long wishlistCount = wishlistCountMap.getOrDefault(souvenir.getId(), 0L);
+            return MySouvenirResponse.of(souvenir, thumbnailUrl, isWishlisted, wishlistCount);
         });
 
         return MySouvenirListResponse.from(responsePage);
@@ -174,9 +190,8 @@ public class UserService {
                 || !request.locationService();
     }
 
-    private void deleteRefreshTokenIfExists(User user) {
-        refreshTokenRepository.findByUser(user)
-                .ifPresent(refreshTokenRepository::delete);
+    private void deleteRefreshTokenIfExists(Long userId) {
+        refreshTokenRepository.deleteByUserId(userId);
     }
 
     private void deleteUserAgreementIfExists(User user) {

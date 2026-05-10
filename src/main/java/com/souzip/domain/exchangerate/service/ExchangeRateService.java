@@ -14,8 +14,8 @@ import com.souzip.domain.exchangerate.repository.ExchangeRateRepository;
 import com.souzip.domain.souvenir.dto.PriceData;
 import com.souzip.domain.souvenir.dto.PriceResponse;
 import com.souzip.domain.souvenir.vo.PriceInfo;
-import com.souzip.global.exception.BusinessException;
-import com.souzip.global.exception.ErrorCode;
+import com.souzip.shared.exception.BusinessException;
+import com.souzip.shared.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,9 +42,9 @@ public class ExchangeRateService {
     private final CurrencyRepository currencyRepository;
 
     public ExchangeCalculatedPrice calculatePrice(
-        String countryCode,
-        Integer localPrice,
-        Integer krwPrice
+            String countryCode,
+            Integer localPrice,
+            Integer krwPrice
     ) {
         CountryResponseDto country = countryService.getCountryByCode(countryCode);
         ExchangeRateResponseDto rate = getRate(country.currency().code());
@@ -61,9 +61,9 @@ public class ExchangeRateService {
     }
 
     public PriceData calculatePriceData(
-        Integer price,
-        String currency,
-        String countryCode
+            Integer price,
+            String currency,
+            String countryCode
     ) {
         if (hasInvalidPriceInput(price, currency)) {
             return createEmptyPriceData();
@@ -75,16 +75,16 @@ public class ExchangeRateService {
 
         String localCurrency = getLocalCurrency(countryCode);
         PriceInfo convertedPrice = calculateConvertedPrice(
-            originalPrice,
-            localCurrency,
-            exchangeAmount
+                originalPrice,
+                localCurrency,
+                exchangeAmount
         );
 
         return new PriceData(
-            originalPrice,
-            exchangeAmount,
-            currencySymbol,
-            convertedPrice
+                originalPrice,
+                exchangeAmount,
+                currencySymbol,
+                convertedPrice
         );
     }
 
@@ -97,10 +97,10 @@ public class ExchangeRateService {
         String convertedSymbol = getCurrencySymbol(convertedPrice.getCurrency());
 
         return PriceResponse.of(
-            originalPrice.getAmount(),
-            originalSymbol,
-            convertedPrice.getAmount(),
-            convertedSymbol
+                originalPrice.getAmount(),
+                originalSymbol,
+                convertedPrice.getAmount(),
+                convertedSymbol
         );
     }
 
@@ -114,37 +114,37 @@ public class ExchangeRateService {
 
     private ExchangeCalculatedPrice createEmptyPrice(CountryResponseDto country) {
         return new ExchangeCalculatedPrice(
-            ZERO_PRICE,
-            ZERO_PRICE,
-            country.currency().symbol()
+                ZERO_PRICE,
+                ZERO_PRICE,
+                country.currency().symbol()
         );
     }
 
     private ExchangeCalculatedPrice fromLocalPrice(
-        Integer localPrice,
-        ExchangeRateResponseDto rate,
-        CountryResponseDto country
+            Integer localPrice,
+            ExchangeRateResponseDto rate,
+            CountryResponseDto country
     ) {
         int krw = multiply(localPrice, rate.rate());
 
         return new ExchangeCalculatedPrice(
-            localPrice,
-            krw,
-            country.currency().symbol()
+                localPrice,
+                krw,
+                country.currency().symbol()
         );
     }
 
     private ExchangeCalculatedPrice fromKrwPrice(
-        Integer krwPrice,
-        ExchangeRateResponseDto rate,
-        CountryResponseDto country
+            Integer krwPrice,
+            ExchangeRateResponseDto rate,
+            CountryResponseDto country
     ) {
         int local = divide(krwPrice, rate.rate());
 
         return new ExchangeCalculatedPrice(
-            local,
-            krwPrice,
-            country.currency().symbol()
+                local,
+                krwPrice,
+                country.currency().symbol()
         );
     }
 
@@ -181,9 +181,9 @@ public class ExchangeRateService {
     }
 
     private PriceInfo calculateConvertedPrice(
-        PriceInfo originalPrice,
-        String localCurrency,
-        Integer exchangeAmount
+            PriceInfo originalPrice,
+            String localCurrency,
+            Integer exchangeAmount
     ) {
         if (isKrwInput(originalPrice)) {
             return convertKrwToLocal(originalPrice.getAmount(), localCurrency);
@@ -207,8 +207,8 @@ public class ExchangeRateService {
 
     private String getLocalCurrency(String countryCode) {
         return countryRepository.findByCodeWithCurrency(countryCode)
-            .map(country -> country.getCurrency().getCode())
-            .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+                .map(country -> country.getCurrency().getCode())
+                .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
     }
 
     private String getCurrencySymbol(String currencyCode) {
@@ -217,8 +217,8 @@ public class ExchangeRateService {
         }
 
         return currencyRepository.findByCode(currencyCode)
-            .map(Currency::getSymbol)
-            .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
+                .map(Currency::getSymbol)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
     }
 
     private boolean isNullCurrency(String currencyCode) {
@@ -245,21 +245,21 @@ public class ExchangeRateService {
 
     private int multiply(Integer value, BigDecimal rate) {
         return BigDecimal.valueOf(value)
-            .multiply(rate)
-            .setScale(0, RoundingMode.HALF_UP)
-            .intValue();
+                .multiply(rate)
+                .setScale(0, RoundingMode.HALF_UP)
+                .intValue();
     }
 
     private int divide(Integer value, BigDecimal rate) {
         return BigDecimal.valueOf(value)
-            .divide(rate, 0, RoundingMode.HALF_UP)
-            .intValue();
+                .divide(rate, 0, RoundingMode.HALF_UP)
+                .intValue();
     }
 
     public ExchangeRateResponseDto getRate(String currencyCode) {
         ExchangeRate rate = exchangeRateRepository
-            .findByCurrencyCodeAndBaseCode(currencyCode, DEFAULT_BASE_CURRENCY)
-            .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
+                .findByCurrencyCodeAndBaseCode(currencyCode, DEFAULT_BASE_CURRENCY)
+                .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
 
         return ExchangeRateResponseDto.from(rate);
     }
@@ -307,8 +307,8 @@ public class ExchangeRateService {
 
     private Optional<ExchangeRate> findExistingRate(ExchangeRate newRate) {
         return exchangeRateRepository.findByCurrencyCodeAndBaseCode(
-            newRate.getCurrencyCode(),
-            newRate.getBaseCode()
+                newRate.getCurrencyCode(),
+                newRate.getBaseCode()
         );
     }
 

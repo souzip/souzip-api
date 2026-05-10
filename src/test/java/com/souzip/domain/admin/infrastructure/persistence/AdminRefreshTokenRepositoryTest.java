@@ -2,7 +2,7 @@ package com.souzip.domain.admin.infrastructure.persistence;
 
 import com.souzip.domain.admin.model.AdminRefreshToken;
 import com.souzip.domain.admin.repository.AdminRefreshTokenRepository;
-import com.souzip.global.config.QuerydslConfig;
+import com.souzip.shared.config.QuerydslConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import static org.assertj.core.api.Assertions.assertThat;

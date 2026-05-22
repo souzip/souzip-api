@@ -10,12 +10,10 @@ public record AiRecommendationResponse(
             String name,
             String category,
             String countryCode,
-            String thumbnailUrl,
-            long wishlistCount,
-            boolean isWishlisted
+            String thumbnailUrl
     ) {
-        public static RecommendedSouvenir from(Long id, String name, String category, String countryCode, String thumbnailUrl, long wishlistCount, boolean isWishlisted) {
-            return new RecommendedSouvenir(id, name, category, countryCode, thumbnailUrl, wishlistCount, isWishlisted);
+        public static RecommendedSouvenir from(Long id, String name, String category, String countryCode, String thumbnailUrl) {
+            return new RecommendedSouvenir(id, name, category, countryCode, thumbnailUrl);
         }
     }
 }

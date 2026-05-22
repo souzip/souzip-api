@@ -11,13 +11,8 @@ import com.souzip.domain.file.File;
 import com.souzip.domain.recommend.ai.dto.AiRecommendationResponse;
 import com.souzip.domain.recommend.ai.repository.AiRecommendationRepositoryCustom;
 import com.souzip.domain.souvenir.entity.Souvenir;
-import com.souzip.domain.user.entity.User;
-import com.souzip.domain.user.repository.UserRepository;
-import com.souzip.domain.wishlist.repository.WishlistRepository;
-import com.souzip.shared.clova.ClovaStudioClient;
-import com.souzip.shared.clova.PromptLoader;
-import com.souzip.shared.exception.BusinessException;
-import com.souzip.shared.exception.ErrorCode;
+import com.souzip.global.clova.ClovaStudioClient;
+import com.souzip.global.clova.PromptLoader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -38,8 +33,6 @@ public class AiRecommendationService {
     private final ObjectMapper objectMapper;
     private final FileQueryService fileQueryService;
     private final FileStorage fileStorage;
-    private final WishlistRepository wishlistRepository;
-    private final UserRepository userRepository;
 
     public AiRecommendationResponse getCategoryRecommendationsForUser(Long userId) {
         log.info("getCategoryRecommendationsForUser 시작, userId={}", userId);
@@ -71,10 +64,8 @@ public class AiRecommendationService {
         Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
         log.info("추천 이름 파싱: {}", recommendedNamesByCategory);
 
-        String userUuid = findUserUuid(userId);
-
         return new AiRecommendationResponse(
-                mapToRecommendedSouvenirs(recommendedNamesByCategory, userUuid)
+                mapToRecommendedSouvenirs(recommendedNamesByCategory)
         );
     }
 
@@ -116,29 +107,20 @@ public class AiRecommendationService {
         Map<String, List<String>> recommendedNamesByCategory = parseClovaResponse(clovaResponse);
         log.info("추천 이름 파싱: {}", recommendedNamesByCategory);
 
-        List<Souvenir> souvenirs = recommendedNamesByCategory.values().stream()
-                .flatMap(List::stream)
-                .map(aiRecommendationRepository::findByName)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-
-        String userUuid = findUserUuid(userId);
-        List<Long> souvenirIds = souvenirs.stream().map(Souvenir::getId).toList();
-        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserId(userUuid);
-        Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
-
-        List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs = souvenirs.stream()
-                .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
-                        s.getId(),
-                        s.getName(),
-                        s.getCategory().name(),
-                        s.getCountryCode(),
-                        getThumbnailUrl(s.getId()),
-                        wishlistCountMap.getOrDefault(s.getId(), 0L),
-                        wishlistedIds.contains(s.getId())
-                ))
-                .collect(Collectors.toList());
+        List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs =
+                recommendedNamesByCategory.values().stream()
+                        .flatMap(List::stream)
+                        .map(aiRecommendationRepository::findByName)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
+                                s.getId(),
+                                s.getName(),
+                                s.getCategory().name(),
+                                s.getCountryCode(),
+                                getThumbnailUrl(s.getId())
+                        ))
+                        .collect(Collectors.toList());
 
         log.info("최종 추천 souvenirs 개수: {}", finalSouvenirs.size());
         return new AiRecommendationResponse(finalSouvenirs);
@@ -187,8 +169,7 @@ public class AiRecommendationService {
         try {
             return objectMapper.readValue(
                             clovaResponse,
-                            new TypeReference<Map<String, List<Map<String, String>>>>() {
-                            }
+                            new TypeReference<Map<String, List<Map<String, String>>>>() {}
                     ).entrySet().stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
@@ -202,8 +183,7 @@ public class AiRecommendationService {
     }
 
     private List<AiRecommendationResponse.RecommendedSouvenir> mapToRecommendedSouvenirs(
-            Map<String, List<String>> recommendedNamesByCategory,
-            String userUuid
+            Map<String, List<String>> recommendedNamesByCategory
     ) {
         List<Souvenir> souvenirs = recommendedNamesByCategory.values().stream()
                 .flatMap(List::stream)
@@ -217,8 +197,6 @@ public class AiRecommendationService {
                 .toList();
 
         Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
-        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserId(userUuid);
-        Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
 
         return souvenirs.stream()
                 .map(s -> AiRecommendationResponse.RecommendedSouvenir.from(
@@ -228,17 +206,9 @@ public class AiRecommendationService {
                         s.getCountryCode(),
                         Optional.ofNullable(thumbnailMap.get(s.getId()))
                                 .map(FileResponse::url)
-                                .orElse(null),
-                        wishlistCountMap.getOrDefault(s.getId(), 0L),
-                        wishlistedIds.contains(s.getId())
+                                .orElse(null)
                 ))
                 .collect(Collectors.toList());
-    }
-
-    private String findUserUuid(Long userId) {
-        return userRepository.findById(userId)
-                .map(User::getUserId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private String getThumbnailUrl(Long souvenirId) {

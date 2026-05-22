@@ -1,12 +1,10 @@
 package com.souzip.domain.user.repository;
 
+import com.souzip.domain.user.entity.Provider;
 import com.souzip.domain.user.entity.User;
-import com.souzip.shared.domain.Provider;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -19,12 +17,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByTransferIdentifier(String transferIdentifier);
 
     List<User> findByProvider(Provider provider);
-
-    @Query("""
-            SELECT DISTINCT u.email FROM User u
-            WHERE u.deleted = false AND u.email IS NOT NULL
-            """)
-    List<String> findDistinctEmailsByActiveUsers();
-
-    long deleteByDeletedTrue();
 }

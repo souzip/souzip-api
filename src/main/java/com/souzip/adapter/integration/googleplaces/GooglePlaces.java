@@ -4,7 +4,8 @@ import com.souzip.adapter.integration.googleplaces.dto.GooglePlacesSearchRespons
 import com.souzip.adapter.integration.googleplaces.dto.GooglePlacesSearchResponse.Result;
 import com.souzip.application.location.dto.SearchPlace;
 import com.souzip.application.location.required.PlaceSearchProvider;
-import com.souzip.shared.domain.Coordinate;
+import com.souzip.domain.shared.Coordinate;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor

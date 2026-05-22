@@ -4,9 +4,12 @@ import com.souzip.domain.recommend.general.dto.CountryRecommendationDto;
 import com.souzip.domain.recommend.general.dto.GeneralRecommendationDto;
 import com.souzip.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.domain.recommend.general.service.GeneralRecommendationService;
-import com.souzip.shared.common.dto.SuccessResponse;
+import com.souzip.global.common.dto.SuccessResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -18,19 +21,13 @@ public class GeneralRecommendationController {
     private final GeneralRecommendationService generalRecommendationService;
 
     @GetMapping("/discovery/general/country/{countryCode}")
-    public SuccessResponse<List<GeneralRecommendationDto>> getCountryTop10(
-            @PathVariable String countryCode,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
-    ) {
-        return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode, authorizationHeader));
+    public SuccessResponse<List<GeneralRecommendationDto>> getCountryTop10(@PathVariable String countryCode) {
+        return SuccessResponse.of(generalRecommendationService.getTop10ByCountry(countryCode));
     }
 
     @GetMapping("/discovery/general/category/{categoryName}")
-    public SuccessResponse<List<GeneralRecommendationDto>> getCategoryTop10(
-            @PathVariable String categoryName,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
-    ) {
-        return SuccessResponse.of(generalRecommendationService.getTop10ByCategory(categoryName, authorizationHeader));
+    public SuccessResponse<List<GeneralRecommendationDto>> getCategoryTop10(@PathVariable String categoryName) {
+        return SuccessResponse.of(generalRecommendationService.getTop10ByCategory(categoryName));
     }
 
     @GetMapping("/discovery/general/stats")
@@ -39,14 +36,15 @@ public class GeneralRecommendationController {
     }
 
     @GetMapping("/countries/souvenirs")
-    public SuccessResponse<List<CountryRecommendationDto>> getTopCountriesWithTop10Souvenirs(
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
-    ) {
-        return SuccessResponse.of(generalRecommendationService.getTopCountriesWithTop10Souvenirs(authorizationHeader));
+    public SuccessResponse<List<CountryRecommendationDto>> getTopCountriesWithTop10Souvenirs() {
+        return SuccessResponse.of(generalRecommendationService.getTopCountriesWithTop10Souvenirs());
     }
 
     @GetMapping("/discovery/general/countries/top10")
     public SuccessResponse<List<GeneralRecommendationStatsDto>> getTopCountriesAllTimeTop10() {
-        return SuccessResponse.of(generalRecommendationService.getTop10CountriesBySouvenirCount());
+        return SuccessResponse.of(
+                generalRecommendationService.getTop10CountriesBySouvenirCount()
+        );
     }
+
 }

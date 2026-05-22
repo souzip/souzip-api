@@ -1,6 +1,6 @@
 package com.souzip.application.location.dto;
 
-import com.souzip.shared.domain.Coordinate;
+import com.souzip.domain.shared.Coordinate;
 
 public record SearchPlace(
         String name,

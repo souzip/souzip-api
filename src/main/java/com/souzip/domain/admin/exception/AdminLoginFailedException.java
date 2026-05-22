@@ -1,6 +1,6 @@
 package com.souzip.domain.admin.exception;
 
-import com.souzip.shared.exception.BusinessException;
+import com.souzip.global.exception.BusinessException;
 
 public class AdminLoginFailedException extends BusinessException {
 

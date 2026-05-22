@@ -41,19 +41,3 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-      probes:
-        enabled: true
-  metrics:
-    tags:
-      application: ${spring.application.name}
-      environment: dev
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-
-logging:
-  config: classpath:logback-dev.xml

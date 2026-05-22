@@ -9,8 +9,8 @@ import com.souzip.domain.country.entity.Region;
 import com.souzip.domain.country.repository.CountryRepository;
 import com.souzip.domain.currency.entity.Currency;
 import com.souzip.domain.currency.repository.CurrencyRepository;
-import com.souzip.shared.exception.BusinessException;
-import com.souzip.shared.exception.ErrorCode;
+import com.souzip.global.exception.BusinessException;
+import com.souzip.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,6 @@ public class CountryService {
 
     public CountryResponseDto getCountryByCode(String code) {
         Country country = findCountryByCodeOrThrow(code);
-
         return CountryResponseDto.from(country);
     }
 

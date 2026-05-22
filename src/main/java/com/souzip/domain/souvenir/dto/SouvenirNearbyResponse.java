@@ -4,23 +4,20 @@ import com.souzip.domain.category.entity.Category;
 import com.souzip.domain.souvenir.entity.Purpose;
 
 import java.math.BigDecimal;
-import java.util.Set;
 import java.util.function.Function;
 
 public record SouvenirNearbyResponse(
-        Long id,
-        String name,
-        Category category,
-        Purpose purpose,
-        int localPrice,
-        int krwPrice,
-        String currencySymbol,
-        String thumbnail,
-        BigDecimal latitude,
-        BigDecimal longitude,
-        String address,
-        long wishlistCount,
-        Boolean isWishlisted
+    Long id,
+    String name,
+    Category category,
+    Purpose purpose,
+    int localPrice,
+    int krwPrice,
+    String currencySymbol,
+    String thumbnail,
+    BigDecimal latitude,
+    BigDecimal longitude,
+    String address
 ) {
     private static final int INDEX_ID = 0;
     private static final int INDEX_NAME = 1;
@@ -33,44 +30,38 @@ public record SouvenirNearbyResponse(
     private static final int INDEX_LATITUDE = 8;
     private static final int INDEX_LONGITUDE = 9;
     private static final int INDEX_ADDRESS = 10;
-    private static final int INDEX_WISHLIST_COUNT = 11;
 
     public static SouvenirNearbyResponse from(
-            Long id,
-            String name,
-            Category category,
-            Purpose purpose,
-            int localPrice,
-            int krwPrice,
-            String currencySymbol,
-            String thumbnail,
-            BigDecimal latitude,
-            BigDecimal longitude,
-            String address,
-            long wishlistCount,
-            Boolean isWishlisted
+        Long id,
+        String name,
+        Category category,
+        Purpose purpose,
+        int localPrice,
+        int krwPrice,
+        String currencySymbol,
+        String thumbnail,
+        BigDecimal latitude,
+        BigDecimal longitude,
+        String address
     ) {
         return new SouvenirNearbyResponse(
-                id,
-                name,
-                category,
-                purpose,
-                localPrice,
-                krwPrice,
-                currencySymbol,
-                thumbnail,
-                latitude,
-                longitude,
-                address,
-                wishlistCount,
-                isWishlisted
+            id,
+            name,
+            category,
+            purpose,
+            localPrice,
+            krwPrice,
+            currencySymbol,
+            thumbnail,
+            latitude,
+            longitude,
+            address
         );
     }
 
     public static SouvenirNearbyResponse fromObjectArray(
-            Object[] row,
-            Function<String, String> urlGenerator,
-            Set<Long> wishlistedIds
+        Object[] row,
+        Function<String, String> urlGenerator
     ) {
         Long id = extractId(row);
         String name = extractName(row);
@@ -85,23 +76,19 @@ public record SouvenirNearbyResponse(
         String address = extractAddress(row);
 
         String imageUrl = generateImageUrl(thumbnail, urlGenerator);
-        long wishlistCount = ((Number) row[INDEX_WISHLIST_COUNT]).longValue();
-        Boolean isWishlisted = wishlistedIds.isEmpty() ? null : wishlistedIds.contains(id);
 
         return new SouvenirNearbyResponse(
-                id,
-                name,
-                category,
-                purpose,
-                localPrice,
-                krwPrice,
-                currencySymbol,
-                imageUrl,
-                latitude,
-                longitude,
-                address,
-                wishlistCount,
-                isWishlisted
+            id,
+            name,
+            category,
+            purpose,
+            localPrice,
+            krwPrice,
+            currencySymbol,
+            imageUrl,
+            latitude,
+            longitude,
+            address
         );
     }
 

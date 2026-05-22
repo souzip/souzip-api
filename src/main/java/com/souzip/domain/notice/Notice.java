@@ -1,11 +1,10 @@
 package com.souzip.domain.notice;
 
-import com.souzip.shared.domain.BaseEntity;
+import com.souzip.domain.shared.BaseEntity;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 

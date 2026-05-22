@@ -1,7 +1,6 @@
 package com.souzip.domain.admin.application.port;
 
-import com.souzip.shared.common.dto.pagination.PaginationResponse;
-
+import com.souzip.global.common.dto.pagination.PaginationResponse;
 import java.time.LocalDateTime;
 
 public interface CityQueryPort {
@@ -14,6 +13,5 @@ public interface CityQueryPort {
             String nameEn,
             Integer priority,
             LocalDateTime updatedAt
-    ) {
-    }
+    ) {}
 }

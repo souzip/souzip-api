@@ -22,19 +22,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
-      base-path: /actuator
+        include: "loggers,env"
   endpoint:
     health:
       show-details: always
-  metrics:
-    tags:
-      application: ${spring.application.name}
-      environment: local
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-
-logging:
-  config: classpath:logback-local.xml

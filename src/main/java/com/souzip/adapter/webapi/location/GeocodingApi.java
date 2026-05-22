@@ -3,14 +3,11 @@ package com.souzip.adapter.webapi.location;
 import com.souzip.adapter.webapi.location.dto.AddressResponse;
 import com.souzip.application.location.dto.AddressResult;
 import com.souzip.application.location.provided.ReverseGeocoding;
-import com.souzip.auth.adapter.security.annotation.RequireAuth;
-import com.souzip.shared.common.dto.SuccessResponse;
-import com.souzip.shared.domain.Coordinate;
+import com.souzip.domain.shared.Coordinate;
+import com.souzip.global.common.dto.SuccessResponse;
+import com.souzip.global.security.annotation.RequireAuth;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 

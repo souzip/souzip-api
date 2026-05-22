@@ -3,7 +3,6 @@ package com.souzip.domain.recommend.general.service;
 import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
-import com.souzip.auth.adapter.security.jwt.JwtTokenProvider;
 import com.souzip.domain.file.EntityType;
 import com.souzip.domain.file.File;
 import com.souzip.domain.recommend.general.dto.CountryRecommendationDto;
@@ -11,40 +10,50 @@ import com.souzip.domain.recommend.general.dto.GeneralRecommendationDto;
 import com.souzip.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.domain.recommend.general.repository.GeneralRecommendationRepositoryCustom;
 import com.souzip.domain.souvenir.entity.Souvenir;
-import com.souzip.domain.wishlist.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GeneralRecommendationService {
 
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final int BEARER_PREFIX_LENGTH = 7;
     private final GeneralRecommendationRepositoryCustom generalRecommendationRepository;
     private final FileQueryService fileQueryService;
     private final FileStorage fileStorage;
-    private final WishlistRepository wishlistRepository;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public List<GeneralRecommendationDto> getTop10ByCategory(String categoryName, @Nullable String authorizationHeader) {
-        List<Souvenir> souvenirs = generalRecommendationRepository.findTop10ByCategoryRecent(categoryName);
-        return toDto(souvenirs, authorizationHeader);
+    public List<GeneralRecommendationDto> getTop10ByCategory(String categoryName) {
+        List<Souvenir> souvenirs = generalRecommendationRepository
+                .findTop10ByCategoryRecent(categoryName);
+
+        List<Long> souvenirIds = souvenirs.stream()
+                .map(Souvenir::getId)
+                .toList();
+
+        Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
+
+        return souvenirs.stream()
+                .map(s -> new GeneralRecommendationDto(
+                        s.getId(),
+                        s.getName(),
+                        s.getCategory(),
+                        s.getCountryCode(),
+                        Optional.ofNullable(thumbnailMap.get(s.getId()))
+                                .map(FileResponse::url)
+                                .orElse(null)
+                ))
+                .toList();
     }
 
     public List<GeneralRecommendationStatsDto> getTop10CountriesBySouvenirCount() {
         return generalRecommendationRepository.findTop10CountriesBySouvenirCount();
     }
 
-    public List<CountryRecommendationDto> getTopCountriesWithTop10Souvenirs(@Nullable String authorizationHeader) {
+    public List<CountryRecommendationDto> getTopCountriesWithTop10Souvenirs() {
         List<GeneralRecommendationStatsDto> topCountries =
                 generalRecommendationRepository.findTop10CountriesBySouvenirCount();
 
@@ -65,14 +74,16 @@ public class GeneralRecommendationService {
                 .toList();
 
         Map<Long, FileResponse> thumbnailMap = allSouvenirIds.isEmpty()
-                ? Map.of()
-                : getThumbnails(allSouvenirIds);
+                                               ? Map.of()
+                                               : getThumbnails(allSouvenirIds);
 
-        String userId = extractUserId(authorizationHeader);
-        Set<Long> wishlistedIds = userId != null
-                ? wishlistRepository.findSouvenirIdsByUserId(userId)
-                : Collections.emptySet();
-        Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(allSouvenirIds);
+        Map<String, GeneralRecommendationStatsDto> statsMap = topCountries.stream()
+                .collect(Collectors.toMap(
+                        GeneralRecommendationStatsDto::countryCode,
+                        s -> s,
+                        (a, b) -> a,
+                        LinkedHashMap::new
+                ));
 
         List<CountryRecommendationDto> result = new ArrayList<>();
         for (GeneralRecommendationStatsDto stats : topCountries) {
@@ -84,9 +95,7 @@ public class GeneralRecommendationService {
                             s,
                             Optional.ofNullable(thumbnailMap.get(s.getId()))
                                     .map(FileResponse::url)
-                                    .orElse(null),
-                            wishlistCountMap.getOrDefault(s.getId(), 0L),
-                            userId != null ? wishlistedIds.contains(s.getId()) : null
+                                    .orElse(null)
                     ))
                     .toList();
 
@@ -101,81 +110,31 @@ public class GeneralRecommendationService {
         return result;
     }
 
-    public List<GeneralRecommendationDto> getTop10ByCountry(String countryCode, @Nullable String authorizationHeader) {
-        List<Souvenir> souvenirs = generalRecommendationRepository.findTop10ByCountry(countryCode);
-        return toDto(souvenirs, authorizationHeader);
-    }
+    public List<GeneralRecommendationDto> getTop10ByCountry(String countryCode) {
+        List<Souvenir> souvenirs = generalRecommendationRepository
+                .findTop10ByCountry(countryCode);
 
-    public List<GeneralRecommendationStatsDto> getTop3CountriesBySouvenirCount() {
-        return generalRecommendationRepository.findTop3CountriesBySouvenirCount();
-    }
+        List<Long> souvenirIds = souvenirs.stream()
+                .map(Souvenir::getId)
+                .toList();
 
-    private List<GeneralRecommendationDto> toDto(List<Souvenir> souvenirs, @Nullable String authorizationHeader) {
-        List<Long> souvenirIds = souvenirs.stream().map(Souvenir::getId).toList();
-        Map<Long, FileResponse> thumbnailMap = souvenirIds.isEmpty() ? Map.of() : getThumbnails(souvenirIds);
-
-        String userId = extractUserId(authorizationHeader);
-        Set<Long> wishlistedIds = userId != null
-                ? wishlistRepository.findSouvenirIdsByUserId(userId)
-                : Collections.emptySet();
-        Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
+        Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
 
         return souvenirs.stream()
-                .map(s -> GeneralRecommendationDto.of(
-                        s,
+                .map(s -> new GeneralRecommendationDto(
+                        s.getId(),
+                        s.getName(),
+                        s.getCategory(),
+                        s.getCountryCode(),
                         Optional.ofNullable(thumbnailMap.get(s.getId()))
                                 .map(FileResponse::url)
-                                .orElse(null),
-                        wishlistCountMap.getOrDefault(s.getId(), 0L),
-                        userId != null ? wishlistedIds.contains(s.getId()) : null
+                                .orElse(null)
                 ))
                 .toList();
     }
 
-    @Nullable
-    private String extractUserId(@Nullable String authorizationHeader) {
-        if (hasNoAuthorizationHeader(authorizationHeader)) {
-            return null;
-        }
-
-        if (isNotBearerToken(authorizationHeader)) {
-            return null;
-        }
-
-        String token = extractToken(authorizationHeader);
-
-        if (isEmptyToken(token)) {
-            return null;
-        }
-
-        return parseUserIdFromToken(token);
-    }
-
-    private boolean hasNoAuthorizationHeader(String authorizationHeader) {
-        return authorizationHeader == null;
-    }
-
-    private boolean isNotBearerToken(String authorizationHeader) {
-        return !authorizationHeader.startsWith(BEARER_PREFIX);
-    }
-
-    private String extractToken(String authorizationHeader) {
-        return authorizationHeader.substring(BEARER_PREFIX_LENGTH).trim();
-    }
-
-    private boolean isEmptyToken(String token) {
-        return token.isEmpty();
-    }
-
-    @Nullable
-    private String parseUserIdFromToken(String token) {
-        try {
-            Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            return userId != null ? String.valueOf(userId) : null;
-        } catch (Exception e) {
-            log.debug("Failed to parse token", e);
-            return null;
-        }
+    public List<GeneralRecommendationStatsDto> getTop3CountriesBySouvenirCount() {
+        return generalRecommendationRepository.findTop3CountriesBySouvenirCount();
     }
 
     private Map<Long, FileResponse> getThumbnails(List<Long> souvenirIds) {

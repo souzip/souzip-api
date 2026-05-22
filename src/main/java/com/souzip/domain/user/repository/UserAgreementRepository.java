@@ -11,6 +11,4 @@ public interface UserAgreementRepository extends JpaRepository<UserAgreement, Lo
     Optional<UserAgreement> findByUser(User user);
 
     boolean existsByUser(User user);
-
-    long countByMarketingConsentTrue();
 }

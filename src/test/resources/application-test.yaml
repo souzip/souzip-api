@@ -5,9 +5,6 @@ spring:
     username: sa
     password:
 
-  flyway:
-    enabled: false
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,6 +17,3 @@ logging:
   level:
     root: INFO
     org.springframework.test.context: DEBUG
-
-firebase:
-  enabled: false

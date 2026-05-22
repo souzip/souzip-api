@@ -49,8 +49,10 @@ public enum ErrorCode implements BaseErrorCode {
 
     AI_RECOMMENDATION_NOT_READY(HttpStatus.BAD_REQUEST, "추천 시스템을 위해 기념품 업로드 이력이 있어야 합니다."),
 
-    FCM_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 푸시 전송에 실패했습니다."),
-    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 전송에 실패했습니다.");
+    APPLE_MIGRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 마이그레이션 준비 중 오류가 발생했습니다."),
+    APPLE_TRANSFER_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "App Transfer가 아직 완료되지 않았습니다."),
+    NO_APPLE_USERS_FOUND(HttpStatus.NOT_FOUND, "마이그레이션할 Apple 사용자가 없습니다.")
+    ;
 
     private final HttpStatus status;
     private final String message;

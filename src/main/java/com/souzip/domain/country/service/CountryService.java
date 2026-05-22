@@ -38,7 +38,6 @@ public class CountryService {
 
     public CountryResponseDto getCountryByCode(String code) {
         Country country = findCountryByCodeOrThrow(code);
-
         return CountryResponseDto.from(country);
     }
 

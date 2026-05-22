@@ -35,6 +35,13 @@ management:
     tags:
       application: ${spring.application.name}
 
+logging:
+  pattern:
+    console: "[%d{yyyy-MM-dd HH:mm:ss}] [%X{traceId}] [%-5level] %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.souzip.api: DEBUG
+
 jwt:
   expiration: 3600000
   refresh-expiration: 2592000000
@@ -80,16 +87,3 @@ admin:
   initial:
     username: ${ADMIN_INITIAL_USERNAME}
     password: ${ADMIN_INITIAL_PASSWORD}
-
-firebase:
-  enabled: ${FIREBASE_ENABLED:false}
-  credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
-
-mail:
-  smtp:
-    enabled: ${MAIL_SMTP_ENABLED:false}
-    host: ${MAIL_SMTP_HOST:smtp.gmail.com}
-    port: ${MAIL_SMTP_PORT:587}
-    username: ${MAIL_SMTP_USERNAME:}
-    password: ${MAIL_SMTP_PASSWORD:}
-    from: ${MAIL_SMTP_FROM:}

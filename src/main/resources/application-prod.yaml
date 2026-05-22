@@ -16,7 +16,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
         default_schema: public
 
   flyway:
@@ -36,25 +36,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,metrics,prometheus"
+        include: "health,info,metrics,prometheus"
   endpoint:
     health:
-      show-details: never
-      probes:
-        enabled: true
-  metrics:
-    tags:
-      application: ${spring.application.name}
-      environment: prod
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-      percentiles:
-        http.server.requests: 0.95, 0.99
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-
-logging:
-  config: classpath:logback-prod.xml
+      show-details: when-authorized

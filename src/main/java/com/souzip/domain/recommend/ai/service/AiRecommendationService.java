@@ -72,7 +72,6 @@ public class AiRecommendationService {
         log.info("추천 이름 파싱: {}", recommendedNamesByCategory);
 
         String userUuid = findUserUuid(userId);
-
         return new AiRecommendationResponse(
                 mapToRecommendedSouvenirs(recommendedNamesByCategory, userUuid)
         );
@@ -125,7 +124,7 @@ public class AiRecommendationService {
 
         String userUuid = findUserUuid(userId);
         List<Long> souvenirIds = souvenirs.stream().map(Souvenir::getId).toList();
-        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserId(userUuid);
+        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserUserId(userUuid);
         Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
 
         List<AiRecommendationResponse.RecommendedSouvenir> finalSouvenirs = souvenirs.stream()
@@ -217,7 +216,7 @@ public class AiRecommendationService {
                 .toList();
 
         Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
-        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserId(userUuid);
+        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserUserId(userUuid);
         Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
 
         return souvenirs.stream()

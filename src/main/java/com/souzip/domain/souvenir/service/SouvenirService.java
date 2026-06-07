@@ -56,12 +56,13 @@ public class SouvenirService {
             double radiusMeter,
             @Nullable String authorizationHeader
     ) {
-        String userId = extractUserId(authorizationHeader);
+        Long userId = extractUserIdAsLong(authorizationHeader);
 
         List<Object[]> results = souvenirRepository.findNearbySouvenirs(latitude, longitude, radiusMeter);
 
-        Set<Long> wishlistedIds = userId != null
-                ? wishlistRepository.findSouvenirIdsByUserId(userId)
+        String userUuid = userId != null ? findUserUuid(userId) : null;
+        Set<Long> wishlistedIds = userUuid != null
+                ? wishlistRepository.findSouvenirIdsByUserUserId(userUuid)
                 : Collections.emptySet();
 
         List<SouvenirNearbyResponse> list = results.stream()
@@ -79,11 +80,12 @@ public class SouvenirService {
             Long souvenirId,
             @Nullable String authorizationHeader
     ) {
-        String userId = extractUserId(authorizationHeader);
+        Long userId = extractUserIdAsLong(authorizationHeader);
         Souvenir souvenir = findSouvenirById(souvenirId);
         List<FileResponse> files = getFiles(souvenirId);
-        boolean isOwned = souvenir.isOwnedBy(userId);
-        boolean isWishlisted = userId != null && wishlistRepository.existsByUserUserIdAndSouvenirId(userId, souvenirId);
+        String userUuid = userId != null ? findUserUuid(userId) : null;
+        boolean isOwned = userId != null && souvenir.isOwnedBy(userUuid);
+        boolean isWishlisted = userUuid != null && wishlistRepository.existsByUserUserIdAndSouvenirId(userUuid, souvenirId);
         long wishlistCount = wishlistRepository.countBySouvenirId(souvenirId);
         PriceResponse priceResponse = createPriceResponse(souvenir);
         return SouvenirDetailResponse.of(souvenir, files, isOwned, isWishlisted, wishlistCount, priceResponse);
@@ -220,7 +222,7 @@ public class SouvenirService {
     }
 
     @Nullable
-    private String extractUserId(@Nullable String authorizationHeader) {
+    private Long extractUserIdAsLong(@Nullable String authorizationHeader) {
         if (hasNoAuthorizationHeader(authorizationHeader)) {
             return null;
         }
@@ -235,7 +237,13 @@ public class SouvenirService {
             return null;
         }
 
-        return parseUserIdFromToken(token);
+        return parseUserIdFromTokenAsLong(token);
+    }
+
+    @Nullable
+    private String extractUserId(@Nullable String authorizationHeader) {
+        Long userId = extractUserIdAsLong(authorizationHeader);
+        return userId != null ? String.valueOf(userId) : null;
     }
 
     private boolean hasNoAuthorizationHeader(String authorizationHeader) {
@@ -255,14 +263,19 @@ public class SouvenirService {
     }
 
     @Nullable
-    private String parseUserIdFromToken(String token) {
+    private Long parseUserIdFromTokenAsLong(String token) {
         try {
-            Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            return userId != null ? String.valueOf(userId) : null;
+            return jwtTokenProvider.getUserIdFromToken(token);
         } catch (Exception e) {
             log.debug("Failed to parse token", e);
             return null;
         }
+    }
+
+    private String findUserUuid(Long userId) {
+        return userRepository.findById(userId)
+                .map(User::getUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private void requireUserId(Long userId) {

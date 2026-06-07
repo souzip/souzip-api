@@ -119,7 +119,7 @@ public class UserService {
                 .toList();
 
         Map<Long, FileResponse> thumbnailMap = getThumbnails(souvenirIds);
-        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserId(user.getUserId());
+        Set<Long> wishlistedIds = wishlistRepository.findSouvenirIdsByUserUserId(user.getUserId());
         Map<Long, Long> wishlistCountMap = wishlistRepository.countBySouvenirIds(souvenirIds);
 
         Page<MySouvenirResponse> responsePage = souvenirPage.map(souvenir -> {

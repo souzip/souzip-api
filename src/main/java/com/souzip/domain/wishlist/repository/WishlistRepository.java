@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @Repository
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
 
+    boolean existsByUserIdAndSouvenirId(Long userId, Long souvenirId);
+
     boolean existsByUserUserIdAndSouvenirId(String userId, Long souvenirId);
 
     @Modifying
@@ -29,8 +31,11 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     )
     Page<Wishlist> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
 
+    @Query("SELECT w.souvenir.id FROM Wishlist w WHERE w.user.id = :userId")
+    Set<Long> findSouvenirIdsByUserId(@Param("userId") Long userId);
+
     @Query("SELECT w.souvenir.id FROM Wishlist w WHERE w.user.userId = :userId")
-    Set<Long> findSouvenirIdsByUserId(@Param("userId") String userId);
+    Set<Long> findSouvenirIdsByUserUserId(@Param("userId") String userId);
 
     @Query("SELECT COUNT(w) FROM Wishlist w WHERE w.souvenir.id = :souvenirId")
     long countBySouvenirId(@Param("souvenirId") Long souvenirId);

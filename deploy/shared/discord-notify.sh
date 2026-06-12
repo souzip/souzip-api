@@ -174,6 +174,37 @@ notify_server_up() {
     curl -s -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL" > /dev/null
 }
 
+notify_disk_critical() {
+    local env=${1:-"dev"}
+    local disk_usage=$2
+    local disk_percent=$3
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    [ -z "$DISCORD_WEBHOOK_URL" ] && return
+
+    PAYLOAD=$(jq -n \
+      --arg env "$env" \
+      --arg du "$disk_usage" \
+      --arg dp "$disk_percent" \
+      --arg ts "$timestamp" \
+      --argjson color "$COLOR_RED" \
+      '{
+        username: "Souzip Bot",
+        content: "@here 디스크 공간 부족",
+        embeds: [{
+          title: ("디스크 사용량 경고 [" + $env + "]"),
+          description: "디스크 사용량이 95%를 초과했습니다.",
+          color: $color,
+          fields: [
+            {name: "환경", value: $env, inline: true},
+            {name: "시간", value: $ts, inline: true},
+            {name: "디스크 사용량", value: "\($du) (\($dp)%)", inline: false}
+          ]
+        }]
+      }')
+
+    curl -s -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL" > /dev/null
+}
+
 notify_disk_warning() {
     local env=${1:-"dev"}
     local disk_usage=$2
@@ -192,7 +223,7 @@ notify_disk_warning() {
         content: "@here 디스크 공간 부족",
         embeds: [{
           title: ("디스크 사용량 경고 [" + $env + "]"),
-          description: "디스크 사용량이 임계값을 초과했습니다.",
+          description: "디스크 사용량이 90%를 초과했습니다.",
           color: $color,
           fields: [
             {name: "환경", value: $env, inline: true},

@@ -10,7 +10,8 @@ else
 fi
 DEPLOY_DIR="$WORK_DIR/deploy/$ENV"
 STATUS_FILE="$DEPLOY_DIR/.system-status"
-DISK_THRESHOLD=80
+DISK_THRESHOLD=90
+DISK_CRITICAL_THRESHOLD=95
 MEMORY_THRESHOLD=90
 MAX_HEALTH_FAILURES=3
 
@@ -30,11 +31,13 @@ fi
 
 if [ -f "$STATUS_FILE" ]; then
     source "$STATUS_FILE"
+    DISK_CRITICAL_SENT="${DISK_CRITICAL_SENT:-false}"
 else
     HEALTH_STATUS="up"
     HEALTH_FAILURE_COUNT=0
     HEALTH_DOWN_SINCE=""
     DISK_WARNING_SENT=false
+    DISK_CRITICAL_SENT=false
     MEMORY_WARNING_SENT=false
     CONTAINER_WARNING_SENT=false
 fi
@@ -98,6 +101,16 @@ fi
 
 DISK_USAGE=$(df -h / | awk 'NR==2 {print $3 " / " $2}')
 DISK_PERCENT=$(df / | awk 'NR==2 {print int($5)}')
+if [ $DISK_PERCENT -ge $DISK_CRITICAL_THRESHOLD ]; then
+    if [ "$DISK_CRITICAL_SENT" = "false" ]; then
+        if [ ! -z "$DISCORD_WEBHOOK_URL" ]; then
+            notify_disk_critical "$ENV" "$DISK_USAGE" "$DISK_PERCENT"
+        fi
+        DISK_CRITICAL_SENT=true
+    fi
+else
+    DISK_CRITICAL_SENT=false
+fi
 if [ $DISK_PERCENT -ge $DISK_THRESHOLD ]; then
     if [ "$DISK_WARNING_SENT" = "false" ]; then
         if [ ! -z "$DISCORD_WEBHOOK_URL" ]; then
@@ -134,13 +147,17 @@ else
     CONTAINER_WARNING_SENT=false
 fi
 
-TEMP_STATUS_FILE=$(mktemp "${STATUS_FILE}.tmp.XXXXXX")
-cat > "$TEMP_STATUS_FILE" << EOF
+if TEMP_STATUS_FILE=$(mktemp "${STATUS_FILE}.tmp.XXXXXX" 2>/dev/null); then
+    cat > "$TEMP_STATUS_FILE" << EOF
 HEALTH_STATUS="$HEALTH_STATUS"
 HEALTH_FAILURE_COUNT=$HEALTH_FAILURE_COUNT
 HEALTH_DOWN_SINCE="$HEALTH_DOWN_SINCE"
 DISK_WARNING_SENT=$DISK_WARNING_SENT
+DISK_CRITICAL_SENT=$DISK_CRITICAL_SENT
 MEMORY_WARNING_SENT=$MEMORY_WARNING_SENT
 CONTAINER_WARNING_SENT=$CONTAINER_WARNING_SENT
 EOF
-mv "$TEMP_STATUS_FILE" "$STATUS_FILE"
+    mv "$TEMP_STATUS_FILE" "$STATUS_FILE"
+else
+    echo "[WARN] STATUS_FILE 업데이트 실패 (디스크 공간 부족)"
+fi

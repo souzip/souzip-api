@@ -151,6 +151,36 @@ class FcmTokenCommandServiceTest {
         then(fcmTokenRepository).should(never()).save(any());
     }
 
+    @DisplayName("영구 실패 토큰들을 ID로 일괄 비활성화한다")
+    @Test
+    void deactivateByIds_deactivatesGivenTokens() {
+        // given
+        FcmToken token1 = createToken("fcm-token-1", "device-id-1", 1L);
+        FcmToken token2 = createToken("fcm-token-2", "device-id-2", 2L);
+
+        given(fcmTokenRepository.findAllByIdIn(List.of(10L, 20L))).willReturn(List.of(token1, token2));
+        given(fcmTokenRepository.save(any(FcmToken.class))).willAnswer(inv -> inv.getArgument(0));
+
+        // when
+        fcmTokenCommandService.deactivateByIds(List.of(10L, 20L));
+
+        // then
+        assertThat(token1.isActive()).isFalse();
+        assertThat(token2.isActive()).isFalse();
+        then(fcmTokenRepository).should(times(2)).save(any(FcmToken.class));
+    }
+
+    @DisplayName("비활성화할 ID가 비어있으면 조회조차 하지 않는다")
+    @Test
+    void deactivateByIds_emptyIds_doesNothing() {
+        // when
+        fcmTokenCommandService.deactivateByIds(List.of());
+
+        // then
+        then(fcmTokenRepository).should(never()).findAllByIdIn(any());
+        then(fcmTokenRepository).should(never()).save(any());
+    }
+
     private FcmToken createToken(String fcmToken, String deviceId, Long userId) {
         FcmTokenRegisterRequest request = createRequest(fcmToken, deviceId);
         FcmToken token = FcmToken.register(request);

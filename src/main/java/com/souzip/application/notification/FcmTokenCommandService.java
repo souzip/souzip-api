@@ -3,6 +3,7 @@ package com.souzip.application.notification;
 import com.souzip.application.notification.required.FcmTokenRepository;
 import com.souzip.domain.notification.FcmToken;
 import com.souzip.domain.notification.FcmTokenRegisterRequest;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,18 @@ public class FcmTokenCommandService {
     // 회원 탈퇴 시 해당 사용자의 모든 활성 FCM 토큰을 비활성화합니다.
     public void deactivateAllByUserId(Long userId) {
         List<FcmToken> tokens = fcmTokenRepository.findByUserIdAndActiveTrue(userId);
+        tokens.forEach(token -> {
+            token.deactivate();
+            fcmTokenRepository.save(token);
+        });
+    }
+
+    // 영구 실패(UNREGISTERED 등)로 더 이상 유효하지 않은 토큰들을 일괄 비활성화합니다.
+    public void deactivateByIds(Collection<Long> ids) {
+        if (ids.isEmpty()) {
+            return;
+        }
+        List<FcmToken> tokens = fcmTokenRepository.findAllByIdIn(ids);
         tokens.forEach(token -> {
             token.deactivate();
             fcmTokenRepository.save(token);

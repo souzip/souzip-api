@@ -9,6 +9,7 @@ import com.souzip.application.notification.provided.FcmTokenFinder;
 import com.souzip.domain.notification.FcmToken;
 import com.souzip.shared.exception.BusinessException;
 import com.souzip.shared.exception.ErrorCode;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 public class FcmNotificationService {
 
     private final FcmTokenFinder fcmTokenFinder;
+    private final FcmTokenCommandService fcmTokenCommandService;
     private final ObjectProvider<FirebaseMessaging> firebaseMessaging;
 
     // 단일 기기 토큰으로 알림(제목·본문)을 전송합니다.
@@ -51,7 +53,8 @@ public class FcmNotificationService {
             messaging.send(messageBuilder.build());
         } catch (FirebaseMessagingException e) {
             log.error("FCM 전송 실패 tokenPrefix={} error={}", maskToken(registrationToken), e.getMessagingErrorCode(), e);
-            throw new BusinessException(ErrorCode.FCM_SEND_FAILED, e.getMessage());
+            // 예외 메시지에 원본 토큰 등 민감 정보가 섞일 수 있어 그대로 전파하지 않고, 오류 코드만 보존합니다.
+            throw new FcmSendException(e.getMessagingErrorCode());
         }
     }
 
@@ -63,20 +66,25 @@ public class FcmNotificationService {
         }
         int successCount = 0;
         int failCount = 0;
+        List<Long> staleTokenIds = new ArrayList<>();
         for (FcmToken token : tokens) {
             try {
                 sendToToken(token.getToken(), title, body);
                 successCount++;
-            } catch (BusinessException e) {
+            } catch (FcmSendException e) {
                 failCount++;
+                if (e.isPermanentFailure()) {
+                    staleTokenIds.add(token.getId());
+                }
                 log.warn(
                         "FCM 전송 실패(다음 토큰으로 계속) userId={}, fcmTokenId={}, errorCode={}",
                         userId,
                         token.getId(),
-                        e.getErrorCode()
+                        e.getMessagingErrorCode()
                 );
             }
         }
+        deactivateStaleTokens(staleTokenIds);
         if (failCount > 0 && successCount == 0) {
             throw new BusinessException(ErrorCode.FCM_SEND_FAILED, "활성 토큰 전송이 모두 실패했습니다.");
         }
@@ -98,20 +106,34 @@ public class FcmNotificationService {
         }
         int successCount = 0;
         int failCount = 0;
+        List<Long> staleTokenIds = new ArrayList<>();
         for (FcmToken token : tokens) {
             try {
                 sendToToken(token.getToken(), title, body);
                 successCount++;
-            } catch (BusinessException e) {
+            } catch (FcmSendException e) {
                 failCount++;
+                if (e.isPermanentFailure()) {
+                    staleTokenIds.add(token.getId());
+                }
                 log.warn(
                         "FCM 브로드캐스트 실패(다음 토큰으로 계속) fcmTokenId={}, errorCode={}",
                         token.getId(),
-                        e.getErrorCode()
+                        e.getMessagingErrorCode()
                 );
             }
         }
+        deactivateStaleTokens(staleTokenIds);
         return new PushBroadcastResult(tokens.size(), successCount, failCount, true);
+    }
+
+    // 영구 실패(UNREGISTERED 등) 토큰은 이후 전송 대상에서 제외되도록 비활성화합니다.
+    private void deactivateStaleTokens(List<Long> staleTokenIds) {
+        if (staleTokenIds.isEmpty()) {
+            return;
+        }
+        fcmTokenCommandService.deactivateByIds(staleTokenIds);
+        log.info("영구 실패로 비활성화한 FCM 토큰 수={}", staleTokenIds.size());
     }
 
     private static String maskToken(String token) {

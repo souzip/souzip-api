@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -34,6 +35,9 @@ class FcmNotificationServiceTest {
 
     @Mock
     private FcmTokenFinder fcmTokenFinder;
+
+    @Mock
+    private FcmTokenCommandService fcmTokenCommandService;
 
     @Mock
     private ObjectProvider<FirebaseMessaging> firebaseMessagingProvider;
@@ -163,6 +167,43 @@ class FcmNotificationServiceTest {
         assertThat(result.failCount()).isZero();
     }
 
+    @DisplayName("브로드캐스트 - 영구 실패(UNREGISTERED) 토큰은 비활성화한다")
+    @Test
+    void broadcastToAllActiveTokens_permanentFailure_deactivatesStaleToken() throws FirebaseMessagingException {
+        // given
+        FcmToken token = createTokenWithId(10L, "stale-token", "device-id-1", 1L);
+        FirebaseMessagingException permanent = mockFirebaseException(MessagingErrorCode.UNREGISTERED);
+
+        given(fcmTokenFinder.getAllActiveTokens()).willReturn(List.of(token));
+        given(firebaseMessagingProvider.getIfAvailable()).willReturn(firebaseMessaging);
+        given(firebaseMessaging.send(any())).willThrow(permanent);
+
+        // when
+        PushBroadcastResult result = fcmNotificationService.broadcastToAllActiveTokens("제목", "본문");
+
+        // then
+        assertThat(result.failCount()).isEqualTo(1);
+        then(fcmTokenCommandService).should(times(1)).deactivateByIds(List.of(10L));
+    }
+
+    @DisplayName("브로드캐스트 - 일시 실패(INTERNAL) 토큰은 비활성화하지 않는다")
+    @Test
+    void broadcastToAllActiveTokens_transientFailure_keepsToken() throws FirebaseMessagingException {
+        // given
+        FcmToken token = createTokenWithId(11L, "fcm-token-1", "device-id-1", 1L);
+        FirebaseMessagingException transientErr = mockFirebaseException(MessagingErrorCode.INTERNAL);
+
+        given(fcmTokenFinder.getAllActiveTokens()).willReturn(List.of(token));
+        given(firebaseMessagingProvider.getIfAvailable()).willReturn(firebaseMessaging);
+        given(firebaseMessaging.send(any())).willThrow(transientErr);
+
+        // when
+        fcmNotificationService.broadcastToAllActiveTokens("제목", "본문");
+
+        // then
+        then(fcmTokenCommandService).should(never()).deactivateByIds(any());
+    }
+
     private FcmToken createToken(String fcmToken, String deviceId, Long userId) {
         FcmTokenRegisterRequest request = FcmTokenRegisterRequest.of(
                 fcmToken, DeviceType.ANDROID, deviceId, "Galaxy S23", "Android 14", "1.0.0"
@@ -172,9 +213,19 @@ class FcmNotificationServiceTest {
         return token;
     }
 
+    private FcmToken createTokenWithId(Long id, String fcmToken, String deviceId, Long userId) {
+        FcmToken token = createToken(fcmToken, deviceId, userId);
+        ReflectionTestUtils.setField(token, "id", id);
+        return token;
+    }
+
     private FirebaseMessagingException mockFirebaseException() {
+        return mockFirebaseException(MessagingErrorCode.INTERNAL);
+    }
+
+    private FirebaseMessagingException mockFirebaseException(MessagingErrorCode code) {
         FirebaseMessagingException exception = mock(FirebaseMessagingException.class);
-        given(exception.getMessagingErrorCode()).willReturn(MessagingErrorCode.INTERNAL);
+        given(exception.getMessagingErrorCode()).willReturn(code);
         return exception;
     }
 }

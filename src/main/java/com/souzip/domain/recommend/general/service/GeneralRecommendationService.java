@@ -11,6 +11,8 @@ import com.souzip.domain.recommend.general.dto.GeneralRecommendationDto;
 import com.souzip.domain.recommend.general.dto.GeneralRecommendationStatsDto;
 import com.souzip.domain.recommend.general.repository.GeneralRecommendationRepositoryCustom;
 import com.souzip.domain.souvenir.entity.Souvenir;
+import com.souzip.domain.user.entity.User;
+import com.souzip.domain.user.repository.UserRepository;
 import com.souzip.domain.wishlist.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class GeneralRecommendationService {
     private final FileStorage fileStorage;
     private final WishlistRepository wishlistRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     public List<GeneralRecommendationDto> getTop10ByCategory(String categoryName, @Nullable String authorizationHeader) {
         List<Souvenir> souvenirs = generalRecommendationRepository.findTop10ByCategoryRecent(categoryName);
@@ -171,7 +174,10 @@ public class GeneralRecommendationService {
     private String parseUserIdFromToken(String token) {
         try {
             Long userId = jwtTokenProvider.getUserIdFromToken(token);
-            return userId != null ? String.valueOf(userId) : null;
+            if (userId == null) return null;
+            return userRepository.findById(userId)
+                    .map(User::getUserId)
+                    .orElse(null);
         } catch (Exception e) {
             log.debug("Failed to parse token", e);
             return null;

@@ -3,6 +3,7 @@ package com.souzip.domain.user.service;
 import com.souzip.application.file.FileQueryService;
 import com.souzip.application.file.dto.FileResponse;
 import com.souzip.application.file.required.FileStorage;
+import com.souzip.application.notification.FcmTokenCommandService;
 import com.souzip.auth.application.required.RefreshTokenRepository;
 import com.souzip.domain.audit.entity.AuditAction;
 import com.souzip.domain.category.dto.CategoryDto;
@@ -50,6 +51,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserAgreementRepository userAgreementRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final FcmTokenCommandService fcmTokenCommandService;
     private final ProfileImageService profileImageService;
     private final SouvenirRepository souvenirRepository;
     private final WishlistRepository wishlistRepository;
@@ -92,6 +94,7 @@ public class UserService {
 
         deleteRefreshTokenIfExists(userId);
         deleteUserAgreementIfExists(user);
+        fcmTokenCommandService.deactivateAllByUserId(userId);
 
         user.anonymize();
 

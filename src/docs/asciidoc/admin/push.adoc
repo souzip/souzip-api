@@ -1,0 +1,22 @@
+[[admin-push-api]]
+== 푸시 브로드캐스트 관리
+
+[[admin-push-broadcast]]
+=== 전체 기기 푸시 발송
+
+관리자가 입력한 제목·본문으로 활성 FCM 토큰 전체에 푸시를 발송합니다.
+
+* ADMIN 권한이 필요합니다.
+* 발송 결과(대상/성공/실패 수)는 이력으로 저장됩니다.
+* Firebase가 설정되지 않은 경우 전송하지 않고 대상 기기 수만 반환합니다.
+
+operation::admin/push/broadcast[snippets='http-request,request-fields,http-response,response-fields']
+
+[[admin-push-broadcast-history]]
+=== 푸시 발송 이력 조회
+
+푸시 브로드캐스트 발송 이력을 최신순으로 페이지 조회합니다.
+
+* VIEWER 이상 권한이 필요합니다.
+
+operation::admin/push/broadcast-history[snippets='http-request,query-parameters,http-response,response-fields']

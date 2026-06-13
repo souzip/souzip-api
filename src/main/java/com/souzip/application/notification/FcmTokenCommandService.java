@@ -26,6 +26,9 @@ public class FcmTokenCommandService {
     }
 
     private FcmToken syncExistingToken(FcmToken existing, Long userId, FcmTokenRegisterRequest request) {
+        // 같은 기기(deviceId)로 이미 등록된 다른 row 가 있으면 unique(user_id, device_id) 충돌을 막기 위해 먼저 제거합니다.
+        // (같은 기기에서 계정을 전환하거나 FCM 토큰이 재할당되는 경우 발생)
+        fcmTokenRepository.deleteByUserIdAndDeviceIdExcludingId(userId, request.deviceId(), existing.getId());
         existing.linkUser(userId);
         existing.syncDeviceIdentity(request.deviceType(), request.deviceId());
         existing.updateDeviceInfo(request.deviceModel(), request.osVersion(), request.appVersion());

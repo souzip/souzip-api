@@ -1,0 +1,21 @@
+[[notification-api]]
+== FCM 토큰 API
+
+[[fcm-token-register]]
+=== FCM 토큰 등록
+
+로그인 사용자의 FCM 디바이스 토큰을 등록하거나 갱신합니다.
+
+* 인증이 필요합니다.
+* 동일 토큰 또는 동일 디바이스가 있으면 갱신하고, 없으면 신규 등록합니다.
+
+operation::fcm-token/register[snippets='http-request,request-fields,http-response,response-fields']
+
+[[fcm-token-deactivate]]
+=== FCM 토큰 비활성화
+
+로그아웃 등으로 해당 디바이스의 FCM 토큰을 비활성화합니다.
+
+* 인증이 필요합니다.
+
+operation::fcm-token/deactivate[snippets='http-request,query-parameters,http-response,response-fields']

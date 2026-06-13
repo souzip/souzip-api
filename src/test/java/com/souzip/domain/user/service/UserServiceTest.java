@@ -1,5 +1,6 @@
 package com.souzip.domain.user.service;
 
+import com.souzip.application.notification.FcmTokenCommandService;
 import com.souzip.auth.application.required.RefreshTokenRepository;
 import com.souzip.domain.user.dto.NicknameCheckResponse;
 import com.souzip.domain.user.dto.OnboardingRequest;
@@ -37,6 +38,9 @@ class UserServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private FcmTokenCommandService fcmTokenCommandService;
 
     @Mock
     private ProfileImageService profileImageService;
@@ -248,6 +252,7 @@ class UserServiceTest {
         verify(spyUser).anonymize();
         verify(refreshTokenRepository).deleteByUserId(1L);
         verify(userAgreementRepository).delete(agreement);
+        verify(fcmTokenCommandService).deactivateAllByUserId(1L);
         verify(userRepository).delete(spyUser);
     }
 
@@ -274,6 +279,7 @@ class UserServiceTest {
 
         verify(spyUser).anonymize();
         verify(refreshTokenRepository).deleteByUserId(1L);
+        verify(fcmTokenCommandService).deactivateAllByUserId(1L);
         verify(userRepository).delete(spyUser);
         verify(userAgreementRepository, never()).delete(any());
     }

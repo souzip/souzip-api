@@ -63,7 +63,7 @@ public class SouvenirService {
         String userUuid = userId != null ? findUserUuid(userId) : null;
         Set<Long> wishlistedIds = userUuid != null
                 ? wishlistRepository.findSouvenirIdsByUserUserId(userUuid)
-                : Collections.emptySet();
+                : null;
 
         List<SouvenirNearbyResponse> list = results.stream()
                 .map(row -> SouvenirNearbyResponse.fromObjectArray(

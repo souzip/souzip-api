@@ -86,7 +86,7 @@ public record SouvenirNearbyResponse(
 
         String imageUrl = generateImageUrl(thumbnail, urlGenerator);
         long wishlistCount = ((Number) row[INDEX_WISHLIST_COUNT]).longValue();
-        Boolean isWishlisted = wishlistedIds.isEmpty() ? null : wishlistedIds.contains(id);
+        Boolean isWishlisted = wishlistedIds != null ? wishlistedIds.contains(id) : null;
 
         return new SouvenirNearbyResponse(
                 id,

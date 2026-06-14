@@ -3,7 +3,7 @@ DATE=$(date +%Y-%m-%d_%H%M)
 BACKUP_DIR="/home/souzip-prod/backups"
 BACKUP_FILE="$BACKUP_DIR/souzip-$DATE.dump"
 BUCKET="souzip-db-backup"
-RETENTION_DAYS=30
+RETENTION_COUNT=7
 
 if [ -f "/home/souzip-prod/souzip/deploy/prod/.env" ]; then
     export PROD_POSTGRES_USER=$(grep '^PROD_POSTGRES_USER=' /home/souzip-prod/souzip/deploy/prod/.env | cut -d= -f2-)
@@ -42,20 +42,22 @@ if [ $? -ne 0 ]; then
 fi
 echo "[INFO] Object Storage 업로드 완료"
 
-# 로컬 오래된 백업 삭제
-find $BACKUP_DIR -name "souzip-*.dump" -mtime +$RETENTION_DAYS -delete
-
-# Object Storage 오래된 백업 삭제
-s3cmd $S3CMD_OPTS ls s3://$BUCKET/ | awk '{print $4}' | while read file; do
-    file_date=$(echo $file | grep -oP '\d{4}-\d{2}-\d{2}')
-    if [ ! -z "$file_date" ]; then
-        days_old=$(( ( $(date +%s) - $(date -d "$file_date" +%s) ) / 86400 ))
-        if [ $days_old -gt $RETENTION_DAYS ]; then
-            s3cmd $S3CMD_OPTS del $file
-            echo "[INFO] 오래된 백업 삭제 - $file"
-        fi
-    fi
+# 로컬 백업은 최신순으로 RETENTION_COUNT 개만 보관하고 나머지 삭제
+ls -1t $BACKUP_DIR/souzip-*.dump 2>/dev/null | tail -n +$((RETENTION_COUNT + 1)) | while read -r file; do
+    rm -f "$file"
+    echo "[INFO] 오래된 로컬 백업 삭제 - $file"
 done
+
+# Object Storage 백업도 최신순으로 RETENTION_COUNT 개만 보관 (파일명이 날짜순이라 정렬=시간순)
+remote_files=$(s3cmd $S3CMD_OPTS ls s3://$BUCKET/ | awk '{print $4}' | grep 'souzip-.*\.dump$' | sort)
+remote_total=$(printf '%s\n' "$remote_files" | grep -c .)
+remote_delete_count=$((remote_total - RETENTION_COUNT))
+if [ "$remote_delete_count" -gt 0 ]; then
+    printf '%s\n' "$remote_files" | head -n "$remote_delete_count" | while read -r file; do
+        s3cmd $S3CMD_OPTS del "$file"
+        echo "[INFO] 오래된 백업 삭제 - $file"
+    done
+fi
 
 echo "[INFO] DB 백업 프로세스 완료 - $DATE"
 

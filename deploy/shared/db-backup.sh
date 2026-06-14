@@ -3,7 +3,7 @@ DATE=$(date +%Y-%m-%d_%H%M)
 BACKUP_DIR="/home/souzip-prod/backups"
 BACKUP_FILE="$BACKUP_DIR/souzip-$DATE.dump"
 BUCKET="souzip-db-backup"
-RETENTION_DAYS=30
+RETENTION_DAYS=7
 
 if [ -f "/home/souzip-prod/souzip/deploy/prod/.env" ]; then
     export PROD_POSTGRES_USER=$(grep '^PROD_POSTGRES_USER=' /home/souzip-prod/souzip/deploy/prod/.env | cut -d= -f2-)
